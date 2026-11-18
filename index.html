@@ -480,7 +480,7 @@
     <section class="panel panel-doc" id="panel-lettre">
       <div class="panel-head">
         <h2>La lettre de motivation</h2>
-        <p>Tu apportes le fond (tes raisons, tes expériences, tes anciennes lettres) ; l'atelier varie les tournures et repère des tendances simples dans ce qui a marché pour toi.</p>
+        <p>La lettre se rédige toute seule à partir de l'annonce et de ton CV : elle reprend tes expériences réelles et les mots-clés de l'annonce que tu maîtrises. Clique sur un paragraphe pour le corriger.</p>
       </div>
       <div class="split">
         <div class="controls-col">
@@ -513,8 +513,8 @@
           </div>
 
           <div class="card" style="margin-bottom:16px;">
-            <span class="eyebrow">Tes motivations, dans tes mots</span>
-            <p class="hint" style="margin:6px 0 12px;">2 à 4 points : une expérience, une réussite, une raison précise de candidater. L'atelier les enchaîne, il ne les invente pas.</p>
+            <span class="eyebrow">Tes raisons à toi (facultatif)</span>
+            <p class="hint" style="margin:6px 0 12px;">Si tu veux une lettre plus personnelle, ajoute 1 à 2 phrases : une raison précise de candidater, une réussite. Elles sont reprises telles quelles, rien n'est inventé.</p>
             <div id="motiv-list"></div>
             <button class="btn btn-ghost btn-sm" id="btn-add-motiv">+ Ajouter un point</button>
           </div>
@@ -549,7 +549,7 @@
           <div class="preview-toolbar">
             <span class="eyebrow">Aperçu</span>
             <div class="toolbar-row">
-              <button class="btn btn-ghost btn-sm" id="btn-reroll"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg><span>Régénérer les tournures</span></button>
+              <button class="btn btn-ghost btn-sm" id="btn-reroll"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg><span>Régénérer la lettre</span></button><span class="hint" id="lettre-edit-note" style="display:none;">Modifiée à la main : « Régénérer » la remplace.</span>
               <button class="btn btn-sm" id="btn-print-lettre">Télécharger en PDF</button>
             </div>
           </div>
@@ -728,6 +728,7 @@ var STOPWORDS = ("le la les de des du un une et en dans pour avec sur au aux par
 var STOP = {}; STOPWORDS.forEach(function(w){ STOP[w]=true; });
 
 var SKILL_DICTIONARY = [
+  "llm","agents","agent ia","mcp","n8n","github","github actions","cloudflare","supabase","vercel","neon","claude code","cursor","api","rag","prompt engineering","automatisation","intelligence artificielle","ia générative","typescript","docker","git","ci/cd","architecture applicative","ux","ui","web3","blockchain","audiovisuel","montage vidéo","documentation","tests","spécifications","design graphique","direction artistique","production audiovisuelle",
   "gestion de projet","chef de projet","communication","rédaction","relation client","relation clients",
   "management","leadership","autonomie","rigueur","organisation","polyvalence","esprit d'équipe","travail d'équipe",
   "excel","powerpoint","word","sql","python","javascript","react","node","html","css","java","php",
@@ -921,7 +922,7 @@ function defaultState(){
     annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[] },
     library: { experiences:[], formations:[], competences:[], sections:[], lettresArchive:[], annexeItems:[] },
     cv: { lang:"fr", format:"standard", resume:"", selectedExp:[], selectedForm:[], autoMode:true },
-    lettre: { lang:"fr", destinataire:"", ton:"formel", motivations:[""], motivPrompts:[""], competencesChoisies:[], disponibilite:"", seed:1 },
+    lettre: { lang:"fr", destinataire:"", ton:"formel", corps:null, motivations:[""], motivPrompts:[""], competencesChoisies:[], disponibilite:"", seed:1 },
     annexeDossier: { categorie:"", selectedItemIds:[] },
     candidatures: [],
     entretien: { questions: [], reponses: {}, seed: 1, corrigeVisible: false }
@@ -968,8 +969,8 @@ function statusFor(tab){
     return (hasExp && state.library.competences.length) ? "ready" : "partial";
   }
   if(tab === "lettre"){
-    var hasMotiv = state.lettre.motivations.some(function(m){ return m.trim(); });
-    return hasMotiv ? "ready" : "empty";
+    var hasMat = state.annonce.poste.trim() && state.library.experiences.some(function(e){ return e.poste.trim() || e.entreprise.trim(); });
+    return hasMat ? "ready" : "empty";
   }
   if(tab === "annexe"){
     if(!state.annexeDossier.categorie) return "empty";
@@ -1728,6 +1729,7 @@ function parseEntries(lines, isForm){
   return entries.map(function(e){
     var h1 = e.head[0] || "", h2 = e.head[1] || "";
     if(!h2 && h1){ var sp = splitTitleLine(h1); h1 = sp.a; h2 = sp.b; }
+    if(h2 && (h2.split(/\s+/).length >= 6 || (h2.match(/,/g) || []).length >= 2) && !isForm){ e.body.unshift(h2); h2 = ""; }   // description, pas un nom d'entreprise
     var body = e.body.join("\n");
     if(isForm) return { id: uid(), diplome: h1, etablissement: h2, dates: e.dates, details: body };
     return { id: uid(), poste: h1, entreprise: h2, dates: e.dates, details: body };
@@ -2521,71 +2523,237 @@ function analyserPatterns(){
 }
 document.getElementById("btn-analyser-patterns").addEventListener("click", analyserPatterns);
 
+/* ---- génération automatique de la lettre (annonce + bibliothèque), sans rien inventer ---- */
+var LETTRE_AUTO = {
+  fr: {
+    formel: {
+      ouverture: ["Je vous adresse ma candidature au poste de {poste} chez {entreprise}.",
+        "Votre annonce pour le poste de {poste} chez {entreprise} a retenu mon attention, et je vous propose ma candidature.",
+        "Je candidate au poste de {poste} que propose {entreprise}."],
+      cloture: ["Je me tiens à votre disposition pour un entretien. Dans l'attente de votre réponse, je vous prie d'agréer, Madame, Monsieur, mes salutations distinguées.",
+        "Je serais disponible pour vous rencontrer et détailler ce parcours. Veuillez agréer, Madame, Monsieur, mes salutations respectueuses."]
+    },
+    direct: {
+      ouverture: ["Je candidate au poste de {poste} chez {entreprise}.",
+        "Le poste de {poste} chez {entreprise} correspond à mon expérience. Voici pourquoi.",
+        "Je réponds à votre annonce de {poste} chez {entreprise}."],
+      cloture: ["Je suis disponible pour un entretien quand vous voulez.",
+        "Un échange de vingt minutes suffirait pour voir si cela vous convient. Dites-moi quand."]
+    },
+    chaleureux: {
+      ouverture: ["Votre annonce pour le poste de {poste} chez {entreprise} m'a donné envie de vous écrire.",
+        "J'ai lu avec intérêt l'annonce du poste de {poste} chez {entreprise}, et j'aimerais en discuter avec vous.",
+        "Le poste de {poste} chez {entreprise} m'intéresse, et je vous explique ici pourquoi je pense pouvoir y contribuer."],
+      cloture: ["Merci d'avoir pris le temps de me lire. Je serais content d'en parler avec vous.",
+        "Au plaisir d'en discuter de vive voix, et merci pour votre attention."]
+    }
+  },
+  en: {
+    formel: {
+      ouverture: ["I am applying for the {poste} position at {entreprise}.",
+        "Your advertisement for the {poste} position at {entreprise} caught my attention, and I would like to submit my application."],
+      cloture: ["I would be glad to discuss my application at an interview. Thank you for your time and consideration.",
+        "I remain available for an interview and thank you for considering my application."]
+    },
+    direct: {
+      ouverture: ["I'm applying for the {poste} role at {entreprise}.",
+        "The {poste} role at {entreprise} matches my experience. Here is why."],
+      cloture: ["I'm available for an interview whenever suits you.",
+        "A short call would be enough to see if it works for you. Tell me when."]
+    },
+    chaleureux: {
+      ouverture: ["Your posting for the {poste} role at {entreprise} made me want to get in touch.",
+        "I read your {poste} posting at {entreprise} with interest and would like to talk it through."],
+      cloture: ["Thank you for taking the time to read this. I'd be happy to talk it over.",
+        "I look forward to discussing this in person, and thank you for your attention."]
+    }
+  }
+};
+
+function lowerFirst(s){ return s ? s.charAt(0).toLowerCase() + s.slice(1) : s; }
+function trimEnd(s){ return (s || "").trim().replace(/[.;:,\s]+$/, ""); }
+var PROPER_TERMS = { github:"GitHub", "github actions":"GitHub Actions", cloudflare:"Cloudflare", supabase:"Supabase", vercel:"Vercel", neon:"Neon", "claude code":"Claude Code", cursor:"Cursor", docker:"Docker", typescript:"TypeScript", javascript:"JavaScript", python:"Python", react:"React", figma:"Figma", photoshop:"Photoshop", excel:"Excel", powerpoint:"PowerPoint", "ci/cd":"CI/CD" };
+function displayTerm(t){
+  var k = t.toLowerCase();
+  if(PROPER_TERMS[k]) return PROPER_TERMS[k];
+  if(/^[a-z]{2,4}$/.test(k) && !/^(agile|word|java|node|html|css|seo|sea)$/.test(k)) return k.toUpperCase();
+  if(/^(html|css|seo|sea|sql|php)$/.test(k)) return k.toUpperCase();
+  return t;
+}
+function humanList(arr, en){
+  if(arr.length <= 1) return arr.join("");
+  return arr.slice(0, -1).join(", ") + (en ? " and " : " et ") + arr[arr.length - 1];
+}
+// retire les tics typographiques qui trahissent un texte généré
+function cleanLetterText(s){
+  return s.replace(/\s+[—–]\s+/g, ", ").replace(/[—–]/g, "-").replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/\s{2,}/g, " ").trim();
+}
+
+function datesFr(d, en){
+  d = (d || "").trim();
+  if(!d) return "";
+  if(/^(depuis|since)/i.test(d)) return ", " + lowerFirst(d);
+  return " (" + d + ")";
+}
+
+// projets/réalisations (sous-titres "## ") classés par proximité avec l'annonce
+function pickProjects(kws){
+  var projects = [];
+  (state.library.sections || []).forEach(function(sec){
+    if(!/r[ée]alisation|projet|portfolio|work|project/i.test(sec.titre || "")) return;
+    var cur = null;
+    (sec.texte || "").split("\n").forEach(function(line){
+      var m = line.match(/^##\s+(.*)$/);
+      if(m){ cur = { title: m[1].trim(), body: [] }; projects.push(cur); }
+      else if(cur){ cur.body.push(line); }
+    });
+  });
+  projects.forEach(function(pr, i){ pr.idx = i; pr.score = scoreAgainstKeywords(pr.title + " " + pr.body.join(" "), kws); });
+  projects.sort(function(a, b){ return (b.score - a.score) || (a.idx - b.idx); });
+  var top = projects.filter(function(x){ return x.score > 0; }).slice(0, 2);
+  if(!top.length) top = projects.slice(0, 2);
+  return top.map(function(pr){
+    var parts = pr.title.split(/\s+[—–-]\s+/);
+    var name = parts[0].trim();
+    if(name === name.toUpperCase() && name.length > 4){
+      var small = { et:1, de:1, du:1, la:1, le:1, les:1, des:1, en:1, au:1, un:1, une:1, and:1, of:1, the:1 };
+      name = name.split(/\s+/).map(function(w, i){
+        var lw = w.toLowerCase();
+        if(i > 0 && small[lw]) return lw;
+        return w.length <= 3 ? w : w.charAt(0) + lw.slice(1);
+      }).join(" ");
+    }
+    return parts[1] ? name + " (" + lowerFirst(parts[1].trim()) + ")" : name;
+  });
+}
+
+function generateLettreParagraphs(){
+  var l = state.lettre, an = state.annonce, en = l.lang === "en";
+  var poste = an.poste.trim() || (en ? "this position" : "ce poste");
+  var entreprise = an.entreprise.trim() || (en ? "your company" : "votre entreprise");
+  var bank = (LETTRE_AUTO[en ? "en" : "fr"])[l.ton] || LETTRE_AUTO[en ? "en" : "fr"].formel;
+  var rng = mulberry32(djb2(poste + "|" + entreprise + "|" + l.ton + "|" + l.lang + "|" + (l.seed || 1)));
+  var posteTxt = /^[A-ZÀ-Ý][a-zà-ÿ]/.test(poste) ? lowerFirst(poste) : poste;
+  var fill = function(t){ return t.split("{poste}").join(posteTxt).split("{entreprise}").join(entreprise); };
+
+  var paras = [];
+  var kws = (an.keywords || []);
+  var cvText = cvFullText();
+
+  // 1. ouverture + profil
+  var titre = (state.profil.titre || "").trim();
+  if(titre && titre === titre.toUpperCase()) titre = titre.toLowerCase();
+  var p1 = fill(pick(bank.ouverture, rng));
+  if(titre) p1 += en ? " I work as " + titre + "." : " Je suis " + lowerFirst(titre) + ".";
+  paras.push(p1);
+
+  // 2. expériences les plus proches de l'annonce, avec leurs faits réels
+  var exps = state.library.experiences.filter(function(e){ return e.poste.trim() || e.entreprise.trim(); }).map(function(e, idx){
+    return { e: e, idx: idx, score: scoreAgainstKeywords([e.poste, e.entreprise, e.details].join(" "), kws) };
+  });
+  exps.sort(function(a, b){ return (b.score - a.score) || (a.idx - b.idx); });
+  var chosen = exps.filter(function(x){ return x.score > 0; }).slice(0, 2);
+  if(!chosen.length) chosen = exps.slice(0, 1);
+  chosen.forEach(function(x, i){
+    var e = x.e;
+    var facts = (e.details || "").split("\n").map(trimEnd).filter(Boolean).slice(0, 2).map(lowerFirst);
+    var who = e.entreprise.trim();
+    var s;
+    if(en){
+      s = (i === 0 ? "" : "I also worked ") + (who ? "At " + who + ", " : "") + "as " + (e.poste.trim() || "a team member") + datesFr(e.dates, true) + (facts.length ? ", my work covered: " + facts.join("; ") + "." : ".");
+      s = s.replace(/^I also worked At /, "I also worked at ");
+    } else {
+      s = (i === 0 ? "" : "J'ai aussi travaillé : ") + (who ? (i === 0 ? "Chez " + who : "chez " + who) + ", " : "") + (i === 0 ? "comme " : "comme ") + (e.poste.trim() ? lowerFirst(e.poste.trim()) : "membre de l'équipe") + datesFr(e.dates, false) + (facts.length ? ", mes missions portaient sur : " + facts.join(" ; ") + "." : ".");
+    }
+    paras.push(s.charAt(0).toUpperCase() + s.slice(1));
+  });
+
+  // 2b. réalisations proches de l'annonce
+  var projs = pickProjects(kws);
+  if(projs.length) paras.push(en ? "Among my projects: " + projs.join("; ") + "." : "Parmi mes réalisations : " + projs.join(" ; ") + ".");
+
+  // 3. mots-clés de l'annonce que la bibliothèque contient réellement
+  var matched = kws.filter(function(k){ return (k.kind === "skill" || k.term.length >= 5) && countTerm(cvText, norm(k.term)) > 0; }).slice(0, 6).map(function(k){ return k.term; });
+  (l.competencesChoisies || []).forEach(function(c){ if(matched.map(norm).indexOf(norm(c)) === -1) matched.push(c); });
+  if(matched.length){
+    paras.push(en
+      ? "Your advertisement mentions " + humanList(matched.map(displayTerm), true) + ". I use these in my daily work."
+      : "Votre annonce mentionne " + humanList(matched.map(displayTerm), false) + ". Ce sont des sujets que je pratique dans mon travail.");
+  }
+
+  // 4. apports personnels (facultatifs), repris tels quels
+  (l.motivations || []).map(function(m){ return m.trim(); }).filter(Boolean).forEach(function(m){
+    paras.push(/[.!?]$/.test(m) ? m : m + ".");
+  });
+
+  // 5. clôture
+  var cl = pick(bank.cloture, rng);
+  var dispo = (l.disponibilite || "").trim();
+  if(dispo) cl = (en ? "I am available " : "Je suis disponible ") + dispo + ". " + cl;
+  paras.push(cl);
+
+  return paras.map(cleanLetterText);
+}
+
 function renderLettrePreview(){
   var l = state.lettre;
   var an = state.annonce;
-  var motivs = l.motivations.map(function(m){return m.trim();}).filter(Boolean);
   var wrap = document.getElementById("lettre-preview");
+  var en = l.lang === "en";
 
-  if(!motivs.length){
-    wrap.innerHTML = '<p class="empty-note">'+ (l.lang==="en" ? "Add at least one motivation point (on the left) to generate the letter." : "Ajoute au moins un point de motivation (à gauche) pour générer la lettre.") +'</p>';
+  var hasMaterial = state.library.experiences.some(function(e){ return e.poste.trim() || e.entreprise.trim(); }) ||
+    l.motivations.some(function(m){ return m.trim(); });
+  if(!an.poste.trim() && !hasMaterial){
+    wrap.innerHTML = '<p class="empty-note">' + (en ? "Paste the job ad and import your CV: the letter writes itself here." : "Colle l'annonce et importe ton CV : la lettre se rédige ici toute seule.") + '</p>';
     return;
   }
 
-  var poste = an.poste.trim() || (l.lang==="en" ? "this position" : "ce poste");
-  var entreprise = an.entreprise.trim() || (l.lang==="en" ? "your company" : "votre entreprise");
-  var bank = (l.lang==="en" ? PHRASES_EN : PHRASES)[l.ton] || (l.lang==="en" ? PHRASES_EN.formel : PHRASES.formel);
-
-  var seedStr = poste + "|" + entreprise + "|" + l.ton + "|" + l.lang + "|" + (l.seed||1);
-  var rng = mulberry32(djb2(seedStr));
-
-  var ouverture = pick(bank.ouverture, rng).split("{poste}").join(poste).split("{entreprise}").join(entreprise);
-  var cloture = pick(bank.cloture, rng);
-  var transitions = shuffle(bank.transition, rng);
-
-  var skillMention = "";
-  if(l.competencesChoisies.length){
-    if(l.lang==="en"){
-      skillMention = " I can specifically highlight my " + (l.competencesChoisies.length===1 ? "proficiency in " + l.competencesChoisies[0] : "skills in " + l.competencesChoisies.slice(0,-1).join(", ") + " and " + l.competencesChoisies.slice(-1)) + ".";
-    } else {
-      skillMention = " Je peux notamment mettre en avant " + (l.competencesChoisies.length===1 ? "ma maîtrise de " + l.competencesChoisies[0] : "mes compétences en " + l.competencesChoisies.slice(0,-1).join(", ") + " et " + l.competencesChoisies.slice(-1)) + ".";
-    }
-  }
-
-  var paragraphs = [ouverture];
-  motivs.forEach(function(m, i){
-    var t = transitions[i % transitions.length];
-    var lead = t + " ";
-    var body = m.trim();
-    var sentence = body.charAt(0).toLowerCase() + body.slice(1);
-    if(!/[.!?]$/.test(sentence)) sentence += ".";
-    paragraphs.push(lead + sentence + (i === motivs.length-1 ? skillMention : ""));
-  });
-  var closingExtra = l.disponibilite.trim() ?
-    (l.lang==="en" ? " I am available " + l.disponibilite.trim() + "." : " Je suis disponible " + l.disponibilite.trim() + ".") : "";
-  paragraphs.push(cloture.replace(/(\.)$/, closingExtra ? closingExtra + "$1" : "$1"));
+  var poste = an.poste.trim() || (en ? "this position" : "ce poste");
+  var entreprise = an.entreprise.trim() || (en ? "your company" : "votre entreprise");
+  var edited = Array.isArray(l.corps) && l.corps.length;
+  var paragraphs = edited ? l.corps : generateLettreParagraphs();
 
   var today = new Date();
-  var dateStr = l.lang==="en"
+  var dateStr = en
     ? MOIS_EN[today.getMonth()] + " " + today.getDate() + ", " + today.getFullYear()
     : today.getDate() + " " + ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"][today.getMonth()] + " " + today.getFullYear();
 
-  var objLabel = l.lang==="en" ? "Subject: Application for the position of " : "Objet : Candidature au poste de ";
-  var attnLabel = l.lang==="en" ? "Attention: " : "À l'attention de ";
+  var objLabel = en ? "Subject: Application for the position of " : "Objet : Candidature au poste de ";
+  var attnLabel = en ? "Attention: " : "À l'attention de ";
 
   var html = "";
-  html += '<div class="l-from">'+ (esc(state.profil.nom)||(l.lang==="en"?"Your name":"Ton nom")) + (state.profil.ville ? "<br>"+esc(state.profil.ville) : "") + (state.profil.email? "<br>"+esc(state.profil.email):"") + '</div>';
+  html += '<div class="l-from">'+ (esc(state.profil.nom)||(en?"Your name":"Ton nom")) + (state.profil.ville ? "<br>"+esc(state.profil.ville) : "") + (state.profil.email? "<br>"+esc(state.profil.email):"") + (state.profil.tel? "<br>"+esc(state.profil.tel):"") + '</div>';
   html += '<div class="l-to">' + esc(entreprise) + (l.destinataire ? "<br>" + attnLabel + esc(l.destinataire) : "") + '</div>';
   html += '<div class="l-date">' + esc(state.profil.ville ? state.profil.ville+", " : "") + dateStr + '</div>';
   html += '<div class="l-obj">' + objLabel + esc(poste) + '</div>';
-  paragraphs.forEach(function(p){ html += "<p>" + esc(p) + "</p>"; });
-  html += '<div class="l-sign">' + esc(state.profil.nom || (l.lang==="en"?"Your name":"Ton nom")) + '</div>';
+  html += '<div id="lettre-body">';
+  paragraphs.forEach(function(p){ html += '<p contenteditable="true" spellcheck="false" data-lp="1">' + esc(p) + "</p>"; });
+  html += '</div>';
+  html += '<div class="l-sign">' + esc(state.profil.nom || (en?"Your name":"Ton nom")) + '</div>';
 
   wrap.innerHTML = html;
+  var note = document.getElementById("lettre-edit-note");
+  if(note) note.style.display = edited ? "inline" : "none";
 }
+
+(function(){
+  var wrap = document.getElementById("lettre-preview");
+  wrap.addEventListener("focusout", function(e){
+    if(!e.target.getAttribute || !e.target.getAttribute("data-lp")) return;
+    var texts = Array.prototype.map.call(wrap.querySelectorAll("[data-lp]"), function(p){ return p.innerText.replace(/\s+/g, " ").trim(); }).filter(Boolean);
+    var current = Array.isArray(state.lettre.corps) ? state.lettre.corps : generateLettreParagraphs();
+    if(texts.join("\n") === current.join("\n")) return;
+    state.lettre.corps = texts;
+    persist(); renderLettrePreview();
+  });
+  wrap.addEventListener("keydown", function(e){
+    if(e.key === "Enter" && e.target.getAttribute && e.target.getAttribute("data-lp")){ e.preventDefault(); e.target.blur(); }
+  });
+})();
 
 document.getElementById("btn-reroll").addEventListener("click", function(){
   state.lettre.seed = (state.lettre.seed || 1) + 1;
+  state.lettre.corps = null;
   renderLettrePreview(); persist();
 });
 
