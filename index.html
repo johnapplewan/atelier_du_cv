@@ -507,6 +507,12 @@
           </div>
 
           <div class="card" style="margin-bottom:16px;">
+            <span class="eyebrow">Texte de la lettre (modifiable)</span>
+            <p class="hint" style="margin:6px 0 10px;">Corrige directement ici : une ligne vide sépare deux paragraphes. Le bouton « Régénérer la lettre » repart de l'annonce.</p>
+            <textarea id="lettre-texte" style="min-height:260px;"></textarea>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
             <span class="eyebrow">Besoin d'une idée ?</span>
             <p class="hint" style="margin:6px 0 10px;">Clique sur une question : elle devient un nouveau point de motivation à répondre dans tes mots.</p>
             <div class="chips" id="question-bank"></div>
@@ -2629,12 +2635,16 @@ function pickProjects(kws){
 
 function generateLettreParagraphs(){
   var l = state.lettre, an = state.annonce, en = l.lang === "en";
-  var poste = an.poste.trim() || (en ? "this position" : "ce poste");
-  var entreprise = an.entreprise.trim() || (en ? "your company" : "votre entreprise");
+  var poste = an.poste.trim();
+  var entreprise = an.entreprise.trim();
   var bank = (LETTRE_AUTO[en ? "en" : "fr"])[l.ton] || LETTRE_AUTO[en ? "en" : "fr"].formel;
   var rng = mulberry32(djb2(poste + "|" + entreprise + "|" + l.ton + "|" + l.lang + "|" + (l.seed || 1)));
   var posteTxt = /^[A-ZÀ-Ý][a-zà-ÿ]/.test(poste) ? lowerFirst(poste) : poste;
-  var fill = function(t){ return t.split("{poste}").join(posteTxt).split("{entreprise}").join(entreprise); };
+  var fill = function(t){
+    if(!poste){ return en ? "I am writing to apply for the position you advertise." : "Je vous adresse ma candidature pour le poste que vous proposez."; }
+    if(!entreprise){ t = t.replace(/ (chez|at) \{entreprise\}/, "").replace(/ que propose \{entreprise\}/, "").replace(/ que propose \{entreprise\}/, "").replace("{entreprise}", ""); }
+    return t.split("{poste}").join(posteTxt).split("{entreprise}").join(entreprise);
+  };
 
   var paras = [];
   var kws = (an.keywords || []);
@@ -2708,8 +2718,8 @@ function renderLettrePreview(){
     return;
   }
 
-  var poste = an.poste.trim() || (en ? "this position" : "ce poste");
-  var entreprise = an.entreprise.trim() || (en ? "your company" : "votre entreprise");
+  var poste = an.poste.trim();
+  var entreprise = an.entreprise.trim();
   var edited = Array.isArray(l.corps) && l.corps.length;
   var paragraphs = edited ? l.corps : generateLettreParagraphs();
 
@@ -2723,9 +2733,9 @@ function renderLettrePreview(){
 
   var html = "";
   html += '<div class="l-from">'+ (esc(state.profil.nom)||(en?"Your name":"Ton nom")) + (state.profil.ville ? "<br>"+esc(state.profil.ville) : "") + (state.profil.email? "<br>"+esc(state.profil.email):"") + (state.profil.tel? "<br>"+esc(state.profil.tel):"") + '</div>';
-  html += '<div class="l-to">' + esc(entreprise) + (l.destinataire ? "<br>" + attnLabel + esc(l.destinataire) : "") + '</div>';
+  if(entreprise || l.destinataire) html += '<div class="l-to">' + esc(entreprise) + (l.destinataire ? (entreprise ? "<br>" : "") + attnLabel + esc(l.destinataire) : "") + '</div>';
   html += '<div class="l-date">' + esc(state.profil.ville ? state.profil.ville+", " : "") + dateStr + '</div>';
-  html += '<div class="l-obj">' + objLabel + esc(poste) + '</div>';
+  if(poste) html += '<div class="l-obj">' + objLabel + esc(poste) + '</div>';
   html += '<div id="lettre-body">';
   paragraphs.forEach(function(p){ html += '<p contenteditable="true" spellcheck="false" data-lp="1">' + esc(p) + "</p>"; });
   html += '</div>';
@@ -2734,7 +2744,15 @@ function renderLettrePreview(){
   wrap.innerHTML = html;
   var note = document.getElementById("lettre-edit-note");
   if(note) note.style.display = edited ? "inline" : "none";
+  var ta = document.getElementById("lettre-texte");
+  if(ta && document.activeElement !== ta) ta.value = paragraphs.join("\n\n");
 }
+
+document.getElementById("lettre-texte").addEventListener("input", function(){
+  var parts = this.value.split(/\n\s*\n/).map(function(x){ return x.trim(); }).filter(Boolean);
+  state.lettre.corps = parts.length ? parts : null;
+  renderLettrePreview(); persist();
+});
 
 (function(){
   var wrap = document.getElementById("lettre-preview");
