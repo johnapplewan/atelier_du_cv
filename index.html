@@ -1,0 +1,2500 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atelier Candidature</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<!-- Génération de PDF côté navigateur : simples scripts techniques depuis un CDN public, aucune donnée ne leur est envoyée. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --bg: #EAE7DE;
+    --surface: #F5F3EC;
+    --surface-2: #FFFFFF;
+    --border: #D6D0C0;
+    --border-strong: #B9B29E;
+    --ink-900: #1E232B;
+    --ink-600: #4B525C;
+    --ink-400: #7B818A;
+    --accent: #2E4C82;
+    --accent-ink: #1F3A66;
+    --accent-soft: #DDE4F0;
+    --brass: #93602C;
+    --brass-soft: #EFE0CB;
+    --success: #2E7D4F;
+    --success-soft: #DCEEE2;
+    --caution: #93602C;
+    --caution-soft: #EFE0CB;
+    --danger: #A3423F;
+    --danger-soft: #F2DEDC;
+    --shadow: 0 1px 2px rgba(30,35,43,.06), 0 8px 24px -12px rgba(30,35,43,.18);
+    --radius: 10px;
+    --font-display: 'Newsreader', Georgia, 'Times New Roman', serif;
+    --font-body: 'Public Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #171B21; --surface: #1E232B; --surface-2: #242A33; --border: #333B47; --border-strong: #454F5E;
+      --ink-900: #EDEAE2; --ink-600: #B9BEC7; --ink-400: #7C838D;
+      --accent: #8CA9DE; --accent-ink: #AFC4E8; --accent-soft: #26314A;
+      --brass: #D3A363; --brass-soft: #3A2E1C;
+      --success: #6BB78C; --success-soft: #1E3327;
+      --caution: #D3A363; --caution-soft: #3A2E1C;
+      --danger: #E08B87; --danger-soft: #3A2323;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #171B21; --surface: #1E232B; --surface-2: #242A33; --border: #333B47; --border-strong: #454F5E;
+    --ink-900: #EDEAE2; --ink-600: #B9BEC7; --ink-400: #7C838D;
+    --accent: #8CA9DE; --accent-ink: #AFC4E8; --accent-soft: #26314A;
+    --brass: #D3A363; --brass-soft: #3A2E1C;
+    --success: #6BB78C; --success-soft: #1E3327;
+    --caution: #D3A363; --caution-soft: #3A2E1C;
+    --danger: #E08B87; --danger-soft: #3A2323;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{ background:var(--bg); color:var(--ink-900); font-family:var(--font-body); font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased; }
+  ::selection{ background:var(--accent-soft); }
+  a{ color:var(--accent); }
+  button{ font-family:inherit; }
+  h1,h2,h3{ font-family:var(--font-display); font-weight:600; text-wrap:balance; margin:0; color:var(--ink-900); }
+  .eyebrow{ font-family:var(--font-mono); font-size:11px; letter-spacing:.09em; text-transform:uppercase; color:var(--ink-400); }
+  :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+  @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; } }
+
+  .app{ display:grid; grid-template-columns:232px 1fr; grid-template-rows:auto 1fr; grid-template-areas:"top top" "rail main"; min-height:100vh; }
+  .topbar{ grid-area:top; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 28px; border-bottom:1px solid var(--border); background:var(--surface); flex-wrap:wrap; }
+  .brand{ display:flex; align-items:baseline; gap:10px; }
+  .brand-mark{ font-family:var(--font-display); font-style:italic; font-weight:600; font-size:22px; color:var(--accent); }
+  .brand-name{ font-family:var(--font-display); font-weight:600; font-size:18px; }
+  .brand-sub{ font-size:12.5px; color:var(--ink-600); }
+  .topbar-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+
+  .btn{ display:inline-flex; align-items:center; gap:7px; padding:9px 15px; border-radius:8px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--ink-900); font-size:13.5px; font-weight:600; cursor:pointer; transition:background .15s ease, border-color .15s ease, transform .05s ease; white-space:nowrap; }
+  .btn:hover{ border-color:var(--accent); }
+  .btn:active{ transform:translateY(1px); }
+  .btn-primary{ background:var(--accent); border-color:var(--accent); color:#fff; }
+  .btn-primary:hover{ background:var(--accent-ink); border-color:var(--accent-ink); }
+  .btn-ghost{ background:transparent; border-color:transparent; }
+  .btn-ghost:hover{ border-color:var(--border-strong); }
+  .btn-sm{ padding:6px 11px; font-size:12.5px; }
+  .btn[disabled]{ opacity:.45; cursor:not-allowed; }
+
+  .rail{ grid-area:rail; border-right:1px solid var(--border); background:var(--surface); padding:20px 14px; display:flex; flex-direction:column; gap:4px; }
+  .rail-item{ display:flex; align-items:center; gap:11px; padding:11px 12px; border-radius:8px; cursor:pointer; border:1px solid transparent; background:none; text-align:left; width:100%; color:var(--ink-600); font-size:14px; font-weight:600; }
+  .rail-item:hover{ background:var(--accent-soft); color:var(--ink-900); }
+  .rail-item.is-active{ background:var(--surface-2); border-color:var(--border); color:var(--ink-900); box-shadow:var(--shadow); }
+  .rail-item .num{ font-family:var(--font-mono); font-size:11px; color:var(--ink-400); width:16px; }
+  .rail-item.is-active .num{ color:var(--accent); }
+  .status-dot{ width:9px; height:9px; border-radius:50%; margin-left:auto; flex-shrink:0; border:1.5px solid var(--ink-400); background:transparent; }
+  .status-dot[data-state="partial"]{ background:var(--caution); border-color:var(--caution); }
+  .status-dot[data-state="ready"]{ background:var(--success); border-color:var(--success); }
+  .rail-foot{ margin-top:auto; padding:12px; font-size:11.5px; color:var(--ink-400); line-height:1.5; }
+
+  .workspace{ grid-area:main; padding:28px 32px 60px; overflow-x:hidden; }
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+  /* Rendu hors-écran temporaire d'un onglet non actif le temps d'une capture PDF (html2canvas a besoin
+     que l'élément ait une taille réelle, ce qu'un panneau display:none ne lui donne pas). */
+  .panel.pdf-capturing{ display:block; position:absolute; left:-99999px; top:0; visibility:visible; }
+  .panel-head{ margin-bottom:22px; max-width:640px; }
+  .panel-head h2{ font-size:26px; margin-bottom:6px; }
+  .panel-head p{ color:var(--ink-600); font-size:14px; margin:0; }
+
+  .split{ display:grid; grid-template-columns:minmax(320px,1fr) minmax(340px,1.05fr); gap:24px; align-items:start; }
+  @media (max-width:960px){ .split{ grid-template-columns:1fr; } }
+
+  .card{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:20px 22px; }
+  .controls-col{ display:flex; flex-direction:column; }
+  .field{ margin-bottom:16px; }
+  .field:last-child{ margin-bottom:0; }
+  .field label{ display:block; font-size:12.5px; font-weight:600; color:var(--ink-600); margin-bottom:6px; }
+  .field .hint{ font-size:11.5px; color:var(--ink-400); margin-top:5px; }
+  .hint{ font-size:11.5px; color:var(--ink-400); }
+  input[type=text], input[type=email], input[type=tel], input[type=url], input[type=file], textarea, select{
+    width:100%; padding:9px 11px; border-radius:7px; border:1px solid var(--border-strong);
+    background:var(--surface-2); color:var(--ink-900); font-family:inherit; font-size:14px;
+  }
+  textarea{ resize:vertical; min-height:78px; line-height:1.5; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  @media (max-width:520px){ .row2{ grid-template-columns:1fr; } }
+
+  .chips{ display:flex; flex-wrap:wrap; gap:7px; margin-top:8px; }
+  .chip{ display:inline-flex; align-items:center; gap:6px; font-family:var(--font-mono); font-size:11.5px; padding:5px 9px 5px 11px; border-radius:99px; background:var(--accent-soft); color:var(--accent-ink); border:1px solid transparent; }
+  .chip button{ background:none; border:none; color:inherit; cursor:pointer; font-size:13px; line-height:1; padding:0; opacity:.65; }
+  .chip button:hover{ opacity:1; }
+  .chip.suggest{ background:transparent; border:1px dashed var(--border-strong); color:var(--ink-600); cursor:pointer; }
+  .chip.suggest:hover{ border-color:var(--accent); color:var(--accent); }
+
+  .exp-block{ border:1px solid var(--border); border-radius:8px; padding:14px 16px; margin-bottom:12px; background:var(--surface-2); }
+  .exp-block-head{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+  .exp-block-head .eyebrow{ margin:0; }
+
+  .gauge-wrap{ display:flex; align-items:center; gap:16px; }
+  .gauge-num{ font-family:var(--font-mono); font-size:30px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .gauge-label{ font-size:12.5px; color:var(--ink-600); max-width:190px; }
+  .tier-pill{ display:inline-flex; align-items:center; gap:6px; padding:3px 10px; border-radius:99px; font-size:11.5px; font-weight:600; font-family:var(--font-mono); }
+  .tier-pill.success{ background:var(--success-soft); color:var(--success); }
+  .tier-pill.caution{ background:var(--caution-soft); color:var(--caution); }
+  .tier-pill.danger{ background:var(--danger-soft); color:var(--danger); }
+
+  .preview-frame{ position:sticky; top:20px; }
+  .paper{ background:#FFFFFF; border:1px solid var(--border); border-radius:6px; box-shadow:var(--shadow); padding:38px 40px; min-height:400px; color:#20242B; }
+  .paper *{ color:inherit; }
+  .paper h1,.paper h2,.paper h3{ color:inherit; }
+  .preview-toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+  .preview-toolbar .eyebrow{ margin:0; }
+  .download-status{ display:block; font-size:11px; color:var(--ink-400); margin-top:6px; text-align:right; min-height:14px; }
+
+  .cv-doc{ font-size:12.5px; line-height:1.55; }
+  .cv-doc .cv-name{ font-family:var(--font-display); font-size:23px; font-weight:600; margin:0 0 2px; }
+  .cv-doc .cv-title{ font-size:13.5px; color:#4B525C; margin:0 0 10px; }
+  .cv-doc .cv-contact{ font-size:11.5px; color:#4B525C; margin-bottom:10px; }
+  .cv-doc .cv-contact span:not(:last-child)::after{ content:"·"; margin:0 7px; color:#B9B29E; }
+  .cv-doc h3.cv-h{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; border-bottom:1.5px solid #20242B; padding-bottom:4px; margin:18px 0 9px; font-family:var(--font-body); font-weight:700; }
+  .cv-doc .cv-item{ margin-bottom:11px; }
+  .cv-doc .cv-item-head{ display:flex; justify-content:space-between; gap:10px; font-weight:600; font-size:12.5px; }
+  .cv-doc .cv-item-sub{ font-size:11.5px; color:#4B525C; margin:1px 0 4px; font-style:italic; }
+  .cv-doc ul{ margin:4px 0 0; padding-left:16px; }
+  .cv-doc li{ margin-bottom:2px; }
+  .cv-doc .cv-skills{ display:flex; flex-wrap:wrap; gap:5px 8px; }
+  .cv-doc .cv-skill{ font-size:11px; }
+  .empty-note{ color:#8b8f96; font-style:italic; font-size:12.5px; }
+
+  .lettre-doc{ font-size:13px; line-height:1.7; }
+  .lettre-doc .l-from{ margin-bottom:22px; }
+  .lettre-doc .l-to{ margin-bottom:22px; }
+  .lettre-doc .l-date{ text-align:right; margin-bottom:22px; font-size:12px; color:#4B525C; }
+  .lettre-doc .l-obj{ font-weight:600; margin-bottom:16px; }
+  .lettre-doc p{ margin:0 0 13px; }
+  .lettre-doc .l-sign{ margin-top:8px; }
+
+  .annexe-doc h3.cv-h{ font-size:11px; text-transform:uppercase; letter-spacing:.08em; border-bottom:1.5px solid #20242B; padding-bottom:4px; margin:16px 0 9px; font-family:var(--font-body); font-weight:700; }
+  .annexe-doc ul.checklist{ list-style:none; margin:0 0 4px; padding:0; }
+  .annexe-doc ul.checklist li{ display:flex; gap:9px; align-items:flex-start; padding:5px 0; font-size:12.5px; border-bottom:1px dashed #E2DECF; }
+  .annexe-doc ul.checklist li:last-child{ border-bottom:none; }
+  .annexe-doc .box{ width:14px; height:14px; border:1.5px solid #8b8f96; border-radius:3px; flex-shrink:0; margin-top:1px; }
+  .annexe-note{ font-size:12px; color:#4B525C; margin-top:16px; }
+
+  .toolbar-row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  .segmented{ display:inline-flex; border:1px solid var(--border-strong); border-radius:8px; overflow:hidden; }
+  .segmented button{ border:none; background:var(--surface-2); color:var(--ink-600); padding:8px 13px; font-size:12.5px; font-weight:600; cursor:pointer; }
+  .segmented button + button{ border-left:1px solid var(--border-strong); }
+  .segmented button.active{ background:var(--accent); color:#fff; }
+
+  .bullet-row{ display:flex; gap:8px; margin-bottom:8px; align-items:flex-start; }
+  .bullet-row textarea{ flex:1; min-height:52px; }
+  .icon-btn{ background:none; border:1px solid var(--border-strong); border-radius:7px; width:34px; height:34px; flex-shrink:0; cursor:pointer; color:var(--ink-600); font-size:15px; display:flex; align-items:center; justify-content:center; }
+  .icon-btn:hover{ border-color:var(--accent); color:var(--accent); }
+  .icon-btn[disabled]{ opacity:.35; cursor:not-allowed; }
+
+  .category-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:9px; margin-bottom:4px; }
+  .cat-card{ border:1px solid var(--border-strong); border-radius:8px; padding:12px; cursor:pointer; background:var(--surface-2); font-size:13px; font-weight:600; text-align:left; }
+  .cat-card:hover{ border-color:var(--accent); }
+  .cat-card.active{ border-color:var(--accent); background:var(--accent-soft); color:var(--accent-ink); }
+
+  .footnote{ font-size:11.5px; color:var(--ink-400); margin-top:14px; line-height:1.6; }
+
+  .photo-thumb{ width:56px; height:70px; object-fit:cover; border-radius:5px; border:1px solid var(--border-strong); flex-shrink:0; }
+  #suisse-fields{ margin-top:2px; }
+
+  .ref-panel{ border:1px solid var(--border); border-radius:8px; padding:10px 14px; background:var(--surface-2); }
+  .ref-panel summary{ cursor:pointer; font-size:12.5px; font-weight:600; color:var(--ink-600); }
+  .ref-panel summary:hover{ color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark">§</span>
+      <div>
+        <div class="brand-name">Atelier Candidature</div>
+        <div class="brand-sub">Une bibliothèque réutilisable, recomposée à chaque annonce</div>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" id="btn-reset" title="Effacer la bibliothèque et repartir de zéro">Tout effacer</button>
+      <button class="btn btn-ghost btn-sm" id="btn-export-cv-lettre">CV + Lettre (PDF)</button>
+      <button class="btn btn-primary btn-sm" id="btn-export-all">Télécharger le dossier complet (PDF)</button>
+    </div>
+  </header>
+  <div style="grid-column:2;padding:0 28px;display:flex;gap:16px;justify-content:flex-end;">
+    <span class="download-status" id="export-cv-lettre-status"></span>
+    <span class="download-status" id="export-all-status"></span>
+  </div>
+
+  <nav class="rail" id="rail">
+    <button class="rail-item is-active" data-tab="annonce"><span class="num">01</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
+    <button class="rail-item" data-tab="cv"><span class="num">02</span>CV<span class="status-dot" id="dot-cv"></span></button>
+    <button class="rail-item" data-tab="lettre"><span class="num">03</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
+    <button class="rail-item" data-tab="annexe"><span class="num">04</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
+    <button class="rail-item" data-tab="candidatures"><span class="num">05</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
+    <button class="rail-item" data-tab="entretien"><span class="num">06</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
+    <div class="rail-foot">Ta bibliothèque (expériences, compétences, lettres, contenus, candidatures) reste uniquement dans ce navigateur : rien n'est envoyé ailleurs, à aucun moment.</div>
+  </nav>
+
+  <main class="workspace">
+
+    <!-- PANEL ANNONCE -->
+    <section class="panel active" id="panel-annonce">
+      <div class="panel-head">
+        <span class="eyebrow">Étape 01</span>
+        <h2>L'annonce</h2>
+        <p>Colle le poste visé (texte et/ou lien) : le reste du dossier s'en sert pour repérer les mots-clés attendus et recomposer le CV, la lettre et l'annexe.</p>
+      </div>
+      <div class="split">
+        <div class="card">
+          <div class="row2">
+            <div class="field"><label for="an-poste">Intitulé du poste</label><input type="text" id="an-poste" placeholder="ex. Chargé·e de communication"></div>
+            <div class="field"><label for="an-entreprise">Entreprise</label><input type="text" id="an-entreprise" placeholder="ex. Studio Lumen"></div>
+          </div>
+          <div class="field">
+            <label for="an-url">Lien de l'annonce (optionnel)</label>
+            <input type="url" id="an-url" placeholder="https://...">
+            <p class="hint">Gardé comme simple référence : cette page ne peut pas aller chercher elle-même le contenu d'un lien externe. Colle aussi le texte ci-dessous — ou demande-moi, dans la conversation, de le récupérer pour toi.</p>
+          </div>
+          <div class="field">
+            <label for="an-texte">Texte de l'annonce</label>
+            <textarea id="an-texte" style="min-height:200px" placeholder="Colle ici la description du poste, les missions et le profil recherché…"></textarea>
+          </div>
+          <div class="field">
+            <label>Mots-clés détectés</label>
+            <div class="chips" id="an-keywords"></div>
+            <p class="hint">Clique sur un mot-clé pour l'ajouter à ta bibliothèque de compétences et aux compétences mises en avant dans la lettre.</p>
+          </div>
+        </div>
+        <div class="card">
+          <span class="eyebrow">À quoi ça sert</span>
+          <h3 style="font-size:16px;margin:8px 0 10px;">Repérage local, pas de boîte noire</h3>
+          <p style="font-size:13px;color:var(--ink-600);line-height:1.6;margin:0 0 10px;">
+            L'outil compare les mots les plus fréquents de l'annonce à un lexique de compétences courantes, puis s'en sert pour réordonner ta bibliothèque de CV et suggérer des compétences pour la lettre. Rien n'est envoyé à un service externe : l'analyse tourne entièrement dans ton navigateur — ce n'est pas une IA, mais un algorithme de correspondance par mots-clés.
+          </p>
+          <p style="font-size:13px;color:var(--ink-600);line-height:1.6;margin:0;">
+            Ce dossier n'écrit jamais de faits inventés à ta place : il structure, reformule et met en valeur ce que <em>toi</em> tu renseignes.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL CV (bibliothèque + auto-composition) -->
+    <section class="panel panel-doc" id="panel-cv">
+      <div class="panel-head">
+        <span class="eyebrow">Étape 02</span>
+        <h2>Le CV, format ATS</h2>
+        <p>Une bibliothèque réutilisable d'expériences et de compétences : l'atelier recompose et réordonne le CV pour coller au mieux à l'annonce.</p>
+      </div>
+      <div class="split">
+        <div class="controls-col">
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="row2">
+              <div class="field"><label for="cv-nom">Nom complet</label><input type="text" id="cv-nom" placeholder="ex. Camille Farrow"></div>
+              <div class="field"><label for="cv-titre">Titre / accroche</label><input type="text" id="cv-titre" placeholder="ex. Chargée de communication junior"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label for="cv-email">Email</label><input type="email" id="cv-email" placeholder="prenom.nom@mail.com"></div>
+              <div class="field"><label for="cv-tel">Téléphone</label><input type="tel" id="cv-tel" placeholder="06 00 00 00 00"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label for="cv-ville">Ville</label><input type="text" id="cv-ville" placeholder="ex. Lyon"></div>
+              <div class="field"><label for="cv-lien">Lien (LinkedIn, portfolio…)</label><input type="text" id="cv-lien" placeholder="linkedin.com/in/…"></div>
+            </div>
+            <div class="field"><label for="cv-resume">Résumé (2-3 phrases)</label><textarea id="cv-resume" placeholder="Ce que tu apportes, en une ou deux phrases claires."></textarea></div>
+            <div class="field"><label for="cv-langues">Langues</label><input type="text" id="cv-langues" placeholder="ex. Français (natif), Anglais (courant)"></div>
+
+            <div class="field">
+              <label>Atouts (points forts)</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="prof-atouts-input" placeholder="ex. Sens du relationnel">
+                <button class="btn btn-sm" id="btn-add-atout">Ajouter</button>
+              </div>
+              <div class="chips" id="prof-atouts-chips"></div>
+            </div>
+
+            <div class="field">
+              <label>Photo (optionnelle)</label>
+              <div id="prof-photo-thumb-wrap" style="margin-bottom:8px;"></div>
+              <input type="file" id="prof-photo-input" accept="image/*" style="max-width:260px;">
+              <p class="hint">Utile surtout pour le format suisse. Redimensionnée automatiquement, elle reste dans ton navigateur.</p>
+            </div>
+
+            <div class="row2">
+              <div class="field">
+                <label>Format</label>
+                <div class="segmented" id="format-segmented">
+                  <button type="button" data-format="standard" class="active">Standard</button>
+                  <button type="button" data-format="suisse">Suisse</button>
+                </div>
+              </div>
+              <div class="field">
+                <label>Langue du CV</label>
+                <div class="segmented" id="lang-segmented">
+                  <button type="button" data-lang="fr" class="active">Français</button>
+                  <button type="button" data-lang="en">English</button>
+                </div>
+              </div>
+            </div>
+
+            <div id="suisse-fields" style="display:none;">
+              <div class="row2">
+                <div class="field"><label for="suisse-naissance">Date de naissance</label><input type="text" id="suisse-naissance" placeholder="jj/mm/aaaa"></div>
+                <div class="field"><label for="suisse-nationalite">Nationalité</label><input type="text" id="suisse-nationalite" placeholder="ex. Suisse"></div>
+              </div>
+              <div class="row2">
+                <div class="field"><label for="suisse-permis">Permis de travail</label><input type="text" id="suisse-permis" placeholder="ex. Permis B, non requis…"></div>
+                <div class="field"><label for="suisse-etat">État civil (optionnel)</label><input type="text" id="suisse-etat" placeholder="ex. Célibataire"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <span class="eyebrow">Import rapide</span>
+            <p class="hint" style="margin:6px 0 10px;">Colle le texte d'un de tes anciens CV, même en vrac et sans mise en forme : l'atelier repère les expériences, les formations et les compétences pour remplir ta bibliothèque. Tu peux recommencer avec un autre CV, les éléments s'ajoutent sans doublon. Vérifie et ajuste ensuite ce qui a été détecté ci-dessous.</p>
+            <textarea id="cv-import-text" style="min-height:140px;" placeholder="Colle ici le texte brut d'un CV existant…"></textarea>
+            <div class="toolbar-row" style="margin-top:10px;">
+              <button class="btn btn-primary btn-sm" id="btn-import-cv">Analyser et importer</button>
+              <span class="hint" id="cv-import-status"></span>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="exp-block-head">
+              <span class="eyebrow">Bibliothèque — expériences</span>
+              <div class="toolbar-row">
+                <button class="btn btn-ghost btn-sm" id="btn-recompose">↻ Recomposer automatiquement</button>
+                <button class="btn btn-ghost btn-sm" id="btn-add-exp">+ Ajouter</button>
+              </div>
+            </div>
+            <p class="hint" style="margin:0 0 10px;">Toutes tes expériences restent dans ta bibliothèque ; l'atelier les réordonne selon l'annonce pour mettre les plus pertinentes en premier.</p>
+            <div id="exp-list"></div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="exp-block-head"><span class="eyebrow">Bibliothèque — formations</span><button class="btn btn-ghost btn-sm" id="btn-add-formation">+ Ajouter</button></div>
+            <div id="formation-list"></div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="field">
+              <label>Bibliothèque — compétences</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="cv-skill-input" placeholder="ex. Gestion de projet">
+                <button class="btn btn-sm" id="btn-add-skill">Ajouter</button>
+              </div>
+              <div class="chips" id="cv-skill-chips"></div>
+              <div class="chips" id="cv-skill-suggest" style="margin-top:10px;"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="gauge-wrap">
+              <div>
+                <div class="eyebrow" style="margin-bottom:4px;">Score de correspondance ATS</div>
+                <div class="gauge-num" id="ats-score">—</div>
+              </div>
+              <div class="gauge-label">Part des mots-clés de l'annonce retrouvés dans ta bibliothèque. <span id="ats-tier"></span></div>
+            </div>
+            <p class="footnote" id="ats-missing"></p>
+          </div>
+
+        </div>
+
+        <div class="preview-frame">
+          <div class="preview-toolbar">
+            <span class="eyebrow">Aperçu</span>
+            <button class="btn btn-sm" id="btn-print-cv">Télécharger en PDF</button>
+          </div>
+          <div class="paper cv-doc" id="cv-preview"></div>
+          <span class="download-status" id="cv-download-status"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL LETTRE -->
+    <section class="panel panel-doc" id="panel-lettre">
+      <div class="panel-head">
+        <span class="eyebrow">Étape 03</span>
+        <h2>La lettre de motivation</h2>
+        <p>Tu apportes le fond (tes raisons, tes expériences, tes anciennes lettres) ; l'atelier varie les tournures et repère des tendances simples dans ce qui a marché pour toi.</p>
+      </div>
+      <div class="split">
+        <div class="controls-col">
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="row2">
+              <div class="field"><label for="l-destinataire">Destinataire (optionnel)</label><input type="text" id="l-destinataire" placeholder="ex. Madame Berthier"></div>
+              <div class="field">
+                <label>Langue de la lettre</label>
+                <div class="segmented" id="lettre-lang-segmented">
+                  <button data-lang="fr" class="active">Français</button>
+                  <button data-lang="en">English</button>
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Ton</label>
+              <div class="segmented" id="tone-segmented">
+                <button data-tone="formel" class="active">Formel</button>
+                <button data-tone="direct">Direct</button>
+                <button data-tone="chaleureux">Chaleureux</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <span class="eyebrow">Besoin d'une idée ?</span>
+            <p class="hint" style="margin:6px 0 10px;">Clique sur une question : elle devient un nouveau point de motivation à répondre dans tes mots.</p>
+            <div class="chips" id="question-bank"></div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <span class="eyebrow">Tes motivations, dans tes mots</span>
+            <p class="hint" style="margin:6px 0 12px;">2 à 4 points : une expérience, une réussite, une raison précise de candidater. L'atelier les enchaîne, il ne les invente pas.</p>
+            <div id="motiv-list"></div>
+            <button class="btn btn-ghost btn-sm" id="btn-add-motiv">+ Ajouter un point</button>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="field">
+              <label>Compétences à mettre en avant</label>
+              <div class="chips" id="l-skill-suggest"></div>
+              <div class="chips" id="l-skill-chosen" style="margin-top:8px;"></div>
+            </div>
+            <div class="field"><label for="l-disponibilite">Disponibilité (optionnel)</label><input type="text" id="l-disponibilite" placeholder="ex. immédiate, dès le 1er septembre…"></div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="exp-block-head"><span class="eyebrow">Bibliothèque de lettres archivées</span><button class="btn btn-ghost btn-sm" id="btn-add-archive">+ Ajouter une lettre</button></div>
+            <p class="hint" style="margin:0 0 12px;">Colle d'anciennes lettres et indique ce qu'elles ont produit : ça nourrit l'analyse de patterns ci-dessous et sert de référence pendant la rédaction.</p>
+            <div id="archive-list"></div>
+          </div>
+
+          <div class="card">
+            <div class="exp-block-head"><span class="eyebrow">Patterns de tes lettres</span><button class="btn btn-sm" id="btn-analyser-patterns">Analyser mes lettres</button></div>
+            <div id="patterns-result"></div>
+            <details class="ref-panel" id="lettre-reference" style="margin-top:14px;">
+              <summary>Relire mes anciennes lettres (pour s'en inspirer)</summary>
+              <div id="reference-list"></div>
+            </details>
+          </div>
+
+        </div>
+
+        <div class="preview-frame">
+          <div class="preview-toolbar">
+            <span class="eyebrow">Aperçu</span>
+            <div class="toolbar-row">
+              <button class="btn btn-ghost btn-sm" id="btn-reroll">↻ Régénérer les tournures</button>
+              <button class="btn btn-sm" id="btn-print-lettre">Télécharger en PDF</button>
+            </div>
+          </div>
+          <div class="paper lettre-doc" id="lettre-preview"></div>
+          <span class="download-status" id="lettre-download-status"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL ANNEXE -->
+    <section class="panel panel-doc" id="panel-annexe">
+      <div class="panel-head">
+        <span class="eyebrow">Étape 04</span>
+        <h2>L'annexe</h2>
+        <p>Une bibliothèque de contenus par type de poste — liens, projets, chiffres — que tu retrouves à chaque candidature.</p>
+      </div>
+      <div class="split">
+        <div class="card">
+          <span class="eyebrow">Type de poste</span>
+          <div class="category-grid" id="cat-grid" style="margin-top:10px;"></div>
+
+          <div class="field" style="margin-top:14px;">
+            <label>Suggestions pour ce type de poste</label>
+            <div class="chips" id="annexe-suggest"></div>
+            <p class="hint">Clique pour ajouter un élément à remplir dans ta bibliothèque.</p>
+          </div>
+
+          <div class="exp-block-head" style="margin-top:18px;">
+            <span class="eyebrow">Ta bibliothèque pour ce type de poste</span>
+            <button class="btn btn-ghost btn-sm" id="btn-add-annexe-item">+ Ajouter</button>
+          </div>
+          <div id="annexe-items-list"></div>
+        </div>
+        <div class="preview-frame">
+          <div class="preview-toolbar">
+            <span class="eyebrow">Aperçu</span>
+            <button class="btn btn-sm" id="btn-print-annexe">Télécharger en PDF</button>
+          </div>
+          <div class="paper annexe-doc" id="annexe-preview"></div>
+          <span class="download-status" id="annexe-download-status"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- PANEL CANDIDATURES -->
+    <section class="panel" id="panel-candidatures">
+      <div class="panel-head">
+        <span class="eyebrow">Étape 05</span>
+        <h2>Suivi des candidatures</h2>
+        <p>La liste des annonces auxquelles tu as postulé, et où ça en est — pour ne rien relancer en double, ni oublier une relance utile.</p>
+      </div>
+      <div class="card" style="max-width:900px;">
+        <div class="toolbar-row" style="margin-bottom:14px;">
+          <button class="btn btn-primary btn-sm" id="btn-save-current-candidature">+ Enregistrer l'annonce en cours (étape 01)</button>
+          <button class="btn btn-ghost btn-sm" id="btn-add-candidature">+ Ajouter manuellement</button>
+        </div>
+        <p class="hint" id="candidatures-summary" style="margin:0 0 14px;"></p>
+        <div id="candidatures-list"></div>
+      </div>
+    </section>
+
+    <!-- PANEL ENTRETIEN -->
+    <section class="panel" id="panel-entretien">
+      <div class="panel-head">
+        <span class="eyebrow">Étape 06</span>
+        <h2>S'entraîner à l'entretien</h2>
+        <p>Une série de questions classiques et de questions liées à l'annonce. Réponds dans tes mots, puis affiche le corrigé pour un repérage honnête de ce qui pourrait manquer.</p>
+      </div>
+      <div class="split">
+        <div class="controls-col">
+          <div class="card" style="margin-bottom:16px;">
+            <div class="toolbar-row">
+              <button class="btn btn-primary btn-sm" id="btn-generer-questions">↻ Générer une série de questions</button>
+              <button class="btn btn-ghost btn-sm" id="btn-voir-corrige">Voir le corrigé</button>
+            </div>
+            <p class="hint" style="margin:10px 0 0;">Le corrigé est un repérage local (mots-clés de l'annonce non mentionnés, longueur, présence d'un exemple chiffré) — pas une vraie évaluation de ta prestation.</p>
+          </div>
+          <div id="entretien-questions"></div>
+        </div>
+        <div class="preview-frame">
+          <div class="card">
+            <span class="eyebrow">Conseils généraux</span>
+            <p style="font-size:13px;color:var(--ink-600);line-height:1.6;margin:10px 0 0;">
+              Structure utile pour les questions comportementales : la situation (contexte bref), la tâche (ce qu'on attendait de toi), l'action (ce que <em>toi</em> tu as fait précisément) et le résultat (idéalement chiffré). Vise une réponse d'une trentaine de secondes à l'oral avant de développer si on te relance.
+            </p>
+          </div>
+          <div id="entretien-corrige" style="margin-top:16px;"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+
+/* ===================== SOCLE PARTAGÉ ===================== */
+
+function esc(s){ return (s||"").replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function stripAccents(s){ return (s||"").normalize("NFD").replace(new RegExp("[\u0300-\u036f]","g"),""); }
+function norm(s){ return stripAccents((s||"").toLowerCase()).trim(); }
+
+function uid(){ return "id" + Math.random().toString(36).slice(2, 9) + Date.now().toString(36); }
+
+function djb2(str){
+  var h = 5381;
+  for(var i=0;i<str.length;i++){ h = ((h*33) ^ str.charCodeAt(i)) >>> 0; }
+  return h;
+}
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function pick(arr, rng){ return arr[Math.floor(rng()*arr.length) % arr.length]; }
+function shuffle(arr, rng){
+  var a = arr.slice();
+  for(var i=a.length-1;i>0;i--){ var j = Math.floor(rng()*(i+1)); var tmp=a[i]; a[i]=a[j]; a[j]=tmp; }
+  return a;
+}
+
+function escapeRegex(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function termRegex(nTerm){ return new RegExp("\\b" + escapeRegex(nTerm) + "\\b", "g"); }
+function countTerm(normText, nTerm){ var m = normText.match(termRegex(nTerm)); return m ? m.length : 0; }
+
+function debounce(fn, ms){
+  var t;
+  return function(){
+    var args = arguments;
+    clearTimeout(t);
+    t = setTimeout(function(){ fn.apply(null, args); }, ms);
+  };
+}
+
+function scoreAgainstKeywords(text, keywords){
+  if(!keywords || !keywords.length) return 0;
+  var t = norm(text || "");
+  var total = 0;
+  keywords.forEach(function(k){ total += countTerm(t, norm(k.term)); });
+  return total;
+}
+
+function orderedList(libArr, selArr){
+  var byId = {}; libArr.forEach(function(x){ byId[x.id] = x; });
+  var seen = {}; var result = [];
+  (selArr || []).forEach(function(id){ if(byId[id] && !seen[id]){ result.push(byId[id]); seen[id] = true; } });
+  libArr.forEach(function(x){ if(!seen[x.id]){ result.push(x); seen[x.id] = true; } });
+  return result;
+}
+
+function fileSafe(s){
+  var t = stripAccents(s||"document").replace(/[^a-zA-Z0-9\- ]/g,"").trim().replace(/\s+/g,"-");
+  return t || "document";
+}
+
+var STOPWORDS = ("le la les de des du un une et en dans pour avec sur au aux par ce cette ces cet que qui quoi dont ou où "+
+  "est sont être avoir été fait faire plus moins notre votre vos nos leur leurs vous nous ils elles il elle je tu on "+
+  "ainsi comme afin sein ce s'y y a à son sa ses tout tous toute toutes autre autres chaque même mêmes très bien "+
+  "poste mission missions profil entreprise société équipe cadre sein candidat candidate candidature recherche recherchons "+
+  "vos votre nos avez êtes serez pourrez pourra doit doivent aussi ainsi lors lorsque depuis chez sous entre selon "+
+  "afin permettant permettre vous-même être etre nombreux nombreuses grand grande type types cet cette celui celle "+
+  "the and for with").split(/\s+/);
+var STOP = {}; STOPWORDS.forEach(function(w){ STOP[w]=true; });
+
+var SKILL_DICTIONARY = [
+  "gestion de projet","chef de projet","communication","rédaction","relation client","relation clients",
+  "management","leadership","autonomie","rigueur","organisation","polyvalence","esprit d'équipe","travail d'équipe",
+  "excel","powerpoint","word","sql","python","javascript","react","node","html","css","java","php",
+  "photoshop","illustrator","indesign","figma","canva","after effects","premiere",
+  "seo","sea","réseaux sociaux","community management","marketing digital","growth","analytics",
+  "comptabilité","facturation","paie","recrutement","ressources humaines","droit du travail",
+  "négociation","prospection","vente","commercial","account management",
+  "anglais","espagnol","allemand","bilingue",
+  "agile","scrum","kanban","crm","erp","data","analyse de données","reporting",
+  "logistique","supply chain","qualité","norme iso","sécurité",
+  "pédagogie","enseignement","formation","animation d'équipe","service client","satisfaction client"
+];
+
+function extractKeywords(text){
+  var raw = text || "";
+  var tokens = norm(raw).match(/[a-z\-]{3,}/g) || [];
+  var freq = {};
+  tokens.forEach(function(t){ if(!STOP[t]){ freq[t] = (freq[t]||0)+1; } });
+
+  var dictHits = [];
+  var normText = norm(raw);
+  SKILL_DICTIONARY.forEach(function(term){
+    var nTerm = norm(term);
+    var count = countTerm(normText, nTerm);
+    if(count > 0){ dictHits.push({ term: term, count: count, kind:"skill" }); }
+  });
+  dictHits.sort(function(a,b){ return b.count - a.count; });
+
+  var used = {};
+  dictHits.forEach(function(h){ used[norm(h.term)] = true; });
+
+  var freqList = Object.keys(freq)
+    .filter(function(w){ return !used[w] && freq[w] >= 2 && w.length >= 4; })
+    .map(function(w){ return { term:w, count:freq[w], kind:"terme" }; })
+    .sort(function(a,b){ return b.count - a.count; })
+    .slice(0, 10);
+
+  return dictHits.concat(freqList).slice(0, 18);
+}
+
+var ANNEXE_CATEGORIES = [
+  { key:"dev", label:"Développement / Tech", items:[
+    "Lien vers le profil GitHub / GitLab",
+    "2 à 3 projets clés : contexte, stack utilisée, résultat concret",
+    "Contributions open-source, si tu en as",
+    "Certifications techniques (cloud, langages, méthodes)",
+    "Lien vers une démo ou un dépôt public"
+  ]},
+  { key:"design", label:"Design / Créatif", items:[
+    "Lien vers le portfolio (Behance, Dribbble, site perso)",
+    "3 à 5 projets : problème posé, démarche, résultat",
+    "Un mot sur ta méthode de travail (recherche, itération, tests)",
+    "Outils maîtrisés (Figma, Adobe, prototypage…)",
+    "Une réalisation dont tu es particulièrement fier·ère, en une phrase"
+  ]},
+  { key:"commercial", label:"Commercial / Business", items:[
+    "Chiffres clés : objectifs atteints, volumes, croissance",
+    "Un exemple de négociation ou de deal marquant",
+    "Secteurs ou typologies de clients déjà adressés",
+    "Outils CRM utilisés",
+    "Une recommandation ou un retour client, si disponible"
+  ]},
+  { key:"marketing", label:"Marketing / Communication", items:[
+    "Lien vers des campagnes ou publications réalisées",
+    "Indicateurs de performance (audience, engagement, conversions)",
+    "Exemples de contenus rédigés ou produits",
+    "Outils maîtrisés (SEO, réseaux sociaux, emailing, analytics)",
+    "Une campagne dont tu es fier·ère, en une phrase"
+  ]},
+  { key:"data", label:"Data / Analyse", items:[
+    "Lien vers des travaux publics (portfolio, GitHub, Kaggle)",
+    "1 à 2 études de cas : question posée, méthode, résultat",
+    "Outils et langages maîtrisés (SQL, Python, BI…)",
+    "Un exemple de décision prise grâce à une analyse",
+    "Certifications ou formations pertinentes"
+  ]},
+  { key:"rh", label:"RH / Administratif", items:[
+    "Exemples de process mis en place ou améliorés",
+    "Volumes gérés (recrutements, dossiers, paie…)",
+    "Outils SIRH ou logiciels de gestion maîtrisés",
+    "Une situation délicate bien gérée, en une phrase",
+    "Certifications RH ou juridiques pertinentes"
+  ]},
+  { key:"autre", label:"Autre poste", items:[
+    "Un lien vers un travail représentatif, si tu en as un",
+    "Un exemple concret de réussite dans ce domaine",
+    "Outils ou méthodes spécifiques au métier",
+    "Une référence ou recommandation, si disponible",
+    "Une certification ou formation pertinente"
+  ]}
+];
+
+var PHRASES = {
+  formel: {
+    ouverture: [
+      "Votre offre de {poste} au sein de {entreprise} a retenu toute mon attention, et c'est avec sérieux que je vous soumets ma candidature.",
+      "C'est avec un vif intérêt que j'ai pris connaissance de votre offre pour le poste de {poste} au sein de {entreprise}.",
+      "Je me permets de vous adresser ma candidature au poste de {poste}, publié par {entreprise}, qui correspond precisément à mon parcours.",
+      "Votre annonce pour le poste de {poste} chez {entreprise} correspond à un projet professionnel que je mûris depuis un moment."
+    ],
+    transition: ["Je souhaite souligner que","Il me paraît utile de préciser que","Dans ce cadre,","Plus précisément,","À ce titre,"],
+    cloture: [
+      "Je serais heureux·se de vous exposer plus en détail ma motivation lors d'un entretien, et vous prie d'agréer, Madame, Monsieur, l'expression de mes salutations distinguées.",
+      "Je me tiens à votre disposition pour un entretien et vous prie de croire, Madame, Monsieur, en l'assurance de ma considération distinguée.",
+      "Dans l'attente de votre retour, je vous prie d'agréer, Madame, Monsieur, mes salutations respectueuses."
+    ]
+  },
+  direct: {
+    ouverture: [
+      "Le poste de {poste} chez {entreprise} correspond exactement à ce que je cherche : voici pourquoi.",
+      "Votre offre pour {poste} chez {entreprise} m'intéresse, et mon parcours colle bien au poste.",
+      "Je candidate pour le poste de {poste} chez {entreprise} : mon profil répond directement aux critères annoncés.",
+      "{entreprise} recrute un·e {poste} — je pense avoir le profil qu'il vous faut, pour les raisons suivantes."
+    ],
+    transition: ["Concrètement,","Pour être précis·e,","Autre point important :","Sur ce point,","En pratique,"],
+    cloture: [
+      "Je suis disponible pour en discuter rapidement, par téléphone ou en entretien, dès que vous le souhaitez.",
+      "Un échange rapide permettrait de voir si le fit est le bon des deux côtés — je reste disponible quand vous voulez.",
+      "Je reste joignable pour un entretien dans les meilleurs délais."
+    ]
+  },
+  chaleureux: {
+    ouverture: [
+      "J'ai découvert votre offre pour le poste de {poste} chez {entreprise}, et elle m'a tout de suite donné envie d'échanger avec vous.",
+      "C'est avec enthousiasme que je vous écris au sujet du poste de {poste} au sein de {entreprise}.",
+      "Votre offre pour {poste} chez {entreprise} résonne particulièrement avec ce que je cherche à construire professionnellement.",
+      "Rejoindre {entreprise} en tant que {poste} serait, pour moi, une belle suite logique à mon parcours."
+    ],
+    transition: ["J'aime particulièrement le fait que","Ce qui me tient à cœur, c'est que","Avec enthousiasme,","Ce qui me motive tout autant,","Dans le même esprit,"],
+    cloture: [
+      "Je serais ravi·e d'échanger avec vous pour vous en dire plus, et vous remercie sincèrement du temps accordé à ma candidature.",
+      "J'espère avoir la chance d'en discuter de vive voix avec vous très prochainement, et vous remercie pour votre attention.",
+      "Au plaisir d'échanger avec vous, et merci pour l'attention portée à cette candidature."
+    ]
+  }
+};
+
+var MOIS_EN = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+var PHRASES_EN = {
+  formel: {
+    ouverture: [
+      "I am writing to express my sincere interest in the {poste} position at {entreprise}, which I came across with great attention.",
+      "It is with genuine interest that I submit my application for the position of {poste} at {entreprise}.",
+      "I would like to apply for the {poste} position recently advertised by {entreprise}, as it aligns closely with my background.",
+      "Your opening for a {poste} at {entreprise} caught my attention, and I am pleased to submit my candidacy."
+    ],
+    transition: ["I would like to point out that","It is worth mentioning that","In this respect,","More specifically,","On this matter,"],
+    cloture: [
+      "I would welcome the opportunity to discuss my application further at an interview, and I thank you for considering my candidacy.",
+      "I remain at your disposal for an interview and thank you for the attention given to my application.",
+      "I look forward to the possibility of discussing this further, and thank you for your time and consideration."
+    ]
+  },
+  direct: {
+    ouverture: [
+      "The {poste} role at {entreprise} is exactly what I'm looking for — here's why.",
+      "I'm applying for the {poste} position at {entreprise}: my background matches what you're looking for.",
+      "{entreprise} is hiring a {poste}, and I believe I'm the right fit, for the following reasons.",
+      "Your listing for {poste} at {entreprise} caught my eye, and my experience lines up directly with it."
+    ],
+    transition: ["Specifically,","To be precise,","Another key point:","On that front,","In practice,"],
+    cloture: [
+      "I'm available for a quick call or interview whenever suits you.",
+      "A short conversation would help confirm the fit on both sides — I'm available whenever works for you.",
+      "I remain available for an interview at your earliest convenience."
+    ]
+  },
+  chaleureux: {
+    ouverture: [
+      "I came across your posting for the {poste} role at {entreprise}, and it immediately made me want to reach out.",
+      "It's with real enthusiasm that I'm writing to you about the {poste} position at {entreprise}.",
+      "Your opening for {poste} at {entreprise} resonates strongly with what I'm hoping to build in my career.",
+      "Joining {entreprise} as a {poste} would feel like a natural next step in my journey."
+    ],
+    transition: ["What I particularly appreciate is that","What matters most to me is that","With enthusiasm,","Equally motivating to me,","In the same spirit,"],
+    cloture: [
+      "I would be delighted to discuss this further with you, and sincerely thank you for the time spent considering my application.",
+      "I hope to have the chance to speak with you soon, and thank you for your attention to this application.",
+      "Looking forward to speaking with you, and thank you for considering this application."
+    ]
+  }
+};
+
+/* ---------------- état & persistance ---------------- */
+
+function defaultState(){
+  return {
+    profil: { nom:"", titre:"", email:"", tel:"", ville:"", lien:"", langues:"", atouts:[], photo:null,
+      suisseActif:false, suisse:{ dateNaissance:"", nationalite:"", permis:"", etatCivil:"" } },
+    annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[] },
+    library: { experiences:[], formations:[], competences:[], lettresArchive:[], annexeItems:[] },
+    cv: { lang:"fr", format:"standard", resume:"", selectedExp:[], selectedForm:[], autoMode:true },
+    lettre: { lang:"fr", destinataire:"", ton:"formel", motivations:[""], motivPrompts:[""], competencesChoisies:[], disponibilite:"", seed:1 },
+    annexeDossier: { categorie:"", selectedItemIds:[] },
+    candidatures: [],
+    entretien: { questions: [], reponses: {}, seed: 1, corrigeVisible: false }
+  };
+}
+
+var state = defaultState();
+try{
+  var saved = JSON.parse(localStorage.getItem("atelier-candidature-v2") || "null");
+  if(saved && typeof saved === "object"){
+    var def = defaultState();
+    state = {
+      profil: Object.assign({}, def.profil, saved.profil, { suisse: Object.assign({}, def.profil.suisse, saved.profil && saved.profil.suisse) }),
+      annonce: Object.assign({}, def.annonce, saved.annonce),
+      library: Object.assign({}, def.library, saved.library),
+      cv: Object.assign({}, def.cv, saved.cv),
+      lettre: Object.assign({}, def.lettre, saved.lettre),
+      annexeDossier: Object.assign({}, def.annexeDossier, saved.annexeDossier),
+      candidatures: saved.candidatures || [],
+      entretien: Object.assign({}, def.entretien, saved.entretien, { reponses: Object.assign({}, saved.entretien && saved.entretien.reponses) })
+    };
+    if(!state.profil.atouts) state.profil.atouts = [];
+    if(!state.lettre.motivPrompts) state.lettre.motivPrompts = state.lettre.motivations.map(function(){ return ""; });
+  }
+}catch(e){ /* stockage indisponible ou corrompu : on repart d'un état par défaut */ }
+
+function persist(){
+  try{ localStorage.setItem("atelier-candidature-v2", JSON.stringify(state)); }catch(e){}
+}
+
+/* ---------------- onglets & statut ---------------- */
+
+var TABS = ["annonce","cv","lettre","annexe","candidatures","entretien"];
+var activeTab = "annonce";
+
+function statusFor(tab){
+  if(tab === "annonce"){
+    if(!state.annonce.texte.trim()) return "empty";
+    return (state.annonce.poste && state.annonce.entreprise) ? "ready" : "partial";
+  }
+  if(tab === "cv"){
+    if(!state.profil.nom.trim()) return "empty";
+    var hasExp = state.library.experiences.some(function(e){ return e.poste.trim(); });
+    return (hasExp && state.library.competences.length) ? "ready" : "partial";
+  }
+  if(tab === "lettre"){
+    var hasMotiv = state.lettre.motivations.some(function(m){ return m.trim(); });
+    return hasMotiv ? "ready" : "empty";
+  }
+  if(tab === "annexe"){
+    if(!state.annexeDossier.categorie) return "empty";
+    return state.annexeDossier.selectedItemIds.length ? "ready" : "partial";
+  }
+  if(tab === "candidatures"){
+    return state.candidatures.length ? "ready" : "empty";
+  }
+  if(tab === "entretien"){
+    if(!state.entretien.questions.length) return "empty";
+    var hasReponse = Object.keys(state.entretien.reponses).some(function(k){ return (state.entretien.reponses[k]||"").trim(); });
+    return hasReponse ? "ready" : "partial";
+  }
+  return "empty";
+}
+
+function refreshStatusDots(){
+  TABS.forEach(function(t){
+    var el = document.getElementById("dot-"+t);
+    var s = statusFor(t);
+    el.setAttribute("data-state", s === "empty" ? "" : s);
+  });
+}
+
+function switchTab(tab){
+  activeTab = tab;
+  TABS.forEach(function(t){
+    document.getElementById("panel-"+t).classList.toggle("active", t === tab);
+    document.querySelector('.rail-item[data-tab="'+t+'"]').classList.toggle("is-active", t === tab);
+  });
+}
+
+document.getElementById("rail").addEventListener("click", function(e){
+  var btn = e.target.closest(".rail-item");
+  if(btn){ switchTab(btn.getAttribute("data-tab")); }
+});
+
+/* ---------------- téléchargement : vrai PDF (html2canvas + jsPDF), dans la page Claude et hors d'elle ---------------- */
+
+// Dans le cadre sécurisé d'une page Claude publiée, la page ne peut pas déclencher elle-même un
+// téléchargement : on passe par la capacité "downloads" du runtime. Hébergée ailleurs (ex. Cloudflare
+// Pages), ce cadre n'existe pas : `window.claude` est alors absent et on utilise le mécanisme standard
+// du navigateur (lien <a download> + URL.createObjectURL). Même fichier, deux environnements.
+function saveFileEverywhere(filename, blob, statusElId){
+  var statusEl = document.getElementById(statusElId);
+  function setStatus(msg){ if(statusEl) statusEl.textContent = msg; }
+  var inClaudeFrame = !!(window.claude && typeof window.claude.use === "function");
+
+  if(!inClaudeFrame){
+    try{
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
+      setStatus("Téléchargé.");
+    }catch(e){
+      setStatus("Le téléchargement a échoué dans ce navigateur.");
+    }
+    return;
+  }
+
+  setStatus("Préparation du fichier…");
+  window.claude.use("downloads").then(function(ns){
+    if(!ns){ setStatus("Le téléchargement n'est pas disponible dans cette vue."); return null; }
+    return ns.save({ filename: filename, data: blob });
+  }).then(function(res){
+    if(res){ setStatus("Téléchargé."); }
+  }).catch(function(err){
+    var code = err && err.code;
+    if(code === "declined"){ setStatus("Téléchargement annulé."); }
+    else { setStatus("Le téléchargement a échoué" + (code ? " (" + code + ")" : "") + "."); }
+  });
+}
+
+// Découpe un long aperçu (capturé en une seule image) sur autant de pages A4 que nécessaire,
+// au lieu de l'écraser sur une seule page.
+function addCanvasAsPages(doc, canvas, margin, startNewPage){
+  var pageW = doc.internal.pageSize.getWidth();
+  var pageH = doc.internal.pageSize.getHeight();
+  var availW = pageW - margin * 2;
+  var availH = pageH - margin * 2;
+  var scale = availW / canvas.width;
+  var pxPerPage = Math.max(1, Math.floor(availH / scale));
+  var totalPages = Math.max(1, Math.ceil(canvas.height / pxPerPage));
+
+  for(var p = 0; p < totalPages; p++){
+    if(startNewPage || p > 0){ doc.addPage(); }
+    var sy = p * pxPerPage;
+    var sh = Math.min(pxPerPage, canvas.height - sy);
+    var sliceCanvas = document.createElement("canvas");
+    sliceCanvas.width = canvas.width;
+    sliceCanvas.height = sh;
+    var sctx = sliceCanvas.getContext("2d");
+    sctx.fillStyle = "#ffffff";
+    sctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
+    sctx.drawImage(canvas, 0, sy, canvas.width, sh, 0, 0, canvas.width, sh);
+    var imgData = sliceCanvas.toDataURL("image/jpeg", 0.92);
+    doc.addImage(imgData, "JPEG", margin, margin, availW, sh * scale);
+  }
+}
+
+function pdfLibsReady(){
+  return typeof window.html2canvas === "function" && !!(window.jspdf && window.jspdf.jsPDF);
+}
+
+// Capture chaque aperçu (exactement ce qui est affiché à l'écran) en image, puis assemble
+// ces images en pages d'un même PDF — un ou plusieurs documents, dans l'ordre donné.
+// Un document dont l'onglet n'est pas affiché a un panneau en display:none (donc une taille
+// nulle) : on le rend brièvement hors-écran le temps de la capture, puis on le remet comme avant.
+function buildPdfFromSections(elements){
+  var jsPDFCtor = window.jspdf.jsPDF;
+  var doc = new jsPDFCtor({ unit: "pt", format: "a4" });
+  var margin = 28;
+  var chain = Promise.resolve();
+  elements.forEach(function(el, i){
+    chain = chain.then(function(){
+      var panel = el.closest(".panel");
+      var wasActive = panel && panel.classList.contains("active");
+      if(panel && !wasActive){ panel.classList.add("pdf-capturing"); }
+      return window.html2canvas(el, { backgroundColor: "#ffffff", scale: 1.5, useCORS: true }).then(
+        function(canvas){
+          if(panel && !wasActive){ panel.classList.remove("pdf-capturing"); }
+          addCanvasAsPages(doc, canvas, margin, i > 0);
+        },
+        function(err){
+          if(panel && !wasActive){ panel.classList.remove("pdf-capturing"); }
+          throw err;
+        }
+      );
+    });
+  });
+  return chain.then(function(){ return doc; });
+}
+
+function wireExportButton(btnId, statusId, getElements, filenameFn){
+  var btn = document.getElementById(btnId);
+  if(!btn) return;
+  btn.addEventListener("click", function(){
+    var statusEl = document.getElementById(statusId);
+    function setStatus(msg){ if(statusEl) statusEl.textContent = msg; }
+    if(!pdfLibsReady()){
+      setStatus("Les bibliothèques PDF n'ont pas fini de charger — réessaie dans un instant.");
+      return;
+    }
+    btn.disabled = true;
+    setStatus("Génération du PDF…");
+    buildPdfFromSections(getElements()).then(function(doc){
+      btn.disabled = false;
+      saveFileEverywhere(filenameFn(), doc.output("blob"), statusId);
+    }).catch(function(){
+      btn.disabled = false;
+      setStatus("La génération du PDF a échoué.");
+    });
+  });
+}
+
+wireExportButton("btn-print-cv", "cv-download-status",
+  function(){ return [document.getElementById("cv-preview")]; },
+  function(){ return fileSafe(state.profil.nom || "cv") + "-CV.pdf"; });
+
+wireExportButton("btn-print-lettre", "lettre-download-status",
+  function(){ return [document.getElementById("lettre-preview")]; },
+  function(){ return fileSafe(state.profil.nom || "lettre") + "-lettre.pdf"; });
+
+wireExportButton("btn-print-annexe", "annexe-download-status",
+  function(){ return [document.getElementById("annexe-preview")]; },
+  function(){ return "annexe-candidature.pdf"; });
+
+wireExportButton("btn-export-cv-lettre", "export-cv-lettre-status",
+  function(){ return [document.getElementById("cv-preview"), document.getElementById("lettre-preview")]; },
+  function(){ return fileSafe(state.profil.nom || "candidature") + "-CV-et-lettre.pdf"; });
+
+wireExportButton("btn-export-all", "export-all-status",
+  function(){ return [document.getElementById("cv-preview"), document.getElementById("lettre-preview"), document.getElementById("annexe-preview")]; },
+  function(){ return fileSafe(state.profil.nom || "dossier") + "-dossier-complet.pdf"; });
+
+document.getElementById("btn-reset").addEventListener("click", function(){
+  if(!confirm("Effacer toutes les informations saisies (bibliothèque comprise) et repartir d'un dossier vide ?")) return;
+  try{ localStorage.removeItem("atelier-candidature-v2"); }catch(e){}
+  location.reload();
+});
+
+/* ===================== MODULE ANNONCE ===================== */
+
+var anPoste = document.getElementById("an-poste");
+var anEntreprise = document.getElementById("an-entreprise");
+var anUrl = document.getElementById("an-url");
+var anTexte = document.getElementById("an-texte");
+
+anPoste.value = state.annonce.poste;
+anEntreprise.value = state.annonce.entreprise;
+anUrl.value = state.annonce.url || "";
+anTexte.value = state.annonce.texte;
+
+function renderKeywordChips(){
+  var wrap = document.getElementById("an-keywords");
+  if(!state.annonce.keywords.length){
+    wrap.innerHTML = '<span class="empty-note" style="color:var(--ink-400)">Colle le texte de l\'annonce pour faire apparaître les mots-clés.</span>';
+    return;
+  }
+  wrap.innerHTML = "";
+  state.annonce.keywords.forEach(function(k){
+    var chip = document.createElement("button");
+    chip.className = "chip suggest";
+    chip.type = "button";
+    chip.textContent = k.term + (k.count>1 ? " ("+k.count+")" : "");
+    chip.title = "Ajouter à ta bibliothèque de compétences et à la lettre";
+    chip.addEventListener("click", function(){
+      addSkill(k.term);
+      toggleLettreCompetence(k.term, true);
+    });
+    wrap.appendChild(chip);
+  });
+}
+
+function reanalyzeAnnonce(){
+  state.annonce.poste = anPoste.value;
+  state.annonce.entreprise = anEntreprise.value;
+  state.annonce.url = anUrl.value;
+  state.annonce.texte = anTexte.value;
+  state.annonce.keywords = extractKeywords(anTexte.value);
+  renderKeywordChips();
+  if (typeof window.onAnnonceChanged === "function") window.onAnnonceChanged();
+  renderLettreSkillSuggestions();
+  renderLettrePreview();
+  renderAnnexeSuggestions();
+  refreshStatusDots();
+  persist();
+}
+[anPoste, anEntreprise, anUrl].forEach(function(el){ el.addEventListener("input", reanalyzeAnnonce); });
+anTexte.addEventListener("input", debounce(reanalyzeAnnonce, 350));
+
+/* ===================== MODULE CV (bibliothèque + auto-composition) ===================== */
+
+function sortedCompetences(){
+  var kws = state.annonce.keywords || [];
+  return state.library.competences.map(function(c){
+    return { c: c, score: scoreAgainstKeywords(c.label, kws) };
+  }).sort(function(a, b){ return b.score - a.score; }).map(function(x){ return x.c; });
+}
+
+function refreshCVStatus(){ refreshStatusDots(); }
+
+function recomposerCV(){
+  var kws = state.annonce.keywords || [];
+  var lib = state.library;
+
+  var expScored = lib.experiences.map(function(e, idx){
+    return { id: e.id, idx: idx, score: scoreAgainstKeywords([e.poste, e.entreprise, e.details].join(" "), kws) };
+  });
+  expScored.sort(function(a, b){ return (b.score - a.score) || (a.idx - b.idx); });
+  state.cv.selectedExp = expScored.map(function(x){ return x.id; });
+
+  var formScored = lib.formations.map(function(f, idx){
+    return { id: f.id, idx: idx, score: scoreAgainstKeywords([f.diplome, f.etablissement].join(" "), kws) };
+  });
+  formScored.sort(function(a, b){ return (b.score - a.score) || (a.idx - b.idx); });
+  state.cv.selectedForm = formScored.map(function(x){ return x.id; });
+
+  state.cv.autoMode = true;
+}
+
+function moveInSelection(key, id, dir){
+  var libArr = key === "selectedExp" ? state.library.experiences : state.library.formations;
+  var full = orderedList(libArr, state.cv[key]).map(function(x){ return x.id; });
+  var idx = full.indexOf(id);
+  var newIdx = idx + dir;
+  if(idx === -1 || newIdx < 0 || newIdx >= full.length) return;
+  var tmp = full[idx]; full[idx] = full[newIdx]; full[newIdx] = tmp;
+  state.cv[key] = full;
+  state.cv.autoMode = false;
+  if(key === "selectedExp"){ renderExpList(); } else { renderFormList(); }
+  renderCVPreview(); persist();
+}
+
+window.onAnnonceChanged = function(){
+  if(state.cv.autoMode){ recomposerCV(); }
+  renderExpList(); renderFormList(); renderSkillChips(); renderSkillSuggestions();
+  renderCVPreview();
+  refreshCVStatus();
+  persist();
+};
+
+function cvFullText(){
+  var p = state.profil, lib = state.library, cv = state.cv;
+  var parts = [cv.resume, p.langues];
+  p.atouts.forEach(function(a){ parts.push(a); });
+  lib.competences.forEach(function(c){ parts.push(c.label); });
+  lib.experiences.forEach(function(e){ parts.push(e.poste, e.entreprise, e.details); });
+  lib.formations.forEach(function(f){ parts.push(f.diplome, f.etablissement); });
+  return norm(parts.join(" \n "));
+}
+
+function computeATS(){
+  var kws = state.annonce.keywords;
+  if(!kws || !kws.length) return { pct: null, missing: [] };
+  var full = cvFullText();
+  var missing = [], matched = 0;
+  kws.forEach(function(k){
+    if(countTerm(full, norm(k.term)) > 0){ matched++; } else { missing.push(k.term); }
+  });
+  return { pct: Math.round((matched / kws.length) * 100), missing: missing };
+}
+
+function atsTier(pct){
+  if(pct === null) return null;
+  if(pct >= 70) return "success";
+  if(pct >= 40) return "caution";
+  return "danger";
+}
+
+function renderATS(){
+  var ats = computeATS();
+  var scoreEl = document.getElementById("ats-score");
+  var tierEl = document.getElementById("ats-tier");
+  var missingEl = document.getElementById("ats-missing");
+  if(ats.pct === null){
+    scoreEl.textContent = "—";
+    tierEl.innerHTML = "";
+    missingEl.textContent = "Renseigne l'annonce (étape 01) pour calculer un score.";
+  } else {
+    scoreEl.textContent = ats.pct + "%";
+    var tier = atsTier(ats.pct);
+    var labelMap = { success: "bonne couverture", caution: "couverture partielle", danger: "couverture faible" };
+    tierEl.innerHTML = '<span class="tier-pill ' + tier + '">' + labelMap[tier] + '</span>';
+    missingEl.textContent = ats.missing.length
+      ? "Mots-clés absents de ta bibliothèque : " + ats.missing.slice(0, 8).join(", ") + (ats.missing.length > 8 ? "…" : "")
+      : "Tous les mots-clés détectés apparaissent dans ta bibliothèque.";
+  }
+}
+
+function renderExpList(){
+  var wrap = document.getElementById("exp-list");
+  wrap.innerHTML = "";
+  var items = orderedList(state.library.experiences, state.cv.selectedExp);
+  if(!items.length){
+    wrap.innerHTML = '<p class="empty-note">Ajoute une première expérience pour commencer ta bibliothèque.</p>';
+    return;
+  }
+  items.forEach(function(exp, i){
+    var score = scoreAgainstKeywords([exp.poste, exp.entreprise, exp.details].join(" "), state.annonce.keywords || []);
+    var block = document.createElement("div");
+    block.className = "exp-block";
+    block.innerHTML =
+      '<div class="exp-block-head"><span class="eyebrow">Expérience ' + (i + 1) + (score > 0 ? ' · pertinence ' + score : '') + '</span>' +
+      '<div class="toolbar-row">' +
+        '<button class="icon-btn" data-up="' + exp.id + '" title="Monter"' + (i === 0 ? " disabled" : "") + '>▲</button>' +
+        '<button class="icon-btn" data-down="' + exp.id + '" title="Descendre"' + (i === items.length - 1 ? " disabled" : "") + '>▼</button>' +
+        '<button class="icon-btn" data-remove-exp="' + exp.id + '" title="Retirer">✕</button>' +
+      '</div></div>' +
+      '<div class="row2">' +
+        '<div class="field"><label>Intitulé du poste</label><input type="text" data-f="poste" data-id="' + exp.id + '" value="' + esc(exp.poste) + '"></div>' +
+        '<div class="field"><label>Entreprise</label><input type="text" data-f="entreprise" data-id="' + exp.id + '" value="' + esc(exp.entreprise) + '"></div>' +
+      '</div>' +
+      '<div class="field"><label>Dates</label><input type="text" data-f="dates" data-id="' + exp.id + '" value="' + esc(exp.dates) + '" placeholder="ex. 2022 – 2024"></div>' +
+      '<div class="field"><label>Réalisations (une par ligne)</label><textarea data-f="details" data-id="' + exp.id + '" placeholder="Ce que tu as fait, avec un résultat si possible.">' + esc(exp.details) + '</textarea></div>';
+    wrap.appendChild(block);
+  });
+  wrap.querySelectorAll("input,textarea").forEach(function(el){
+    el.addEventListener("input", function(){
+      var item = state.library.experiences.find(function(x){ return x.id === el.getAttribute("data-id"); });
+      if(item){ item[el.getAttribute("data-f")] = el.value; }
+      renderCVPreview(); refreshCVStatus(); persist();
+    });
+  });
+  wrap.querySelectorAll("[data-up]").forEach(function(btn){
+    btn.addEventListener("click", function(){ moveInSelection("selectedExp", btn.getAttribute("data-up"), -1); });
+  });
+  wrap.querySelectorAll("[data-down]").forEach(function(btn){
+    btn.addEventListener("click", function(){ moveInSelection("selectedExp", btn.getAttribute("data-down"), 1); });
+  });
+  wrap.querySelectorAll("[data-remove-exp]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var id = btn.getAttribute("data-remove-exp");
+      state.library.experiences = state.library.experiences.filter(function(x){ return x.id !== id; });
+      state.cv.selectedExp = state.cv.selectedExp.filter(function(x){ return x !== id; });
+      renderExpList(); renderCVPreview(); refreshCVStatus(); persist();
+    });
+  });
+}
+
+function renderFormList(){
+  var wrap = document.getElementById("formation-list");
+  wrap.innerHTML = "";
+  var items = orderedList(state.library.formations, state.cv.selectedForm);
+  if(!items.length){
+    wrap.innerHTML = '<p class="empty-note">Ajoute une formation.</p>';
+    return;
+  }
+  items.forEach(function(f, i){
+    var block = document.createElement("div");
+    block.className = "exp-block";
+    block.innerHTML =
+      '<div class="exp-block-head"><span class="eyebrow">Formation ' + (i + 1) + '</span>' +
+      '<div class="toolbar-row">' +
+        '<button class="icon-btn" data-up="' + f.id + '" title="Monter"' + (i === 0 ? " disabled" : "") + '>▲</button>' +
+        '<button class="icon-btn" data-down="' + f.id + '" title="Descendre"' + (i === items.length - 1 ? " disabled" : "") + '>▼</button>' +
+        '<button class="icon-btn" data-remove-form="' + f.id + '" title="Retirer">✕</button>' +
+      '</div></div>' +
+      '<div class="row2">' +
+        '<div class="field"><label>Diplôme</label><input type="text" data-f="diplome" data-id="' + f.id + '" value="' + esc(f.diplome) + '"></div>' +
+        '<div class="field"><label>Établissement</label><input type="text" data-f="etablissement" data-id="' + f.id + '" value="' + esc(f.etablissement) + '"></div>' +
+      '</div>' +
+      '<div class="field"><label>Dates</label><input type="text" data-f="dates" data-id="' + f.id + '" value="' + esc(f.dates) + '" placeholder="ex. 2020 – 2022"></div>';
+    wrap.appendChild(block);
+  });
+  wrap.querySelectorAll("input").forEach(function(el){
+    el.addEventListener("input", function(){
+      var item = state.library.formations.find(function(x){ return x.id === el.getAttribute("data-id"); });
+      if(item){ item[el.getAttribute("data-f")] = el.value; }
+      renderCVPreview(); persist();
+    });
+  });
+  wrap.querySelectorAll("[data-up]").forEach(function(btn){
+    btn.addEventListener("click", function(){ moveInSelection("selectedForm", btn.getAttribute("data-up"), -1); });
+  });
+  wrap.querySelectorAll("[data-down]").forEach(function(btn){
+    btn.addEventListener("click", function(){ moveInSelection("selectedForm", btn.getAttribute("data-down"), 1); });
+  });
+  wrap.querySelectorAll("[data-remove-form]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var id = btn.getAttribute("data-remove-form");
+      state.library.formations = state.library.formations.filter(function(x){ return x.id !== id; });
+      state.cv.selectedForm = state.cv.selectedForm.filter(function(x){ return x !== id; });
+      renderFormList(); renderCVPreview(); persist();
+    });
+  });
+}
+
+function addSkillRaw(label){
+  var t = (label || "").trim();
+  if(!t) return null;
+  if(state.library.competences.some(function(c){ return norm(c.label) === norm(t); })) return null;
+  var item = { id: uid(), label: t };
+  state.library.competences.push(item);
+  return item;
+}
+
+function addSkill(label){
+  var item = addSkillRaw(label);
+  if(!item) return;
+  renderSkillChips(); renderSkillSuggestions(); renderCVPreview(); refreshCVStatus(); persist();
+}
+
+/* ---------------- import libre d'un ancien CV (texte brut, sans structure imposée) ---------------- */
+
+var MONTHS_FR_RE = "janv(?:ier)?|f[ée]vr(?:ier)?|mars|avr(?:il)?|mai|juin|juil(?:let)?|ao[uû]t|sept(?:embre)?|oct(?:obre)?|nov(?:embre)?|d[ée]c(?:embre)?";
+var DATE_TOKEN_RE = "(?:(?:\\d{1,2}[\\/\\.])?\\d{4}|(?:" + MONTHS_FR_RE + ")\\.?\\s*\\d{4})";
+var DATE_END_TOKEN_RE = "(?:" + DATE_TOKEN_RE + "|aujourd['’]?hui|pr[ée]sent|en cours|actuel(?:le)?|now|present|current)";
+var DATE_RANGE_RE = new RegExp("(" + DATE_TOKEN_RE + ")\\s*(?:-|–|—|à|au|->|to)\\s*(" + DATE_END_TOKEN_RE + ")", "i");
+var DATE_SINCE_RE = new RegExp("depuis\\s+(" + DATE_TOKEN_RE + ")", "i");
+var DATE_SINGLE_RE = new RegExp("\\b(" + DATE_TOKEN_RE + ")\\b", "i");
+
+var IMPORT_FORM_KEYWORDS = ["bac","bts","dut","licence","master","bachelor","mastere","ingenieur","doctorat",
+  "formation diplomante","ecole","universite","diplome","certification","certificat","lycee","college","prepa","iut","cap "];
+
+function yearOfToken(tok){ var m = (tok||"").match(/\d{4}/); return m ? parseInt(m[0],10) : null; }
+function isPlausibleYear(y){ var now = new Date().getFullYear(); return y && y >= 1960 && y <= now + 1; }
+
+function detectDateInLine(line){
+  var m = line.match(DATE_RANGE_RE);
+  if(m) return { full: m[0], index: m.index };
+  m = line.match(DATE_SINCE_RE);
+  if(m) return { full: m[0], index: m.index };
+  m = line.match(DATE_SINGLE_RE);
+  if(m && isPlausibleYear(yearOfToken(m[1])) && line.length <= 90){ return { full: m[0], index: m.index }; }
+  return null;
+}
+
+function stripImportBullet(line){
+  return line.replace(/^[\s•\-\*•‣◦⁃∙▪●‣→>]+/, "").trim();
+}
+
+function splitTitleLine(line){
+  var seps = [" — ", " – ", " - ", " chez ", " @ ", " | ", ", "];
+  for(var i=0;i<seps.length;i++){
+    var idx = line.indexOf(seps[i]);
+    if(idx > 0){ return { a: line.slice(0, idx).trim(), b: line.slice(idx + seps[i].length).trim() }; }
+  }
+  return { a: line.trim(), b: "" };
+}
+
+function isLikelySkillLine(line){
+  var t = line.trim();
+  if(t.length < 3 || t.length > 160) return false;
+  if(/\d{4}/.test(t)) return false;
+  var words = t.split(/[,\/•|·]/).map(function(w){ return w.trim(); }).filter(Boolean);
+  if(words.length < 3) return false;
+  var tooLong = words.some(function(w){ return w.split(/\s+/).length > 3; });
+  return !tooLong;
+}
+
+function isFormationBlock(titleLine, bodyText){
+  var t = norm(titleLine + " " + bodyText);
+  return IMPORT_FORM_KEYWORDS.some(function(k){ return t.indexOf(k) !== -1; });
+}
+
+var IMPORT_EMAIL_RE = /[\w.+-]+@[\w-]+\.[a-z]{2,}/i;
+var IMPORT_PHONE_RE = /(?:\+?\d[\d\s.\-]{7,}\d)/;
+
+function cleanTitleLine(s){
+  return s.trim().replace(/[()\[\]–—\-:,]+$/, "").replace(/^[()\[\]–—\-:,]+/, "").trim();
+}
+
+function parseImportedCv(rawText){
+  var trimmed = (rawText || "").split(/\r\n|\r|\n/).map(function(l){ return l.trim(); });
+  var consumed = {};
+  var contact = { nom: "", email: "", tel: "" };
+
+  var nonBlankIdxs = [];
+  trimmed.forEach(function(l, i){ if(l) nonBlankIdxs.push(i); });
+
+  // Première ligne non vide : si elle ressemble à un simple nom (pas de date, pas de chiffre,
+  // peu de mots), on la traite comme l'en-tête du CV plutôt que comme une expérience.
+  if(nonBlankIdxs.length){
+    var firstIdx = nonBlankIdxs[0];
+    var firstLine = trimmed[firstIdx];
+    if(firstLine.length <= 40 && firstLine.split(/\s+/).length <= 5 && !/\d/.test(firstLine) &&
+       !IMPORT_EMAIL_RE.test(firstLine) && !detectDateInLine(firstLine)){
+      contact.nom = firstLine;
+      consumed[firstIdx] = true;
+    }
+  }
+
+  // Lignes de coordonnées en tête de document (email / téléphone) : on les extrait plutôt que
+  // de les traiter comme une expérience professionnelle sans titre clair.
+  nonBlankIdxs.slice(0, 8).forEach(function(i){
+    if(consumed[i]) return;
+    var l = trimmed[i];
+    if(detectDateInLine(l)) return;
+    var emailMatch = l.match(IMPORT_EMAIL_RE);
+    var phoneMatch = l.match(IMPORT_PHONE_RE);
+    if(emailMatch || phoneMatch){
+      if(emailMatch && !contact.email) contact.email = emailMatch[0];
+      if(phoneMatch && !contact.tel) contact.tel = phoneMatch[0].replace(/\s+/g, " ").trim();
+      consumed[i] = true;
+    }
+  });
+
+  var blocks = [];
+  var current = null;
+  var skillLines = [];
+
+  function pushCurrent(){
+    if(current && (current.titleLine.trim() || current.body.length)){ blocks.push(current); }
+    current = null;
+  }
+
+  trimmed.forEach(function(line, idx){
+    if(consumed[idx] || !line) return;
+    if(isLikelySkillLine(line)){ skillLines.push(line); return; }
+    var dateHit = detectDateInLine(line);
+    if(dateHit){
+      pushCurrent();
+      var titleLine = cleanTitleLine(line.slice(0, dateHit.index) + " " + line.slice(dateHit.index + dateHit.full.length));
+      current = { dates: dateHit.full.replace(/\s+/g, " ").trim(), titleLine: titleLine, body: [] };
+    } else if(current){
+      current.body.push(stripImportBullet(line));
+    } else {
+      current = { dates: "", titleLine: line, body: [] };
+    }
+  });
+  pushCurrent();
+
+  var experiences = [], formations = [];
+  blocks.slice(0, 30).forEach(function(b){
+    var bodyText = b.body.join("\n");
+    var parts = splitTitleLine(b.titleLine);
+    if(isFormationBlock(b.titleLine, bodyText)){
+      var etab = parts.b;
+      if(bodyText){ etab = etab ? (etab + " — " + bodyText.slice(0,140)) : bodyText.slice(0,140); }
+      formations.push({ id: uid(), diplome: parts.a, etablissement: etab, dates: b.dates });
+    } else {
+      experiences.push({ id: uid(), poste: parts.a, entreprise: parts.b, dates: b.dates, details: bodyText });
+    }
+  });
+
+  var dictSkills = extractKeywords(rawText).filter(function(k){ return k.kind === "skill"; }).map(function(k){ return k.term; });
+  var extraTokens = [];
+  skillLines.forEach(function(l){
+    l.split(/[,\/•|·]/).forEach(function(tok){
+      var t = tok.trim().replace(/^[:\-–—]+|[:\-–—]+$/g, "");
+      if(t && t.length >= 2 && t.length <= 40 && t.split(/\s+/).length <= 4){ extraTokens.push(t); }
+    });
+  });
+
+  return { experiences: experiences, formations: formations, skills: dictSkills.concat(extraTokens), contact: contact };
+}
+
+function doImportCv(){
+  var ta = document.getElementById("cv-import-text");
+  var statusEl = document.getElementById("cv-import-status");
+  var text = ta.value;
+  if(!text.trim()){ statusEl.textContent = "Colle d'abord le texte d'un CV à analyser."; return; }
+
+  var result = parseImportedCv(text);
+
+  function existsExp(poste, entreprise){
+    var key = norm(poste) + "|" + norm(entreprise);
+    return state.library.experiences.some(function(e){ return (norm(e.poste) + "|" + norm(e.entreprise)) === key; });
+  }
+  function existsForm(diplome, etablissement){
+    var key = norm(diplome) + "|" + norm(etablissement);
+    return state.library.formations.some(function(f){ return (norm(f.diplome) + "|" + norm(f.etablissement)) === key; });
+  }
+
+  var addedExp = 0, addedForm = 0, addedSkills = 0;
+  result.experiences.forEach(function(e){
+    if(!e.poste && !e.entreprise && !e.details) return;
+    if(existsExp(e.poste, e.entreprise)) return;
+    state.library.experiences.push(e);
+    state.cv.selectedExp.push(e.id);
+    addedExp++;
+  });
+  result.formations.forEach(function(f){
+    if(!f.diplome && !f.etablissement) return;
+    if(existsForm(f.diplome, f.etablissement)) return;
+    state.library.formations.push(f);
+    state.cv.selectedForm.push(f.id);
+    addedForm++;
+  });
+  result.skills.forEach(function(s){ if(addSkillRaw(s)) addedSkills++; });
+
+  var filledProfil = [];
+  var c = result.contact || {};
+  if(c.nom && !state.profil.nom.trim()){
+    state.profil.nom = c.nom;
+    document.getElementById("cv-nom").value = c.nom;
+    filledProfil.push("nom");
+  }
+  if(c.email && !state.profil.email.trim()){
+    state.profil.email = c.email;
+    document.getElementById("cv-email").value = c.email;
+    filledProfil.push("email");
+  }
+  if(c.tel && !state.profil.tel.trim()){
+    state.profil.tel = c.tel;
+    document.getElementById("cv-tel").value = c.tel;
+    filledProfil.push("téléphone");
+  }
+
+  if(addedExp || addedForm || addedSkills || filledProfil.length){
+    ta.value = "";
+    statusEl.textContent = "Importé : " + addedExp + " expérience(s), " + addedForm + " formation(s), " + addedSkills + " compétence(s)" +
+      (filledProfil.length ? ", profil pré-rempli (" + filledProfil.join(", ") + ")" : "") + " — vérifie et ajuste ci-dessous.";
+  } else {
+    statusEl.textContent = "Rien de nouveau détecté (peut-être déjà présent, ou pas de date reconnaissable comme « 2020 - 2022 »). Ajuste le texte ou complète à la main ci-dessous.";
+  }
+
+  if(state.cv.autoMode && (state.annonce.keywords || []).length){ recomposerCV(); }
+  renderExpList(); renderFormList(); renderSkillChips(); renderSkillSuggestions();
+  renderCVPreview(); refreshCVStatus(); persist();
+}
+
+function renderSkillChips(){
+  var wrap = document.getElementById("cv-skill-chips");
+  wrap.innerHTML = "";
+  state.library.competences.forEach(function(c){
+    var chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = esc(c.label) + ' <button data-id="' + c.id + '" title="Retirer">✕</button>';
+    wrap.appendChild(chip);
+  });
+  wrap.querySelectorAll("button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var id = btn.getAttribute("data-id");
+      state.library.competences = state.library.competences.filter(function(c){ return c.id !== id; });
+      renderSkillChips(); renderSkillSuggestions(); renderCVPreview(); refreshCVStatus(); persist();
+    });
+  });
+}
+
+function renderSkillSuggestions(){
+  var wrap = document.getElementById("cv-skill-suggest");
+  var existing = {}; state.library.competences.forEach(function(c){ existing[norm(c.label)] = true; });
+  var suggestions = (state.annonce.keywords || []).filter(function(k){ return !existing[norm(k.term)]; });
+  wrap.innerHTML = "";
+  if(!suggestions.length) return;
+  var label = document.createElement("span");
+  label.className = "hint"; label.style.width = "100%"; label.textContent = "Suggestions issues de l'annonce :";
+  wrap.appendChild(label);
+  suggestions.forEach(function(k){
+    var chip = document.createElement("button");
+    chip.type = "button"; chip.className = "chip suggest"; chip.textContent = "+ " + k.term;
+    chip.addEventListener("click", function(){ addSkill(k.term); });
+    wrap.appendChild(chip);
+  });
+}
+
+function addAtout(label){
+  var t = (label || "").trim();
+  if(!t) return;
+  if(state.profil.atouts.some(function(a){ return norm(a) === norm(t); })) return;
+  state.profil.atouts.push(t);
+  renderAtoutsChips(); renderCVPreview(); persist();
+}
+
+function renderAtoutsChips(){
+  var wrap = document.getElementById("prof-atouts-chips");
+  wrap.innerHTML = "";
+  state.profil.atouts.forEach(function(a, i){
+    var chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = esc(a) + ' <button data-i="' + i + '" title="Retirer">✕</button>';
+    wrap.appendChild(chip);
+  });
+  wrap.querySelectorAll("button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      state.profil.atouts.splice(+btn.getAttribute("data-i"), 1);
+      renderAtoutsChips(); renderCVPreview(); persist();
+    });
+  });
+}
+
+function renderPhotoThumb(){
+  var wrap = document.getElementById("prof-photo-thumb-wrap");
+  wrap.innerHTML = "";
+  if(!state.profil.photo) return;
+  var row = document.createElement("div");
+  row.style.display = "flex"; row.style.alignItems = "center"; row.style.gap = "10px";
+  var img = document.createElement("img");
+  img.src = state.profil.photo;
+  img.className = "photo-thumb";
+  var btn = document.createElement("button");
+  btn.className = "btn btn-ghost btn-sm";
+  btn.type = "button";
+  btn.textContent = "Retirer";
+  btn.addEventListener("click", function(){
+    state.profil.photo = null;
+    var input = document.getElementById("prof-photo-input");
+    if(input) input.value = "";
+    renderPhotoThumb(); renderCVPreview(); persist();
+  });
+  row.appendChild(img); row.appendChild(btn);
+  wrap.appendChild(row);
+}
+
+var CV_LABELS = {
+  fr: { profil: "Profil", experience: "Expérience", formation: "Formation", competences: "Compétences", langues: "Langues", atouts: "Points forts", note: null },
+  en: { profil: "Profile", experience: "Experience", formation: "Education", competences: "Skills", langues: "Languages", atouts: "Strengths", note: "Content not auto-translated — ask for a translation in the conversation." }
+};
+
+function renderCVPreview(){
+  var p = state.profil, cv = state.cv;
+  var L = CV_LABELS[cv.lang] || CV_LABELS.fr;
+  var wrap = document.getElementById("cv-preview");
+
+  var hasAnyExp = state.library.experiences.some(function(e){ return e.poste || e.entreprise; });
+  if(!p.nom.trim() && !hasAnyExp){
+    wrap.innerHTML = '<p class="empty-note">Remplis ton profil et ta bibliothèque à gauche : le CV se construit ici.</p>';
+    renderATS();
+    return;
+  }
+
+  var html = '<div style="display:flex;justify-content:space-between;gap:16px;">';
+  html += '<div style="flex:1;min-width:0;">';
+  html += '<p class="cv-name">' + (esc(p.nom) || "Ton nom") + '</p>';
+  if(p.titre) html += '<p class="cv-title">' + esc(p.titre) + '</p>';
+  var contacts = [p.email, p.tel, p.ville, p.lien].filter(Boolean).map(esc);
+  if(contacts.length) html += '<p class="cv-contact">' + contacts.map(function(x){ return "<span>" + x + "</span>"; }).join("") + '</p>';
+  if(p.suisseActif){
+    var sw = [p.suisse.dateNaissance && ("Né(e) le " + p.suisse.dateNaissance), p.suisse.nationalite, p.suisse.permis, p.suisse.etatCivil].filter(Boolean).map(esc);
+    if(sw.length) html += '<p class="cv-contact">' + sw.map(function(x){ return "<span>" + x + "</span>"; }).join("") + '</p>';
+  }
+  html += '</div>';
+  if(p.photo){ html += '<img src="' + p.photo + '" alt="" style="width:72px;height:90px;object-fit:cover;border-radius:4px;border:1px solid #D6D0C0;flex-shrink:0;">'; }
+  html += '</div>';
+
+  if(cv.resume) html += '<h3 class="cv-h">' + L.profil + '</h3><p>' + esc(cv.resume) + '</p>';
+  if(p.atouts.length) html += '<h3 class="cv-h">' + L.atouts + '</h3><div class="cv-skills">' + p.atouts.map(function(a){ return '<span class="chip cv-skill" style="background:var(--accent-soft);color:var(--accent-ink);">' + esc(a) + '</span>'; }).join("") + '</div>';
+
+  var exps = orderedList(state.library.experiences, cv.selectedExp).filter(function(e){ return e.poste || e.entreprise; });
+  if(exps.length){
+    html += '<h3 class="cv-h">' + L.experience + '</h3>';
+    exps.forEach(function(e){
+      html += '<div class="cv-item"><div class="cv-item-head"><span>' + esc(e.poste) + '</span><span>' + esc(e.dates) + '</span></div>';
+      if(e.entreprise) html += '<div class="cv-item-sub">' + esc(e.entreprise) + '</div>';
+      if(e.details){
+        var lines = e.details.split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
+        html += '<ul>' + lines.map(function(l){ return "<li>" + esc(l) + "</li>"; }).join("") + '</ul>';
+      }
+      html += '</div>';
+    });
+  }
+
+  var forms = orderedList(state.library.formations, cv.selectedForm).filter(function(f){ return f.diplome || f.etablissement; });
+  if(forms.length){
+    html += '<h3 class="cv-h">' + L.formation + '</h3>';
+    forms.forEach(function(f){
+      html += '<div class="cv-item"><div class="cv-item-head"><span>' + esc(f.diplome) + '</span><span>' + esc(f.dates) + '</span></div>';
+      if(f.etablissement) html += '<div class="cv-item-sub">' + esc(f.etablissement) + '</div></div>';
+    });
+  }
+
+  var skills = sortedCompetences();
+  if(skills.length){
+    html += '<h3 class="cv-h">' + L.competences + '</h3><div class="cv-skills">' +
+      skills.map(function(c){ return '<span class="chip cv-skill" style="background:var(--brass-soft);color:var(--brass);">' + esc(c.label) + '</span>'; }).join("") +
+      '</div>';
+  }
+  if(p.langues) html += '<h3 class="cv-h">' + L.langues + '</h3><p>' + esc(p.langues) + '</p>';
+
+  if(L.note) html += '<p class="footnote" style="margin-top:18px;font-style:italic;">' + esc(L.note) + '</p>';
+
+  wrap.innerHTML = html;
+  renderATS();
+}
+
+function initCVModule(){
+  ["nom", "titre", "email", "tel", "ville", "lien", "langues"].forEach(function(f){
+    var el = document.getElementById("cv-" + f);
+    el.value = state.profil[f] || "";
+    el.addEventListener("input", function(){ state.profil[f] = el.value; renderCVPreview(); refreshCVStatus(); persist(); });
+  });
+
+  var resumeEl = document.getElementById("cv-resume");
+  resumeEl.value = state.cv.resume || "";
+  resumeEl.addEventListener("input", function(){ state.cv.resume = resumeEl.value; renderCVPreview(); persist(); });
+
+  [["suisse-naissance", "dateNaissance"], ["suisse-nationalite", "nationalite"], ["suisse-permis", "permis"], ["suisse-etat", "etatCivil"]].forEach(function(pair){
+    var el = document.getElementById(pair[0]);
+    el.value = state.profil.suisse[pair[1]] || "";
+    el.addEventListener("input", function(){ state.profil.suisse[pair[1]] = el.value; renderCVPreview(); persist(); });
+  });
+
+  document.getElementById("format-segmented").addEventListener("click", function(e){
+    var btn = e.target.closest("button"); if(!btn) return;
+    state.cv.format = btn.getAttribute("data-format");
+    this.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b === btn); });
+    state.profil.suisseActif = state.cv.format === "suisse";
+    document.getElementById("suisse-fields").style.display = state.profil.suisseActif ? "block" : "none";
+    renderCVPreview(); persist();
+  });
+  document.getElementById("lang-segmented").addEventListener("click", function(e){
+    var btn = e.target.closest("button"); if(!btn) return;
+    state.cv.lang = btn.getAttribute("data-lang");
+    this.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b === btn); });
+    renderCVPreview(); persist();
+  });
+  document.querySelectorAll('#format-segmented button').forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-format") === state.cv.format); });
+  document.getElementById("suisse-fields").style.display = (state.cv.format === "suisse") ? "block" : "none";
+  document.querySelectorAll('#lang-segmented button').forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-lang") === state.cv.lang); });
+
+  document.getElementById("btn-add-atout").addEventListener("click", function(){
+    var input = document.getElementById("prof-atouts-input");
+    addAtout(input.value); input.value = "";
+  });
+  document.getElementById("prof-atouts-input").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ e.preventDefault(); addAtout(this.value); this.value = ""; }
+  });
+
+  document.getElementById("prof-photo-input").addEventListener("change", function(e){
+    var file = e.target.files && e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var img = new Image();
+      img.onload = function(){
+        var targetW = 180;
+        var scale = targetW / img.width;
+        var canvas = document.createElement("canvas");
+        canvas.width = targetW;
+        canvas.height = Math.round(img.height * scale);
+        var ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        state.profil.photo = canvas.toDataURL("image/jpeg", 0.8);
+        renderPhotoThumb(); renderCVPreview(); persist();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById("btn-import-cv").addEventListener("click", doImportCv);
+
+  document.getElementById("btn-add-exp").addEventListener("click", function(){
+    var item = { id: uid(), poste: "", entreprise: "", dates: "", details: "" };
+    state.library.experiences.push(item);
+    state.cv.selectedExp.push(item.id);
+    renderExpList(); renderCVPreview(); refreshCVStatus(); persist();
+  });
+  document.getElementById("btn-recompose").addEventListener("click", function(){
+    recomposerCV();
+    renderExpList(); renderFormList(); renderCVPreview(); persist();
+  });
+  document.getElementById("btn-add-formation").addEventListener("click", function(){
+    var item = { id: uid(), diplome: "", etablissement: "", dates: "" };
+    state.library.formations.push(item);
+    state.cv.selectedForm.push(item.id);
+    renderFormList(); renderCVPreview(); persist();
+  });
+  document.getElementById("btn-add-skill").addEventListener("click", function(){
+    var input = document.getElementById("cv-skill-input");
+    addSkill(input.value); input.value = "";
+  });
+  document.getElementById("cv-skill-input").addEventListener("keydown", function(e){
+    if(e.key === "Enter"){ e.preventDefault(); addSkill(this.value); this.value = ""; }
+  });
+
+  renderPhotoThumb();
+  renderAtoutsChips();
+  renderExpList();
+  renderFormList();
+  renderSkillChips();
+  renderSkillSuggestions();
+  renderCVPreview();
+}
+
+/* ===================== MODULE LETTRE ===================== */
+
+var LETTRE_STOP = {}; ("dans pour avec sans sous entre chez selon depuis cette votre notre leurs vous nous elle elles ils "+
+  "ainsi alors donc mais comme plus moins tout tous toute toutes etre avoir fait faire bien tres dont cette poste "+
+  "annonce entreprise societe equipe mission").split(/\s+/).forEach(function(w){ LETTRE_STOP[w]=true; });
+
+var QUESTION_BANK = [
+  "Quelle réalisation chiffrée es-tu le/la plus fier·ère ?",
+  "Quel problème as-tu résolu que personne d'autre ne voulait prendre ?",
+  "Qu'est-ce que ce poste a de spécifique, au-delà du salaire ?",
+  "Quelle compétence as-tu développée qui colle exactement à cette annonce ?",
+  "Raconte une fois où tu as pris une initiative sans qu'on te le demande.",
+  "Qu'est-ce que tu as appris d'un échec qui te sert encore aujourd'hui ?",
+  "Pourquoi cette entreprise précisément, et pas une autre du secteur ?",
+  "Quel retour — client, manager, collègue — t'a particulièrement marqué·e ?",
+  "Qu'est-ce que tu ferais différemment dans ton poste actuel si tu avais plus de temps ?",
+  "Quel aspect de ce poste te pousserait à rester engagé·e sur le long terme ?"
+];
+
+var OUTCOME_LABELS = { aucune:"Aucune réponse", relance:"Relance obtenue", entretien:"Entretien obtenu", offre:"Poste obtenu" };
+var OUTCOME_TIER = { aucune:"danger", relance:"caution", entretien:"success", offre:"success" };
+
+document.getElementById("lettre-lang-segmented").addEventListener("click", function(e){
+  var btn = e.target.closest("button"); if(!btn) return;
+  state.lettre.lang = btn.getAttribute("data-lang");
+  this.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b===btn); });
+  renderLettrePreview(); persist();
+});
+
+document.getElementById("tone-segmented").addEventListener("click", function(e){
+  var btn = e.target.closest("button"); if(!btn) return;
+  state.lettre.ton = btn.getAttribute("data-tone");
+  this.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b===btn); });
+  renderLettrePreview(); persist();
+});
+
+document.getElementById("l-destinataire").addEventListener("input", function(){
+  state.lettre.destinataire = this.value; renderLettrePreview(); persist();
+});
+document.getElementById("l-disponibilite").addEventListener("input", function(){
+  state.lettre.disponibilite = this.value; renderLettrePreview(); persist();
+});
+
+function renderQuestionBank(){
+  var wrap = document.getElementById("question-bank");
+  wrap.innerHTML = "";
+  QUESTION_BANK.forEach(function(q){
+    var chip = document.createElement("button");
+    chip.type = "button"; chip.className = "chip suggest"; chip.textContent = q;
+    chip.addEventListener("click", function(){ addMotivFromQuestion(q); });
+    wrap.appendChild(chip);
+  });
+}
+
+function addMotivFromQuestion(question){
+  if(!state.lettre.motivPrompts) state.lettre.motivPrompts = state.lettre.motivations.map(function(){ return ""; });
+  if(state.lettre.motivations.length >= 4) return;
+  state.lettre.motivations.push("");
+  state.lettre.motivPrompts.push(question);
+  renderMotivList(); refreshStatusDots(); persist();
+}
+
+function renderMotivList(){
+  if(!state.lettre.motivPrompts) state.lettre.motivPrompts = state.lettre.motivations.map(function(){ return ""; });
+  var wrap = document.getElementById("motiv-list");
+  wrap.innerHTML = "";
+  state.lettre.motivations.forEach(function(m, i){
+    var placeholder = state.lettre.motivPrompts[i] || "ex. J'ai mené un projet similaire pendant deux ans, avec de bons résultats.";
+    var row = document.createElement("div");
+    row.className = "bullet-row";
+    row.innerHTML =
+      '<textarea data-i="'+i+'" placeholder="'+esc(placeholder)+'">'+esc(m)+'</textarea>'+
+      (state.lettre.motivations.length>1 ? '<button class="icon-btn" data-remove="'+i+'" title="Retirer">✕</button>' : '');
+    wrap.appendChild(row);
+  });
+  wrap.querySelectorAll("textarea").forEach(function(el){
+    el.addEventListener("input", function(){
+      state.lettre.motivations[+el.getAttribute("data-i")] = el.value;
+      renderLettrePreview(); refreshStatusDots(); persist();
+    });
+  });
+  wrap.querySelectorAll("[data-remove]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var i = +btn.getAttribute("data-remove");
+      state.lettre.motivations.splice(i, 1);
+      state.lettre.motivPrompts.splice(i, 1);
+      renderMotivList(); renderLettrePreview(); refreshStatusDots(); persist();
+    });
+  });
+}
+document.getElementById("btn-add-motiv").addEventListener("click", function(){
+  if(state.lettre.motivations.length >= 4) return;
+  state.lettre.motivations.push("");
+  if(!state.lettre.motivPrompts) state.lettre.motivPrompts = [];
+  state.lettre.motivPrompts.push("");
+  renderMotivList(); persist();
+});
+
+function toggleLettreCompetence(term, forceOn){
+  var idx = state.lettre.competencesChoisies.findIndex(function(s){ return norm(s) === norm(term); });
+  if(idx === -1){ state.lettre.competencesChoisies.push(term); }
+  else if(!forceOn){ state.lettre.competencesChoisies.splice(idx,1); }
+  renderLettreSkillSuggestions(); renderLettrePreview(); persist();
+}
+
+function renderLettreSkillSuggestions(){
+  var chosenWrap = document.getElementById("l-skill-chosen");
+  var suggestWrap = document.getElementById("l-skill-suggest");
+  chosenWrap.innerHTML = "";
+  state.lettre.competencesChoisies.forEach(function(s){
+    var chip = document.createElement("span");
+    chip.className = "chip";
+    chip.innerHTML = esc(s) + ' <button data-s="'+esc(s)+'" title="Retirer">✕</button>';
+    chosenWrap.appendChild(chip);
+  });
+  chosenWrap.querySelectorAll("button").forEach(function(btn){
+    btn.addEventListener("click", function(){ toggleLettreCompetence(btn.getAttribute("data-s"), false); });
+  });
+
+  var chosenSet = {}; state.lettre.competencesChoisies.forEach(function(s){ chosenSet[norm(s)] = true; });
+  var pool = (state.library.competences||[]).map(function(c){ return c.label; })
+    .concat((state.annonce.keywords||[]).map(function(k){ return k.term; }));
+  var seen = {}; var dedup = [];
+  pool.forEach(function(s){ var n=norm(s); if(!seen[n] && !chosenSet[n]){ seen[n]=true; dedup.push(s); } });
+  dedup.sort(function(a,b){
+    return (scoreAgainstKeywords(b, state.annonce.keywords||[])||0) - (scoreAgainstKeywords(a, state.annonce.keywords||[])||0);
+  });
+  var suggestions = dedup.slice(0,10);
+  suggestWrap.innerHTML = "";
+  if(!suggestions.length){
+    if(!state.lettre.competencesChoisies.length){
+      suggestWrap.innerHTML = '<span class="hint">Ajoute des compétences à ta bibliothèque (étape CV) pour les proposer ici.</span>';
+    }
+    return;
+  }
+  suggestions.forEach(function(s){
+    var chip = document.createElement("button");
+    chip.type="button"; chip.className="chip suggest"; chip.textContent = "+ " + s;
+    chip.addEventListener("click", function(){ toggleLettreCompetence(s, true); });
+    suggestWrap.appendChild(chip);
+  });
+}
+
+function renderArchiveList(){
+  var wrap = document.getElementById("archive-list");
+  wrap.innerHTML = "";
+  if(!state.library.lettresArchive.length){
+    wrap.innerHTML = '<p class="empty-note">Aucune lettre archivée pour l\'instant.</p>';
+  }
+  state.library.lettresArchive.forEach(function(entry, i){
+    var block = document.createElement("div");
+    block.className = "exp-block";
+    block.innerHTML =
+      '<div class="exp-block-head">'+
+        '<span class="tier-pill '+OUTCOME_TIER[entry.outcome||"aucune"]+'">'+esc(OUTCOME_LABELS[entry.outcome||"aucune"])+'</span>'+
+        '<button class="icon-btn" data-remove="'+i+'" title="Retirer">✕</button>'+
+      '</div>'+
+      '<div class="row2">'+
+        '<div class="field"><label>Titre / repère</label><input type="text" data-f="titre" data-i="'+i+'" value="'+esc(entry.titre)+'" placeholder="ex. Candidature Studio Lumen"></div>'+
+        '<div class="field"><label>Résultat</label><select data-f="outcome" data-i="'+i+'">'+
+          Object.keys(OUTCOME_LABELS).map(function(k){ return '<option value="'+k+'"'+(entry.outcome===k?" selected":"")+'>'+OUTCOME_LABELS[k]+'</option>'; }).join("")+
+        '</select></div>'+
+      '</div>'+
+      '<div class="row2">'+
+        '<div class="field"><label>Poste visé</label><input type="text" data-f="poste" data-i="'+i+'" value="'+esc(entry.poste)+'"></div>'+
+        '<div class="field"><label>Entreprise</label><input type="text" data-f="entreprise" data-i="'+i+'" value="'+esc(entry.entreprise)+'"></div>'+
+      '</div>'+
+      '<div class="field"><label>Texte complet</label><textarea data-f="texte" data-i="'+i+'" style="min-height:110px;" placeholder="Colle ici le texte de cette ancienne lettre.">'+esc(entry.texte)+'</textarea></div>';
+    wrap.appendChild(block);
+  });
+  wrap.querySelectorAll("input,textarea,select").forEach(function(el){
+    el.addEventListener("input", function(){
+      state.library.lettresArchive[+el.getAttribute("data-i")][el.getAttribute("data-f")] = el.value;
+      renderReferencePanel(); refreshStatusDots(); persist();
+    });
+    if(el.tagName === "SELECT"){
+      el.addEventListener("change", function(){
+        state.library.lettresArchive[+el.getAttribute("data-i")][el.getAttribute("data-f")] = el.value;
+        renderArchiveList(); renderReferencePanel(); persist();
+      });
+    }
+  });
+  wrap.querySelectorAll("[data-remove]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      state.library.lettresArchive.splice(+btn.getAttribute("data-remove"), 1);
+      renderArchiveList(); renderReferencePanel(); document.getElementById("patterns-result").innerHTML = ""; persist();
+    });
+  });
+}
+document.getElementById("btn-add-archive").addEventListener("click", function(){
+  state.library.lettresArchive.push({ id: uid(), titre:"", poste:"", entreprise:"", texte:"", outcome:"aucune" });
+  renderArchiveList(); renderReferencePanel(); persist();
+});
+
+function renderReferencePanel(){
+  var wrap = document.getElementById("reference-list");
+  var withText = state.library.lettresArchive.filter(function(e){ return e.texte && e.texte.trim(); });
+  if(!withText.length){ wrap.innerHTML = '<p class="empty-note" style="margin-top:10px;">Rien à relire pour l\'instant.</p>'; return; }
+  wrap.innerHTML = withText.map(function(e){
+    var lines = e.texte.trim().split("\n").filter(Boolean).slice(0,2).join(" ");
+    return '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed var(--border);">'+
+      '<div style="font-weight:600;font-size:13px;">'+esc(e.titre || (e.poste || "Lettre") + (e.entreprise ? " — "+e.entreprise : ""))+'</div>'+
+      '<div class="hint" style="margin-top:3px;">'+esc(lines)+(e.texte.trim().length>160?"…":"")+'</div>'+
+    '</div>';
+  }).join("");
+}
+
+function analyserPatterns(){
+  var out = document.getElementById("patterns-result");
+  var all = state.library.lettresArchive.filter(function(e){ return e.texte && e.texte.trim(); });
+  if(all.length < 2){
+    out.innerHTML = '<p class="empty-note">Archive au moins deux lettres (avec leur texte complet) pour voir apparaître une tendance.</p>';
+    return;
+  }
+  var success = all.filter(function(e){ return e.outcome === "entretien" || e.outcome === "offre"; });
+  var autres = all.filter(function(e){ return e.outcome === "aucune" || e.outcome === "relance"; });
+
+  function wordsOf(t){ return t.trim().split(/\s+/).filter(Boolean); }
+  function avgWords(group){ if(!group.length) return null; return Math.round(group.reduce(function(s,e){ return s+wordsOf(e.texte).length; },0)/group.length); }
+  function pctNumeric(group){ if(!group.length) return null; var n=group.filter(function(e){ return /\d/.test(e.texte.trim().slice(0,60)); }).length; return Math.round(100*n/group.length); }
+  function avgParagraphs(group){ if(!group.length) return null; return Math.round(10*group.reduce(function(s,e){ return s + e.texte.trim().split(/\n\s*\n/).filter(Boolean).length; },0)/group.length)/10; }
+  function topWords(group){
+    var freq = {};
+    group.forEach(function(e){
+      var tokens = norm(e.texte).match(/[a-z\-]{4,}/g) || [];
+      var seenInLetter = {};
+      tokens.forEach(function(t){
+        if(LETTRE_STOP[t] || seenInLetter[t]) return;
+        seenInLetter[t] = true;
+        freq[t] = (freq[t]||0) + 1;
+      });
+    });
+    return freq;
+  }
+
+  var phrases = [];
+  phrases.push("Sur les " + all.length + " lettres archivées (texte complet renseigné), " +
+    (success.length ? "celles suivies d'une relance, d'un entretien ou d'une offre" : "le lot disponible") +
+    (success.length && autres.length ?
+      " comptent en moyenne " + avgWords(success) + " mots contre " + avgWords(autres) + " pour les autres, et démarrent par un fait chiffré dans " + pctNumeric(success) + "% des cas contre " + pctNumeric(autres) + "% pour les autres."
+      : " compte en moyenne " + avgWords(all) + " mots, avec un fait chiffré en ouverture dans " + pctNumeric(all) + "% des cas."));
+
+  if(success.length && autres.length){
+    phrases.push("Structure : " + avgParagraphs(success) + " paragraphes en moyenne côté réussites, contre " + avgParagraphs(autres) + " côté sans suite.");
+    var freqSuccess = topWords(success), freqAutres = topWords(autres);
+    var diffs = Object.keys(freqSuccess)
+      .filter(function(w){ return freqSuccess[w] >= 2; })
+      .map(function(w){ return { w:w, score: (freqSuccess[w]/success.length) - ((freqAutres[w]||0)/autres.length) }; })
+      .sort(function(a,b){ return b.score - a.score; })
+      .filter(function(d){ return d.score > 0; })
+      .slice(0,5)
+      .map(function(d){ return d.w; });
+    if(diffs.length){
+      phrases.push("Mots qui reviennent proportionnellement plus souvent dans tes lettres qui ont marché : " + diffs.join(", ") + ".");
+    }
+  } else {
+    phrases.push("Ajoute au moins une lettre marquée « entretien » ou « offre » et une autre sans suite pour obtenir une vraie comparaison.");
+  }
+
+  phrases.push("Ceci reste un repérage statistique simple sur ton propre texte (longueurs, chiffres, mots qui reviennent) — pas une analyse de sens : à toi d'en tirer ce qui te semble juste.");
+
+  out.innerHTML = phrases.map(function(p){ return "<p style=\"margin:0 0 8px;font-size:13px;color:var(--ink-600);line-height:1.6;\">"+esc(p)+"</p>"; }).join("");
+}
+document.getElementById("btn-analyser-patterns").addEventListener("click", analyserPatterns);
+
+function renderLettrePreview(){
+  var l = state.lettre;
+  var an = state.annonce;
+  var motivs = l.motivations.map(function(m){return m.trim();}).filter(Boolean);
+  var wrap = document.getElementById("lettre-preview");
+
+  if(!motivs.length){
+    wrap.innerHTML = '<p class="empty-note">'+ (l.lang==="en" ? "Add at least one motivation point (on the left) to generate the letter." : "Ajoute au moins un point de motivation (à gauche) pour générer la lettre.") +'</p>';
+    return;
+  }
+
+  var poste = an.poste.trim() || (l.lang==="en" ? "this position" : "ce poste");
+  var entreprise = an.entreprise.trim() || (l.lang==="en" ? "your company" : "votre entreprise");
+  var bank = (l.lang==="en" ? PHRASES_EN : PHRASES)[l.ton] || (l.lang==="en" ? PHRASES_EN.formel : PHRASES.formel);
+
+  var seedStr = poste + "|" + entreprise + "|" + l.ton + "|" + l.lang + "|" + (l.seed||1);
+  var rng = mulberry32(djb2(seedStr));
+
+  var ouverture = pick(bank.ouverture, rng).split("{poste}").join(poste).split("{entreprise}").join(entreprise);
+  var cloture = pick(bank.cloture, rng);
+  var transitions = shuffle(bank.transition, rng);
+
+  var skillMention = "";
+  if(l.competencesChoisies.length){
+    if(l.lang==="en"){
+      skillMention = " I can specifically highlight my " + (l.competencesChoisies.length===1 ? "proficiency in " + l.competencesChoisies[0] : "skills in " + l.competencesChoisies.slice(0,-1).join(", ") + " and " + l.competencesChoisies.slice(-1)) + ".";
+    } else {
+      skillMention = " Je peux notamment mettre en avant " + (l.competencesChoisies.length===1 ? "ma maîtrise de " + l.competencesChoisies[0] : "mes compétences en " + l.competencesChoisies.slice(0,-1).join(", ") + " et " + l.competencesChoisies.slice(-1)) + ".";
+    }
+  }
+
+  var paragraphs = [ouverture];
+  motivs.forEach(function(m, i){
+    var t = transitions[i % transitions.length];
+    var lead = t + " ";
+    var body = m.trim();
+    var sentence = body.charAt(0).toLowerCase() + body.slice(1);
+    if(!/[.!?]$/.test(sentence)) sentence += ".";
+    paragraphs.push(lead + sentence + (i === motivs.length-1 ? skillMention : ""));
+  });
+  var closingExtra = l.disponibilite.trim() ?
+    (l.lang==="en" ? " I am available " + l.disponibilite.trim() + "." : " Je suis disponible " + l.disponibilite.trim() + ".") : "";
+  paragraphs.push(cloture.replace(/(\.)$/, closingExtra ? closingExtra + "$1" : "$1"));
+
+  var today = new Date();
+  var dateStr = l.lang==="en"
+    ? MOIS_EN[today.getMonth()] + " " + today.getDate() + ", " + today.getFullYear()
+    : today.getDate() + " " + ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"][today.getMonth()] + " " + today.getFullYear();
+
+  var objLabel = l.lang==="en" ? "Subject: Application for the position of " : "Objet : Candidature au poste de ";
+  var attnLabel = l.lang==="en" ? "Attention: " : "À l'attention de ";
+
+  var html = "";
+  html += '<div class="l-from">'+ (esc(state.profil.nom)||(l.lang==="en"?"Your name":"Ton nom")) + (state.profil.ville ? "<br>"+esc(state.profil.ville) : "") + (state.profil.email? "<br>"+esc(state.profil.email):"") + '</div>';
+  html += '<div class="l-to">' + esc(entreprise) + (l.destinataire ? "<br>" + attnLabel + esc(l.destinataire) : "") + '</div>';
+  html += '<div class="l-date">' + esc(state.profil.ville ? state.profil.ville+", " : "") + dateStr + '</div>';
+  html += '<div class="l-obj">' + objLabel + esc(poste) + '</div>';
+  paragraphs.forEach(function(p){ html += "<p>" + esc(p) + "</p>"; });
+  html += '<div class="l-sign">' + esc(state.profil.nom || (l.lang==="en"?"Your name":"Ton nom")) + '</div>';
+
+  wrap.innerHTML = html;
+}
+
+document.getElementById("btn-reroll").addEventListener("click", function(){
+  state.lettre.seed = (state.lettre.seed || 1) + 1;
+  renderLettrePreview(); persist();
+});
+
+/* ===================== MODULE ANNEXE (bibliothèque de contenus) ===================== */
+
+function renderAnnexeCategoryGrid(){
+  var wrap = document.getElementById("cat-grid");
+  wrap.innerHTML = "";
+  ANNEXE_CATEGORIES.forEach(function(cat){
+    var btn = document.createElement("button");
+    btn.className = "cat-card" + (state.annexeDossier.categorie === cat.key ? " active" : "");
+    btn.textContent = cat.label;
+    btn.addEventListener("click", function(){
+      state.annexeDossier.categorie = cat.key;
+      renderAnnexeCategoryGrid(); renderAnnexeSuggestions(); renderAnnexeItemsList(); renderAnnexePreview(); refreshStatusDots(); persist();
+    });
+    wrap.appendChild(btn);
+  });
+}
+function currentAnnexeCategory(){ return ANNEXE_CATEGORIES.find(function(c){ return c.key === state.annexeDossier.categorie; }); }
+
+function renderAnnexeSuggestions(){
+  var wrap = document.getElementById("annexe-suggest");
+  var cat = currentAnnexeCategory();
+  wrap.innerHTML = "";
+  if(!cat) return;
+  var existingLabels = {};
+  state.library.annexeItems.filter(function(it){ return it.categorie===cat.key; }).forEach(function(it){ existingLabels[norm(it.label)] = true; });
+  cat.items.forEach(function(label){
+    if(existingLabels[norm(label)]) return;
+    var chip = document.createElement("button");
+    chip.type="button"; chip.className="chip suggest"; chip.textContent = "+ " + label;
+    chip.addEventListener("click", function(){
+      state.library.annexeItems.push({ id: uid(), categorie: cat.key, label: label, lien:"", note:"" });
+      renderAnnexeSuggestions(); renderAnnexeItemsList(); persist();
+    });
+    wrap.appendChild(chip);
+  });
+  if(!wrap.children.length){
+    wrap.innerHTML = '<span class="hint">Toutes les suggestions de base sont déjà dans ta bibliothèque.</span>';
+  }
+}
+
+function renderAnnexeItemsList(){
+  var wrap = document.getElementById("annexe-items-list");
+  var cat = currentAnnexeCategory();
+  wrap.innerHTML = "";
+  if(!cat){ wrap.innerHTML = '<p class="empty-note">Choisis un type de poste ci-dessus.</p>'; return; }
+  var items = state.library.annexeItems.filter(function(it){ return it.categorie===cat.key; });
+  if(!items.length){ wrap.innerHTML = '<p class="empty-note">Ajoute un premier élément (lien, projet, chiffre clé…).</p>'; return; }
+  items.forEach(function(it){
+    var checked = state.annexeDossier.selectedItemIds.indexOf(it.id) !== -1;
+    var row = document.createElement("div");
+    row.className = "exp-block";
+    row.innerHTML =
+      '<div class="exp-block-head">'+
+        '<label style="display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;"><input type="checkbox" data-include="'+it.id+'" '+(checked?"checked":"")+' style="width:auto;">Inclure dans l\'annexe</label>'+
+        '<button class="icon-btn" data-remove="'+it.id+'" title="Retirer">✕</button>'+
+      '</div>'+
+      '<div class="field"><label>Intitulé</label><input type="text" data-f="label" data-id="'+it.id+'" value="'+esc(it.label)+'"></div>'+
+      '<div class="row2">'+
+        '<div class="field"><label>Lien (optionnel)</label><input type="text" data-f="lien" data-id="'+it.id+'" value="'+esc(it.lien)+'" placeholder="https://…"></div>'+
+        '<div class="field"><label>Note (optionnel)</label><input type="text" data-f="note" data-id="'+it.id+'" value="'+esc(it.note)+'"></div>'+
+      '</div>';
+    wrap.appendChild(row);
+  });
+  wrap.querySelectorAll("[data-include]").forEach(function(cb){
+    cb.addEventListener("change", function(){
+      var id = cb.getAttribute("data-include");
+      var idx = state.annexeDossier.selectedItemIds.indexOf(id);
+      if(cb.checked && idx===-1) state.annexeDossier.selectedItemIds.push(id);
+      if(!cb.checked && idx!==-1) state.annexeDossier.selectedItemIds.splice(idx,1);
+      renderAnnexePreview(); refreshStatusDots(); persist();
+    });
+  });
+  wrap.querySelectorAll("input[data-f]").forEach(function(el){
+    el.addEventListener("input", function(){
+      var item = state.library.annexeItems.find(function(x){ return x.id===el.getAttribute("data-id"); });
+      if(item) item[el.getAttribute("data-f")] = el.value;
+      renderAnnexePreview(); persist();
+    });
+  });
+  wrap.querySelectorAll("[data-remove]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var id = btn.getAttribute("data-remove");
+      state.library.annexeItems = state.library.annexeItems.filter(function(x){ return x.id!==id; });
+      state.annexeDossier.selectedItemIds = state.annexeDossier.selectedItemIds.filter(function(x){ return x!==id; });
+      renderAnnexeItemsList(); renderAnnexeSuggestions(); renderAnnexePreview(); refreshStatusDots(); persist();
+    });
+  });
+}
+document.getElementById("btn-add-annexe-item").addEventListener("click", function(){
+  var cat = currentAnnexeCategory();
+  if(!cat) return;
+  state.library.annexeItems.push({ id: uid(), categorie: cat.key, label:"", lien:"", note:"" });
+  renderAnnexeItemsList(); persist();
+});
+
+function renderAnnexePreview(){
+  var cat = currentAnnexeCategory();
+  var wrap = document.getElementById("annexe-preview");
+  if(!cat){ wrap.innerHTML = '<p class="empty-note">Choisis un type de poste pour voir ton annexe.</p>'; return; }
+  var selected = state.library.annexeItems.filter(function(it){ return state.annexeDossier.selectedItemIds.indexOf(it.id)!==-1; });
+  if(!selected.length){ wrap.innerHTML = '<p class="empty-note">Coche au moins un élément de ta bibliothèque à gauche.</p>'; return; }
+  var html = '<h3 class="cv-h">Annexe — ' + esc(cat.label) + '</h3><ul class="checklist">';
+  selected.forEach(function(it){
+    html += '<li><span class="box" style="background:#20242B;"></span><span><strong>'+esc(it.label)+'</strong>'+
+      (it.lien ? ' — <a href="'+esc(it.lien)+'">'+esc(it.lien)+'</a>' : '') +
+      (it.note ? ' <em>('+esc(it.note)+')</em>' : '') +
+    '</span></li>';
+  });
+  html += '</ul><p class="annexe-note">Joins cette page en dernière position du dossier, après le CV et la lettre.</p>';
+  wrap.innerHTML = html;
+}
+
+/* ===================== MODULE CANDIDATURES (suivi local des annonces postulées) ===================== */
+
+var CANDIDATURE_STATUTS = [
+  { key: "envoyee", label: "Envoyée", tier: "caution" },
+  { key: "relance", label: "Relance faite", tier: "caution" },
+  { key: "entretien", label: "Entretien obtenu", tier: "success" },
+  { key: "refus", label: "Refus", tier: "danger" },
+  { key: "offre", label: "Offre obtenue", tier: "success" }
+];
+function candidatureStatutMeta(key){
+  return CANDIDATURE_STATUTS.find(function(s){ return s.key === key; }) || CANDIDATURE_STATUTS[0];
+}
+function todayISO(){
+  var d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+function renderCandidaturesSummary(){
+  var el = document.getElementById("candidatures-summary");
+  var total = state.candidatures.length;
+  if(!total){ el.textContent = "Aucune candidature enregistrée pour l'instant."; return; }
+  var counts = {};
+  state.candidatures.forEach(function(c){ counts[c.statut] = (counts[c.statut]||0) + 1; });
+  var parts = [total + " candidature" + (total>1?"s":"")];
+  if(counts.entretien) parts.push(counts.entretien + " entretien" + (counts.entretien>1?"s":""));
+  if(counts.offre) parts.push(counts.offre + " offre" + (counts.offre>1?"s":""));
+  el.textContent = parts.join(" · ");
+}
+
+function renderCandidaturesList(){
+  var wrap = document.getElementById("candidatures-list");
+  wrap.innerHTML = "";
+  if(!state.candidatures.length){
+    wrap.innerHTML = '<p class="empty-note">Rien pour l\'instant — enregistre l\'annonce en cours, ou ajoute une candidature manuellement.</p>';
+    renderCandidaturesSummary();
+    return;
+  }
+  var sorted = state.candidatures.slice().sort(function(a,b){ return (b.date||"").localeCompare(a.date||""); });
+  sorted.forEach(function(c){
+    var meta = candidatureStatutMeta(c.statut);
+    var block = document.createElement("div");
+    block.className = "exp-block";
+    block.innerHTML =
+      '<div class="exp-block-head">' +
+        '<span class="tier-pill ' + meta.tier + '">' + esc(meta.label) + '</span>' +
+        '<button class="icon-btn" data-remove="' + c.id + '" title="Retirer">✕</button>' +
+      '</div>' +
+      '<div class="row2">' +
+        '<div class="field"><label>Poste</label><input type="text" data-f="poste" data-id="' + c.id + '" value="' + esc(c.poste) + '"></div>' +
+        '<div class="field"><label>Entreprise</label><input type="text" data-f="entreprise" data-id="' + c.id + '" value="' + esc(c.entreprise) + '"></div>' +
+      '</div>' +
+      '<div class="row2">' +
+        '<div class="field"><label>Date</label><input type="text" data-f="date" data-id="' + c.id + '" value="' + esc(c.date) + '" placeholder="aaaa-mm-jj"></div>' +
+        '<div class="field"><label>Statut</label><select data-f="statut" data-id="' + c.id + '">' +
+          CANDIDATURE_STATUTS.map(function(s){ return '<option value="'+s.key+'"'+(c.statut===s.key?" selected":"")+'>'+s.label+'</option>'; }).join("") +
+        '</select></div>' +
+      '</div>' +
+      '<div class="field"><label>Lien de l\'annonce</label><input type="text" data-f="lien" data-id="' + c.id + '" value="' + esc(c.lien) + '" placeholder="https://…"></div>' +
+      '<div class="field"><label>Notes</label><textarea data-f="notes" data-id="' + c.id + '" placeholder="Relance prévue, contact, retour reçu…">' + esc(c.notes) + '</textarea></div>';
+    wrap.appendChild(block);
+  });
+  wrap.querySelectorAll("input,textarea").forEach(function(el){
+    el.addEventListener("input", function(){
+      var item = state.candidatures.find(function(c){ return c.id === el.getAttribute("data-id"); });
+      if(item){ item[el.getAttribute("data-f")] = el.value; }
+      refreshStatusDots(); persist();
+    });
+  });
+  wrap.querySelectorAll("select").forEach(function(el){
+    el.addEventListener("change", function(){
+      var item = state.candidatures.find(function(c){ return c.id === el.getAttribute("data-id"); });
+      if(item){ item.statut = el.value; }
+      renderCandidaturesList(); refreshStatusDots(); persist();
+    });
+  });
+  wrap.querySelectorAll("[data-remove]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      state.candidatures = state.candidatures.filter(function(c){ return c.id !== btn.getAttribute("data-remove"); });
+      renderCandidaturesList(); refreshStatusDots(); persist();
+    });
+  });
+  renderCandidaturesSummary();
+}
+
+document.getElementById("btn-save-current-candidature").addEventListener("click", function(){
+  state.candidatures.push({
+    id: uid(),
+    poste: state.annonce.poste || "",
+    entreprise: state.annonce.entreprise || "",
+    lien: state.annonce.url || "",
+    date: todayISO(),
+    statut: "envoyee",
+    notes: ""
+  });
+  renderCandidaturesList(); refreshStatusDots(); persist();
+});
+document.getElementById("btn-add-candidature").addEventListener("click", function(){
+  state.candidatures.push({ id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "envoyee", notes: "" });
+  renderCandidaturesList(); refreshStatusDots(); persist();
+});
+
+/* ===================== MODULE ENTRETIEN (entraînement local, corrigé heuristique) ===================== */
+
+var ENTRETIEN_QUESTION_BANK = [
+  { id: "q-presentation", cat: "ouverture", text: "Présentez-vous en quelques phrases." },
+  { id: "q-pourquoi-poste", cat: "motivation", text: "Pourquoi ce poste vous intéresse-t-il ?" },
+  { id: "q-pourquoi-entreprise", cat: "motivation", text: "Pourquoi notre entreprise plutôt qu'une autre ?" },
+  { id: "q-qualite-defaut", cat: "personnalite", text: "Quelle est votre plus grande qualité professionnelle ? Et un axe d'amélioration ?" },
+  { id: "q-difficulte", cat: "comportementale", text: "Décrivez une situation difficile que vous avez su gérer." },
+  { id: "q-echec", cat: "comportementale", text: "Parlez-moi d'un échec et de ce que vous en avez retenu." },
+  { id: "q-initiative", cat: "comportementale", text: "Racontez une fois où vous avez pris une initiative sans qu'on vous le demande." },
+  { id: "q-5ans", cat: "projection", text: "Où vous voyez-vous dans cinq ans ?" },
+  { id: "q-disponibilite", cat: "logistique", text: "Quelle est votre disponibilité, et vos prétentions salariales ?" },
+  { id: "q-questions-finales", cat: "cloture", text: "Avez-vous des questions pour nous ?" }
+];
+var ENTRETIEN_CAT_LABELS = {
+  ouverture: "Ouverture", motivation: "Motivation", personnalite: "Personnalité", comportementale: "Comportementale",
+  projection: "Projection", logistique: "Logistique", cloture: "Clôture", annonce: "Lié à l'annonce"
+};
+
+function genererQuestionsEntretien(){
+  state.entretien.seed = (state.entretien.seed || 1) + 1;
+  var rng = mulberry32(djb2("entretien-" + state.entretien.seed));
+  var picked = shuffle(ENTRETIEN_QUESTION_BANK, rng).slice(0, 6);
+  var kwQuestions = (state.annonce.keywords || []).slice(0, 3).map(function(k){
+    return { id: "q-kw-" + norm(k.term), cat: "annonce", text: "Donnez un exemple concret où vous avez mis en œuvre : " + k.term + "." };
+  });
+  state.entretien.questions = picked.concat(kwQuestions);
+  document.getElementById("entretien-corrige").innerHTML = "";
+  renderEntretienQuestions();
+  refreshStatusDots();
+  persist();
+}
+
+function renderEntretienQuestions(){
+  var wrap = document.getElementById("entretien-questions");
+  wrap.innerHTML = "";
+  if(!state.entretien.questions.length){
+    wrap.innerHTML = '<p class="empty-note">Clique sur « Générer une série de questions » pour commencer.</p>';
+    return;
+  }
+  state.entretien.questions.forEach(function(q, i){
+    var block = document.createElement("div");
+    block.className = "exp-block";
+    block.innerHTML =
+      '<div class="exp-block-head"><span class="eyebrow">Question ' + (i+1) + ' · ' + esc(ENTRETIEN_CAT_LABELS[q.cat] || q.cat) + '</span></div>' +
+      '<p style="font-size:13.5px;font-weight:600;margin:0 0 10px;">' + esc(q.text) + '</p>' +
+      '<textarea data-qid="' + q.id + '" placeholder="Réponds ici dans tes mots, comme à l\'oral.">' + esc(state.entretien.reponses[q.id] || "") + '</textarea>';
+    wrap.appendChild(block);
+  });
+  wrap.querySelectorAll("textarea").forEach(function(el){
+    el.addEventListener("input", function(){
+      state.entretien.reponses[el.getAttribute("data-qid")] = el.value;
+      refreshStatusDots(); persist();
+    });
+  });
+}
+
+function renderEntretienCorrige(){
+  var wrap = document.getElementById("entretien-corrige");
+  if(!state.entretien.questions.length){
+    wrap.innerHTML = '<p class="empty-note">Génère d\'abord une série de questions.</p>';
+    return;
+  }
+  var allText = state.entretien.questions.map(function(q){ return state.entretien.reponses[q.id] || ""; }).join(" \n ");
+  var kws = state.annonce.keywords || [];
+  var missing = kws.filter(function(k){ return countTerm(norm(allText), norm(k.term)) === 0; }).map(function(k){ return k.term; });
+
+  var html = "";
+  if(kws.length){
+    html += '<div class="card" style="margin-bottom:14px;"><span class="eyebrow">Mots-clés de l\'annonce</span>' +
+      '<p style="font-size:13px;color:var(--ink-600);margin:8px 0 0;line-height:1.6;">' +
+      (missing.length
+        ? "Pas encore mentionnés dans tes réponses : " + missing.slice(0,10).join(", ") + (missing.length>10?"…":"") + "."
+        : "Tous les mots-clés détectés de l'annonce apparaissent au moins une fois dans tes réponses.") +
+      '</p></div>';
+  }
+
+  state.entretien.questions.forEach(function(q, i){
+    var reponse = (state.entretien.reponses[q.id] || "").trim();
+    var wc = reponse ? reponse.split(/\s+/).filter(Boolean).length : 0;
+    var tips = [];
+    if(!reponse){
+      tips.push("Pas encore de réponse rédigée.");
+    } else {
+      if(wc < 25) tips.push("Réponse courte (" + wc + " mots) — un exemple concret la renforcerait.");
+      if(!/\d/.test(reponse)) tips.push("Aucun chiffre repéré — un résultat chiffré (durée, volume, pourcentage) rend l'exemple plus convaincant.");
+      if(q.cat === "annonce"){
+        var term = q.text.replace(/^.*: /, "").replace(/\.$/, "");
+        if(countTerm(norm(reponse), norm(term)) === 0){ tips.push("Le mot-clé « " + term + " » n'apparaît pas littéralement dans ta réponse."); }
+      }
+      if(!tips.length){ tips.push("Rien de particulier à signaler sur ces repères simples."); }
+    }
+    html += '<div class="exp-block"><div class="exp-block-head"><span class="eyebrow">Question ' + (i+1) + '</span></div>' +
+      '<p style="font-size:13px;font-weight:600;margin:0 0 8px;">' + esc(q.text) + '</p>' +
+      '<ul style="margin:0;padding-left:18px;font-size:12.5px;color:var(--ink-600);">' +
+      tips.map(function(t){ return "<li>" + esc(t) + "</li>"; }).join("") +
+      '</ul></div>';
+  });
+
+  wrap.innerHTML = html;
+}
+
+document.getElementById("btn-generer-questions").addEventListener("click", genererQuestionsEntretien);
+document.getElementById("btn-voir-corrige").addEventListener("click", renderEntretienCorrige);
+
+/* ===================== INIT GÉNÉRAL ===================== */
+
+initCVModule();
+
+document.getElementById("l-destinataire").value = state.lettre.destinataire || "";
+document.getElementById("l-disponibilite").value = state.lettre.disponibilite || "";
+document.querySelectorAll('#tone-segmented button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-tone')===state.lettre.ton); });
+document.querySelectorAll('#lettre-lang-segmented button').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-lang')===state.lettre.lang); });
+renderQuestionBank();
+renderArchiveList();
+renderReferencePanel();
+renderMotivList();
+renderLettreSkillSuggestions();
+renderLettrePreview();
+
+renderAnnexeCategoryGrid();
+renderAnnexeSuggestions();
+renderAnnexeItemsList();
+renderAnnexePreview();
+
+renderCandidaturesList();
+
+renderEntretienQuestions();
+
+renderKeywordChips();
+if (typeof window.onAnnonceChanged === "function") window.onAnnonceChanged();
+
+refreshStatusDots();
+
+</script>
+</body>
+</html>
