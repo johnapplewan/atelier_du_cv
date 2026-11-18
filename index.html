@@ -202,6 +202,8 @@
   .cv-doc .cv-item{ margin-bottom:11px; }
   .cv-doc .cv-item-head{ display:flex; justify-content:space-between; gap:10px; font-weight:600; font-size:12.5px; }
   .cv-doc .cv-item-sub{ font-size:11.5px; color:#4B525C; margin:1px 0 4px; font-style:italic; }
+  .cv-doc [contenteditable]:hover{ outline:1px dashed var(--accent,#888); outline-offset:2px; cursor:text; }
+  .cv-doc [contenteditable]:focus{ outline:2px solid var(--accent,#888); outline-offset:2px; }
   .cv-doc ul{ margin:4px 0 0; padding-left:16px; }
   .cv-doc li{ margin-bottom:2px; }
   .cv-doc .cv-skills{ display:flex; flex-wrap:wrap; gap:5px 8px; }
@@ -405,10 +407,11 @@
 
           <div class="card" style="margin-bottom:16px;">
             <span class="eyebrow">Import rapide</span>
-            <p class="hint" style="margin:6px 0 10px;">Colle le texte d'un de tes anciens CV, même en vrac et sans mise en forme : l'atelier repère les expériences, les formations et les compétences pour remplir ta bibliothèque. Tu peux recommencer avec un autre CV, les éléments s'ajoutent sans doublon. Vérifie et ajuste ensuite ce qui a été détecté ci-dessous.</p>
+            <p class="hint" style="margin:6px 0 10px;">Colle le texte d'un de tes CV, même avec du Markdown (#, **, tirets…) : les symboles sont nettoyés, et chaque rubrique (Expériences, Formation, Compétences, Langues, ou toute autre rubrique à toi) est reconnue d'après son titre : l'atelier repère les expériences, les formations et les compétences pour remplir ta bibliothèque. Tu peux recommencer avec un autre CV, les éléments s'ajoutent sans doublon. Vérifie et ajuste ensuite ce qui a été détecté ci-dessous.</p>
             <textarea id="cv-import-text" style="min-height:140px;" placeholder="Colle ici le texte brut d'un CV existant…"></textarea>
             <div class="toolbar-row" style="margin-top:10px;">
               <button class="btn btn-primary btn-sm" id="btn-import-cv">Analyser et importer</button>
+              <label class="hint" style="display:inline-flex;gap:6px;align-items:center;"><input type="checkbox" id="cv-import-replace"> Remplacer ma bibliothèque actuelle</label>
               <span class="hint" id="cv-import-status"></span>
             </div>
           </div>
@@ -428,6 +431,11 @@
           <div class="card" style="margin-bottom:16px;">
             <div class="exp-block-head"><span class="eyebrow">Bibliothèque — formations</span><button class="btn btn-ghost btn-sm" id="btn-add-formation">+ Ajouter</button></div>
             <div id="formation-list"></div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="exp-block-head"><span class="eyebrow">Autres rubriques (projets, intérêts, certifications…)</span><button class="btn btn-ghost btn-sm" id="btn-add-section">+ Ajouter</button></div>
+            <div id="section-list"></div>
           </div>
 
           <div class="card" style="margin-bottom:16px;">
@@ -909,7 +917,7 @@ function defaultState(){
     profil: { nom:"", titre:"", email:"", tel:"", ville:"", lien:"", langues:"", atouts:[], photo:null,
       suisseActif:false, suisse:{ dateNaissance:"", nationalite:"", permis:"", etatCivil:"" } },
     annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[] },
-    library: { experiences:[], formations:[], competences:[], lettresArchive:[], annexeItems:[] },
+    library: { experiences:[], formations:[], competences:[], sections:[], lettresArchive:[], annexeItems:[] },
     cv: { lang:"fr", format:"standard", resume:"", selectedExp:[], selectedForm:[], autoMode:true },
     lettre: { lang:"fr", destinataire:"", ton:"formel", motivations:[""], motivPrompts:[""], competencesChoisies:[], disponibilite:"", seed:1 },
     annexeDossier: { categorie:"", selectedItemIds:[] },
@@ -1402,10 +1410,11 @@ function renderFormList(){
         '<div class="field"><label>Diplôme</label><input type="text" data-f="diplome" data-id="' + f.id + '" value="' + esc(f.diplome) + '"></div>' +
         '<div class="field"><label>Établissement</label><input type="text" data-f="etablissement" data-id="' + f.id + '" value="' + esc(f.etablissement) + '"></div>' +
       '</div>' +
-      '<div class="field"><label>Dates</label><input type="text" data-f="dates" data-id="' + f.id + '" value="' + esc(f.dates) + '" placeholder="ex. 2020 – 2022"></div>';
+      '<div class="field"><label>Dates</label><input type="text" data-f="dates" data-id="' + f.id + '" value="' + esc(f.dates) + '" placeholder="ex. 2020 – 2022"></div>' +
+      '<div class="field"><label>Précisions (une par ligne, optionnel)</label><textarea data-f="details" data-id="' + f.id + '">' + esc(f.details || "") + '</textarea></div>';
     wrap.appendChild(block);
   });
-  wrap.querySelectorAll("input").forEach(function(el){
+  wrap.querySelectorAll("input,textarea").forEach(function(el){
     el.addEventListener("input", function(){
       var item = state.library.formations.find(function(x){ return x.id === el.getAttribute("data-id"); });
       if(item){ item[el.getAttribute("data-f")] = el.value; }
@@ -1503,7 +1512,7 @@ function cleanTitleLine(s){
   return s.trim().replace(/[()\[\]–—\-:,]+$/, "").replace(/^[()\[\]–—\-:,]+/, "").trim();
 }
 
-function parseImportedCv(rawText){
+function parseImportedCvLegacy(rawText){
   var trimmed = (rawText || "").split(/\r\n|\r|\n/).map(function(l){ return l.trim(); });
   var consumed = {};
   var contact = { nom: "", email: "", tel: "" };
@@ -1588,6 +1597,174 @@ function parseImportedCv(rawText){
   return { experiences: experiences, formations: formations, skills: dictSkills.concat(extraTokens), contact: contact };
 }
 
+/* ---- import structuré : nettoyage markdown + détection de rubriques ---- */
+
+var IMPORT_SECTIONS = [
+  { key:"profil",  re:/^(profil|resume|r[ée]sum[ée]|summary|a propos|à propos|presentation|présentation|objectif|accroche|about)/ },
+  { key:"exp",     re:/^(exp[ée]riences?|parcours professionnel|emplois?|historique professionnel|work experience|experience|carri[èe]re|missions)/ },
+  { key:"form",    re:/^(formations?|[ée]tudes?|dipl[ôo]mes?|parcours (acad[ée]mique|scolaire)|education|cursus|scolarit[ée])/ },
+  { key:"comp",    re:/^(comp[ée]tences?|skills|savoir[- ]faire|outils|technologies|expertises?|logiciels|hard skills|soft skills)/ },
+  { key:"langues", re:/^(langues?|languages?)/ },
+  { key:"atouts",  re:/^(atouts?|qualit[ée]s|points forts|forces)/ }
+];
+
+function importSectionKey(text){
+  var t = norm(text).replace(/[:：\s]+$/, "").replace(/^[\d.\s]+/, "");
+  if(!t || t.length > 60) return null;
+  for(var i=0;i<IMPORT_SECTIONS.length;i++){ if(IMPORT_SECTIONS[i].re.test(t)) return IMPORT_SECTIONS[i].key; }
+  return null;
+}
+
+function stripInlineMarkdown(s){
+  return s
+    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+    .replace(/\*\*\*([^*]+)\*\*\*/g, "$1").replace(/\*\*([^*]+)\*\*/g, "$1").replace(/__([^_]+)__/g, "$1")
+    .replace(/(^|[\s(])\*([^*\n]+)\*(?=[\s).,;:]|$)/g, "$1$2").replace(/(^|[\s(])_([^_\n]+)_(?=[\s).,;:]|$)/g, "$1$2")
+    .replace(/~~([^~]+)~~/g, "$1").replace(/`([^`]*)`/g, "$1")
+    .replace(/<\/?[a-z][^>]*>/gi, "")
+    .replace(/\\([*_#\-])/g, "$1")
+    .replace(/[ ​]/g, " ").replace(/\s+/g, " ").trim();
+}
+
+// Transforme le texte brut en lignes typées {t, bullet, hash, bold, blank}
+function normalizeImportLines(raw){
+  var out = [];
+  (raw || "").split(/\r\n|\r|\n/).forEach(function(orig){
+    var l = orig.replace(/\t/g, "  ");
+    if(!l.trim()){ out.push({ blank:true }); return; }
+    if(/^\s*([-*_=─—]\s*){3,}$/.test(l)){ out.push({ blank:true }); return; }       // filets
+    if(/^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(l) && l.indexOf("-") !== -1){ return; }       // séparateur de tableau
+    var hash = 0, m = l.match(/^\s*(#{1,6})\s+(.*)$/);
+    if(m){ hash = m[1].length; l = m[2]; }
+    l = l.replace(/^\s*>+\s*/, "");
+    var bullet = false;
+    var bm = l.match(/^\s*(?:[-*+•‣◦⁃∙▪●→➢✓✔■□]|\d{1,2}[.)])\s+(.*)$/);
+    if(bm && !/^\s*\*\*/.test(l)){ bullet = true; l = bm[1]; }
+    if(l.indexOf("|") !== -1 && /^\s*\|.*\|\s*$/.test(l)){ l = l.replace(/^\s*\||\|\s*$/g, "").split("|").map(function(c){ return c.trim(); }).filter(Boolean).join(" — "); }
+    var wholeBold = /^\s*(\*\*|__)[^*_]+(\*\*|__)\s*:?\s*$/.test(l);
+    var t = stripInlineMarkdown(l);
+    if(!t) return;
+    out.push({ t:t, bullet:bullet, hash:hash, bold:wholeBold });
+  });
+  return out;
+}
+
+function isHeadingLine(o){
+  if(!o || o.blank) return false;
+  var key = importSectionKey(o.t);
+  if(key && !o.bullet && o.t.length <= 40 && !detectDateInLine(o.t)) return { key:key };
+  if(o.bullet || detectDateInLine(o.t)) return false;
+  if(o.hash && o.hash <= 2 && o.t.length <= 60) return { key:"custom" };
+  var letters = o.t.replace(/[^A-Za-zÀ-ÿ]/g, "");
+  if(letters.length >= 4 && o.t.length <= 40 && !/\d/.test(o.t) && o.t === o.t.toUpperCase() && !IMPORT_EMAIL_RE.test(o.t)) return { key:"custom" };
+  if(o.bold && /:$/.test(o.t)) return { key:"custom" };
+  return false;
+}
+
+function splitListItems(lines){
+  var items = [];
+  lines.forEach(function(o){
+    o.t.split(/\s*[,;•·|]\s*|\s+\/\s+/).forEach(function(tok){
+      var t = tok.trim().replace(/^[:\-–—]+|[:\-–—.]+$/g, "").trim();
+      if(t.length >= 2 && t.length <= 60) items.push(t);
+    });
+  });
+  return items;
+}
+
+function parseEntries(lines, isForm){
+  var entries = [], cur = null;
+  function push(){ if(cur && (cur.head.length || cur.body.length)) entries.push(cur); cur = null; }
+  lines.forEach(function(o){
+    if(o.blank){ if(cur && cur.body.length && !cur.hasBullet) cur.gap = true; return; }
+    var dh = detectDateInLine(o.t);
+    if(!o.bullet){
+      if(dh){
+        if(cur && !cur.dates && !cur.body.length){ /* date sur ligne séparée du titre */ }
+        else { push(); cur = null; }
+        if(!cur) cur = { head:[], body:[], dates:"", hasBullet:false };
+        cur.dates = dh.full.replace(/\s+/g, " ").trim();
+        var rest = cleanTitleLine(o.t.slice(0, dh.index) + " " + o.t.slice(dh.index + dh.full.length));
+        if(rest) cur.head.push(rest);
+        return;
+      }
+      var short = o.t.length <= 80 && !/[.!?]$/.test(o.t);
+      if(!cur){ cur = { head:[o.t], body:[], dates:"", hasBullet:false }; return; }
+      if(cur.head.length < 2 && !cur.body.length && short){ cur.head.push(o.t); return; }
+      if(cur.hasBullet && short){ push(); cur = { head:[o.t], body:[], dates:"", hasBullet:false }; return; }
+      if(cur.gap && short && cur.body.length){ push(); cur = { head:[o.t], body:[], dates:"", hasBullet:false }; return; }
+      cur.body.push(o.t);
+      return;
+    }
+    if(!cur) cur = { head:[], body:[], dates:"", hasBullet:true };
+    cur.hasBullet = true;
+    cur.body.push(o.t);
+  });
+  push();
+  return entries.map(function(e){
+    var h1 = e.head[0] || "", h2 = e.head[1] || "";
+    if(!h2 && h1){ var sp = splitTitleLine(h1); h1 = sp.a; h2 = sp.b; }
+    var body = e.body.join("\n");
+    if(isForm) return { id: uid(), diplome: h1, etablissement: h2, dates: e.dates, details: body };
+    return { id: uid(), poste: h1, entreprise: h2, dates: e.dates, details: body };
+  });
+}
+
+function parseImportedCv(rawText){
+  var lines = normalizeImportLines(rawText);
+  var contact = { nom:"", email:"", tel:"", titre:"", ville:"", lien:"" };
+  var secs = [];                 // {key, title, lines}
+  var head = [], current = null;
+
+  lines.forEach(function(o){
+    var h = isHeadingLine(o);
+    if(h && h.key === "custom" && !secs.length && !head.some(function(x){ return !x.blank; })) h = false;   // 1re ligne = nom
+    if(h){ current = { key:h.key, title:o.t.replace(/[:：]\s*$/, ""), lines:[] }; secs.push(current); return; }
+    (current ? current.lines : head).push(o);
+  });
+
+  // aucune rubrique reconnue : ancien analyseur sur texte nettoyé
+  if(!secs.length){
+    var cleaned = lines.map(function(o){ return o.blank ? "" : (o.bullet ? "• " : "") + o.t; }).join("\n");
+    return parseImportedCvLegacy(cleaned);
+  }
+
+  // en-tête : nom, titre, coordonnées, accroche
+  var resumeLines = [];
+  var nonBlank = head.filter(function(o){ return !o.blank; });
+  nonBlank.forEach(function(o, i){
+    var t = o.t, em = t.match(IMPORT_EMAIL_RE), ph = t.match(IMPORT_PHONE_RE), url = t.match(/(?:https?:\/\/|www\.|linkedin\.com)[^\s,|]+/i);
+    if(em || ph || url){
+      if(em && !contact.email) contact.email = em[0];
+      if(ph && !contact.tel && !detectDateInLine(t)) contact.tel = ph[0].replace(/\s+/g, " ").trim();
+      if(url && !contact.lien) contact.lien = url[0];
+      var rest = t.replace(IMPORT_EMAIL_RE, "").replace(IMPORT_PHONE_RE, "").replace(/(?:https?:\/\/|www\.|linkedin\.com)[^\s,|]+/i, "").replace(/[|·•,–—-]+/g, " ").replace(/\s+/g, " ").trim();
+      if(rest && rest.length <= 40 && !contact.ville && !/\d/.test(rest)) contact.ville = rest;
+      return;
+    }
+    if(!contact.nom && t.length <= 40 && t.split(/\s+/).length <= 5 && !/\d/.test(t)){ contact.nom = t; return; }
+    if(!contact.titre && t.length <= 80 && !/[.!?]$/.test(t)){ contact.titre = t; return; }
+    resumeLines.push(t);
+  });
+
+  var out = { experiences:[], formations:[], skills:[], sections:[], contact:contact, resume:resumeLines.join(" "), langues:"", atouts:[] };
+
+  secs.forEach(function(s){
+    var content = s.lines;
+    if(s.key === "exp"){ out.experiences = out.experiences.concat(parseEntries(content, false)); }
+    else if(s.key === "form"){ out.formations = out.formations.concat(parseEntries(content, true)); }
+    else if(s.key === "comp"){ out.skills = out.skills.concat(splitListItems(content.filter(function(o){ return !o.blank; }))); }
+    else if(s.key === "atouts"){ out.atouts = out.atouts.concat(splitListItems(content.filter(function(o){ return !o.blank; }))); }
+    else if(s.key === "langues"){ out.langues = (out.langues ? out.langues + ", " : "") + splitListItems(content.filter(function(o){ return !o.blank; })).join(", "); }
+    else if(s.key === "profil"){ out.resume = (out.resume ? out.resume + " " : "") + content.filter(function(o){ return !o.blank; }).map(function(o){ return o.t; }).join(" "); }
+    else {
+      var txt = content.filter(function(o){ return !o.blank; }).map(function(o){ return o.t; }).join("\n");
+      if(txt) out.sections.push({ id: uid(), titre: s.title, texte: txt });
+    }
+  });
+  return out;
+}
+
 function doImportCv(){
   var ta = document.getElementById("cv-import-text");
   var statusEl = document.getElementById("cv-import-status");
@@ -1595,6 +1772,12 @@ function doImportCv(){
   if(!text.trim()){ statusEl.textContent = "Colle d'abord le texte d'un CV à analyser."; return; }
 
   var result = parseImportedCv(text);
+  var replaceAll = document.getElementById("cv-import-replace").checked;
+  if(replaceAll){
+    state.library.experiences = []; state.library.formations = []; state.library.competences = []; state.library.sections = [];
+    state.cv.selectedExp = []; state.cv.selectedForm = [];
+  }
+  if(!state.library.sections) state.library.sections = [];
 
   function existsExp(poste, entreprise){
     var key = norm(poste) + "|" + norm(entreprise);
@@ -1621,6 +1804,12 @@ function doImportCv(){
     addedForm++;
   });
   result.skills.forEach(function(s){ if(addSkillRaw(s)) addedSkills++; });
+  var addedSections = 0;
+  (result.sections || []).forEach(function(sec){
+    if(state.library.sections.some(function(x){ return norm(x.titre) === norm(sec.titre); })) return;
+    state.library.sections.push(sec); addedSections++;
+  });
+  (result.atouts || []).forEach(function(a){ if(a && state.profil.atouts.indexOf(a) === -1) state.profil.atouts.push(a); });
 
   var filledProfil = [];
   var c = result.contact || {};
@@ -1640,16 +1829,27 @@ function doImportCv(){
     filledProfil.push("téléphone");
   }
 
-  if(addedExp || addedForm || addedSkills || filledProfil.length){
+  var fillText = function(field, val, elId, label, target, key){
+    if(val && (replaceAll || !String(target[key] || "").trim())){
+      target[key] = val; document.getElementById(elId).value = val; filledProfil.push(label);
+    }
+  };
+  fillText("titre", c.titre, "cv-titre", "titre", state.profil, "titre");
+  fillText("ville", c.ville, "cv-ville", "ville", state.profil, "ville");
+  fillText("lien", c.lien, "cv-lien", "lien", state.profil, "lien");
+  fillText("langues", result.langues, "cv-langues", "langues", state.profil, "langues");
+  fillText("resume", result.resume, "cv-resume", "résumé", state.cv, "resume");
+
+  if(addedExp || addedForm || addedSkills || addedSections || filledProfil.length){
     ta.value = "";
-    statusEl.textContent = "Importé : " + addedExp + " expérience(s), " + addedForm + " formation(s), " + addedSkills + " compétence(s)" +
+    statusEl.textContent = "Importé : " + addedExp + " expérience(s), " + addedForm + " formation(s), " + addedSkills + " compétence(s), " + addedSections + " autre(s) rubrique(s)" +
       (filledProfil.length ? ", profil pré-rempli (" + filledProfil.join(", ") + ")" : "") + " — vérifie et ajuste ci-dessous.";
   } else {
     statusEl.textContent = "Rien de nouveau détecté (peut-être déjà présent, ou pas de date reconnaissable comme « 2020 - 2022 »). Ajuste le texte ou complète à la main ci-dessous.";
   }
 
   if(state.cv.autoMode && (state.annonce.keywords || []).length){ recomposerCV(); }
-  renderExpList(); renderFormList(); renderSkillChips(); renderSkillSuggestions();
+  renderExpList(); renderFormList(); renderSkillChips(); renderSkillSuggestions(); renderSectionsList(); renderAtoutsChips();
   renderCVPreview(); refreshCVStatus(); persist();
 }
 
@@ -1741,6 +1941,60 @@ var CV_LABELS = {
   en: { profil: "Profile", experience: "Experience", formation: "Education", competences: "Skills", langues: "Languages", atouts: "Strengths", note: "Content not auto-translated — ask for a translation in the conversation." }
 };
 
+function renderSectionsList(){
+  var wrap = document.getElementById("section-list");
+  if(!wrap) return;
+  var secs = state.library.sections || [];
+  wrap.innerHTML = secs.length ? "" : '<p class="empty-note">Les rubriques qui ne sont ni expériences, ni formations, ni compétences apparaissent ici après import.</p>';
+  secs.forEach(function(sec){
+    var b = document.createElement("div");
+    b.className = "exp-block";
+    b.innerHTML = '<div class="exp-block-head"><span class="eyebrow">Rubrique</span><div class="toolbar-row"><button class="icon-btn" data-remove-sec="' + sec.id + '" title="Retirer" aria-label="Retirer">' + icon("close") + '</button></div></div>' +
+      '<div class="field"><label>Titre de la rubrique</label><input type="text" data-sf="titre" data-id="' + sec.id + '" value="' + esc(sec.titre) + '"></div>' +
+      '<div class="field"><label>Contenu (une ligne par point)</label><textarea data-sf="texte" data-id="' + sec.id + '">' + esc(sec.texte) + '</textarea></div>';
+    wrap.appendChild(b);
+  });
+  wrap.querySelectorAll("[data-sf]").forEach(function(el){
+    el.addEventListener("input", function(){
+      var it = state.library.sections.find(function(x){ return x.id === el.getAttribute("data-id"); });
+      if(it){ it[el.getAttribute("data-sf")] = el.value; }
+      renderCVPreview(); persist();
+    });
+  });
+  wrap.querySelectorAll("[data-remove-sec]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var id = btn.getAttribute("data-remove-sec");
+      state.library.sections = state.library.sections.filter(function(x){ return x.id !== id; });
+      renderSectionsList(); renderCVPreview(); persist();
+    });
+  });
+}
+
+/* Édition directe dans l'aperçu : clique sur un texte du CV pour le corriger. */
+function initPreviewEditing(){
+  var wrap = document.getElementById("cv-preview");
+  wrap.addEventListener("focusout", function(e){
+    var el = e.target.closest ? e.target.closest("[data-edit]") : null;
+    if(!el) return;
+    var parts = el.getAttribute("data-edit").split(":");   // type:id:champ
+    var type = parts[0], id = parts[1], field = parts[2];
+    var val = (field === "details" || field === "texte")
+      ? Array.prototype.map.call(el.querySelectorAll("li"), function(li){ return li.innerText.trim(); }).filter(Boolean).join("\n")
+      : el.innerText.replace(/\s+/g, " ").trim();
+    var list = type === "exp" ? state.library.experiences : type === "form" ? state.library.formations : type === "sec" ? state.library.sections : null;
+    if(type === "resume"){ state.cv.resume = val; document.getElementById("cv-resume").value = val; }
+    else if(type === "profil"){ state.profil[field] = val; var inp = document.getElementById("cv-" + field); if(inp) inp.value = val; }
+    else if(list){
+      var it = list.find(function(x){ return x.id === id; });
+      if(it){ it[field] = val; }
+    }
+    renderExpList(); renderFormList(); renderSectionsList(); renderCVPreview(); refreshCVStatus(); persist();
+  });
+  wrap.addEventListener("keydown", function(e){
+    if(e.key === "Enter" && e.target.getAttribute && e.target.getAttribute("data-edit") && e.target.tagName !== "UL"){ e.preventDefault(); e.target.blur(); }
+  });
+}
+
 function renderCVPreview(){
   var p = state.profil, cv = state.cv;
   var L = CV_LABELS[cv.lang] || CV_LABELS.fr;
@@ -1767,18 +2021,18 @@ function renderCVPreview(){
   if(p.photo){ html += '<img src="' + p.photo + '" alt="" style="width:72px;height:90px;object-fit:cover;border-radius:4px;border:1px solid #D6D0C0;flex-shrink:0;">'; }
   html += '</div>';
 
-  if(cv.resume) html += '<h3 class="cv-h">' + L.profil + '</h3><p>' + esc(cv.resume) + '</p>';
+  if(cv.resume) html += '<h3 class="cv-h">' + L.profil + '</h3><p data-edit="resume::resume" contenteditable="true" spellcheck="false">' + esc(cv.resume) + '</p>';
   if(p.atouts.length) html += '<h3 class="cv-h">' + L.atouts + '</h3><div class="cv-skills">' + p.atouts.map(function(a){ return '<span class="chip cv-skill" style="background:var(--accent-soft);color:var(--accent-ink);">' + esc(a) + '</span>'; }).join("") + '</div>';
 
   var exps = orderedList(state.library.experiences, cv.selectedExp).filter(function(e){ return e.poste || e.entreprise; });
   if(exps.length){
     html += '<h3 class="cv-h">' + L.experience + '</h3>';
     exps.forEach(function(e){
-      html += '<div class="cv-item"><div class="cv-item-head"><span>' + esc(e.poste) + '</span><span>' + esc(e.dates) + '</span></div>';
-      if(e.entreprise) html += '<div class="cv-item-sub">' + esc(e.entreprise) + '</div>';
+      html += '<div class="cv-item"><div class="cv-item-head"><span data-edit="exp:' + e.id + ':poste" contenteditable="true" spellcheck="false">' + esc(e.poste) + '</span><span data-edit="exp:' + e.id + ':dates" contenteditable="true" spellcheck="false">' + esc(e.dates) + '</span></div>';
+      if(e.entreprise) html += '<div class="cv-item-sub" data-edit="exp:' + e.id + ':entreprise" contenteditable="true" spellcheck="false">' + esc(e.entreprise) + '</div>';
       if(e.details){
         var lines = e.details.split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
-        html += '<ul>' + lines.map(function(l){ return "<li>" + esc(l) + "</li>"; }).join("") + '</ul>';
+        html += '<ul data-edit="exp:' + e.id + ':details" contenteditable="true" spellcheck="false">' + lines.map(function(l){ return "<li>" + esc(l) + "</li>"; }).join("") + '</ul>';
       }
       html += '</div>';
     });
@@ -1788,8 +2042,13 @@ function renderCVPreview(){
   if(forms.length){
     html += '<h3 class="cv-h">' + L.formation + '</h3>';
     forms.forEach(function(f){
-      html += '<div class="cv-item"><div class="cv-item-head"><span>' + esc(f.diplome) + '</span><span>' + esc(f.dates) + '</span></div>';
-      if(f.etablissement) html += '<div class="cv-item-sub">' + esc(f.etablissement) + '</div></div>';
+      html += '<div class="cv-item"><div class="cv-item-head"><span data-edit="form:' + f.id + ':diplome" contenteditable="true" spellcheck="false">' + esc(f.diplome) + '</span><span data-edit="form:' + f.id + ':dates" contenteditable="true" spellcheck="false">' + esc(f.dates) + '</span></div>';
+      if(f.etablissement) html += '<div class="cv-item-sub" data-edit="form:' + f.id + ':etablissement" contenteditable="true" spellcheck="false">' + esc(f.etablissement) + '</div>';
+      if(f.details){
+        var fl = f.details.split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
+        html += '<ul data-edit="form:' + f.id + ':details" contenteditable="true" spellcheck="false">' + fl.map(function(l){ return "<li>" + esc(l) + "</li>"; }).join("") + '</ul>';
+      }
+      html += '</div>';
     });
   }
 
@@ -1799,6 +2058,10 @@ function renderCVPreview(){
       skills.map(function(c){ return '<span class="chip cv-skill" style="background:var(--brass-soft);color:var(--brass);">' + esc(c.label) + '</span>'; }).join("") +
       '</div>';
   }
+  (state.library.sections || []).filter(function(sec){ return sec.titre || sec.texte; }).forEach(function(sec){
+    var sl = (sec.texte || "").split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
+    html += '<h3 class="cv-h">' + esc(sec.titre) + '</h3><ul data-edit="sec:' + sec.id + ':texte" contenteditable="true" spellcheck="false">' + sl.map(function(l){ return "<li>" + esc(l) + "</li>"; }).join("") + '</ul>';
+  });
   if(p.langues) html += '<h3 class="cv-h">' + L.langues + '</h3><p>' + esc(p.langues) + '</p>';
 
   if(L.note) html += '<p class="footnote" style="margin-top:18px;font-style:italic;">' + esc(L.note) + '</p>';
@@ -1890,6 +2153,12 @@ function initCVModule(){
     state.cv.selectedForm.push(item.id);
     renderFormList(); renderCVPreview(); persist();
   });
+  document.getElementById("btn-add-section").addEventListener("click", function(){
+    state.library.sections.push({ id: uid(), titre: "", texte: "" });
+    renderSectionsList(); renderCVPreview(); persist();
+  });
+  renderSectionsList();
+  initPreviewEditing();
   document.getElementById("btn-add-skill").addEventListener("click", function(){
     var input = document.getElementById("cv-skill-input");
     addSkill(input.value); input.value = "";
