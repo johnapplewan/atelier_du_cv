@@ -507,6 +507,12 @@
           </div>
 
           <div class="card" style="margin-bottom:16px;">
+            <span class="eyebrow">Texte de la lettre (modifiable)</span>
+            <p class="hint" style="margin:6px 0 10px;">Corrige directement ici : une ligne vide sépare deux paragraphes. Le bouton « Régénérer la lettre » repart de l'annonce.</p>
+            <textarea id="lettre-texte" style="min-height:260px;"></textarea>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
             <span class="eyebrow">Besoin d'une idée ?</span>
             <p class="hint" style="margin:6px 0 10px;">Clique sur une question : elle devient un nouveau point de motivation à répondre dans tes mots.</p>
             <div class="chips" id="question-bank"></div>
@@ -1051,21 +1057,29 @@ function saveFileEverywhere(filename, blob, statusElId){
   });
 }
 
-// Découpe un long aperçu (capturé en une seule image) sur autant de pages A4 que nécessaire,
-// au lieu de l'écraser sur une seule page.
-function addCanvasAsPages(doc, canvas, margin, startNewPage){
+// Découpe un long aperçu (capturé en une seule image) sur autant de pages A4 que nécessaire.
+// `breaks` : positions (en pixels du canvas) où une coupure est propre (fin de bloc) ; on coupe
+// au plus proche de la fin de page, sans scinder une ligne ni isoler un titre.
+function addCanvasAsPages(doc, canvas, margin, startNewPage, breaks){
   var pageW = doc.internal.pageSize.getWidth();
   var pageH = doc.internal.pageSize.getHeight();
   var availW = pageW - margin * 2;
   var availH = pageH - margin * 2;
   var scale = availW / canvas.width;
   var pxPerPage = Math.max(1, Math.floor(availH / scale));
-  var totalPages = Math.max(1, Math.ceil(canvas.height / pxPerPage));
+  breaks = (breaks || []).slice().sort(function(a, b){ return a - b; });
 
-  for(var p = 0; p < totalPages; p++){
-    if(startNewPage || p > 0){ doc.addPage(); }
-    var sy = p * pxPerPage;
-    var sh = Math.min(pxPerPage, canvas.height - sy);
+  var sy = 0, first = true;
+  while(sy < canvas.height - 2){
+    var end = Math.min(canvas.height, sy + pxPerPage);
+    if(end < canvas.height){
+      var cand = 0;
+      breaks.forEach(function(b){ if(b > sy + pxPerPage * 0.55 && b <= end) cand = b; });
+      if(cand) end = cand;
+    }
+    var sh = end - sy;
+    if(startNewPage || !first){ doc.addPage(); }
+    first = false;
     var sliceCanvas = document.createElement("canvas");
     sliceCanvas.width = canvas.width;
     sliceCanvas.height = sh;
@@ -1073,8 +1087,8 @@ function addCanvasAsPages(doc, canvas, margin, startNewPage){
     sctx.fillStyle = "#ffffff";
     sctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height);
     sctx.drawImage(canvas, 0, sy, canvas.width, sh, 0, 0, canvas.width, sh);
-    var imgData = sliceCanvas.toDataURL("image/jpeg", 0.92);
-    doc.addImage(imgData, "JPEG", margin, margin, availW, sh * scale);
+    doc.addImage(sliceCanvas.toDataURL("image/jpeg", 0.92), "JPEG", margin, margin, availW, sh * scale);
+    sy = end;
   }
 }
 
@@ -1082,33 +1096,74 @@ function pdfLibsReady(){
   return typeof window.html2canvas === "function" && !!(window.jspdf && window.jspdf.jsPDF);
 }
 
-// Capture chaque aperçu (exactement ce qui est affiché à l'écran) en image, puis assemble
-// ces images en pages d'un même PDF — un ou plusieurs documents, dans l'ordre donné.
-// Un document dont l'onglet n'est pas affiché a un panneau en display:none (donc une taille
-// nulle) : on le rend brièvement hors-écran le temps de la capture, puis on le remet comme avant.
+// Nombre de pages maximum visé par document (le texte est resserré pour y tenir) :
+// la lettre tient sur une page, le CV sur deux.
+var PDF_MAX_PAGES = { "cv-preview": 2, "lettre-preview": 1 };
+var PDF_CAPTURE_SCALE = 1.5;
+
+// Construit une copie du document à la largeur d'une feuille A4, hors écran, pour que la mise en page
+// du PDF ne dépende ni de la taille de la fenêtre ni de l'aperçu à l'écran.
+function makePdfClone(el, width){
+  var clone = el.cloneNode(true);
+  clone.removeAttribute("id");
+  clone.querySelectorAll("[id]").forEach(function(n){ n.removeAttribute("id"); });
+  clone.querySelectorAll("[contenteditable]").forEach(function(n){ n.removeAttribute("contenteditable"); });
+  clone.style.cssText = "position:fixed;left:-10000px;top:0;width:" + width + "px;min-height:0;padding:0;margin:0;border:0;box-shadow:none;border-radius:0;background:#fff;";
+  document.body.appendChild(clone);
+  return clone;
+}
+
+function pdfBreaks(clone){
+  var top = clone.getBoundingClientRect().top, out = [];
+  clone.querySelectorAll(".cv-item, li, p, .l-from, .l-to, .l-date, .l-obj, .cv-skills, .cv-sub").forEach(function(n){
+    out.push(Math.round((n.getBoundingClientRect().bottom - top) * PDF_CAPTURE_SCALE));
+  });
+  return out;
+}
+
+// Largeur de mise en page : 680 px donne ~9,5 pt ; on élargit (texte plus petit) jusqu'à tenir dans la limite de pages.
+function fitPdfClone(el, doc, margin){
+  var maxPages = PDF_MAX_PAGES[el.id] || 99;
+  var pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight();
+  var availW = pageW - margin * 2, availH = pageH - margin * 2;
+  var clone = null, width = 680;
+  for(; width <= 800; width += 20){
+    if(clone) clone.remove();
+    clone = makePdfClone(el, width);
+    var pagePx = availH * width / availW;
+    var pages = Math.ceil((clone.getBoundingClientRect().height / (pagePx * 0.97)));
+    if(pages <= maxPages) break;
+  }
+  return { clone: clone, width: width, maxPages: maxPages };
+}
+
 function buildPdfFromSections(elements){
   var jsPDFCtor = window.jspdf.jsPDF;
   var doc = new jsPDFCtor({ unit: "pt", format: "a4" });
-  var margin = 28;
+  var margin = 32;
   var chain = Promise.resolve();
+  var overflow = [];
   elements.forEach(function(el, i){
     chain = chain.then(function(){
       var panel = el.closest(".panel");
       var wasActive = panel && panel.classList.contains("active");
       if(panel && !wasActive){ panel.classList.add("pdf-capturing"); }
-      return window.html2canvas(el, { backgroundColor: "#ffffff", scale: 1.5, useCORS: true }).then(
+      var fit = fitPdfClone(el, doc, margin);
+      var breaks = pdfBreaks(fit.clone);
+      var restore = function(){ fit.clone.remove(); if(panel && !wasActive){ panel.classList.remove("pdf-capturing"); } };
+      return window.html2canvas(fit.clone, { backgroundColor: "#ffffff", scale: PDF_CAPTURE_SCALE, useCORS: true, windowWidth: fit.width }).then(
         function(canvas){
-          if(panel && !wasActive){ panel.classList.remove("pdf-capturing"); }
-          addCanvasAsPages(doc, canvas, margin, i > 0);
+          restore();
+          var before = doc.internal.getNumberOfPages();
+          addCanvasAsPages(doc, canvas, margin, i > 0, breaks);
+          var used = doc.internal.getNumberOfPages() - before + (i > 0 ? 0 : 0);
+          if(used > fit.maxPages) overflow.push(el.id === "cv-preview" ? "CV" : "lettre");
         },
-        function(err){
-          if(panel && !wasActive){ panel.classList.remove("pdf-capturing"); }
-          throw err;
-        }
+        function(err){ restore(); throw err; }
       );
     });
   });
-  return chain.then(function(){ return doc; });
+  return chain.then(function(){ doc._overflow = overflow; return doc; });
 }
 
 function wireExportButton(btnId, statusId, getElements, filenameFn){
@@ -1126,6 +1181,7 @@ function wireExportButton(btnId, statusId, getElements, filenameFn){
     buildPdfFromSections(getElements()).then(function(doc){
       btn.disabled = false;
       saveFileEverywhere(filenameFn(), doc.output("blob"), statusId);
+      if(doc._overflow && doc._overflow.length){ setStatus("Attention : " + doc._overflow.join(" et ") + " dépasse la longueur visée. Retire des expériences ou des rubriques pour tenir en " + (doc._overflow.indexOf("lettre") !== -1 ? "1 page (lettre)" : "2 pages (CV)") + "."); }
     }).catch(function(){
       btn.disabled = false;
       setStatus("La génération du PDF a échoué.");
@@ -2629,12 +2685,16 @@ function pickProjects(kws){
 
 function generateLettreParagraphs(){
   var l = state.lettre, an = state.annonce, en = l.lang === "en";
-  var poste = an.poste.trim() || (en ? "this position" : "ce poste");
-  var entreprise = an.entreprise.trim() || (en ? "your company" : "votre entreprise");
+  var poste = an.poste.trim();
+  var entreprise = an.entreprise.trim();
   var bank = (LETTRE_AUTO[en ? "en" : "fr"])[l.ton] || LETTRE_AUTO[en ? "en" : "fr"].formel;
   var rng = mulberry32(djb2(poste + "|" + entreprise + "|" + l.ton + "|" + l.lang + "|" + (l.seed || 1)));
   var posteTxt = /^[A-ZÀ-Ý][a-zà-ÿ]/.test(poste) ? lowerFirst(poste) : poste;
-  var fill = function(t){ return t.split("{poste}").join(posteTxt).split("{entreprise}").join(entreprise); };
+  var fill = function(t){
+    if(!poste){ return en ? "I am writing to apply for the position you advertise." : "Je vous adresse ma candidature pour le poste que vous proposez."; }
+    if(!entreprise){ t = t.replace(/ (chez|at) \{entreprise\}/, "").replace(/ que propose \{entreprise\}/, "").replace(/ que propose \{entreprise\}/, "").replace("{entreprise}", ""); }
+    return t.split("{poste}").join(posteTxt).split("{entreprise}").join(entreprise);
+  };
 
   var paras = [];
   var kws = (an.keywords || []);
@@ -2708,8 +2768,8 @@ function renderLettrePreview(){
     return;
   }
 
-  var poste = an.poste.trim() || (en ? "this position" : "ce poste");
-  var entreprise = an.entreprise.trim() || (en ? "your company" : "votre entreprise");
+  var poste = an.poste.trim();
+  var entreprise = an.entreprise.trim();
   var edited = Array.isArray(l.corps) && l.corps.length;
   var paragraphs = edited ? l.corps : generateLettreParagraphs();
 
@@ -2723,9 +2783,9 @@ function renderLettrePreview(){
 
   var html = "";
   html += '<div class="l-from">'+ (esc(state.profil.nom)||(en?"Your name":"Ton nom")) + (state.profil.ville ? "<br>"+esc(state.profil.ville) : "") + (state.profil.email? "<br>"+esc(state.profil.email):"") + (state.profil.tel? "<br>"+esc(state.profil.tel):"") + '</div>';
-  html += '<div class="l-to">' + esc(entreprise) + (l.destinataire ? "<br>" + attnLabel + esc(l.destinataire) : "") + '</div>';
+  if(entreprise || l.destinataire) html += '<div class="l-to">' + esc(entreprise) + (l.destinataire ? (entreprise ? "<br>" : "") + attnLabel + esc(l.destinataire) : "") + '</div>';
   html += '<div class="l-date">' + esc(state.profil.ville ? state.profil.ville+", " : "") + dateStr + '</div>';
-  html += '<div class="l-obj">' + objLabel + esc(poste) + '</div>';
+  if(poste) html += '<div class="l-obj">' + objLabel + esc(poste) + '</div>';
   html += '<div id="lettre-body">';
   paragraphs.forEach(function(p){ html += '<p contenteditable="true" spellcheck="false" data-lp="1">' + esc(p) + "</p>"; });
   html += '</div>';
@@ -2734,7 +2794,15 @@ function renderLettrePreview(){
   wrap.innerHTML = html;
   var note = document.getElementById("lettre-edit-note");
   if(note) note.style.display = edited ? "inline" : "none";
+  var ta = document.getElementById("lettre-texte");
+  if(ta && document.activeElement !== ta) ta.value = paragraphs.join("\n\n");
 }
+
+document.getElementById("lettre-texte").addEventListener("input", function(){
+  var parts = this.value.split(/\n\s*\n/).map(function(x){ return x.trim(); }).filter(Boolean);
+  state.lettre.corps = parts.length ? parts : null;
+  renderLettrePreview(); persist();
+});
 
 (function(){
   var wrap = document.getElementById("lettre-preview");
