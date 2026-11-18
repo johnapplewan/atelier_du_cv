@@ -204,6 +204,8 @@
   .cv-doc .cv-item-sub{ font-size:11.5px; color:#4B525C; margin:1px 0 4px; font-style:italic; }
   .cv-doc [contenteditable]:hover{ outline:1px dashed var(--accent,#888); outline-offset:2px; cursor:text; }
   .cv-doc [contenteditable]:focus{ outline:2px solid var(--accent,#888); outline-offset:2px; }
+  .cv-doc .cv-sub{ font-weight:600; margin:8px 0 2px; }
+  .cv-doc p{ margin:2px 0; }
   .cv-doc ul{ margin:4px 0 0; padding-left:16px; }
   .cv-doc li{ margin-bottom:2px; }
   .cv-doc .cv-skills{ display:flex; flex-wrap:wrap; gap:5px 8px; }
@@ -1296,7 +1298,8 @@ function cvFullText(){
   p.atouts.forEach(function(a){ parts.push(a); });
   lib.competences.forEach(function(c){ parts.push(c.label); });
   lib.experiences.forEach(function(e){ parts.push(e.poste, e.entreprise, e.details); });
-  lib.formations.forEach(function(f){ parts.push(f.diplome, f.etablissement); });
+  lib.formations.forEach(function(f){ parts.push(f.diplome, f.etablissement, f.details); });
+  (lib.sections || []).forEach(function(x){ parts.push(x.titre, x.texte); });
   return norm(parts.join(" \n "));
 }
 
@@ -1642,9 +1645,10 @@ function normalizeImportLines(raw){
     if(bm && !/^\s*\*\*/.test(l)){ bullet = true; l = bm[1]; }
     if(l.indexOf("|") !== -1 && /^\s*\|.*\|\s*$/.test(l)){ l = l.replace(/^\s*\||\|\s*$/g, "").split("|").map(function(c){ return c.trim(); }).filter(Boolean).join(" — "); }
     var wholeBold = /^\s*(\*\*|__)[^*_]+(\*\*|__)\s*:?\s*$/.test(l);
+    var um = l.match(/\]\((https?:\/\/[^)\s]+)\)/);
     var t = stripInlineMarkdown(l);
     if(!t) return;
-    out.push({ t:t, bullet:bullet, hash:hash, bold:wholeBold });
+    out.push({ t:t, bullet:bullet, hash:hash, bold:wholeBold, url: um ? um[1] : "" });
   });
   return out;
 }
@@ -1670,6 +1674,26 @@ function splitListItems(lines){
     });
   });
   return items;
+}
+
+// Texte structuré d'une rubrique libre : "## sous-titre", "- puce", sinon paragraphe
+function toStructuredText(lines){
+  var out = [], prev = null;
+  lines.forEach(function(o){
+    if(o.blank) return;
+    var t = o.t, kind;
+    if(o.bullet){ kind = "b"; out.push("- " + t); }
+    else {
+      var capsDash = /^[A-ZÀ-Ý0-9][A-ZÀ-Ý0-9'’ .&]{2,}\s+[—–-]\s/.test(t);
+      var labelled = /:\s+\S/.test(t);
+      var sub = t.length <= 100 && !/[.:!?]$/.test(t) && !labelled && (prev === null || prev === "b" || capsDash);
+      if(capsDash && t.length <= 120) sub = true;
+      kind = sub ? "s" : "p";
+      out.push(sub ? "## " + t : t);
+    }
+    prev = kind;
+  });
+  return out.join("\n");
 }
 
 function parseEntries(lines, isForm){
@@ -1730,10 +1754,27 @@ function parseImportedCv(rawText){
   }
 
   // en-tête : nom, titre, coordonnées, accroche
-  var resumeLines = [];
+  var resumeLines = [], tagLines = [];
   var nonBlank = head.filter(function(o){ return !o.blank; });
   nonBlank.forEach(function(o, i){
-    var t = o.t, em = t.match(IMPORT_EMAIL_RE), ph = t.match(IMPORT_PHONE_RE), url = t.match(/(?:https?:\/\/|www\.|linkedin\.com)[^\s,|]+/i);
+    var t = o.t;
+    var lab = t.match(/^(github|linkedin|site(?: personnel| web)?|portfolio|web|localisation|ville|adresse|lieu|disponibilit[ée]|t[ée]l(?:[ée]phone)?|e-?mail|mail)\s*:\s*(.+)$/i);
+    if(lab){
+      var lk = norm(lab[1]), lv = lab[2].trim();
+      if(/github|linkedin|site|portfolio|web/.test(lk)){
+        var href = (o.url || lv).replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "");
+        contact.lien = contact.lien ? contact.lien + " · " + href : href;
+      } else if(/localisation|ville|adresse|lieu/.test(lk)){ contact.ville = lv; }
+      else if(/disponib/.test(lk)){ contact.dispo = /pr[ée]ciser/i.test(lv) ? "" : lv; }
+      else if(/tel/.test(lk)){ contact.tel = lv; }
+      else { contact.email = (lv.match(IMPORT_EMAIL_RE) || [lv])[0]; }
+      return;
+    }
+    if((t.match(/[•·|]/g) || []).length >= 2 && !IMPORT_EMAIL_RE.test(t)){
+      t.split(/\s*[•·|]\s*/).forEach(function(x){ x = x.trim(); if(x) tagLines.push(x); });
+      return;
+    }
+    var em = t.match(IMPORT_EMAIL_RE), ph = t.match(IMPORT_PHONE_RE), url = t.match(/(?:https?:\/\/|www\.|linkedin\.com)[^\s,|]+/i);
     if(em || ph || url){
       if(em && !contact.email) contact.email = em[0];
       if(ph && !contact.tel && !detectDateInLine(t)) contact.tel = ph[0].replace(/\s+/g, " ").trim();
@@ -1742,23 +1783,40 @@ function parseImportedCv(rawText){
       if(rest && rest.length <= 40 && !contact.ville && !/\d/.test(rest)) contact.ville = rest;
       return;
     }
-    if(!contact.nom && t.length <= 40 && t.split(/\s+/).length <= 5 && !/\d/.test(t)){ contact.nom = t; return; }
+    if(!contact.nom && t.length <= 40 && t.split(/\s+/).length <= 5 && !/\d/.test(t) && t.indexOf(":") === -1 && t !== t.toUpperCase()){ contact.nom = t; return; }
     if(!contact.titre && t.length <= 80 && !/[.!?]$/.test(t)){ contact.titre = t; return; }
     resumeLines.push(t);
   });
 
-  var out = { experiences:[], formations:[], skills:[], sections:[], contact:contact, resume:resumeLines.join(" "), langues:"", atouts:[] };
+  var out = { experiences:[], formations:[], skills:[], sections:[], contact:contact, resume:resumeLines.join(" "), langues:"", atouts:tagLines };
 
   secs.forEach(function(s){
     var content = s.lines;
     if(s.key === "exp"){ out.experiences = out.experiences.concat(parseEntries(content, false)); }
-    else if(s.key === "form"){ out.formations = out.formations.concat(parseEntries(content, true)); }
-    else if(s.key === "comp"){ out.skills = out.skills.concat(splitListItems(content.filter(function(o){ return !o.blank; }))); }
+    else if(s.key === "form"){
+      var fe = parseEntries(content, true), extra = [];
+      fe.forEach(function(f){
+        if(!f.diplome && !f.dates){      // simples puces : une formation par ligne, le reste est rangé ailleurs
+          f.details.split("\n").forEach(function(l){
+            if(/langue|fran[çc]ais|anglais|espagnol|allemand|bilingue|bilingual/i.test(l)){ out.langues = (out.langues ? out.langues + ", " : "") + l; }
+            else if(/permis|mobilit|disponib|v[ée]hicul/i.test(l)){ extra.push("- " + l); }
+            else { out.formations.push({ id: uid(), diplome: l, etablissement: "", dates: "", details: "" }); }
+          });
+        } else { out.formations.push(f); }
+      });
+      if(extra.length) out.sections.push({ id: uid(), titre: "Informations complémentaires", texte: extra.join("\n") });
+    }
+    else if(s.key === "comp"){
+      var cl = content.filter(function(o){ return !o.blank; });
+      var structured = cl.some(function(o, i){ return (!o.bullet && cl[i+1] && cl[i+1].bullet) || (o.bullet && o.t.split(/\s+/).length > 4); });
+      if(structured){ out.sections.push({ id: uid(), titre: s.title, texte: toStructuredText(content) }); }
+      else { out.skills = out.skills.concat(splitListItems(cl)); }
+    }
     else if(s.key === "atouts"){ out.atouts = out.atouts.concat(splitListItems(content.filter(function(o){ return !o.blank; }))); }
     else if(s.key === "langues"){ out.langues = (out.langues ? out.langues + ", " : "") + splitListItems(content.filter(function(o){ return !o.blank; })).join(", "); }
     else if(s.key === "profil"){ out.resume = (out.resume ? out.resume + " " : "") + content.filter(function(o){ return !o.blank; }).map(function(o){ return o.t; }).join(" "); }
     else {
-      var txt = content.filter(function(o){ return !o.blank; }).map(function(o){ return o.t; }).join("\n");
+      var txt = toStructuredText(content);
       if(txt) out.sections.push({ id: uid(), titre: s.title, texte: txt });
     }
   });
@@ -1941,6 +1999,29 @@ var CV_LABELS = {
   en: { profil: "Profile", experience: "Experience", formation: "Education", competences: "Skills", langues: "Languages", atouts: "Strengths", note: "Content not auto-translated — ask for a translation in the conversation." }
 };
 
+function structuredToHtml(texte){
+  var html = "", inList = false;
+  (texte || "").split("\n").map(function(l){ return l.trim(); }).filter(Boolean).forEach(function(l){
+    var isB = /^[-•*]\s+/.test(l), isS = /^##\s+/.test(l);
+    if(isB && !inList){ html += "<ul>"; inList = true; }
+    if(!isB && inList){ html += "</ul>"; inList = false; }
+    if(isB) html += "<li>" + esc(l.replace(/^[-•*]\s+/, "")) + "</li>";
+    else if(isS) html += '<p class="cv-sub">' + esc(l.replace(/^##\s+/, "")) + "</p>";
+    else html += "<p>" + esc(l) + "</p>";
+  });
+  if(inList) html += "</ul>";
+  return html;
+}
+function htmlToStructured(root){
+  var out = [];
+  Array.prototype.forEach.call(root.children, function(el){
+    if(el.tagName === "UL"){ Array.prototype.forEach.call(el.querySelectorAll("li"), function(li){ var t = li.innerText.trim(); if(t) out.push("- " + t); }); }
+    else { var t2 = el.innerText.trim(); if(t2) out.push((el.classList.contains("cv-sub") ? "## " : "") + t2); }
+  });
+  if(!out.length){ var raw = root.innerText.trim(); if(raw) out.push(raw); }
+  return out.join("\n");
+}
+
 function renderSectionsList(){
   var wrap = document.getElementById("section-list");
   if(!wrap) return;
@@ -1951,7 +2032,7 @@ function renderSectionsList(){
     b.className = "exp-block";
     b.innerHTML = '<div class="exp-block-head"><span class="eyebrow">Rubrique</span><div class="toolbar-row"><button class="icon-btn" data-remove-sec="' + sec.id + '" title="Retirer" aria-label="Retirer">' + icon("close") + '</button></div></div>' +
       '<div class="field"><label>Titre de la rubrique</label><input type="text" data-sf="titre" data-id="' + sec.id + '" value="' + esc(sec.titre) + '"></div>' +
-      '<div class="field"><label>Contenu (une ligne par point)</label><textarea data-sf="texte" data-id="' + sec.id + '">' + esc(sec.texte) + '</textarea></div>';
+      '<div class="field"><label>Contenu (« - » pour une puce, « ## » pour un sous-titre)</label><textarea data-sf="texte" data-id="' + sec.id + '">' + esc(sec.texte) + '</textarea></div>';
     wrap.appendChild(b);
   });
   wrap.querySelectorAll("[data-sf]").forEach(function(el){
@@ -1978,7 +2059,7 @@ function initPreviewEditing(){
     if(!el) return;
     var parts = el.getAttribute("data-edit").split(":");   // type:id:champ
     var type = parts[0], id = parts[1], field = parts[2];
-    var val = (field === "details" || field === "texte")
+    var val = field === "texte" && type === "sec" ? htmlToStructured(el) : (field === "details")
       ? Array.prototype.map.call(el.querySelectorAll("li"), function(li){ return li.innerText.trim(); }).filter(Boolean).join("\n")
       : el.innerText.replace(/\s+/g, " ").trim();
     var list = type === "exp" ? state.library.experiences : type === "form" ? state.library.formations : type === "sec" ? state.library.sections : null;
@@ -2059,8 +2140,7 @@ function renderCVPreview(){
       '</div>';
   }
   (state.library.sections || []).filter(function(sec){ return sec.titre || sec.texte; }).forEach(function(sec){
-    var sl = (sec.texte || "").split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
-    html += '<h3 class="cv-h">' + esc(sec.titre) + '</h3><ul data-edit="sec:' + sec.id + ':texte" contenteditable="true" spellcheck="false">' + sl.map(function(l){ return "<li>" + esc(l) + "</li>"; }).join("") + '</ul>';
+    html += '<h3 class="cv-h">' + esc(sec.titre) + '</h3><div data-edit="sec:' + sec.id + ':texte" contenteditable="true" spellcheck="false">' + structuredToHtml(sec.texte) + '</div>';
   });
   if(p.langues) html += '<h3 class="cv-h">' + L.langues + '</h3><p>' + esc(p.langues) + '</p>';
 
