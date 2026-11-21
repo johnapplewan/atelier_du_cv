@@ -42,6 +42,7 @@
     <tr><td>Lecture d'une annonce par son lien (<code>/api/annonce</code>)</td><td>Adresse (URL) de l'annonce saisie par l'utilisateur</td><td>Site de l'annonce, via le service de l'éditeur</td><td>Aucune</td></tr>
     <tr><td>Recherche d'un lieu (<code>/api/lieu</code>)</td><td>Nom de commune saisi</td><td>API Adresse (data.gouv.fr)</td><td>Aucune</td></tr>
     <tr><td>Recherche d'entreprises (<code>/api/entreprises</code>)</td><td>Secteur (codes d'activité), zone, taille</td><td>API Recherche d'entreprises (data.gouv.fr)</td><td>Aucune</td></tr>
+    <tr><td>Recherche d'offres (<code>/api/offres</code>)</td><td>Mots-clés, commune, rayon, contrat, période</td><td>API Offres d'emploi (France Travail)</td><td>Aucune</td></tr>
   </tbody>
 </table>
 <p>Ces services reçoivent uniquement les critères de recherche ou l'adresse de l'annonce, jamais votre nom, vos coordonnées ni le contenu de votre CV ou de vos lettres. Ils ne servent qu'à répondre à votre demande.</p>
@@ -50,8 +51,9 @@
 <h2>4. Assistant IA (facultatif)</h2>
 <p>L'application n'appelle aucun service d'IA de sa propre initiative. Si vous utilisez l'assistant : soit vous copiez vous-même un message préparé par l'application dans votre compte Claude (Anthropic), soit, dans la version publiée sur claude.ai, la page demande à Claude avec votre compte et après votre accord. Les textes préparés ne contiennent ni votre nom, ni vos coordonnées, ni votre photo, ni vos liens ; ils comprennent l'annonce, vos expériences, vos compétences, votre « voix » et vos remarques. Leur traitement par Anthropic relève de vos conditions et de la politique de confidentialité d'Anthropic. Vous voyez le texte avant tout envoi.</p>
 
-<h2>5. Offres d'emploi France Travail (fonction prévue)</h2>
-<p>Une recherche d'offres s'appuyant sur les API de France Travail est prévue. Avant son activation, cette politique sera mise à jour. Les principes retenus : appels faits depuis le service de l'éditeur, sans conserver les offres au-delà de l'affichage, mention de la source, aucun envoi de données personnelles de l'utilisateur à France Travail.</p>
+<h2>5. Offres d'emploi France Travail</h2>
+<p>L'onglet « Offres » interroge l'API « Offres d'emploi » de France Travail (francetravail.io) lorsqu'elle est activée sur le site. Les appels sont faits par le service de l'éditeur, avec les identifiants de l'application stockés côté serveur : ils ne sont jamais visibles dans le navigateur. Seuls les critères de recherche saisis (mots-clés, commune, rayon, type de contrat, période, mention « débutant accepté ») sont transmis ; ni votre nom, ni vos coordonnées, ni le contenu de votre CV ou de vos lettres. Les offres reçues sont affichées pendant la recherche et ne sont pas conservées par l'éditeur ; si vous préparez une candidature à partir d'une offre, son texte est enregistré dans votre navigateur uniquement. La source (France Travail) est indiquée et un lien renvoie vers l'offre d'origine.</p>
+<p>Le traitement des données par France Travail relève de ses propres conditions d'utilisation et de sa politique de protection des données.</p>
 
 <h2>6. Cookies, mesure d'audience, tiers</h2>
 <p>Aucun cookie n'est déposé. Aucune mesure d'audience, aucun pixel, aucune publicité. Les polices et bibliothèques sont hébergées sur le site lui-même : aucune ressource n'est chargée depuis un service tiers (pas de Google Fonts ni de CDN).</p>

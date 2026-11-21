@@ -43,3 +43,16 @@ robots (LinkedIn, Indeed…) ne peuvent pas être lus : on colle alors le texte 
 - Polices (`vendor/fonts*`) et bibliothèques PDF (`vendor/*.js`) sont hébergées sur le site : aucune ressource tierce n'est chargée.
 - `_headers` : politique de sécurité du contenu (CSP), HSTS, X-Frame-Options, etc. (Cloudflare Pages).
 - `robots.txt` et `sitemap.xml` : à garder à jour si le domaine change.
+
+## Offres France Travail (API « Offres d'emploi »)
+
+`functions/api/offres.js` interroge l'API France Travail. Les identifiants ne sont jamais dans le code : ils se définissent dans
+Cloudflare → Workers & Pages → projet → Settings → Variables and Secrets (type « Secret » pour les deux premiers), puis redéployer :
+
+| Variable | Rôle |
+|---|---|
+| `FT_CLIENT_ID` | identifiant client de l'application créée sur francetravail.io |
+| `FT_CLIENT_SECRET` | clé secrète de cette application |
+| `FT_SCOPE` | facultatif ; défaut `api_offresdemploiv2 o2dsoffre` (à aligner sur les scopes affichés pour l'application) |
+
+Tant que `FT_CLIENT_ID` et `FT_CLIENT_SECRET` sont absents, l'onglet « Offres » indique que la recherche n'est pas activée.

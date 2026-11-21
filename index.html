@@ -359,13 +359,14 @@
     <div class="rail-tabs">
       <button class="rail-item" data-tab="profils"><span class="num">01</span>Mes profils<span class="status-dot" id="dot-profils"></span></button>
       <button class="rail-item" data-tab="recherche"><span class="num">02</span>Recherche<span class="status-dot" id="dot-recherche"></span></button>
-      <button class="rail-item" data-tab="freelance"><span class="num">03</span>Freelance<span class="status-dot" id="dot-freelance"></span></button>
-      <button class="rail-item is-active" data-tab="annonce"><span class="num">04</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
-      <button class="rail-item" data-tab="cv"><span class="num">05</span>CV<span class="status-dot" id="dot-cv"></span></button>
-      <button class="rail-item" data-tab="lettre"><span class="num">06</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
-      <button class="rail-item" data-tab="annexe"><span class="num">07</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
-      <button class="rail-item" data-tab="candidatures"><span class="num">08</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
-      <button class="rail-item" data-tab="entretien"><span class="num">09</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
+      <button class="rail-item" data-tab="offres"><span class="num">03</span>Offres<span class="status-dot" id="dot-offres"></span></button>
+      <button class="rail-item" data-tab="freelance"><span class="num">04</span>Freelance<span class="status-dot" id="dot-freelance"></span></button>
+      <button class="rail-item is-active" data-tab="annonce"><span class="num">05</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
+      <button class="rail-item" data-tab="cv"><span class="num">06</span>CV<span class="status-dot" id="dot-cv"></span></button>
+      <button class="rail-item" data-tab="lettre"><span class="num">07</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
+      <button class="rail-item" data-tab="annexe"><span class="num">08</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
+      <button class="rail-item" data-tab="candidatures"><span class="num">09</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
+      <button class="rail-item" data-tab="entretien"><span class="num">10</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
     </div>
     <div class="rail-foot">Ta bibliothèque (expériences, compétences, lettres, candidatures) reste dans ce navigateur. Seuls le lien d'une annonce ou les critères d'une recherche d'entreprises transitent, jamais ton CV ni tes coordonnées.</div>
   </nav>
@@ -421,6 +422,39 @@
         </div>
         <div id="rech-results"></div>
         <button class="btn btn-ghost btn-sm" id="rech-more" type="button" style="display:none;margin-top:8px;">Voir plus d'entreprises</button>
+      </div>
+    </section>
+
+    <!-- PANEL OFFRES -->
+    <section class="panel" id="panel-offres">
+      <div class="panel-head">
+        <h2>Offres d'emploi</h2>
+        <p>Cherche les offres publiées sur France Travail pour ton profil, près de chez toi. Un clic prépare la candidature : annonce, mots-clés, CV et lettre sur mesure.</p>
+      </div>
+      <div style="max-width:980px;">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="row2">
+            <div class="field"><label for="off-profil">Profil de recherche</label><select id="off-profil"></select></div>
+            <div class="field"><label for="off-q">Mots-clés</label><input type="text" id="off-q" placeholder="ex. développeur web, chargé de communication"></div>
+          </div>
+          <p class="hint" id="off-exp-note" style="margin:-4px 0 8px;"></p>
+          <div class="row2">
+            <div class="field"><label for="off-lieu">Lieu</label>
+              <div style="display:flex;gap:8px;"><input type="text" id="off-lieu" placeholder="ex. Reims"><button class="btn btn-sm" id="btn-off-lieu" type="button">Chercher le lieu</button></div>
+              <div class="chips" id="off-lieu-list" style="margin-top:6px;"></div></div>
+            <div class="field"><label for="off-dist">Rayon</label><select id="off-dist"><option value="10">10 km</option><option value="20" selected>20 km</option><option value="50">50 km</option><option value="100">100 km</option></select></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="off-contrat">Contrat</label><select id="off-contrat"><option value="">Tous</option><option value="CDI">CDI</option><option value="CDD">CDD</option><option value="MIS">Intérim</option><option value="LIB">Profession libérale / indépendant</option></select></div>
+            <div class="field"><label for="off-depuis">Publiée depuis</label><select id="off-depuis"><option value="">Toute période</option><option value="1">1 jour</option><option value="3">3 jours</option><option value="7">7 jours</option><option value="14">14 jours</option><option value="31">31 jours</option></select></div>
+          </div>
+          <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-off-go" type="button">Rechercher des offres</button></div>
+          <p class="hint" id="off-status" style="margin:10px 0 0;"></p>
+          <p class="hint" style="margin:6px 0 0;">Seuls les mots-clés, le lieu et les filtres sont transmis à France Travail ; ni ton nom, ni tes coordonnées, ni ton CV.</p>
+        </div>
+        <div id="off-results"></div>
+        <button class="btn btn-ghost btn-sm" id="off-more" type="button" style="display:none;margin-top:8px;">Voir plus d'offres</button>
+        <p class="hint" id="off-attrib" style="display:none;margin-top:14px;">Offres issues de France Travail (francetravail.io), affichées le temps de la recherche et non conservées. La candidature se fait sur la source de l'offre.</p>
       </div>
     </section>
 
@@ -1284,11 +1318,12 @@ function persist(){
 
 /* ---------------- onglets & statut ---------------- */
 
-var TABS = ["profils","recherche","freelance","annonce","cv","lettre","annexe","candidatures","entretien"];
+var TABS = ["profils","recherche","offres","freelance","annonce","cv","lettre","annexe","candidatures","entretien"];
 var activeTab = "annonce";
 
 function statusFor(tab){
   if(tab === "profils"){ return state.profils.length ? "ready" : "empty"; }
+  if(tab === "offres"){ return (state.offresResultats || []).length ? "ready" : "empty"; }
   if(tab === "freelance"){ return flState().services.some(function(s){ return (s.titre || "").trim(); }) ? "ready" : "empty"; }
   if(tab === "recherche"){ return (state.rechercheResultats || []).length ? "ready" : "empty"; }
   if(tab === "annonce"){
@@ -1338,6 +1373,7 @@ function switchTab(tab){
   if(tab === "profils" && typeof renderProfils === "function"){ renderProfils(); }
   if(tab === "recherche" && typeof rechProfilOptions === "function"){ rechProfilOptions(); renderRechResults(); }
   if(tab === "freelance" && typeof renderFreelance === "function"){ renderFreelance(); }
+  if(tab === "offres" && typeof offProfilOptions === "function"){ offProfilOptions(); renderOffResults(); }
   TABS.forEach(function(t){
     document.getElementById("panel-"+t).classList.toggle("active", t === tab);
     document.querySelector('.rail-item[data-tab="'+t+'"]').classList.toggle("is-active", t === tab);
@@ -3876,7 +3912,8 @@ function analyseEmetteur(an){
   else if(KNOWN_RECRUITERS.test(name)){ type = "recruteur"; raisons.push("le nom évoque un cabinet de recrutement"); }
   else if(/notre client|pour le compte d[e'’]|soci[ée]t[ée] cliente|entreprise cliente|client final|l['’]un de nos clients|un de nos clients|cabinet de recrutement|nous recrutons pour|soci[ée]t[ée] confidentielle|entreprise confidentielle/i.test(text)){ type = "recruteur"; raisons.push("le texte parle d'un client (« notre client », « pour le compte de »…)"); }
   else if(KNOWN_ESN.test(name) || /en r[ée]gie|chez nos clients|chez l['’]un de nos clients|mission chez (?:un|le) client|intervenir chez/i.test(text)){ type = "esn"; raisons.push(KNOWN_ESN.test(name) ? "le nom évoque une ESN" : "missions chez des clients"); }
-  else if(name.trim() || text.trim()){ type = "direct"; raisons.push(name.trim() ? "aucun signe d'intermédiaire : l'entreprise recrute directement" : "aucun signe d'intermédiaire"); }
+  else if(name.trim()){ type = "direct"; raisons.push("aucun signe d'intermédiaire : l'entreprise recrute directement"); }
+  else if(text.trim()){ raisons.push("entreprise non communiquée : possiblement un cabinet ou une agence, à préciser si tu le sais"); }
   var client = "";
   var m = text.match(/pour le compte d[e'’]\s*([A-ZÀ-Ý][\wÀ-ÿ&'’.\- ]{2,40}?)(?:[,.;\n]|\s+(?:qui|dont|leader|sp[ée]cialis))/);
   if(m) client = m[1].trim();
@@ -4686,6 +4723,130 @@ function generateOffreServiceParagraphs(){
         ? "Je peux transmettre mon CV et des références détaillées pour que mon profil soit référencé, et je reste disponible pour un échange de vingt minutes."
         : "Je peux envoyer mon CV et des références détaillées, et je reste disponible pour un échange de vingt minutes à votre convenance."));
   return paras.map(cleanLetterText);
+}
+
+/* ===================== OFFRES D'EMPLOI (France Travail) ===================== */
+
+var offPlace = null, offLast = null;
+state.offresResultats = [];
+
+function offProfilOptions(){
+  var sel = document.getElementById("off-profil"), cur = sel.value;
+  if(!state.profils.length){ sel.innerHTML = '<option value="">Aucun profil : la recherche utilise seulement les mots-clés saisis</option>'; return; }
+  sel.innerHTML = '<option value="">Aucun profil précis</option>' + state.profils.map(function(p){ return '<option value="' + p.id + '">' + esc(p.nom) + (p.modes && p.modes.debutant ? " (débutants acceptés)" : "") + '</option>'; }).join("");
+  if(cur && state.profils.some(function(p){ return p.id === cur; })) sel.value = cur;
+  else if(state.profils.length){ sel.value = state.profils[0].id; offLoadProfil(); }
+}
+function offCurrentProfil(){ return state.profils.find(function(p){ return p.id === document.getElementById("off-profil").value; }) || null; }
+function offLoadProfil(){
+  var pr = offCurrentProfil(); if(!pr) return;
+  document.getElementById("off-q").value = pr.titreVise || "";
+  if(!document.getElementById("off-lieu").value) document.getElementById("off-lieu").value = pr.lieu || "";
+  var c = (pr.contrats || [])[0];
+  var map = { "CDI":"CDI", "CDD":"CDD", "Intérim":"MIS", "Freelance":"LIB", "Alternance":"", "Stage":"" };
+  document.getElementById("off-contrat").value = map[c] || "";
+  document.getElementById("off-exp-note").textContent = pr.modes && pr.modes.debutant ? "Ce profil n'a pas d'expérience dans le domaine : la recherche est limitée aux offres « débutant accepté »." : "";
+}
+document.getElementById("off-profil").addEventListener("change", function(){ offPlace = null; document.getElementById("off-lieu").value = ""; offLoadProfil(); });
+
+function offLieuSearch(){
+  var q = document.getElementById("off-lieu").value.trim(), box = document.getElementById("off-lieu-list"), st = document.getElementById("off-status");
+  box.innerHTML = ""; if(q.length < 2){ st.textContent = "Écris le nom d'une commune."; return; }
+  st.textContent = "Recherche du lieu…";
+  flFetch("/api/lieu?q=" + encodeURIComponent(q)).then(function(d){
+    if(!d.ok || !(d.places || []).length){ st.textContent = "Aucune commune trouvée."; return; }
+    st.textContent = "Choisis la commune :";
+    d.places.forEach(function(pl){
+      var b = document.createElement("button"); b.type = "button"; b.className = "chip suggest"; b.textContent = pl.label + " (" + pl.postcode + ")";
+      b.addEventListener("click", function(){ offPlace = pl; document.getElementById("off-lieu").value = pl.label; box.innerHTML = ""; st.textContent = "Lieu : " + pl.label + ", " + pl.context + "."; });
+      box.appendChild(b);
+    });
+    if(d.places.length === 1) box.firstChild.click();
+  }, function(){ st.textContent = rechOffline(); });
+}
+document.getElementById("btn-off-lieu").addEventListener("click", offLieuSearch);
+document.getElementById("off-lieu").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); offLieuSearch(); } });
+document.getElementById("off-lieu").addEventListener("input", function(){ offPlace = null; });
+
+function offRun(page){
+  var st = document.getElementById("off-status"), pr = offCurrentProfil();
+  var q = document.getElementById("off-q").value.trim();
+  var qs = ["page=" + (page || 1)];
+  if(q) qs.push("q=" + encodeURIComponent(q));
+  if(offPlace){ qs.push("commune=" + encodeURIComponent(offPlace.citycode), "distance=" + document.getElementById("off-dist").value); }
+  else if(document.getElementById("off-lieu").value.trim()){ st.textContent = "Choisis la commune avec « Chercher le lieu »."; return; }
+  var ct = document.getElementById("off-contrat").value; if(ct) qs.push("contrat=" + ct);
+  var dp = document.getElementById("off-depuis").value; if(dp) qs.push("depuis=" + dp);
+  if(pr && pr.modes && pr.modes.debutant) qs.push("experience=D");
+  if(!q && !offPlace){ st.textContent = "Indique un mot-clé ou un lieu."; return; }
+  var btn = document.getElementById("btn-off-go"); btn.disabled = true; st.textContent = "Recherche en cours…";
+  flFetch("/api/offres?" + qs.join("&")).then(function(d){
+    btn.disabled = false;
+    if(!d.ok){
+      var msg = {
+        not_configured: "La recherche d'offres n'est pas encore activée sur ce site (identifiants France Travail non renseignés côté serveur).",
+        auth_scope: "France Travail refuse les autorisations (scopes) demandées : vérifie que ton application est bien abonnée à l'API « Offres d'emploi » sur francetravail.io, et que la variable FT_SCOPE correspond.",
+        auth_client: "Identifiant ou clé secrète refusés par France Travail : vérifie les variables FT_CLIENT_ID et FT_CLIENT_SECRET.",
+        auth_denied: "France Travail refuse l'accès à l'API : vérifie l'abonnement de ton application.",
+        rate: "Trop de recherches d'un coup : réessaie dans une minute.",
+        criteria_required: "Indique un mot-clé ou un lieu."
+      }[d.reason] || ("La recherche n'a pas abouti (" + (d.reason || "erreur") + ").");
+      st.textContent = msg; return;
+    }
+    offLast = { page: d.page, totalPages: d.totalPages };
+    state.offresResultats = (page > 1 ? state.offresResultats : []).concat(d.results);
+    st.textContent = d.total ? d.total + " offre(s) trouvée(s) (France Travail), les plus récentes d'abord." : "Aucune offre pour ces critères : élargis le rayon, la période ou les mots-clés.";
+    renderOffResults(); refreshStatusDots();
+  }, function(){ btn.disabled = false; st.textContent = rechOffline(); });
+}
+document.getElementById("btn-off-go").addEventListener("click", function(){ offRun(1); });
+document.getElementById("off-more").addEventListener("click", function(){ offRun((offLast ? offLast.page : 1) + 1); });
+
+// Correspondance entre une offre et la base de la personne (mots-clés de l'offre retrouvés dans ses expériences, formations, projets).
+function offMatch(o){
+  var kws = extractKeywords(o.intitule + " " + o.description).slice(0, 18);
+  if(!kws.length) return { pct: null, found: [], missing: [] };
+  var own = ownMaterialText(), found = [], missing = [];
+  kws.forEach(function(k){ (hasTerm(own, k.term) ? found : missing).push(k.term); });
+  return { pct: Math.round(found.length / kws.length * 100), found: found, missing: missing };
+}
+
+function renderOffResults(){
+  var wrap = document.getElementById("off-results"), ec = state.profil.offresEcartees || {};
+  var list = state.offresResultats.filter(function(o){ return !ec[o.id]; });
+  document.getElementById("off-more").style.display = (offLast && offLast.page < offLast.totalPages && state.offresResultats.length) ? "inline-flex" : "none";
+  document.getElementById("off-attrib").style.display = state.offresResultats.length ? "block" : "none";
+  if(!list.length){ wrap.innerHTML = ""; return; }
+  wrap.innerHTML = "";
+  list.forEach(function(o){
+    var m = offMatch(o), tier = m.pct === null ? "caution" : atsTier(m.pct);
+    var d = document.createElement("div"); d.className = "exp-block";
+    d.innerHTML = '<div class="exp-block-head"><strong>' + esc(o.intitule) + '</strong>' + (m.pct !== null ? '<span class="tier-pill ' + tier + '" title="Mots-clés de l\'offre retrouvés dans ta base">correspondance ' + m.pct + '%</span>' : '') + '</div>' +
+      '<p class="hint" style="margin:0 0 6px;">' + esc(o.entreprise || "Entreprise non communiquée") + ' · ' + esc(o.lieu) + ' · ' + esc(o.contrat) + (o.salaire ? ' · ' + esc(o.salaire) : '') + (o.experience ? ' · ' + esc(o.experience) : '') + (o.date ? ' · publiée le ' + esc(o.date) : '') + '</p>' +
+      '<p style="font-size:13px;color:var(--ink-600);line-height:1.5;margin:0 0 8px;">' + esc(o.description.replace(/\s+/g, " ").slice(0, 260)) + (o.description.length > 260 ? "…" : "") + '</p>' +
+      (m.missing.length ? '<p class="hint" style="margin:0 0 8px;">Mots-clés de l\'offre absents de ta base : ' + esc(m.missing.slice(0, 6).join(", ")) + '.</p>' : '') +
+      '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-off-use="' + esc(o.id) + '">Candidater avec cette offre</button>' +
+      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(o.url) + '">Voir sur France Travail</a>' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-off-skip="' + esc(o.id) + '">Écarter</button></div>';
+    wrap.appendChild(d);
+  });
+  wrap.querySelectorAll("[data-off-use]").forEach(function(b){ b.addEventListener("click", function(){ startFromOffre(state.offresResultats.find(function(o){ return o.id === b.getAttribute("data-off-use"); })); }); });
+  wrap.querySelectorAll("[data-off-skip]").forEach(function(b){ b.addEventListener("click", function(){ state.profil.offresEcartees = state.profil.offresEcartees || {}; state.profil.offresEcartees[b.getAttribute("data-off-skip")] = true; persist(); renderOffResults(); }); });
+}
+
+// Nouvelle candidature pré-remplie avec l'offre (poste, entreprise, texte, lieu, contrat, salaire, lien).
+function startFromOffre(o){
+  if(!o) return;
+  persist();
+  document.getElementById("btn-new-dossier").click();
+  anPoste.value = o.intitule; anEntreprise.value = o.entreprise || ""; anUrl.value = o.url; anTexte.value = o.description;
+  state.annonce.meta = { lieu: o.lieu, contrat: o.contrat, salaire: o.salaire, date: o.date, secteur: "" };
+  state.annonce.source = "france-travail";
+  reanalyzeAnnonce();
+  var pr = offCurrentProfil();
+  if(pr){ state.cv.profilId = pr.id; state.cv.profilManuel = true; applyProfilToDossier(pr.id, false); }
+  syncDossierUI(); persist();
+  switchTab("cv");
 }
 
 /* ===================== CANDIDATURES MULTIPLES : barre, bascule, sauvegarde locale ===================== */
