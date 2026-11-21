@@ -3,12 +3,17 @@
 // Les identifiants restent côté serveur (variables d'environnement Cloudflare, jamais dans le navigateur) :
 //   FT_CLIENT_ID, FT_CLIENT_SECRET   (obligatoires)
 //   FT_SCOPE                         (facultatif, défaut : "api_offresdemploiv2 o2dsoffre")
+//   FT_TOKEN_URL                     (facultatif, remplace l'adresse du serveur d'authentification)
 // Seuls les critères de recherche sont transmis ; aucune donnée personnelle de l'utilisateur, aucune offre conservée.
 //
 // Paramètres : q (mots-clés) · commune (code INSEE, 5 chiffres) · distance (km) · contrat (CDI,CDD,MIS,LIB,...) ·
 //              experience (D = débutant accepté, S = souhaitée, E = exigée) · depuis (1,3,7,14,31 jours) · page (1…)
 
-const TOKEN_URL = "https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=/partenaire";
+// Serveur d'authentification « Partenaires » de France Travail (royaume /partenaire). L'ancienne adresse reste en secours.
+const TOKEN_URLS = [
+  "https://authentification-partenaire.francetravail.io/connexion/oauth2/access_token?realm=/partenaire",
+  "https://entreprise.francetravail.fr/connexion/oauth2/access_token?realm=/partenaire",
+];
 const SEARCH_URL = "https://api.francetravail.io/partenaire/offresdemploi/v2/offres/search";
 const PER_PAGE = 20;
 const CONTRATS = ["CDI", "CDD", "MIS", "SAI", "LIB", "REPRISE", "DDI", "DIN", "FRA", "CCE"];
@@ -30,8 +35,16 @@ async function getToken(env, fetchImpl) {
     client_secret: env.FT_CLIENT_SECRET,
     scope: env.FT_SCOPE || "api_offresdemploiv2 o2dsoffre",
   });
-  const res = await fetchImpl(TOKEN_URL, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: body.toString() });
-  const data = await res.json().catch(() => ({}));
+  const urls = env.FT_TOKEN_URL ? [env.FT_TOKEN_URL] : TOKEN_URLS;
+  let res = null, data = {};
+  for (const u of urls) {
+    try {
+      res = await fetchImpl(u, { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: body.toString() });
+      data = await res.json().catch(() => ({}));
+      break; // une réponse HTTP (même un refus) est définitive : on n'essaie l'autre adresse qu'en cas d'échec réseau
+    } catch (e) { res = null; }
+  }
+  if (!res) return { error: "token", detail: "serveur d'authentification injoignable" };
   if (!res.ok || !data.access_token) {
     const err = String(data.error || "");
     return { error: err === "invalid_scope" ? "scope" : (err === "invalid_client" ? "client" : "token"), detail: String(data.error_description || err || res.status).slice(0, 200) };
@@ -75,7 +88,7 @@ export async function onRequestGet(context) {
     const res = await fetchImpl(`${SEARCH_URL}?${q.toString()}`, { signal: ctrl.signal, headers: { authorization: "Bearer " + t.token, accept: "application/json" } });
     if (res.status === 204) return json({ ok: true, total: 0, page, totalPages: 0, results: [] });
     if (res.status === 401 || res.status === 403) { cachedToken = null; return json({ ok: false, reason: "auth_denied" }); }
-    if (res.status === 429) return json({ ok: false, reason: "rate" });
+    if (res.status === 429) return json({ ok: false, reason: "rate", retryAfter: parseInt(res.headers.get("retry-after") || "", 10) || null });
     if (res.status !== 200 && res.status !== 206) return json({ ok: false, reason: "upstream_" + res.status });
     const data = await res.json();
     const range = (res.headers.get("content-range") || "").match(/\/(\d+)\s*$/);
