@@ -377,9 +377,12 @@
             <div class="field"><label for="an-entreprise">Entreprise</label><input type="text" id="an-entreprise" placeholder="ex. Studio Lumen"></div>
           </div>
           <div class="field">
-            <label for="an-url">Lien de l'annonce (optionnel)</label>
-            <input type="url" id="an-url" placeholder="https://...">
-            <p class="hint">Gardé comme simple référence : cette page ne peut pas aller chercher elle-même le contenu d'un lien externe. Colle aussi le texte ci-dessous — ou demande-moi, dans la conversation, de le récupérer pour toi.</p>
+            <label for="an-url">Lien de l'annonce</label>
+            <div style="display:flex;gap:8px;">
+              <input type="url" id="an-url" placeholder="https://… colle le lien, l'annonce se remplit seule">
+              <button class="btn btn-primary btn-sm" id="btn-fetch-annonce" type="button">Récupérer l'annonce</button>
+            </div>
+            <p class="hint" id="fetch-status" style="margin:6px 0 0;">Poste, entreprise, lieu, contrat et texte complet sont remplis automatiquement. Si le site bloque la lecture (LinkedIn, Indeed…), colle simplement le texte ci-dessous.</p>
           </div>
           <div class="field">
             <label for="an-texte">Texte de l'annonce</label>
@@ -392,14 +395,26 @@
           </div>
         </div>
         <div class="card">
-          <span class="eyebrow">À quoi ça sert</span>
-          <h3 style="font-size:16px;margin:8px 0 10px;">Repérage local, pas de boîte noire</h3>
-          <p style="font-size:13px;color:var(--ink-600);line-height:1.6;margin:0 0 10px;">
-            L'outil compare les mots les plus fréquents de l'annonce à un lexique de compétences courantes, puis s'en sert pour réordonner ta bibliothèque de CV et suggérer des compétences pour la lettre. Rien n'est envoyé à un service externe : l'analyse tourne entièrement dans ton navigateur — ce n'est pas une IA, mais un algorithme de correspondance par mots-clés.
-          </p>
-          <p style="font-size:13px;color:var(--ink-600);line-height:1.6;margin:0;">
-            Ce dossier n'écrit jamais de faits inventés à ta place : il structure, reformule et met en valeur ce que <em>toi</em> tu renseignes.
-          </p>
+          <span class="eyebrow">Analyse de l'annonce</span>
+          <h3 style="font-size:16px;margin:8px 0 10px;">Qui recrute, et pour qui ?</h3>
+          <div class="field">
+            <label for="an-emetteur">Qui publie cette annonce</label>
+            <select id="an-emetteur">
+              <option value="">À déterminer</option>
+              <option value="direct">L'entreprise elle-même (recrutement direct)</option>
+              <option value="recruteur">Un cabinet de recrutement</option>
+              <option value="interim">Une agence d'intérim</option>
+              <option value="esn">Une ESN / société de conseil (mission chez un client)</option>
+            </select>
+            <p class="hint" id="an-emetteur-why" style="margin:6px 0 0;"></p>
+          </div>
+          <div class="field" id="an-client-field"><label for="an-client">Entreprise finale (si le cabinet la cite)</label><input type="text" id="an-client" placeholder="ex. un acteur de la distribution"></div>
+          <div class="row2">
+            <div class="field"><label for="an-lieu">Lieu</label><input type="text" id="an-lieu"></div>
+            <div class="field"><label for="an-contrat">Contrat</label><input type="text" id="an-contrat"></div>
+          </div>
+          <div class="field"><label for="an-salaire">Rémunération (si indiquée)</label><input type="text" id="an-salaire"></div>
+          <p class="hint" style="margin:0;">Le type d'émetteur adapte la lettre : un cabinet s'adresse au recruteur pour le compte d'un client, une entreprise en direct s'adresse à l'entreprise. Corrige-le si la détection se trompe. L'analyse des mots-clés tourne dans ton navigateur, sans IA.</p>
         </div>
       </div>
     </section>
@@ -1022,7 +1037,7 @@ function defaultState(){
     profil: { nom:"", titre:"", email:"", tel:"", ville:"", lien:"", langues:"", atouts:[], photo:null,
       suisseActif:false, suisse:{ dateNaissance:"", nationalite:"", permis:"", etatCivil:"" },
       voix:{ description:"", formuleFinale:"", eviter:"" } },
-    annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[] },
+    annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[], meta:{ lieu:"", contrat:"", salaire:"", date:"" }, emetteur:{ type:"", manual:false, raisons:[] }, clientFinal:"" },
     library: { experiences:[], formations:[], competences:[], sections:[], lettresArchive:[], annexeItems:[] },
     cv: { lang:"fr", format:"standard", resume:"", selectedExp:[], selectedForm:[], autoMode:true },
     lettre: { lang:"fr", destinataire:"", ton:"formel", corps:null, corpsPrev:null, options:{}, remarques:[], motivations:[""], motivPrompts:[""], competencesChoisies:[], disponibilite:"", seed:1 },
@@ -1506,6 +1521,7 @@ function reanalyzeAnnonce(fromText){
   state.annonce.url = anUrl.value;
   state.annonce.texte = anTexte.value;
   state.annonce.keywords = extractKeywords(anTexte.value);
+  if(typeof runEmetteurAnalysis === "function"){ runEmetteurAnalysis(); renderAnalyseCard(); }
   renderKeywordChips();
   if (typeof window.onAnnonceChanged === "function") window.onAnnonceChanged();
   renderLettreSkillSuggestions();
@@ -2903,6 +2919,22 @@ function cleanLetterText(s){
   return s.replace(/\s+[—–]\s+/g, ", ").replace(/[—–]/g, "-").replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/\s{2,}/g, " ").trim();
 }
 
+// Ouvertures et clôtures quand l'annonce vient d'un intermédiaire (cabinet, agence d'intérim)
+var LETTRE_INTERMEDIAIRE = {
+  fr: {
+    ouverture: ["Je vous adresse ma candidature au poste de {poste} que vous proposez{client}.",
+      "Votre annonce pour le poste de {poste}{client} a retenu mon attention, et je souhaite en parler avec vous."],
+    cloture: ["Je reste disponible pour un échange téléphonique avec vous, puis pour un entretien avec votre client si mon profil l'intéresse.",
+      "Je serais heureux d'en discuter avec vous par téléphone. Je peux transmettre un CV détaillé et mes disponibilités sur simple demande."]
+  },
+  en: {
+    ouverture: ["I am applying for the {poste} position you are advertising{client}.",
+      "Your advertisement for the {poste} position{client} caught my attention, and I would like to discuss it with you."],
+    cloture: ["I remain available for a call with you, and then an interview with your client if my profile is of interest.",
+      "I would be glad to talk it through by phone, and can send a detailed CV and my availability on request."]
+  }
+};
+
 function datesFr(d, en){
   d = (d || "").trim();
   if(!d) return "";
@@ -2947,9 +2979,17 @@ function generateLettreParagraphs(){
   var entreprise = an.entreprise.trim();
   var bank = (LETTRE_AUTO[en ? "en" : "fr"])[l.ton] || LETTRE_AUTO[en ? "en" : "fr"].formel;
   var rng = mulberry32(djb2(poste + "|" + entreprise + "|" + l.ton + "|" + l.lang + "|" + (l.seed || 1)));
+  var emType = (an.emetteur && an.emetteur.type) || "direct";
+  var intermediaire = (emType === "recruteur" || emType === "interim");
+  if(intermediaire){
+    var ib = LETTRE_INTERMEDIAIRE[en ? "en" : "fr"];
+    var clientTxt = (an.clientFinal || "").trim() ? (en ? " for " : " pour ") + an.clientFinal.trim() : (en ? " for your client" : " pour votre client");
+    bank = { ouverture: ib.ouverture.map(function(t){ return t.split("{client}").join(clientTxt); }), cloture: ib.cloture, transition: bank.transition };
+  }
   var posteTxt = /^[A-ZÀ-Ý][a-zà-ÿ]/.test(poste) ? lowerFirst(poste) : poste;
   var fill = function(t){
     if(!poste){ return en ? "I am writing to apply for the position you advertise." : "Je vous adresse ma candidature pour le poste que vous proposez."; }
+    if(intermediaire && poste){ return t.split("{poste}").join(posteTxt); }
     if(!entreprise){ t = t.replace(/ (chez|at) \{entreprise\}/, "").replace(/ que propose \{entreprise\}/, "").replace(/ que propose \{entreprise\}/, "").replace("{entreprise}", ""); }
     return t.split("{poste}").join(posteTxt).split("{entreprise}").join(entreprise);
   };
@@ -3455,6 +3495,107 @@ document.getElementById("btn-generer-questions").addEventListener("click", gener
 document.getElementById("btn-voir-corrige").addEventListener("click", renderEntretienCorrige);
 
 
+
+/* ===================== RÉCUPÉRATION D'UNE ANNONCE PAR SON LIEN + ANALYSE DE L'ÉMETTEUR ===================== */
+
+var EMETTEUR_LABELS = { direct:"entreprise en direct", recruteur:"cabinet de recrutement", interim:"agence d'intérim", esn:"ESN / société de conseil" };
+var KNOWN_RECRUITERS = /michael page|page personnel|page group|hays|robert half|randstad|adecco|manpower|synergie|kelly services|proman|crit interim|expectra|gi group|start people|supplay|walters people|externatis|spring (?:france|professional)|lincoln|approach people|cabinet|recrutement|recruitment|staffing|headhunt|executive search|chasseur|talent\.io|jobteaser/i;
+var KNOWN_INTERIM = /adecco|manpower|randstad|synergie|proman|crit|expectra|gi group|start people|supplay|kelly|int[ée]rim|travail temporaire|agence d['’]emploi/i;
+var KNOWN_ESN = /capgemini|sopra steria|atos\b|accenture|\bcgi\b|alten|akkodis|altran|aubay|davidson|onepoint|ausy|expleo|extia|ippon|\bsii\b|nexton|sogeti|neurones|groupe open|\besn\b|\bssii\b/i;
+
+function analyseEmetteur(an){
+  var name = (an.entreprise || ""), text = (an.texte || "");
+  var raisons = [], type = "";
+  var low = norm(text);
+  if(KNOWN_INTERIM.test(name) || /mission d['’]int[ée]rim|contrat de travail temporaire|\bctt\b/i.test(text)){ type = "interim"; raisons.push(KNOWN_INTERIM.test(name) ? "le nom évoque une agence d'intérim" : "le texte parle d'intérim"); }
+  else if(KNOWN_RECRUITERS.test(name)){ type = "recruteur"; raisons.push("le nom évoque un cabinet de recrutement"); }
+  else if(/notre client|pour le compte d[e'’]|soci[ée]t[ée] cliente|entreprise cliente|client final|l['’]un de nos clients|un de nos clients|cabinet de recrutement|nous recrutons pour|soci[ée]t[ée] confidentielle|entreprise confidentielle/i.test(text)){ type = "recruteur"; raisons.push("le texte parle d'un client (« notre client », « pour le compte de »…)"); }
+  else if(KNOWN_ESN.test(name) || /en r[ée]gie|chez nos clients|chez l['’]un de nos clients|mission chez (?:un|le) client|intervenir chez/i.test(text)){ type = "esn"; raisons.push(KNOWN_ESN.test(name) ? "le nom évoque une ESN" : "missions chez des clients"); }
+  else if(name.trim() || text.trim()){ type = "direct"; raisons.push(name.trim() ? "aucun signe d'intermédiaire : l'entreprise recrute directement" : "aucun signe d'intermédiaire"); }
+  var client = "";
+  var m = text.match(/pour le compte d[e'’]\s*([A-ZÀ-Ý][\wÀ-ÿ&'’.\- ]{2,40}?)(?:[,.;\n]|\s+(?:qui|dont|leader|sp[ée]cialis))/);
+  if(m) client = m[1].trim();
+  return { type: type, raisons: raisons, client: client };
+}
+
+function renderAnalyseCard(){
+  var an = state.annonce;
+  an.meta = an.meta || { lieu:"", contrat:"", salaire:"", date:"" };
+  an.emetteur = an.emetteur || { type:"", manual:false, raisons:[] };
+  document.getElementById("an-emetteur").value = an.emetteur.type || "";
+  document.getElementById("an-emetteur-why").textContent = an.emetteur.manual ? "Choix manuel." : ((an.emetteur.raisons || []).length ? "Détecté : " + an.emetteur.raisons.join(" ; ") + "." : "");
+  var cf = document.getElementById("an-client-field");
+  cf.style.display = (an.emetteur.type === "recruteur" || an.emetteur.type === "interim" || an.emetteur.type === "esn") ? "block" : "none";
+  var cl = document.getElementById("an-client"); if(document.activeElement !== cl) cl.value = an.clientFinal || "";
+  [["an-lieu","lieu"],["an-contrat","contrat"],["an-salaire","salaire"]].forEach(function(pair){
+    var el = document.getElementById(pair[0]); if(document.activeElement !== el) el.value = an.meta[pair[1]] || "";
+  });
+}
+
+function runEmetteurAnalysis(){
+  var an = state.annonce;
+  an.emetteur = an.emetteur || { type:"", manual:false, raisons:[] };
+  if(an.emetteur.manual) return;
+  var r = analyseEmetteur(an);
+  an.emetteur.type = r.type; an.emetteur.raisons = r.raisons;
+  if(r.client && !an.clientFinal) an.clientFinal = r.client;
+}
+
+document.getElementById("an-emetteur").addEventListener("change", function(){
+  var e = state.annonce.emetteur; e.type = this.value; e.manual = !!this.value;
+  if(!this.value){ e.manual = false; runEmetteurAnalysis(); }
+  renderAnalyseCard(); renderLettrePreview(); persist();
+});
+document.getElementById("an-client").addEventListener("input", function(){ state.annonce.clientFinal = this.value; renderLettrePreview(); persist(); });
+[["an-lieu","lieu"],["an-contrat","contrat"],["an-salaire","salaire"]].forEach(function(pair){
+  document.getElementById(pair[0]).addEventListener("input", function(){ state.annonce.meta[pair[1]] = this.value; persist(); });
+});
+
+var CONTRAT_FR = { FULL_TIME:"Temps plein", PART_TIME:"Temps partiel", CONTRACTOR:"Freelance / mission", TEMPORARY:"CDD / temporaire", INTERN:"Stage", VOLUNTEER:"Bénévolat", PER_DIEM:"À la journée", OTHER:"Autre" };
+
+function fetchAnnonce(){
+  var url = anUrl.value.trim(), st = document.getElementById("fetch-status"), btn = document.getElementById("btn-fetch-annonce");
+  if(!/^https?:\/\//i.test(url)){ st.textContent = "Colle d'abord un lien complet, qui commence par https://"; return; }
+  if(location.protocol === "file:" || (window.claude && typeof window.claude.use === "function")){
+    st.textContent = "La lecture automatique d'un lien fonctionne sur le site déployé (Cloudflare), pas dans cette version. Colle le texte de l'annonce ci-dessous.";
+    return;
+  }
+  btn.disabled = true; st.textContent = "Lecture de l'annonce…";
+  fetch("/api/annonce?url=" + encodeURIComponent(url)).then(function(res){
+    return res.json().then(function(d){ return d; }, function(){ throw new Error("noapi"); });
+  }).then(function(d){
+    btn.disabled = false;
+    if(!d.ok){
+      var host = d.host ? " (" + d.host + ")" : "";
+      var msg = d.reason === "blocked" ? "Ce site" + host + " bloque la lecture automatique. Ouvre l'annonce, copie son texte et colle-le ci-dessous : le reste se remplit tout seul."
+        : d.reason === "empty" ? "Le lien" + host + " ne contient pas le texte de l'annonce (page chargée par JavaScript). Colle le texte ci-dessous."
+        : d.reason === "forbidden_host" || d.reason === "bad_url" ? "Ce lien ne peut pas être lu."
+        : "Impossible de lire ce lien" + host + ". Colle le texte de l'annonce ci-dessous.";
+      if(d.partial && d.partial.title && !anPoste.value.trim()){ anPoste.value = d.partial.title; reanalyzeAnnonce(); }
+      st.textContent = msg; return;
+    }
+    anPoste.value = d.title || anPoste.value;
+    anEntreprise.value = d.company || anEntreprise.value;
+    anTexte.value = d.description || anTexte.value;
+    var m = state.annonce.meta = state.annonce.meta || {};
+    m.lieu = d.location || m.lieu || "";
+    m.contrat = (d.contract || "").split(", ").map(function(c){ return CONTRAT_FR[c] || c; }).filter(Boolean).join(", ") || m.contrat || "";
+    m.salaire = d.salary || m.salaire || "";
+    m.date = d.datePosted || m.date || "";
+    state.annonce.clientFinal = "";
+    state.annonce.emetteur = { type:"", manual:false, raisons:[] };
+    reanalyzeAnnonce();
+    var em = state.annonce.emetteur.type;
+    st.textContent = "Annonce récupérée" + (d.source === "jsonld" ? "" : " (texte de la page : vérifie le poste et l'entreprise)") + (em ? ". Publiée par : " + EMETTEUR_LABELS[em] + "." : ".");
+  }).catch(function(){
+    btn.disabled = false;
+    st.textContent = "La lecture automatique n'est pas disponible ici. Colle le texte de l'annonce ci-dessous.";
+  });
+}
+document.getElementById("btn-fetch-annonce").addEventListener("click", fetchAnnonce);
+anUrl.addEventListener("paste", function(){ setTimeout(function(){ if(/^https?:\/\//i.test(anUrl.value.trim())){ reanalyzeAnnonce(); fetchAnnonce(); } }, 50); });
+anUrl.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); fetchAnnonce(); } });
+
 /* ===================== CANDIDATURES MULTIPLES : barre, bascule, sauvegarde locale ===================== */
 
 function renderDossierBar(){
@@ -3479,6 +3620,7 @@ function syncDossierUI(){
   anEntreprise.value = state.annonce.entreprise || "";
   anUrl.value = state.annonce.url || "";
   anTexte.value = state.annonce.texte || "";
+  renderAnalyseCard();
   document.getElementById("cv-resume").value = state.cv.resume || "";
   document.querySelectorAll('#format-segmented button').forEach(function(b){ var on = b.getAttribute("data-format") === state.cv.format; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
   document.querySelectorAll('#lang-segmented button').forEach(function(b){ var on = b.getAttribute("data-lang") === state.cv.lang; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
@@ -3741,7 +3883,12 @@ function relevantExperiences(max){
   return exps.slice(0, max || 5);
 }
 function annonceForAI(){
-  return { poste: scrubForAI(state.annonce.poste), entreprise: scrubForAI(state.annonce.entreprise), texte: scrubForAI(state.annonce.texte).slice(0, 4500), mots_cles: (state.annonce.keywords || []).map(function(k){ return k.term; }) };
+  var em = state.annonce.emetteur || {};
+  return { poste: scrubForAI(state.annonce.poste), entreprise: scrubForAI(state.annonce.entreprise),
+    qui_publie: em.type ? (EMETTEUR_LABELS[em.type] || em.type) : "non déterminé",
+    entreprise_finale: scrubForAI(state.annonce.clientFinal),
+    lieu: scrubForAI((state.annonce.meta || {}).lieu), contrat: scrubForAI((state.annonce.meta || {}).contrat),
+    texte: scrubForAI(state.annonce.texte).slice(0, 4500), mots_cles: (state.annonce.keywords || []).map(function(k){ return k.term; }) };
 }
 
 /* ---- CV : reformulation des réalisations pour l'annonce ---- */
@@ -3867,7 +4014,7 @@ document.getElementById("btn-affiner-ia").addEventListener("click", function(){
     remarques: l.remarques || [],
     format_reponse: '{"paragraphs":["..."]}'
   };
-  var system = "Tu rédiges des lettres de motivation pour une personne précise, avec sa voix. 150 à 250 mots, sans formule d'appel ni signature (l'application les ajoute). Structure : une accroche précise sur le poste, un ou deux paragraphes de preuves tirées des expériences fournies et reprenant naturellement les mots-clés de l'annonce que la personne maîtrise réellement, une phrase sur l'entreprise seulement si l'annonce en parle, une clôture courte (reprends la formule de fin fournie si elle existe, sinon reste sobre). Respecte la voix décrite et évite ce qui est listé à éviter. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
+  var system = "Tu rédiges des lettres de motivation pour une personne précise, avec sa voix. 150 à 250 mots, sans formule d'appel ni signature (l'application les ajoute). Adapte l'adresse au type d'émetteur (si cabinet ou intérim : on écrit au recruteur pour le compte de son client, sans prétendre connaître l'entreprise finale ; si recrutement direct : on s'adresse à l'entreprise ; si ESN : on valorise l'adaptabilité de missions seulement si les expériences le montrent). Structure : une accroche précise sur le poste, un ou deux paragraphes de preuves tirées des expériences fournies et reprenant naturellement les mots-clés de l'annonce que la personne maîtrise réellement, une phrase sur l'entreprise seulement si l'annonce en parle, une clôture courte (reprends la formule de fin fournie si elle existe, sinon reste sobre). Respecte la voix décrite et évite ce qui est listé à éviter. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
   {
     var btn = this; btn.disabled = true; st.setAttribute("data-busy", "1"); st.textContent = "Rédaction en cours…";
     iaAsk(system, user, "Annonce, expériences, voix et remarques (sans nom ni coordonnées).").then(function(out){
@@ -3943,6 +4090,7 @@ refreshStatusDots();
 renderDossierBar();
 renderPersonBar();
 renderVoixCard();
+renderAnalyseCard();
 refreshIaState();
 
 </script>

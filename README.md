@@ -22,3 +22,11 @@ Un sous-domaine personnalisé (ex. un sous-domaine de johnapple.fr) se configure
 l'onglet *Custom domains* du projet Pages.
 
 **En local :** ouvrir `index.html` dans un navigateur, ou `npx serve .`.
+
+## Lecture automatique d'une annonce par son lien
+
+Le dossier `functions/` contient une Cloudflare Pages Function (`/api/annonce`). Cloudflare Pages la déploie
+toute seule avec le site (aucune configuration ni clé). Elle récupère la page de l'annonce, lit les données
+structurées (schema.org `JobPosting`) ou, à défaut, le texte de la page, et les renvoie à l'application.
+Seule l'adresse de l'annonce transite par cette fonction ; rien n'est stocké. Les sites qui bloquent les
+robots (LinkedIn, Indeed…) ne peuvent pas être lus : on colle alors le texte de l'annonce.
