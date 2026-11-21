@@ -82,13 +82,14 @@
   :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
   @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; } }
 
-  .app{ display:grid; grid-template-columns:232px 1fr; grid-template-rows:auto auto 1fr; grid-template-areas:"top top" "doss doss" "rail main"; min-height:100vh; }
+  .app{ display:grid; grid-template-columns:232px 1fr; grid-template-rows:auto auto auto 1fr; grid-template-areas:"top top" "pers pers" "doss doss" "rail main"; min-height:100vh; }
   .topbar{ grid-area:top; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 28px; border-bottom:1px solid var(--border); background:var(--surface); flex-wrap:wrap; }
   .brand{ display:flex; align-items:baseline; gap:10px; }
   .brand-mark{ font-family:var(--font-display); font-style:italic; font-weight:500; font-size:22px; color:var(--accent); }
   .brand-name{ font-family:var(--font-display); font-weight:600; font-size:18px; }
   .brand-sub{ font-size:12.5px; color:var(--ink-600); }
   .topbar-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  #person-bar{ grid-area:pers; }
   .dossier-bar{ grid-area:doss; display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 28px; background:var(--surface-2); border-bottom:1px solid var(--border); min-width:0; }
   .dossier-bar select{ min-width:180px; max-width:300px; }
   .dossier-bar input[type=text]{ min-width:150px; max-width:230px; }
@@ -123,7 +124,7 @@
   /* En dessous de ~860px, la barre latérale fixe (232px) écraserait le contenu : elle devient
      une rangée d'onglets horizontale et défilable, au-dessus du contenu plutôt qu'à côté. */
   @media (max-width:860px){
-    .app{ grid-template-columns:1fr; grid-template-areas:"top" "doss" "rail" "main"; }
+    .app{ grid-template-columns:1fr; grid-template-areas:"top" "pers" "doss" "rail" "main"; }
     /* Un enfant de grille garde par défaut min-width:auto (sa taille de contenu minimale), même
        sur une seule colonne : sans ce reset, un onglet ou un bouton qui ne se réduit pas assez
        repousse toute la grille au-delà de l'écran. */
@@ -263,6 +264,34 @@
 </head>
 <body>
 
+<dialog id="ia-dialog" style="max-width:560px;width:92vw;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);color:var(--ink-900);padding:22px;">
+  <h3 style="margin:0 0 8px;font-size:17px;">Assistant IA (facultatif)</h3>
+  <p class="hint" style="margin:0 0 10px;">L'atelier fonctionne sans IA. En l'activant, la reformulation du CV et la lettre sur mesure passent par l'API d'Anthropic, avec <strong>ta propre clé</strong>, directement depuis ton navigateur (aucun serveur intermédiaire).</p>
+  <ul class="hint" style="margin:0 0 12px;padding-left:18px;line-height:1.55;">
+    <li><strong>Jamais envoyés</strong> : nom, email, téléphone, adresse, liens, photo. Ils sont aussi retirés du texte des expériences.</li>
+    <li><strong>Envoyés</strong> : le texte de l'annonce, tes expériences (poste, entreprise, réalisations), tes compétences, ta « voix » et tes remarques.</li>
+    <li>Tu vois le texte exact avant chaque envoi.</li>
+    <li>La clé reste dans ce navigateur, en clair : utilise une clé avec une limite de dépense.</li>
+  </ul>
+  <div class="field"><label for="ia-key">Clé API Anthropic</label><input type="password" id="ia-key" placeholder="sk-ant-…" autocomplete="off"></div>
+  <div class="field"><label for="ia-model">Modèle</label><select id="ia-model"><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (recommandé)</option><option value="claude-haiku-5-5">Claude Haiku 5.5 (plus rapide, moins cher)</option></select></div>
+  <label class="hint" style="display:flex;gap:6px;align-items:center;margin-bottom:12px;"><input type="checkbox" id="ia-skip"> Ne plus demander de confirmation avant chaque envoi (déconseillé)</label>
+  <div class="toolbar-row" style="justify-content:flex-end;">
+    <button class="btn btn-ghost btn-sm" id="ia-forget" type="button">Oublier la clé</button>
+    <button class="btn btn-ghost btn-sm" id="ia-cancel" type="button">Fermer</button>
+    <button class="btn btn-primary btn-sm" id="ia-save" type="button">Enregistrer</button>
+  </div>
+</dialog>
+<dialog id="ia-confirm" style="max-width:720px;width:94vw;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);color:var(--ink-900);padding:22px;">
+  <h3 style="margin:0 0 8px;font-size:17px;">Ce qui va être envoyé à l'IA</h3>
+  <p class="hint" style="margin:0 0 8px;" id="ia-confirm-what"></p>
+  <pre id="ia-confirm-text" style="max-height:46vh;overflow:auto;white-space:pre-wrap;font-size:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px;margin:0 0 12px;"></pre>
+  <div class="toolbar-row" style="justify-content:flex-end;">
+    <button class="btn btn-ghost btn-sm" id="ia-confirm-no" type="button">Annuler</button>
+    <button class="btn btn-primary btn-sm" id="ia-confirm-yes" type="button">Envoyer</button>
+  </div>
+</dialog>
+
 <div class="app" id="app">
   <header class="topbar">
     <div class="brand">
@@ -278,11 +307,20 @@
         <button type="button" data-theme-choice="dark" aria-pressed="false">Sombre</button>
         <button type="button" data-theme-choice="auto" class="active" aria-pressed="true">Auto</button>
       </div>
+      <button class="btn btn-ghost btn-sm" id="btn-ia-settings" title="Assistant IA facultatif : reformulation et lettre sur mesure">Assistant IA : <span id="ia-state">désactivé</span></button>
       <button class="btn btn-ghost btn-sm" id="btn-reset" title="Effacer la bibliothèque et repartir de zéro">Tout effacer</button>
       <button class="btn btn-ghost btn-sm" id="btn-export-cv-lettre">CV + Lettre (PDF)</button>
       <button class="btn btn-primary btn-sm" id="btn-export-all">Télécharger le dossier complet (PDF)</button>
     </div>
   </header>
+  <div class="dossier-bar" id="person-bar" style="border-bottom:none;padding-bottom:0;">
+    <label for="person-select" class="eyebrow" style="margin:0;">Personne</label>
+    <select id="person-select" aria-label="Choisir la personne"></select>
+    <button class="btn btn-ghost btn-sm" id="btn-new-person" title="Une autre personne utilise cet ordinateur : base d'expériences, ton et références séparés">+ Personne</button>
+    <button class="btn btn-ghost btn-sm" id="btn-rename-person">Renommer</button>
+    <button class="btn btn-ghost btn-sm" id="btn-del-person">Supprimer</button>
+    <span class="hint" style="margin-left:4px;">Chaque personne a sa propre base, son ton et ses candidatures.</span>
+  </div>
   <div class="dossier-bar" id="dossier-bar">
     <label for="dossier-select" class="eyebrow" style="margin:0;">Candidature</label>
     <select id="dossier-select" aria-label="Choisir la candidature"></select>
@@ -291,7 +329,7 @@
     <button class="btn btn-ghost btn-sm" id="btn-dup-dossier" title="Partir de cette candidature pour une annonce voisine">Dupliquer</button>
     <button class="btn btn-ghost btn-sm" id="btn-del-dossier">Supprimer</button>
     <span class="spacer"></span>
-    <button class="btn btn-ghost btn-sm" id="btn-backup" title="Télécharge ta base et tes candidatures dans un fichier sur ton ordinateur">Sauvegarder</button>
+    <button class="btn btn-ghost btn-sm" id="btn-backup" title="Télécharge la base et les candidatures de cette personne dans un fichier sur ton ordinateur">Sauvegarder</button>
     <button class="btn btn-ghost btn-sm" id="btn-restore">Restaurer…</button>
     <input type="file" id="restore-file" accept="application/json,.json" style="display:none">
   </div>
@@ -441,9 +479,12 @@
               <span class="eyebrow">Bibliothèque — expériences</span>
               <div class="toolbar-row">
                 <button class="btn btn-ghost btn-sm" id="btn-recompose"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg><span>Recomposer automatiquement</span></button>
+                <button class="btn btn-ghost btn-sm" id="btn-ia-cv" title="Reformule tes réalisations avec le vocabulaire de l'annonce, sans rien inventer">Reformuler pour l'annonce (IA)</button>
+                <button class="btn btn-ghost btn-sm" id="btn-ia-cv-undo" style="display:none;">Texte d'origine</button>
                 <button class="btn btn-ghost btn-sm" id="btn-add-exp">+ Ajouter</button>
               </div>
             </div>
+            <p class="hint" id="ia-cv-status" style="margin:0 0 6px;"></p>
             <p class="hint" style="margin:0 0 10px;">Toutes tes expériences restent dans ta bibliothèque ; l'atelier les réordonne selon l'annonce pour mettre les plus pertinentes en premier.</p>
             <div id="exp-list"></div>
           </div>
@@ -522,6 +563,30 @@
                 <button data-tone="chaleureux" aria-pressed="false">Chaleureux</button>
               </div>
             </div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;" id="card-affiner">
+            <span class="eyebrow">Affiner la lettre</span>
+            <p class="hint" style="margin:6px 0 10px;">Choisis une direction, ou écris une remarque, puis régénère. Chaque régénération garde la version précédente.</p>
+            <div class="chips" id="affiner-chips" style="margin-bottom:10px;"></div>
+            <div style="display:flex;gap:8px;">
+              <input type="text" id="affiner-input" placeholder="Une remarque : « insiste sur mon expérience client », « moins formel »…">
+              <button class="btn btn-sm" id="btn-affiner-add" type="button">Ajouter</button>
+            </div>
+            <div class="chips" id="affiner-remarques" style="margin-top:8px;"></div>
+            <div class="toolbar-row" style="margin-top:12px;">
+              <button class="btn btn-primary btn-sm" id="btn-affiner-go" type="button">Régénérer avec ces remarques</button>
+              <button class="btn btn-ghost btn-sm" id="btn-affiner-undo" type="button" disabled>Version précédente</button>
+            </div>
+            <p class="hint" id="affiner-status" style="margin:8px 0 0;"></p>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;" id="card-voix">
+            <span class="eyebrow">Ma voix (propre à cette personne)</span>
+            <p class="hint" style="margin:6px 0 10px;">Le ton des lettres de cette personne : l'assistant IA s'en sert, et la formule de fin est reprise à chaque lettre.</p>
+            <div class="field"><label for="voix-description">Comment j'écris</label><textarea id="voix-description" style="min-height:80px;" placeholder="ex. Je vouvoie, phrases courtes, direct, un peu d'humour sobre, je parle de résultats plutôt que de qualités."></textarea></div>
+            <div class="field"><label for="voix-eviter">À éviter</label><input type="text" id="voix-eviter" placeholder="ex. passionné, dynamique, « je me permets »"></div>
+            <div class="field"><label for="voix-formule">Ma formule de fin (optionnel)</label><input type="text" id="voix-formule" placeholder="ex. Je serais ravi d'en discuter de vive voix. Cordialement,"></div>
           </div>
 
           <div class="card" style="margin-bottom:16px;">
@@ -625,7 +690,7 @@
       </div>
       <div class="card" style="max-width:900px;">
         <div class="toolbar-row" style="margin-bottom:14px;">
-          <button class="btn btn-primary btn-sm" id="btn-save-current-candidature">+ Enregistrer l'annonce en cours (étape 01)</button>
+          <button class="btn btn-primary btn-sm" id="btn-save-current-candidature">+ Enregistrer une version de la candidature en cours</button>
           <button class="btn btn-ghost btn-sm" id="btn-add-candidature">+ Ajouter manuellement</button>
         </div>
         <p class="hint" id="candidatures-summary" style="margin:0 0 14px;"></p>
@@ -942,11 +1007,12 @@ var PHRASES_EN = {
 function defaultState(){
   return {
     profil: { nom:"", titre:"", email:"", tel:"", ville:"", lien:"", langues:"", atouts:[], photo:null,
-      suisseActif:false, suisse:{ dateNaissance:"", nationalite:"", permis:"", etatCivil:"" } },
+      suisseActif:false, suisse:{ dateNaissance:"", nationalite:"", permis:"", etatCivil:"" },
+      voix:{ description:"", formuleFinale:"", eviter:"" } },
     annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[] },
     library: { experiences:[], formations:[], competences:[], sections:[], lettresArchive:[], annexeItems:[] },
     cv: { lang:"fr", format:"standard", resume:"", selectedExp:[], selectedForm:[], autoMode:true },
-    lettre: { lang:"fr", destinataire:"", ton:"formel", corps:null, motivations:[""], motivPrompts:[""], competencesChoisies:[], disponibilite:"", seed:1 },
+    lettre: { lang:"fr", destinataire:"", ton:"formel", corps:null, corpsPrev:null, options:{}, remarques:[], motivations:[""], motivPrompts:[""], competencesChoisies:[], disponibilite:"", seed:1 },
     annexeDossier: { categorie:"", selectedItemIds:[] },
     candidatures: [],
     entretien: { questions: [], reponses: {}, seed: 1, corrigeVisible: false }
@@ -954,40 +1020,26 @@ function defaultState(){
 }
 
 var state = defaultState();
-try{
-  var saved = JSON.parse(localStorage.getItem("atelier-candidature-v2") || "null");
-  if(saved && typeof saved === "object"){
-    var def = defaultState();
-    state = {
-      profil: Object.assign({}, def.profil, saved.profil, { suisse: Object.assign({}, def.profil.suisse, saved.profil && saved.profil.suisse) }),
-      annonce: Object.assign({}, def.annonce, saved.annonce),
-      library: Object.assign({}, def.library, saved.library),
-      cv: Object.assign({}, def.cv, saved.cv),
-      lettre: Object.assign({}, def.lettre, saved.lettre),
-      annexeDossier: Object.assign({}, def.annexeDossier, saved.annexeDossier),
-      candidatures: saved.candidatures || [],
-      entretien: Object.assign({}, def.entretien, saved.entretien, { reponses: Object.assign({}, saved.entretien && saved.entretien.reponses) })
-    };
-    if(!state.profil.atouts) state.profil.atouts = [];
-    if(!state.lettre.motivPrompts) state.lettre.motivPrompts = state.lettre.motivations.map(function(){ return ""; });
-  }
-}catch(e){ /* stockage indisponible ou corrompu : on repart d'un état par défaut */ }
+var STORAGE_KEY = "atelier-candidature-v2";
 
-/* ---------------- candidatures multiples ----------------
-   La BASE (profil, bibliothèque d'expériences/formations/compétences/rubriques, lettres archivées,
-   suivi) est commune. Chaque candidature (« dossier ») a ses propres annonce, CV recomposé, lettre,
-   annexe et entraînement. state.annonce / state.cv / state.lettre… pointent toujours vers le dossier
-   actif, ce qui garde tout le reste du code inchangé. */
+/* ---------------- personnes et candidatures multiples ----------------
+   Chaque PERSONNE a sa propre base (profil, voix/ton, expériences, formations, compétences, rubriques,
+   lettres archivées, références, suivi) et ses propres candidatures. Chaque candidature (« dossier »)
+   a son annonce, son CV recomposé, sa lettre, son annexe et son entraînement.
+   state.profil / state.library / state.candidatures / state.dossiers pointent vers la personne active,
+   et state.annonce / state.cv / state.lettre… vers la candidature active : le reste du code est inchangé. */
 
 function makeDossier(titre){
   var d = defaultState();
-  return { id: uid(), titre: titre || "", titreAuto: !titre, created: Date.now(),
+  return { id: uid(), titre: titre || "", titreAuto: !titre, created: Date.now(), candidatureId: "",
     annonce: d.annonce, cv: d.cv, lettre: d.lettre, annexeDossier: d.annexeDossier, entretien: d.entretien };
 }
 function normDossier(raw){
+  raw = raw || {};
   var d = makeDossier();
   var out = {
     id: raw.id || d.id, titre: raw.titre || "", titreAuto: raw.titreAuto !== false, created: raw.created || Date.now(),
+    candidatureId: raw.candidatureId || "",
     annonce: Object.assign({}, d.annonce, raw.annonce),
     cv: Object.assign({}, d.cv, raw.cv),
     lettre: Object.assign({}, d.lettre, raw.lettre),
@@ -996,8 +1048,39 @@ function normDossier(raw){
   };
   if(!out.annonce.keywords) out.annonce.keywords = [];
   if(!out.cv.excludedExp) out.cv.excludedExp = [];
+  if(!out.cv.expOverrides) out.cv.expOverrides = {};
+  if(!out.lettre.remarques) out.lettre.remarques = [];
+  if(!out.lettre.motivations || !out.lettre.motivations.length) out.lettre.motivations = [""];
   if(!out.lettre.motivPrompts) out.lettre.motivPrompts = out.lettre.motivations.map(function(){ return ""; });
   return out;
+}
+// données d'une personne (ancien format à une seule candidature compris)
+function normPersonData(raw){
+  raw = raw || {};
+  var def = defaultState();
+  var rp = raw.profil || {};
+  var profil = Object.assign({}, def.profil, rp, { suisse: Object.assign({}, def.profil.suisse, rp.suisse), voix: Object.assign({}, def.profil.voix, rp.voix) });
+  if(!profil.atouts) profil.atouts = [];
+  var library = Object.assign({}, def.library, raw.library);
+  ["experiences","formations","competences","sections","lettresArchive","annexeItems"].forEach(function(k){ if(!Array.isArray(library[k])) library[k] = []; });
+  var dossiers;
+  if(Array.isArray(raw.dossiers) && raw.dossiers.length){ dossiers = raw.dossiers.map(normDossier); }
+  else {
+    var first = normDossier({ annonce: raw.annonce, cv: raw.cv, lettre: raw.lettre, annexeDossier: raw.annexeDossier, entretien: raw.entretien });
+    first.titre = dossierAutoTitle(first);
+    dossiers = [first];
+  }
+  return { profil: profil, library: library, candidatures: (raw.candidatures || []).map(function(c){ return Object.assign({ versions: [] }, c); }), dossiers: dossiers, currentId: raw.currentId };
+}
+function currentPerson(){
+  return state.people.find(function(p){ return p.id === state.currentPersonId; }) || state.people[0];
+}
+function loadPerson(id){
+  var person = state.people.find(function(p){ return p.id === id; }) || state.people[0];
+  var data = normPersonData(person.data);
+  state.currentPersonId = person.id;
+  state.profil = data.profil; state.library = data.library; state.candidatures = data.candidatures; state.dossiers = data.dossiers;
+  activateDossier(data.currentId);
 }
 function currentDossier(){
   return state.dossiers.find(function(d){ return d.id === state.currentId; }) || state.dossiers[0];
@@ -1013,35 +1096,48 @@ function dossierAutoTitle(d){
   var t = [a.poste, a.entreprise].map(function(x){ return (x || "").trim(); }).filter(Boolean).join(" · ");
   return t || "Nouvelle candidature";
 }
+// Chaque candidature ouverte apparaît toute seule dans le suivi (statut « à envoyer ») et s'y met à jour.
+function syncCandidatureTracking(d){
+  var a = d.annonce || {};
+  var has = (a.poste || "").trim() || (a.entreprise || "").trim();
+  var c = state.candidatures.find(function(x){ return x.id === d.candidatureId; });
+  if(!c){
+    if(!has) return;
+    c = { id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "brouillon", notes: "", versions: [], auto: true, lastSync: "" };
+    state.candidatures.push(c);
+    d.candidatureId = c.id;
+  }
+  var sig = [a.poste, a.entreprise, a.url].join("|");
+  if(c.lastSync !== sig){
+    c.poste = a.poste || ""; c.entreprise = a.entreprise || ""; c.lien = a.url || ""; c.lastSync = sig;
+  }
+}
 function syncCurrentDossier(){
   var d = currentDossier(); if(!d) return;
   d.annonce = state.annonce; d.cv = state.cv; d.lettre = state.lettre;
   d.annexeDossier = state.annexeDossier; d.entretien = state.entretien;
   if(d.titreAuto || !d.titre) d.titre = dossierAutoTitle(d);
+  syncCandidatureTracking(d);
 }
 
-(function initDossiers(){
-  state.dossiers = [];
+(function initState(){
   var src = null;
-  try{ src = JSON.parse(localStorage.getItem("atelier-candidature-v2") || "null"); }catch(e){}
-  if(src && Array.isArray(src.dossiers) && src.dossiers.length){
-    src.dossiers.forEach(function(raw){ state.dossiers.push(normDossier(raw)); });
+  try{ src = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); }catch(e){}
+  state.people = [];
+  if(src && Array.isArray(src.people) && src.people.length){
+    src.people.forEach(function(p){ state.people.push({ id: p.id || uid(), nom: p.nom || "", data: p.data || {} }); });
   } else {
-    // ancien format (une seule candidature) : elle devient le premier dossier
-    var first = normDossier({ annonce: state.annonce, cv: state.cv, lettre: state.lettre, annexeDossier: state.annexeDossier, entretien: state.entretien });
-    first.titreAuto = true; first.titre = dossierAutoTitle(first);
-    state.dossiers.push(first);
+    state.people.push({ id: uid(), nom: "", data: (src && typeof src === "object") ? src : {} });
   }
-  activateDossier(src && src.currentId);
+  loadPerson(src && src.currentPersonId);
 })();
 
 function persist(){
   try{
     syncCurrentDossier();
-    localStorage.setItem("atelier-candidature-v2", JSON.stringify({
-      version: 3, profil: state.profil, library: state.library, candidatures: state.candidatures,
-      dossiers: state.dossiers, currentId: state.currentId
-    }));
+    var person = currentPerson();
+    person.data = { profil: state.profil, library: state.library, candidatures: state.candidatures, dossiers: state.dossiers, currentId: state.currentId };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 4, people: state.people, currentPersonId: state.currentPersonId }));
   }catch(e){}
 }
 
@@ -1094,6 +1190,7 @@ function refreshStatusDots(){
 
 function switchTab(tab){
   activeTab = tab;
+  if(tab === "candidatures" && typeof renderCandidaturesList === "function"){ renderCandidaturesList(); }
   TABS.forEach(function(t){
     document.getElementById("panel-"+t).classList.toggle("active", t === tab);
     document.querySelector('.rail-item[data-tab="'+t+'"]').classList.toggle("is-active", t === tab);
@@ -1467,7 +1564,7 @@ function cvFullText(){
   var parts = [cv.resume, p.langues];
   p.atouts.forEach(function(a){ parts.push(a); });
   lib.competences.forEach(function(c){ parts.push(c.label); });
-  lib.experiences.forEach(function(e){ if((cv.excludedExp || []).indexOf(e.id) === -1) parts.push(e.poste, e.entreprise, e.details); });
+  lib.experiences.forEach(function(e){ if((cv.excludedExp || []).indexOf(e.id) === -1) parts.push(e.poste, e.entreprise, expDetails(e)); });
   lib.formations.forEach(function(f){ parts.push(f.diplome, f.etablissement, f.details); });
   (lib.sections || []).forEach(function(x){ parts.push(x.titre, x.texte); });
   return norm(parts.join(" \n "));
@@ -2248,7 +2345,10 @@ function initPreviewEditing(){
     else if(type === "profil"){ state.profil[field] = val; var inp = document.getElementById("cv-" + field); if(inp) inp.value = val; }
     else if(list){
       var it = list.find(function(x){ return x.id === id; });
-      if(it){ it[field] = val; }
+      if(it){
+        if(type === "exp" && field === "details" && state.cv.expOverrides && typeof state.cv.expOverrides[id] === "string"){ state.cv.expOverrides[id] = val; }
+        else { it[field] = val; }
+      }
     }
     renderExpList(); renderFormList(); renderSectionsList(); renderCVPreview(); refreshCVStatus(); persist();
   });
@@ -2292,8 +2392,8 @@ function renderCVPreview(){
     exps.forEach(function(e){
       html += '<div class="cv-item"><div class="cv-item-head"><span data-edit="exp:' + e.id + ':poste" contenteditable="true" spellcheck="false">' + esc(e.poste) + '</span><span data-edit="exp:' + e.id + ':dates" contenteditable="true" spellcheck="false">' + esc(e.dates) + '</span></div>';
       if(e.entreprise) html += '<div class="cv-item-sub" data-edit="exp:' + e.id + ':entreprise" contenteditable="true" spellcheck="false">' + esc(e.entreprise) + '</div>';
-      if(e.details){
-        var lines = e.details.split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
+      if(expDetails(e)){
+        var lines = expDetails(e).split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
         html += '<ul data-edit="exp:' + e.id + ':details" contenteditable="true" spellcheck="false">' + lines.map(function(l){ return "<li>" + esc(l) + "</li>"; }).join("") + '</ul>';
       }
       html += '</div>';
@@ -2335,7 +2435,7 @@ function initCVModule(){
   ["nom", "titre", "email", "tel", "ville", "lien", "langues"].forEach(function(f){
     var el = document.getElementById("cv-" + f);
     el.value = state.profil[f] || "";
-    el.addEventListener("input", function(){ state.profil[f] = el.value; renderCVPreview(); refreshCVStatus(); persist(); });
+    el.addEventListener("input", function(){ state.profil[f] = el.value; renderCVPreview(); refreshCVStatus(); persist(); if(f === "nom" && typeof renderPersonBar === "function") renderPersonBar(); });
   });
 
   var resumeEl = document.getElementById("cv-resume");
@@ -2767,6 +2867,10 @@ var LETTRE_AUTO = {
   }
 };
 
+function expDetails(e){
+  var ov = state.cv && state.cv.expOverrides && state.cv.expOverrides[e.id];
+  return typeof ov === "string" ? ov : (e.details || "");
+}
 function lowerFirst(s){ return s ? s.charAt(0).toLowerCase() + s.slice(1) : s; }
 function trimEnd(s){ return (s || "").trim().replace(/[.;:,\s]+$/, ""); }
 var PROPER_TERMS = { github:"GitHub", "github actions":"GitHub Actions", cloudflare:"Cloudflare", supabase:"Supabase", vercel:"Vercel", neon:"Neon", "claude code":"Claude Code", cursor:"Cursor", docker:"Docker", typescript:"TypeScript", javascript:"JavaScript", python:"Python", react:"React", figma:"Figma", photoshop:"Photoshop", excel:"Excel", powerpoint:"PowerPoint", "ci/cd":"CI/CD" };
@@ -2841,6 +2945,9 @@ function generateLettreParagraphs(){
   var kws = (an.keywords || []);
   var cvText = cvFullText();
 
+  // 0. appel
+  paras.push(en ? "Dear Hiring Manager," : "Madame, Monsieur,");
+
   // 1. ouverture + profil
   var titre = (state.profil.titre || "").trim();
   if(titre && titre === titre.toUpperCase()) titre = titre.toLowerCase();
@@ -2853,11 +2960,11 @@ function generateLettreParagraphs(){
     return { e: e, idx: idx, score: scoreAgainstKeywords([e.poste, e.entreprise, e.details].join(" "), kws) };
   });
   exps.sort(function(a, b){ return (b.score - a.score) || (a.idx - b.idx); });
-  var chosen = exps.filter(function(x){ return x.score > 0; }).slice(0, 2);
+  var chosen = exps.filter(function(x){ return x.score > 0; }).slice(0, (l.options && l.options.court) ? 1 : 2);
   if(!chosen.length) chosen = exps.slice(0, 1);
   chosen.forEach(function(x, i){
     var e = x.e;
-    var facts = (e.details || "").split("\n").map(trimEnd).filter(Boolean).slice(0, 2).map(lowerFirst);
+    var facts = expDetails(e).split("\n").map(trimEnd).filter(Boolean).slice(0, (l.options && l.options.concret) ? 3 : 2).map(lowerFirst);
     var who = e.entreprise.trim();
     var s;
     if(en){
@@ -2870,7 +2977,7 @@ function generateLettreParagraphs(){
   });
 
   // 2b. réalisations proches de l'annonce
-  var projs = pickProjects(kws);
+  var projs = (l.options && l.options.court) ? [] : pickProjects(kws);
   if(projs.length) paras.push(en ? "Among my projects: " + projs.join("; ") + "." : "Parmi mes réalisations : " + projs.join(" ; ") + ".");
 
   // 3. mots-clés de l'annonce que la bibliothèque contient réellement
@@ -2888,7 +2995,8 @@ function generateLettreParagraphs(){
   });
 
   // 5. clôture
-  var cl = pick(bank.cloture, rng);
+  var voix = state.profil.voix || {};
+  var cl = (voix.formuleFinale || "").trim() || pick(bank.cloture, rng);
   var dispo = (l.disponibilite || "").trim();
   if(dispo) cl = (en ? "I am available " : "Je suis disponible ") + dispo + ". " + cl;
   paras.push(cl);
@@ -3081,6 +3189,7 @@ function renderAnnexePreview(){
 /* ===================== MODULE CANDIDATURES (suivi local des annonces postulées) ===================== */
 
 var CANDIDATURE_STATUTS = [
+  { key: "brouillon", label: "À envoyer", tier: "caution" },
   { key: "envoyee", label: "Envoyée", tier: "caution" },
   { key: "relance", label: "Relance faite", tier: "caution" },
   { key: "entretien", label: "Entretien obtenu", tier: "success" },
@@ -3136,7 +3245,8 @@ function renderCandidaturesList(){
         '</select></div>' +
       '</div>' +
       '<div class="field"><label>Lien de l\'annonce</label><input type="text" data-f="lien" data-id="' + c.id + '" value="' + esc(c.lien) + '" placeholder="https://…"></div>' +
-      '<div class="field"><label>Notes</label><textarea data-f="notes" data-id="' + c.id + '" placeholder="Relance prévue, contact, retour reçu…">' + esc(c.notes) + '</textarea></div>';
+      '<div class="field"><label>Notes</label><textarea data-f="notes" data-id="' + c.id + '" placeholder="Relance prévue, contact, retour reçu…">' + esc(c.notes) + '</textarea></div>' +
+      versionsBlockHtml(c);
     wrap.appendChild(block);
   });
   wrap.querySelectorAll("input,textarea").forEach(function(el){
@@ -3153,6 +3263,16 @@ function renderCandidaturesList(){
       renderCandidaturesList(); refreshStatusDots(); persist();
     });
   });
+  wrap.querySelectorAll("[data-restore-ver]").forEach(function(btn){
+    btn.addEventListener("click", function(){ restoreVersion(btn.getAttribute("data-cand"), btn.getAttribute("data-restore-ver")); });
+  });
+  wrap.querySelectorAll("[data-del-ver]").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      var c = state.candidatures.find(function(x){ return x.id === btn.getAttribute("data-cand"); });
+      if(c){ c.versions = (c.versions || []).filter(function(v){ return v.id !== btn.getAttribute("data-del-ver"); }); }
+      renderCandidaturesList(); persist();
+    });
+  });
   wrap.querySelectorAll("[data-remove]").forEach(function(btn){
     btn.addEventListener("click", function(){
       state.candidatures = state.candidatures.filter(function(c){ return c.id !== btn.getAttribute("data-remove"); });
@@ -3162,20 +3282,57 @@ function renderCandidaturesList(){
   renderCandidaturesSummary();
 }
 
+function versionsBlockHtml(c){
+  var vs = c.versions || [];
+  if(!vs.length) return '<p class="hint" style="margin:6px 0 0;">Aucune version enregistrée. « Enregistrer une version » fige le CV et la lettre tels qu\'ils sont, pour y revenir plus tard.</p>';
+  return '<div class="field"><label>Versions enregistrées</label>' + vs.map(function(v){
+    return '<div class="toolbar-row" style="justify-content:space-between;border:1px solid var(--border);border-radius:8px;padding:6px 10px;margin-bottom:6px;">' +
+      '<span style="font-size:13px;"><strong>' + esc(v.label) + '</strong> <span class="hint">· ' + esc(v.date) + '</span></span>' +
+      '<span class="toolbar-row"><button class="btn btn-ghost btn-sm" data-cand="' + c.id + '" data-restore-ver="' + v.id + '">Revenir à cette version</button>' +
+      '<button class="icon-btn" data-cand="' + c.id + '" data-del-ver="' + v.id + '" title="Supprimer cette version" aria-label="Supprimer cette version">' + icon("close") + '</button></span></div>';
+  }).join("") + '</div>';
+}
+
+// Fige la candidature active (annonce, CV, lettre) sous un nom, pour pouvoir y revenir.
+function saveVersion(label){
+  persist();
+  var d = currentDossier();
+  var c = state.candidatures.find(function(x){ return x.id === d.candidatureId; });
+  if(!c){ syncCandidatureTracking(d); c = state.candidatures.find(function(x){ return x.id === d.candidatureId; }); }
+  if(!c) return null;
+  var snap = JSON.parse(JSON.stringify({ annonce: d.annonce, cv: d.cv, lettre: d.lettre, annexeDossier: d.annexeDossier }));
+  var now = new Date();
+  var v = { id: uid(), label: label || ("Version du " + now.toLocaleDateString("fr-FR") + " " + now.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })), date: todayISO(), snap: snap,
+    experiences: JSON.parse(JSON.stringify(state.library.experiences.filter(function(e){ return (d.cv.excludedExp || []).indexOf(e.id) === -1; }))) };
+  c.versions = c.versions || []; c.versions.push(v);
+  persist();
+  return v;
+}
+function restoreVersion(candId, verId){
+  var c = state.candidatures.find(function(x){ return x.id === candId; });
+  var v = c && (c.versions || []).find(function(x){ return x.id === verId; });
+  if(!v) return;
+  var d = state.dossiers.find(function(x){ return x.candidatureId === candId; });
+  if(!d){ alert("La candidature de travail liée à cette ligne n'existe plus : crée-la à nouveau depuis l'onglet Annonce."); return; }
+  if(!confirm("Revenir à « " + v.label + " » ? Le CV, la lettre et l'annonce de cette candidature reprennent leur état enregistré.")) return;
+  var n = normDossier(JSON.parse(JSON.stringify(v.snap)));
+  d.annonce = n.annonce; d.cv = n.cv; d.lettre = n.lettre; d.annexeDossier = n.annexeDossier;
+  // retrouve les expériences telles qu'elles étaient, si elles ont été modifiées ou supprimées depuis
+  (v.experiences || []).forEach(function(e){ if(!state.library.experiences.some(function(x){ return x.id === e.id; })) state.library.experiences.push(JSON.parse(JSON.stringify(e))); });
+  activateDossier(d.id);
+  syncDossierUI(); persist();
+  switchTab("cv");
+}
+
 document.getElementById("btn-save-current-candidature").addEventListener("click", function(){
-  state.candidatures.push({
-    id: uid(),
-    poste: state.annonce.poste || "",
-    entreprise: state.annonce.entreprise || "",
-    lien: state.annonce.url || "",
-    date: todayISO(),
-    statut: "envoyee",
-    notes: ""
-  });
-  renderCandidaturesList(); refreshStatusDots(); persist();
+  var d = currentDossier();
+  var name = prompt("Nom de cette version (laisse vide pour la date du jour) :", "");
+  if(name === null) return;
+  saveVersion(name.trim());
+  renderCandidaturesList(); refreshStatusDots();
 });
 document.getElementById("btn-add-candidature").addEventListener("click", function(){
-  state.candidatures.push({ id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "envoyee", notes: "" });
+  state.candidatures.push({ id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "envoyee", notes: "", versions: [] });
   renderCandidaturesList(); refreshStatusDots(); persist();
 });
 
@@ -3324,6 +3481,8 @@ function syncDossierUI(){
   renderAnnexeCategoryGrid(); renderAnnexeSuggestions(); renderAnnexeItemsList(); renderAnnexePreview();
   renderEntretienQuestions();
   renderDossierBar(); refreshStatusDots();
+  if(typeof refreshAffinerUI === "function"){ refreshAffinerUI(); }
+  var ub = document.getElementById("btn-ia-cv-undo"); if(ub) ub.style.display = Object.keys(state.cv.expOverrides || {}).length ? "inline-flex" : "none";
 }
 
 function switchDossier(id){
@@ -3371,15 +3530,76 @@ document.getElementById("btn-del-dossier").addEventListener("click", function(){
   syncDossierUI(); persist();
 });
 
-// Sauvegarde / restauration : un fichier .json stocké sur l'ordinateur, rien ne transite par un serveur.
+// ---- personnes : chaque personne a sa base, sa voix, ses candidatures ----
+function personLabel(p){
+  return p.nom || (p.id === state.currentPersonId ? (state.profil.nom || "") : ((p.data && p.data.profil && p.data.profil.nom) || "")) || "Personne";
+}
+function renderPersonBar(){
+  var sel = document.getElementById("person-select");
+  sel.innerHTML = "";
+  state.people.forEach(function(p){
+    var o = document.createElement("option");
+    o.value = p.id; o.textContent = personLabel(p);
+    if(p.id === state.currentPersonId) o.selected = true;
+    sel.appendChild(o);
+  });
+  document.getElementById("btn-del-person").disabled = state.people.length <= 1;
+}
+
+// Recharge tout ce qui dépend de la personne (profil, base, suivi) puis de la candidature active.
+function syncPersonUI(){
+  ["nom", "titre", "email", "tel", "ville", "lien", "langues"].forEach(function(f){ document.getElementById("cv-" + f).value = state.profil[f] || ""; });
+  [["suisse-naissance", "dateNaissance"], ["suisse-nationalite", "nationalite"], ["suisse-permis", "permis"], ["suisse-etat", "etatCivil"]].forEach(function(pair){
+    document.getElementById(pair[0]).value = state.profil.suisse[pair[1]] || "";
+  });
+  renderPhotoThumb();
+  renderArchiveList(); renderReferencePanel();
+  renderCandidaturesList();
+  if(typeof renderVoixCard === "function") renderVoixCard();
+  syncDossierUI();
+  renderPersonBar();
+}
+function switchPerson(id){
+  persist();
+  loadPerson(id);
+  syncPersonUI(); persist();
+}
+document.getElementById("person-select").addEventListener("change", function(){ switchPerson(this.value); });
+document.getElementById("btn-new-person").addEventListener("click", function(){
+  var name = prompt("Prénom ou nom de cette personne (utilisé seulement pour la reconnaître dans la liste) :", "");
+  if(name === null) return;
+  persist();
+  var id = uid();
+  state.people.push({ id: id, nom: name.trim() || "Nouvelle personne", data: {} });
+  loadPerson(id);
+  syncPersonUI(); persist();
+  switchTab("cv");
+});
+document.getElementById("btn-rename-person").addEventListener("click", function(){
+  var p = currentPerson();
+  var name = prompt("Nouveau nom dans la liste :", personLabel(p));
+  if(name === null) return;
+  p.nom = name.trim(); persist(); renderPersonBar();
+});
+document.getElementById("btn-del-person").addEventListener("click", function(){
+  if(state.people.length <= 1) return;
+  var p = currentPerson();
+  if(!confirm("Supprimer définitivement « " + personLabel(p) + " » : sa base, ses candidatures, ses lettres ? Pense à « Sauvegarder » avant.")) return;
+  state.people = state.people.filter(function(x){ return x.id !== p.id; });
+  loadPerson(state.people[0].id);
+  syncPersonUI(); persist();
+});
+
+// Sauvegarde / restauration : un fichier .json de la personne active, stocké sur ton ordinateur, rien ne transite par un serveur.
 document.getElementById("btn-backup").addEventListener("click", function(){
   persist();
-  var data = JSON.stringify({ app: "atelier-candidature", version: 3, exportedAt: new Date().toISOString(),
-    profil: state.profil, library: state.library, candidatures: state.candidatures, dossiers: state.dossiers, currentId: state.currentId }, null, 1);
+  var p = currentPerson();
+  var data = JSON.stringify({ app: "atelier-candidature", version: 4, exportedAt: new Date().toISOString(), nom: personLabel(p),
+    data: { profil: state.profil, library: state.library, candidatures: state.candidatures, dossiers: state.dossiers, currentId: state.currentId } }, null, 1);
   var blob = new Blob([data], { type: "application/json" });
   var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "atelier-candidature-base-" + todayISO() + ".json";
+  a.download = "atelier-candidature-" + fileSafe(personLabel(p)) + "-" + todayISO() + ".json";
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
 });
@@ -3390,15 +3610,271 @@ document.getElementById("restore-file").addEventListener("change", function(e){
   r.onload = function(){
     try{
       var raw = JSON.parse(r.result);
-      if(!raw || !Array.isArray(raw.dossiers)) throw new Error("format");
-      if(!confirm("Remplacer ta base et tes candidatures actuelles par le contenu de ce fichier ?")) return;
-      localStorage.setItem("atelier-candidature-v2", JSON.stringify(raw));
-      location.reload();
+      var data = raw && raw.data ? raw.data : raw;          // version 4 ou ancien format
+      if(!data || !(Array.isArray(data.dossiers) || data.library || data.profil)) throw new Error("format");
+      persist();
+      var id = uid();
+      state.people.push({ id: id, nom: ((raw && raw.nom) || (data.profil && data.profil.nom) || "Restaurée") + " (restaurée)", data: data });
+      loadPerson(id);
+      syncPersonUI(); persist();
     }catch(err){ alert("Ce fichier n'est pas une sauvegarde de l'atelier."); }
   };
   r.readAsText(f);
   e.target.value = "";
 });
+
+/* ===================== ASSISTANT IA (facultatif) + AFFINAGE DE LA LETTRE + VOIX ===================== */
+
+var IA_KEY = "atelier-candidature-ia";
+function iaLoad(){ try{ return Object.assign({ key:"", model:"claude-sonnet-5-5", skip:false }, JSON.parse(localStorage.getItem(IA_KEY) || "{}")); }catch(e){ return { key:"", model:"claude-sonnet-5-5", skip:false }; } }
+function iaSave(cfg){ try{ localStorage.setItem(IA_KEY, JSON.stringify(cfg)); }catch(e){} }
+function iaOn(){ return !!iaLoad().key; }
+function refreshIaState(){ document.getElementById("ia-state").textContent = iaOn() ? "activé" : "désactivé"; refreshAffinerUI(); }
+
+document.getElementById("btn-ia-settings").addEventListener("click", function(){
+  var cfg = iaLoad();
+  document.getElementById("ia-key").value = cfg.key;
+  document.getElementById("ia-model").value = cfg.model;
+  document.getElementById("ia-skip").checked = !!cfg.skip;
+  document.getElementById("ia-dialog").showModal();
+});
+document.getElementById("ia-cancel").addEventListener("click", function(){ document.getElementById("ia-dialog").close(); });
+document.getElementById("ia-save").addEventListener("click", function(){
+  iaSave({ key: document.getElementById("ia-key").value.trim(), model: document.getElementById("ia-model").value, skip: document.getElementById("ia-skip").checked });
+  document.getElementById("ia-dialog").close(); refreshIaState();
+});
+document.getElementById("ia-forget").addEventListener("click", function(){
+  iaSave({ key:"", model: document.getElementById("ia-model").value, skip:false });
+  document.getElementById("ia-key").value = ""; refreshIaState();
+});
+
+// Retire de tout texte envoyé : nom, email, téléphone, adresse, liens (les expériences peuvent les contenir).
+function scrubForAI(text){
+  var t = String(text || "");
+  var p = state.profil || {};
+  var secrets = [p.nom, p.email, p.tel, p.ville, p.lien].filter(Boolean);
+  (p.nom || "").split(/\s+/).forEach(function(w){ if(w.length >= 3) secrets.push(w); });
+  secrets.sort(function(a, b){ return b.length - a.length; }).forEach(function(sv){
+    t = t.replace(new RegExp(escapeRegex(sv), "gi"), "[…]");
+  });
+  return t.replace(/[\w.+-]+@[\w-]+\.[a-z]{2,}/gi, "[…]")
+          .replace(/(?:\+?\d[\d\s.\-]{7,}\d)/g, function(m){ return /\d{4}\s*[-–]\s*\d{4}/.test(m) ? m : "[…]"; })
+          .replace(/https?:\/\/\S+|www\.\S+|linkedin\.com\S*/gi, "[lien]");
+}
+
+function iaConfirm(what, text){
+  var cfg = iaLoad();
+  if(cfg.skip) return Promise.resolve(true);
+  return new Promise(function(resolve){
+    var dlg = document.getElementById("ia-confirm");
+    document.getElementById("ia-confirm-what").textContent = what;
+    document.getElementById("ia-confirm-text").textContent = text;
+    var done = function(v){ dlg.close(); document.getElementById("ia-confirm-yes").onclick = null; document.getElementById("ia-confirm-no").onclick = null; resolve(v); };
+    document.getElementById("ia-confirm-yes").onclick = function(){ done(true); };
+    document.getElementById("ia-confirm-no").onclick = function(){ done(false); };
+    dlg.addEventListener("cancel", function(){ resolve(false); }, { once: true });
+    dlg.showModal();
+  });
+}
+
+function iaCall(system, userObj, maxTokens){
+  var cfg = iaLoad();
+  return fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-api-key": cfg.key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+    body: JSON.stringify({ model: cfg.model, max_tokens: maxTokens || 1500, system: system, messages: [{ role: "user", content: JSON.stringify(userObj, null, 1) }] })
+  }).then(function(res){
+    return res.json().catch(function(){ return {}; }).then(function(data){
+      if(!res.ok){
+        var msg = (data && data.error && data.error.message) || ("erreur " + res.status);
+        if(res.status === 401) msg = "clé refusée (401). Vérifie-la dans « Assistant IA ».";
+        throw new Error(msg);
+      }
+      var txt = (data.content || []).map(function(b){ return b.text || ""; }).join("");
+      var m = txt.match(/\{[\s\S]*\}/);
+      if(!m) throw new Error("réponse inattendue");
+      return JSON.parse(m[0]);
+    });
+  }, function(){ throw new Error("connexion impossible (réseau ou navigateur qui bloque la requête)."); });
+}
+
+var IA_STYLE_RULES = "Style : écris comme une personne, pas comme un modèle. Phrases de longueurs variées, verbes simples et précis, faits concrets. Interdits : tirets cadratins ou demi-cadratins, listes de trois éléments par réflexe, tournures « ce n'est pas X, c'est Y », phrases de conclusion qui répètent, formules creuses (passionné, dynamique, véritable atout, au cœur de, résonne, enthousiasme débordant, force de proposition). N'invente AUCUN fait, chiffre, employeur, diplôme, outil ou résultat : n'utilise que ce qui est fourni.";
+
+function relevantExperiences(max){
+  var kws = state.annonce.keywords || [];
+  var exps = orderedList(state.library.experiences, state.cv.selectedExp).filter(function(e){ return (e.poste || e.entreprise) && (state.cv.excludedExp || []).indexOf(e.id) === -1; });
+  return exps.slice(0, max || 5);
+}
+function annonceForAI(){
+  return { poste: scrubForAI(state.annonce.poste), entreprise: scrubForAI(state.annonce.entreprise), texte: scrubForAI(state.annonce.texte).slice(0, 4500), mots_cles: (state.annonce.keywords || []).map(function(k){ return k.term; }) };
+}
+
+/* ---- CV : reformulation des réalisations pour l'annonce ---- */
+function iaReformulerCV(){
+  var st = document.getElementById("ia-cv-status");
+  if(!iaOn()){ st.textContent = "Active d'abord l'assistant IA (bouton en haut)."; document.getElementById("btn-ia-settings").click(); return; }
+  if(!state.annonce.texte.trim()){ st.textContent = "Colle d'abord le texte de l'annonce."; return; }
+  var exps = relevantExperiences(5);
+  if(!exps.length){ st.textContent = "Aucune expérience dans la base."; return; }
+  var user = {
+    consigne: "Reformule pour cette annonce. Garde le même nombre d'expériences. Pour chacune, 3 à 5 réalisations courtes, une par ligne, en réordonnant celles qui comptent le plus pour l'annonce en premier et en reprenant son vocabulaire uniquement quand c'est vrai. Propose aussi une accroche de 2 phrases.",
+    langue: state.cv.lang === "en" ? "anglais" : "français",
+    annonce: annonceForAI(),
+    accroche_actuelle: scrubForAI(state.cv.resume),
+    experiences: exps.map(function(e){ return { id: e.id, poste: scrubForAI(e.poste), entreprise: scrubForAI(e.entreprise), dates: e.dates, realisations: scrubForAI(expDetails(e)).split("\n").filter(Boolean) }; }),
+    format_reponse: '{"accroche":"...","experiences":[{"id":"...","realisations":["..."]}]}'
+  };
+  var system = "Tu adaptes un CV à une annonce pour qu'il passe les filtres ATS tout en restant fidèle aux faits. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
+  iaConfirm("Annonce, expériences et accroche (sans nom ni coordonnées) :", JSON.stringify(user, null, 1)).then(function(ok){
+    if(!ok) return;
+    var btn = document.getElementById("btn-ia-cv"); btn.disabled = true; st.textContent = "Reformulation en cours…";
+    iaCall(system, user, 2500).then(function(out){
+      btn.disabled = false;
+      var n = 0;
+      (out.experiences || []).forEach(function(r){
+        if(!exps.some(function(e){ return e.id === r.id; }) || !Array.isArray(r.realisations)) return;
+        state.cv.expOverrides[r.id] = r.realisations.map(function(x){ return cleanLetterText(String(x)); }).filter(Boolean).join("\n"); n++;
+      });
+      if(out.accroche){
+        if(state.cv.resumeOrig === undefined) state.cv.resumeOrig = state.cv.resume || "";
+        state.cv.resume = cleanLetterText(String(out.accroche));
+        document.getElementById("cv-resume").value = state.cv.resume;
+      }
+      st.textContent = n + " expérience(s) reformulée(s) pour cette annonce. « Texte d'origine » les remet telles que dans ta base. Relis avant d'envoyer.";
+      document.getElementById("btn-ia-cv-undo").style.display = "inline-flex";
+      renderCVPreview(); renderExpList(); persist();
+    }).catch(function(err){ btn.disabled = false; st.textContent = "L'IA n'a pas répondu : " + err.message; });
+  });
+}
+document.getElementById("btn-ia-cv").addEventListener("click", iaReformulerCV);
+document.getElementById("btn-ia-cv-undo").addEventListener("click", function(){
+  state.cv.expOverrides = {};
+  if(state.cv.resumeOrig !== undefined){ state.cv.resume = state.cv.resumeOrig; delete state.cv.resumeOrig; document.getElementById("cv-resume").value = state.cv.resume; }
+  this.style.display = "none";
+  document.getElementById("ia-cv-status").textContent = "Texte d'origine rétabli.";
+  renderCVPreview(); renderExpList(); persist();
+});
+
+/* ---- Lettre : affinage par remarques (rapides en local, libres avec l'IA) ---- */
+var AFFINER_CHIPS = [
+  { key:"court", label:"Plus court", type:"option" },
+  { key:"concret", label:"Plus de faits concrets", type:"option" },
+  { key:"direct", label:"Plus direct", type:"ton" },
+  { key:"chaleureux", label:"Plus chaleureux", type:"ton" },
+  { key:"formel", label:"Plus formel", type:"ton" }
+];
+function refreshAffinerUI(){
+  var wrap = document.getElementById("affiner-chips");
+  if(!wrap) return;
+  var l = state.lettre; l.options = l.options || {};
+  wrap.innerHTML = "";
+  AFFINER_CHIPS.forEach(function(c){
+    var on = c.type === "option" ? !!l.options[c.key] : l.ton === c.key;
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "chip" + (on ? "" : " suggest"); b.textContent = (on ? "✓ " : "") + c.label;
+    b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.addEventListener("click", function(){
+      if(c.type === "option"){ l.options[c.key] = !l.options[c.key]; } else { l.ton = c.key; var tb = document.querySelectorAll('#tone-segmented button'); tb.forEach(function(x){ var o = x.getAttribute('data-tone') === l.ton; x.classList.toggle('active', o); x.setAttribute('aria-pressed', o ? 'true' : 'false'); }); }
+      if(!Array.isArray(l.corps)) renderLettrePreview();
+      refreshAffinerUI(); persist();
+    });
+    wrap.appendChild(b);
+  });
+  var rw = document.getElementById("affiner-remarques"); rw.innerHTML = "";
+  (l.remarques || []).forEach(function(r, i){
+    var chip = document.createElement("span"); chip.className = "chip"; chip.textContent = r + " ";
+    var x = document.createElement("button"); x.type = "button"; x.className = "icon-btn"; x.setAttribute("aria-label", "Retirer cette remarque"); x.innerHTML = icon("close");
+    x.addEventListener("click", function(){ l.remarques.splice(i, 1); refreshAffinerUI(); persist(); });
+    chip.appendChild(x); rw.appendChild(chip);
+  });
+  document.getElementById("btn-affiner-undo").disabled = !(l.corpsPrev && l.corpsPrev.length);
+  var st = document.getElementById("affiner-status");
+  if(!st.getAttribute("data-busy")){
+    st.textContent = iaOn() ? "Assistant IA actif : les remarques libres sont prises en compte." : "Sans assistant IA, seuls les boutons rapides s'appliquent. Les remarques libres demandent l'assistant IA (bouton en haut).";
+  }
+}
+function addRemarque(){
+  var inp = document.getElementById("affiner-input"), v = inp.value.trim();
+  if(!v) return;
+  state.lettre.remarques = state.lettre.remarques || [];
+  state.lettre.remarques.push(v); inp.value = "";
+  refreshAffinerUI(); persist();
+}
+document.getElementById("btn-affiner-add").addEventListener("click", addRemarque);
+document.getElementById("affiner-input").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); addRemarque(); } });
+
+function lettreCurrentParagraphs(){ return Array.isArray(state.lettre.corps) && state.lettre.corps.length ? state.lettre.corps : generateLettreParagraphs(); }
+
+document.getElementById("btn-affiner-go").addEventListener("click", function(){
+  var l = state.lettre, st = document.getElementById("affiner-status");
+  document.getElementById("affiner-input").value && addRemarque();
+  var before = lettreCurrentParagraphs();
+  var finishLocal = function(){
+    l.corpsPrev = before; l.corps = null; l.seed = (l.seed || 1) + 1;
+    renderLettrePreview(); refreshAffinerUI(); persist();
+  };
+  if(!iaOn()){ finishLocal(); return; }
+  // IA : lettre sur mesure à partir de l'annonce, des expériences, de la voix et des remarques
+  var voix = state.profil.voix || {};
+  var sample = state.library.lettresArchive.filter(function(x){ return x.texte && x.texte.trim() && (x.outcome === "entretien" || x.outcome === "offre"); })[0]
+    || state.library.lettresArchive.filter(function(x){ return x.texte && x.texte.trim(); })[0];
+  var en = l.lang === "en";
+  var body = before.filter(function(x){ return !/^(Madame, Monsieur,|Dear Hiring Manager,)$/.test(x); });
+  var user = {
+    consigne: (l.corps ? "Réécris la lettre actuelle en appliquant les remarques, sans changer les faits." : "Rédige la lettre de motivation."),
+    langue: en ? "anglais" : "français", ton: l.ton,
+    options: { courte: !!(l.options && l.options.court), plus_de_faits_concrets: !!(l.options && l.options.concret) },
+    annonce: annonceForAI(),
+    titre_professionnel: scrubForAI(state.profil.titre),
+    experiences: relevantExperiences(4).map(function(e){ return { poste: scrubForAI(e.poste), entreprise: scrubForAI(e.entreprise), dates: e.dates, realisations: scrubForAI(expDetails(e)).split("\n").filter(Boolean).slice(0, 5) }; }),
+    competences: state.library.competences.map(function(c){ return scrubForAI(c.label); }).slice(0, 30),
+    voix: { description: scrubForAI(voix.description), a_eviter: scrubForAI(voix.eviter), formule_de_fin: scrubForAI(voix.formuleFinale) },
+    exemple_de_lettre_de_la_personne: sample ? scrubForAI(sample.texte).slice(0, 1200) : "",
+    disponibilite: scrubForAI(l.disponibilite),
+    lettre_actuelle: l.corps ? body.map(scrubForAI) : [],
+    remarques: l.remarques || [],
+    format_reponse: '{"paragraphs":["..."]}'
+  };
+  var system = "Tu rédiges des lettres de motivation pour une personne précise, avec sa voix. 150 à 250 mots, sans formule d'appel ni signature (l'application les ajoute). Structure : une accroche précise sur le poste, un ou deux paragraphes de preuves tirées des expériences fournies et reprenant naturellement les mots-clés de l'annonce que la personne maîtrise réellement, une phrase sur l'entreprise seulement si l'annonce en parle, une clôture courte (reprends la formule de fin fournie si elle existe, sinon reste sobre). Respecte la voix décrite et évite ce qui est listé à éviter. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
+  iaConfirm("Annonce, expériences, voix et remarques (sans nom ni coordonnées) :", JSON.stringify(user, null, 1)).then(function(ok){
+    if(!ok) return;
+    var btn = this; btn.disabled = true; st.setAttribute("data-busy", "1"); st.textContent = "Rédaction en cours…";
+    iaCall(system, user, 1800).then(function(out){
+      btn.disabled = false; st.removeAttribute("data-busy");
+      if(!out.paragraphs || !out.paragraphs.length) throw new Error("réponse vide");
+      l.corpsPrev = before;
+      var paras = out.paragraphs.map(function(x){ return cleanLetterText(String(x)); }).filter(Boolean);
+      var salut = en ? "Dear Hiring Manager," : "Madame, Monsieur,";
+      l.corps = [salut].concat(paras);
+      renderLettrePreview(); refreshAffinerUI(); persist();
+      st.textContent = "Lettre régénérée. Relis-la : « Version précédente » revient en arrière.";
+    }).catch(function(err){ btn.disabled = false; st.removeAttribute("data-busy"); st.textContent = "L'IA n'a pas répondu : " + err.message; });
+  }.bind(this));
+});
+document.getElementById("btn-affiner-undo").addEventListener("click", function(){
+  var l = state.lettre;
+  if(!(l.corpsPrev && l.corpsPrev.length)) return;
+  var cur = lettreCurrentParagraphs();
+  l.corps = l.corpsPrev; l.corpsPrev = cur;
+  renderLettrePreview(); refreshAffinerUI(); persist();
+});
+
+/* ---- Voix de la personne ---- */
+function renderVoixCard(){
+  var v = state.profil.voix = state.profil.voix || { description:"", formuleFinale:"", eviter:"" };
+  document.getElementById("voix-description").value = v.description || "";
+  document.getElementById("voix-eviter").value = v.eviter || "";
+  document.getElementById("voix-formule").value = v.formuleFinale || "";
+}
+[["voix-description","description"],["voix-eviter","eviter"],["voix-formule","formuleFinale"]].forEach(function(pair){
+  document.getElementById(pair[0]).addEventListener("input", function(){
+    state.profil.voix = state.profil.voix || {};
+    state.profil.voix[pair[1]] = this.value;
+    if(pair[1] === "formuleFinale"){ renderLettrePreview(); }
+    persist();
+  });
+});
+
 
 /* ===================== INIT GÉNÉRAL ===================== */
 
@@ -3429,6 +3905,9 @@ if (typeof window.onAnnonceChanged === "function") window.onAnnonceChanged();
 
 refreshStatusDots();
 renderDossierBar();
+renderPersonBar();
+renderVoixCard();
+refreshIaState();
 
 </script>
 </body>
