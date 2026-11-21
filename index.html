@@ -10,6 +10,7 @@
 <link rel="stylesheet" href="vendor/fonts.css">
 <script src="vendor/html2canvas.min.js" defer></script>
 <script src="vendor/jspdf.umd.min.js" defer></script>
+<script src="prompts.js"></script>
 <script>
 // Applique le thème choisi (clair/sombre) avant le premier rendu, pour éviter un flash de la
 // mauvaise palette. Rien n'est envoyé nulle part : juste une préférence lue depuis ce navigateur.
@@ -795,6 +796,7 @@
               <button class="btn btn-ghost btn-sm" id="btn-affiner-undo" type="button" disabled>Version précédente</button>
             </div>
             <p class="hint" id="affiner-status" style="margin:8px 0 0;"></p>
+            <div id="style-check" style="margin-top:12px;border-top:1px dashed var(--border);padding-top:10px;"></div>
           </div>
 
           <div class="card" style="margin-bottom:16px;" id="card-voix">
@@ -910,6 +912,7 @@
           <button class="btn btn-ghost btn-sm" id="btn-add-candidature">+ Ajouter manuellement</button>
         </div>
         <p class="hint" id="candidatures-summary" style="margin:0 0 14px;"></p>
+        <div id="relances-due" style="margin-bottom:14px;"></div>
         <div id="candidatures-list"></div>
       </div>
     </section>
@@ -1324,8 +1327,8 @@ function syncCandidatureTracking(d){
   if(!c){
     if(!has) return;
     c = { id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "brouillon", notes: "", versions: [], auto: true, lastSync: "", type: a.service ? "service" : (a.spontanee ? "spontanee" : "offre") };
-    if(a.service){ var rel2 = new Date(); rel2.setDate(rel2.getDate() + 10); c.notes = "Offre de service. Relance à prévoir vers le " + rel2.toLocaleDateString("fr-FR") + "."; }
-    else if(a.spontanee){ var rel = new Date(); rel.setDate(rel.getDate() + 10); c.notes = "Candidature spontanée. Relance à prévoir vers le " + rel.toLocaleDateString("fr-FR") + "."; }
+    if(a.service){ c.relance = addDays(todayISO(), 10); c.notes = "Offre de service. Relance prévue le " + new Date(c.relance + "T12:00:00").toLocaleDateString("fr-FR") + "."; }
+    else if(a.spontanee){ c.relance = addDays(todayISO(), 10); c.notes = "Candidature spontanée. Relance prévue le " + new Date(c.relance + "T12:00:00").toLocaleDateString("fr-FR") + "."; }
     state.candidatures.push(c);
     d.candidatureId = c.id;
   }
@@ -1392,6 +1395,7 @@ function statusFor(tab){
     return state.annexeDossier.selectedItemIds.length ? "ready" : "partial";
   }
   if(tab === "candidatures"){
+    if(typeof relancesDues === "function" && relancesDues().length) return "partial";
     return state.candidatures.length ? "ready" : "empty";
   }
   if(tab === "entretien"){
@@ -3347,6 +3351,36 @@ function pickProjects(kws){
   });
 }
 
+// Depuis quelle année la personne pratique un outil ou un sujet (d'après ses expériences).
+function termSinceYear(term){
+  var best = 0;
+  state.library.experiences.forEach(function(e){
+    var y = parseInt(startYear(e.dates), 10);
+    if(y && hasTerm(norm([e.poste, e.details].join(" ")), term) && (!best || y < best)) best = y;
+  });
+  return best ? String(best) : "";
+}
+// La phrase de l'annonce qui recoupe le plus de mots-clés : ce que la personne a remarqué.
+function annonceHighlight(){
+  var an = state.annonce, kws = an.keywords || [];
+  if(!an.texte || an.spontanee || an.service || !kws.length) return "";
+  var best = "", bs = 1;
+  an.texte.split(/(?<=[.!?])\s+|\n+/).forEach(function(sn){
+    sn = sn.trim().replace(/^[-•*]\s*/, "");
+    if(sn.length < 25 || sn.length > 150) return;
+    var sc = scoreAgainstKeywords(sn, kws);
+    if(sc > bs){ bs = sc; best = sn; }
+  });
+  if(!best) return "";
+  // la phrase de l'annonce parle de « nous » ; la lettre s'adresse à « vous »
+  var swaps = [[/^nous (recherchons|cherchons)\b/i, "vous recherchez"], [/^nous proposons\b/i, "vous proposez"], [/^nous souhaitons\b/i, "vous souhaitez"], [/^nous avons\b/i, "vous avez"], [/^nous sommes\b/i, "vous êtes"]];
+  var out = trimEnd(best);
+  swaps.forEach(function(sw){ out = out.replace(sw[0], sw[1]); });
+  if(/^nous\b/i.test(out)) return "";
+  out = out.replace(/\bnotre\b/gi, "votre").replace(/\bnos\b/gi, "vos");
+  return out.replace(/^vous (recherchez|cherchez) quelqu'un pour\b/i, "vous cherchez quelqu'un pour");
+}
+
 function generateLettre(){ return state.annonce.service ? generateOffreServiceParagraphs() : generateLettreParagraphs(); }
 
 function generateLettreParagraphs(){
@@ -3387,6 +3421,8 @@ function generateLettreParagraphs(){
   if(titre && titre === titre.toUpperCase()) titre = titre.toLowerCase();
   var p1 = fill(pick(bank.ouverture, rng));
   if(spont && an.meta && an.meta.secteur) p1 += en ? " Your activity (" + an.meta.secteur + ") matches my profile." : " Votre activité (" + an.meta.secteur + ") correspond à mon profil.";
+  var hl = annonceHighlight();
+  if(hl) p1 += en ? " What caught my attention in your advertisement: " + lowerFirst(hl) + "." : " Dans votre annonce, ce qui retient mon attention : " + lowerFirst(hl) + ".";
   if(titre) p1 += en ? " I work as " + titre + "." : " Je suis " + lowerFirst(titre) + ".";
   paras.push(p1);
 
@@ -3400,13 +3436,11 @@ function generateLettreParagraphs(){
   chosen.forEach(function(x, i){
     var e = x.e;
     var facts = expDetails(e).split("\n").map(trimEnd).filter(Boolean).slice(0, (l.options && l.options.concret) ? 3 : 2).map(lowerFirst);
-    var who = e.entreprise.trim();
-    var s;
+    var s;   // la lettre ne cite pas les employeurs passés : le CV les porte
     if(en){
-      s = (i === 0 ? "" : "I also worked ") + (who ? "At " + who + ", " : "") + "as " + (e.poste.trim() || "a team member") + datesFr(e.dates, true) + (facts.length ? ", my work covered: " + facts.join("; ") + "." : ".");
-      s = s.replace(/^I also worked At /, "I also worked at ");
+      s = (i === 0 ? "" : "I also worked ") + "as " + (e.poste.trim() || "a team member") + datesFr(e.dates, true) + (facts.length ? (i === 0 ? ", my work covered: " : ": ") + facts.join("; ") + "." : ".");
     } else {
-      s = (i === 0 ? "" : "J'ai aussi travaillé : ") + (who ? (i === 0 ? "Chez " + who : "chez " + who) + ", " : "") + (i === 0 ? "comme " : "comme ") + (e.poste.trim() ? lowerFirst(e.poste.trim()) : "membre de l'équipe") + datesFr(e.dates, false) + (facts.length ? ", mes missions portaient sur : " + facts.join(" ; ") + "." : ".");
+      s = (i === 0 ? "Comme " : "J'ai aussi exercé comme ") + (e.poste.trim() ? lowerFirst(e.poste.trim()) : "membre de l'équipe") + datesFr(e.dates, false) + (facts.length ? (i === 0 ? ", mes missions portaient sur : " : " : ") + facts.join(" ; ") + "." : ".");
     }
     paras.push(s.charAt(0).toUpperCase() + s.slice(1));
   });
@@ -3418,7 +3452,16 @@ function generateLettreParagraphs(){
   // 3. mots-clés de l'annonce que la bibliothèque contient réellement
   var matched = kws.filter(function(k){ return (k.kind === "skill" || k.term.length >= 5) && countTerm(cvText, norm(k.term)) > 0; }).slice(0, 6).map(function(k){ return k.term; });
   (l.competencesChoisies || []).forEach(function(c){ if(matched.map(norm).indexOf(norm(c)) === -1) matched.push(c); });
-  if(matched.length){
+  var sinceTxt = "";
+  if(matched.length && !spont){
+    var groups = {}, order = [];
+    matched.slice(0, 4).forEach(function(t){ var y = termSinceYear(t) || "0"; if(!groups[y]){ groups[y] = []; order.push(y); } groups[y].push(displayTerm(t)); });
+    var segs = order.filter(function(y){ return y !== "0"; }).sort().map(function(y){ return humanList(groups[y], en) + (en ? " since " : " depuis ") + y; });
+    var rest = groups["0"] ? humanList(groups["0"], en) : "";
+    if(segs.length) sinceTxt = en ? "Your advertisement asks for these topics. I use " + segs.join("; ") + (rest ? ", as well as " + rest : "") + "." : "Votre annonce demande ces sujets. Je pratique " + segs.join(", ") + (rest ? ", ainsi que " + rest : "") + ".";
+  }
+  if(sinceTxt){ paras.push(sinceTxt); }
+  else if(matched.length){
     paras.push(en
       ? (spont ? "My profile rests on " + humanList(matched.map(displayTerm), true) + ", which I use in my daily work." : "Your advertisement mentions " + humanList(matched.map(displayTerm), true) + ". I use these in my daily work.")
       : (spont ? "Mon profil s'appuie notamment sur " + humanList(matched.map(displayTerm), false) + ", des sujets que je pratique dans mon travail." : "Votre annonce mentionne " + humanList(matched.map(displayTerm), false) + ". Ce sont des sujets que je pratique dans mon travail."));
@@ -3428,6 +3471,13 @@ function generateLettreParagraphs(){
   (l.motivations || []).map(function(m){ return m.trim(); }).filter(Boolean).forEach(function(m){
     paras.push(/[.!?]$/.test(m) ? m : m + ".");
   });
+
+  // 4b. solution : une proposition de travail, sans rien affirmer de la structure
+  if(!intermediaire){
+    paras.push(en
+      ? "I would suggest starting with a conversation about your current priorities, then showing concretely what I can contribute" + (posteTxt && !spont ? " to the " + posteTxt + " role" : "") + "."
+      : "Je propose de commencer par un échange sur vos priorités du moment, puis de montrer concrètement ce que je peux apporter" + (posteTxt && !spont ? " à ce poste de " + posteTxt : "") + ".");
+  }
 
   // 5. clôture
   var voix = state.profil.voix || {};
@@ -3480,6 +3530,7 @@ function renderLettrePreview(){
   if(note) note.style.display = edited ? "inline" : "none";
   var ta = document.getElementById("lettre-texte");
   if(ta && document.activeElement !== ta) ta.value = paragraphs.join("\n\n");
+  if(typeof renderStyleCheck === "function") renderStyleCheck();
 }
 
 document.getElementById("lettre-texte").addEventListener("input", function(){
@@ -3639,6 +3690,35 @@ function todayISO(){
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 }
 
+function addDays(iso, n){
+  var d = iso ? new Date(iso + "T12:00:00") : new Date();
+  d.setDate(d.getDate() + n);
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+var STATUTS_CLOS = { entretien: 1, refus: 1, offre: 1 };
+// Relances à faire : date de relance atteinte, candidature envoyée et sans réponse.
+function relancesDues(){
+  var today = todayISO();
+  return state.candidatures.filter(function(c){ return c.relance && c.relance <= today && !STATUTS_CLOS[c.statut] && c.statut !== "brouillon"; })
+    .sort(function(a, b){ return a.relance.localeCompare(b.relance); });
+}
+function renderRelancesDue(){
+  var box = document.getElementById("relances-due"); if(!box) return;
+  var due = relancesDues();
+  if(!due.length){ box.innerHTML = ""; return; }
+  box.innerHTML = '<p class="eyebrow" style="margin:0 0 6px;">À relancer (' + due.length + ')</p>' + due.map(function(c){
+    var late = Math.max(0, Math.round((new Date(todayISO()) - new Date(c.relance)) / 86400000));
+    return '<div class="exp-block" style="margin-bottom:8px;"><div class="exp-block-head"><strong>' + esc(c.poste || "Sans intitulé") + (c.entreprise ? " · " + esc(c.entreprise) : "") + '</strong><span class="hint">' + (late ? "en retard de " + late + " jour" + (late > 1 ? "s" : "") : "aujourd'hui") + '</span></div>' +
+      '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-relance-done="' + c.id + '">Relance faite</button>' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-relance-later="' + c.id + '">Reporter de 3 jours</button>' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-relance-stop="' + c.id + '">Ne plus relancer</button></div></div>';
+  }).join("");
+  var byId = function(id){ return state.candidatures.find(function(x){ return x.id === id; }); };
+  box.querySelectorAll("[data-relance-done]").forEach(function(b){ b.addEventListener("click", function(){ var c = byId(b.getAttribute("data-relance-done")); if(c){ c.statut = "relance"; c.relance = addDays(todayISO(), 7); } renderCandidaturesList(); refreshStatusDots(); persist(); }); });
+  box.querySelectorAll("[data-relance-later]").forEach(function(b){ b.addEventListener("click", function(){ var c = byId(b.getAttribute("data-relance-later")); if(c){ c.relance = addDays(todayISO(), 3); } renderCandidaturesList(); refreshStatusDots(); persist(); }); });
+  box.querySelectorAll("[data-relance-stop]").forEach(function(b){ b.addEventListener("click", function(){ var c = byId(b.getAttribute("data-relance-stop")); if(c){ c.relance = ""; } renderCandidaturesList(); refreshStatusDots(); persist(); }); });
+}
+
 function renderCandidaturesSummary(){
   var el = document.getElementById("candidatures-summary");
   var total = state.candidatures.length;
@@ -3648,7 +3728,10 @@ function renderCandidaturesSummary(){
   var parts = [total + " candidature" + (total>1?"s":"")];
   if(counts.entretien) parts.push(counts.entretien + " entretien" + (counts.entretien>1?"s":""));
   if(counts.offre) parts.push(counts.offre + " offre" + (counts.offre>1?"s":""));
+  var nd = relancesDues().length;
+  if(nd) parts.push(nd + " relance" + (nd>1?"s":"") + " à faire");
   el.textContent = parts.join(" · ");
+  renderRelancesDue();
 }
 
 function renderCandidaturesList(){
@@ -3675,6 +3758,7 @@ function renderCandidaturesList(){
       '</div>' +
       '<div class="row2">' +
         '<div class="field"><label>Date</label><input type="text" data-f="date" data-id="' + c.id + '" value="' + esc(c.date) + '" placeholder="aaaa-mm-jj"></div>' +
+        '<div class="field"><label>Relance prévue</label><input type="text" data-f="relance" data-id="' + c.id + '" value="' + esc(c.relance || "") + '" placeholder="aaaa-mm-jj"></div>' +
         '<div class="field"><label>Statut</label><select data-f="statut" data-id="' + c.id + '">' +
           CANDIDATURE_STATUTS.map(function(s){ return '<option value="'+s.key+'"'+(c.statut===s.key?" selected":"")+'>'+s.label+'</option>'; }).join("") +
         '</select></div>' +
@@ -3694,7 +3778,11 @@ function renderCandidaturesList(){
   wrap.querySelectorAll("select").forEach(function(el){
     el.addEventListener("change", function(){
       var item = state.candidatures.find(function(c){ return c.id === el.getAttribute("data-id"); });
-      if(item){ item.statut = el.value; }
+      if(item){
+        item.statut = el.value;
+        if(STATUTS_CLOS[item.statut] || item.statut === "brouillon"){ if(STATUTS_CLOS[item.statut]) item.relance = ""; }
+        else if(!item.relance || item.relance < todayISO()){ item.relance = addDays(todayISO(), item.statut === "relance" ? 7 : 7); }
+      }
       renderCandidaturesList(); refreshStatusDots(); persist();
     });
   });
@@ -3767,7 +3855,7 @@ document.getElementById("btn-save-current-candidature").addEventListener("click"
   renderCandidaturesList(); refreshStatusDots();
 });
 document.getElementById("btn-add-candidature").addEventListener("click", function(){
-  state.candidatures.push({ id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "envoyee", notes: "", versions: [] });
+  state.candidatures.push({ id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "envoyee", notes: "", versions: [], relance: addDays(todayISO(), 7) });
   renderCandidaturesList(); refreshStatusDots(); persist();
 });
 
@@ -4697,8 +4785,8 @@ function generateOffreServiceParagraphs(){
   refs.slice(0, 3).forEach(function(e, i){
     var facts = expDetails(e).split("\n").map(trimEnd).filter(Boolean).slice(0, 2).map(lowerFirst);
     var s = en
-      ? (i === 0 ? "Recent reference: " : "Also: ") + (e.poste || "mission") + (e.entreprise ? " at " + e.entreprise : "") + (e.dates ? " (" + e.dates + ")" : "") + (facts.length ? ", " + facts.join("; ") + "." : ".")
-      : (i === 0 ? "Référence récente : " : "Autre référence : ") + (e.poste || "mission") + (e.entreprise ? " chez " + e.entreprise : "") + (e.dates ? " (" + e.dates + ")" : "") + (facts.length ? ", " + facts.join(" ; ") + "." : ".");
+      ? (i === 0 ? "Recent reference: " : "Also: ") + (e.poste || "mission") + (e.dates ? " (" + e.dates + ")" : "") + (facts.length ? ", " + facts.join("; ") + "." : ".")
+      : (i === 0 ? "Référence récente : " : "Autre référence : ") + (e.poste || "mission") + (e.dates ? " (" + e.dates + ")" : "") + (facts.length ? ", " + facts.join(" ; ") + "." : ".");
     paras.push(s);
   });
   // modalités
@@ -5441,6 +5529,93 @@ document.getElementById("restore-file").addEventListener("change", function(e){
   e.target.value = "";
 });
 
+/* ===================== CONTRÔLE DE STYLE DE LA LETTRE (heuristique locale) ===================== */
+// Port en JavaScript de l'analyseur de style de la méthode d'humanisation : repère les marques d'écriture automatique.
+// Le score est une heuristique de style, pas le verdict d'un détecteur ; il ne mesure pas les filigranes statistiques.
+
+var STYLE_FORTES = ["il est important de noter","il convient de noter","il est essentiel de","il est crucial de","il est à noter","il est à souligner","force est de constater","il va sans dire","en conclusion","en somme","pour conclure","en résumé","dans un monde","à l'ère de","de nos jours","plongeons","explorons","un véritable","une véritable","joue un rôle","témoigne de","tapisserie","au cœur de","au coeur de","se démarque","incontournable","inestimable","révolutionnaire","holistique","synergie","tirer parti","pierre angulaire","mettre en lumière","met en lumière","souligne l'importance","un large éventail","approche innovante","solutions sur mesure","de manière significative","dans cette optique","en fin de compte","il ne fait aucun doute","n'hésitez pas à","passionné","dynamique et motivé","véritable atout","force de proposition","enthousiasme","résonne"];
+var STYLE_FAIBLES = ["en outre","de plus,","par ailleurs","par conséquent","ainsi,","cependant,","néanmoins","en effet,","notamment","optimiser","levier","booster","essentiel","crucial","significatif","robuste","dynamique","innovant","efficace","pertinent"];
+var STYLE_CONTRASTES = [
+  /\bce n['’]est pas (?:seulement |simplement |juste )?[^.;!?\n]{3,70}?[,;:]?\s*(?:mais|c['’]est|il s['’]agit)\b/gi,
+  /\bnon seulement\b[^.;!?\n]{3,120}\bmais (?:aussi|également|encore)\b/gi,
+  /\bplus qu['’]un(?:e)?\b[^.;!?\n]{2,50}[,;]\s*c['’]est\b/gi
+];
+
+function styleWords(t){ return (String(t).match(/[\p{L}]+(?:['’-][\p{L}]+)*/gu)) || []; }
+function styleSentences(t){
+  var brut = String(t).replace(/\s+/g, " ");
+  return brut.split(/(?<=[.!?…])\s+(?=[«"“(\[]?[A-ZÀ-ÖØ-Ý0-9])/).map(function(x){ return x.trim(); }).filter(function(x){ return styleWords(x).length >= 2; });
+}
+function coefVar(vals){
+  if(vals.length < 3) return null;
+  var m = vals.reduce(function(a, b){ return a + b; }, 0) / vals.length; if(!m) return null;
+  var v = vals.reduce(function(a, b){ return a + (b - m) * (b - m); }, 0) / vals.length;
+  return Math.sqrt(v) / m;
+}
+function styleCount(hay, needle){ var n = 0, i = 0; while((i = hay.indexOf(needle, i)) !== -1){ n++; i += needle.length; } return n; }
+
+function styleReport(paras){
+  var text = paras.join("\n\n"), w = styleWords(text), nb = w.length, unites = Math.max(nb / 150, 0.5);
+  var ph = styleSentences(text), pen = [], n = text.toLowerCase().replace(/[’‘]/g, "'");
+  var add = function(code, pts, detail, fix){ if(pts > 0.05) pen.push({ code: code, points: Math.round(pts * 10) / 10, detail: detail, fix: fix || "" }); };
+
+  var fortes = 0, usedF = []; STYLE_FORTES.forEach(function(f){ var c = styleCount(n, f.toLowerCase().replace(/[’‘]/g, "'")); if(c){ fortes += c; usedF.push(f); } });
+  var faibles = 0; STYLE_FAIBLES.forEach(function(f){ faibles += styleCount(n, f); });
+  add("formules", Math.min(28, 7 * (fortes + 0.4 * faibles) / unites), fortes + " formule(s) typique(s) et " + faibles + " connecteur(s) banal(aux)", usedF.length ? "Remplace par un fait précis : " + usedF.slice(0, 4).join(", ") + "." : "Allège les connecteurs (en outre, par ailleurs, de plus…).");
+  var contr = 0; STYLE_CONTRASTES.forEach(function(re){ contr += (text.match(re) || []).length; });
+  add("contrastes", Math.min(12, 4 * contr), contr + " tournure(s) « ce n'est pas X, c'est Y »", "Affirme directement ce qui est vrai, sans opposer à ce que personne n'a dit.");
+  var tirets = (text.match(/[—–]/g) || []).length;
+  if(tirets >= 1) add("tirets", Math.min(12, tirets * 3), tirets + " tiret(s) cadratin(s) ou demi-cadratin(s)", "Remplace chaque tiret par une virgule, un deux-points ou des parenthèses.");
+  var rythme = coefVar(ph.map(function(p){ return styleWords(p).length; }));
+  if(rythme !== null && ph.length >= 5) add("rythme", Math.min(16, Math.max(0, 0.45 - rythme) * 80), "longueur des phrases très régulière (variation " + rythme.toFixed(2) + ", naturel : 0,5 et plus)", "Alterne une phrase de quatre à six mots avec une de trente.");
+  var debuts = ph.map(function(p){ return styleWords(p).slice(0, 2).join(" ").toLowerCase(); });
+  if(debuts.length >= 5){ var rep = debuts.length - new Set(debuts).size; add("debuts", Math.min(8, Math.max(0, rep / debuts.length - 0.12) * 40), rep + " début(s) de phrase répété(s)", "Change l'ouverture de ces phrases."); }
+  var triades = (text.match(/[\p{L}]+, [\p{L}]+(?: [\p{L}]+)? (?:et|ou) [\p{L}]+/gu) || []).length;
+  if(ph.length >= 5) add("triades", Math.min(6, Math.max(0, triades / ph.length - 0.15) * 20), triades + " énumération(s) « A, B et C »", "Garde les deux éléments qui comptent.");
+  var lens = paras.filter(function(p){ return styleWords(p).length >= 8; }).map(function(p){ return styleWords(p).length; });
+  var cp = coefVar(lens);
+  if(cp !== null && lens.length >= 4) add("paragraphes", Math.min(5, Math.max(0, 0.3 - cp) * 20), "paragraphes de longueur très semblable", "Un paragraphe court, un plus long.");
+  var dr = (text.match(/\w'\w/g) || []).length, cr = (text.match(/\w’\w/g) || []).length;
+  if(dr && cr) add("apostrophes", 6, "apostrophes droites et courbes mélangées", "Uniformise les apostrophes.");
+
+  var employers = [];
+  (state.library.experiences || []).forEach(function(e){
+    var nm = (e.entreprise || "").trim().replace(/\s*[—–-]\s*.*$/, "").trim();
+    var target = ((state.annonce && state.annonce.entreprise) || "").toLowerCase();
+    if(nm.length >= 3 && text.toLowerCase().indexOf(nm.toLowerCase()) !== -1 && employers.indexOf(nm) === -1 && target.indexOf(nm.toLowerCase()) === -1) employers.push(nm);
+  });
+  var total = Math.min(100, pen.reduce(function(a, p){ return a + p.points; }, 0));
+  return { score: Math.round((100 - total) * 10) / 10, penalties: pen.sort(function(a, b){ return b.points - a.points; }), words: nb, employers: employers, reliable: nb >= 120 };
+}
+
+function renderStyleCheck(){
+  var box = document.getElementById("style-check"); if(!box) return;
+  var l = state.lettre;
+  var paras = (Array.isArray(l.corps) && l.corps.length ? l.corps : (typeof generateLettre === "function" ? generateLettre() : [])).filter(function(x){ return !/^(Madame, Monsieur,|Dear Hiring Manager,|Dear Sir or Madam,)$/.test(x); });
+  if(!paras.length){ box.innerHTML = ""; return; }
+  var r = styleReport(paras), issues = [];
+  var spont = state.annonce.service || state.annonce.spontanee;
+  var wordsOk = r.words >= 150 && r.words <= 250;
+  var html = '<p class="eyebrow" style="margin:0 0 4px;">Contrôle de style</p><p class="hint" style="margin:0 0 4px;"><strong>' + r.score + '/100</strong> (estimation par règles, pas un détecteur) · ' + r.words + ' mots' + (wordsOk ? "" : " (visé : 150 à 250)") + '</p>';
+  if(!wordsOk) issues.push(r.words < 150 ? "Développe un peu : la lettre fait " + r.words + " mots, 150 à 250 sont visés." : "Raccourcis : la lettre fait " + r.words + " mots, 150 à 250 sont visés.");
+  r.penalties.slice(0, 4).forEach(function(p){ issues.push(p.fix); });
+  if(r.employers.length) issues.push("Retire les noms d'employeurs passés (" + r.employers.join(", ") + ") : la lettre valorise ce que le parcours a appris, le CV porte les noms.");
+  if(issues.length){
+    html += '<ul class="ats-list">' + r.penalties.slice(0, 4).map(function(p){ return "<li>" + esc(p.detail) + "</li>"; }).join("") + (r.employers.length ? "<li>Nom(s) d'employeur cité(s) : " + esc(r.employers.join(", ")) + "</li>" : "") + (!wordsOk ? "<li>Longueur : " + r.words + " mots</li>" : "") + "</ul>";
+    html += '<div class="toolbar-row"><button class="btn btn-ghost btn-sm" id="btn-style-fix" type="button">Corriger ces points avec Claude</button></div>';
+  } else { html += '<p class="hint" style="margin:0;">Rien à signaler.</p>'; }
+  if(!r.reliable) html += '<p class="hint" style="margin:4px 0 0;">Texte court : le score est peu fiable.</p>';
+  var notes = state.lettre.remarquesIA || [];
+  if(notes.length) html += '<p class="eyebrow" style="margin:10px 0 4px;">À savoir (hors lettre)</p><ul class="ats-list">' + notes.map(function(x){ return "<li>" + esc(x) + "</li>"; }).join("") + "</ul>";
+  box.innerHTML = html;
+  var fix = document.getElementById("btn-style-fix");
+  if(fix) fix.addEventListener("click", function(){
+    state.lettre.remarques = (state.lettre.remarques || []).concat(issues).slice(-6);
+    refreshAffinerUI(); persist();
+    document.getElementById("btn-affiner-ia").click();
+  });
+}
+
 /* ===================== ASSISTANT IA (facultatif) + AFFINAGE DE LA LETTRE + VOIX ===================== */
 
 var IA_PREF = "atelier-candidature-ia-pref";
@@ -5538,7 +5713,6 @@ function iaConfirm(what, text){
   });
 }
 
-var IA_STYLE_RULES = "Style : écris comme une personne, pas comme un modèle. Phrases de longueurs variées, verbes simples et précis, faits concrets. Interdits : tirets cadratins ou demi-cadratins, listes de trois éléments par réflexe, tournures « ce n'est pas X, c'est Y », phrases de conclusion qui répètent, formules creuses (passionné, dynamique, véritable atout, au cœur de, résonne, enthousiasme débordant, force de proposition). N'invente AUCUN fait, chiffre, employeur, diplôme, outil ou résultat : n'utilise que ce qui est fourni.";
 
 function relevantExperiences(max){
   var kws = state.annonce.keywords || [];
@@ -5570,7 +5744,7 @@ function iaReformulerCV(){
     experiences: exps.map(function(e){ return { id: e.id, poste: scrubForAI(e.poste), entreprise: scrubForAI(e.entreprise), dates: e.dates, realisations: scrubForAI(expDetails(e)).split("\n").filter(Boolean) }; }),
     format_reponse: '{"accroche":"...","experiences":[{"id":"...","realisations":["..."]}]}'
   };
-  var system = "Tu adaptes un CV à une annonce pour qu'il passe les filtres ATS tout en restant fidèle aux faits. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
+  var system = window.PROMPTS ? window.PROMPTS.cv : "Adapte le CV à l'annonce sans rien inventer. Réponds par un objet JSON.";
   {
     var btn = document.getElementById("btn-ia-cv"); btn.disabled = true; st.textContent = "Reformulation en cours…";
     iaAsk(system, user, "Annonce, expériences et accroche (sans nom ni coordonnées).").then(function(out){
@@ -5670,16 +5844,17 @@ document.getElementById("btn-affiner-ia").addEventListener("click", function(){
     options: { courte: !!(l.options && l.options.court), plus_de_faits_concrets: !!(l.options && l.options.concret) },
     annonce: annonceForAI(),
     titre_professionnel: scrubForAI(state.cv.titre || state.profil.titre),
-    experiences: relevantExperiences(4).map(function(e){ return { poste: scrubForAI(e.poste), entreprise: scrubForAI(e.entreprise), dates: e.dates, realisations: scrubForAI(expDetails(e)).split("\n").filter(Boolean).slice(0, 5) }; }),
+    experiences: relevantExperiences(4).map(function(e){ return { poste: scrubForAI(e.poste), dates: e.dates, realisations: scrubForAI(expDetails(e)).split("\n").filter(Boolean).slice(0, 5) }; }),   // sans le nom des employeurs : la lettre ne les cite pas
+    structure_cible: { nom: scrubForAI(state.annonce.entreprise), type: (EMETTEUR_LABELS[(state.annonce.emetteur || {}).type] || "non déterminé"), secteur: (state.annonce.meta || {}).secteur || "", lieu: (state.annonce.meta || {}).lieu || "", entreprise_finale: scrubForAI(state.annonce.clientFinal) },
     competences: state.library.competences.map(function(c){ return scrubForAI(c.label); }).slice(0, 30),
     voix: { description: scrubForAI(voix.description), a_eviter: scrubForAI(voix.eviter), formule_de_fin: scrubForAI(voix.formuleFinale) },
     exemple_de_lettre_de_la_personne: sample ? scrubForAI(sample.texte).slice(0, 1200) : "",
     disponibilite: scrubForAI(l.disponibilite),
     lettre_actuelle: l.corps ? body.map(scrubForAI) : [],
     remarques: l.remarques || [],
-    format_reponse: '{"paragraphs":["..."]}'
+    format_reponse: '{"paragraphs":["..."],"remarques":["..."]}'
   };
-  var system = "Tu rédiges des lettres de motivation pour une personne précise, avec sa voix. 150 à 250 mots, sans formule d'appel ni signature (l'application les ajoute). Si offre_de_service_freelance n'est pas nul, ce n'est pas une candidature : écris une lettre d'offre de service d'un indépendant à la structure ciblée (prestations, références tirées des expériences, modalités), sans parler de poste ni de candidature. Si candidature_spontanee est vrai, il n'y a pas d'annonce : écris une candidature spontanée (secteur et lieu de l'entreprise, profil visé), sans prétendre qu'un poste est ouvert. Adapte l'adresse au type d'émetteur (si cabinet ou intérim : on écrit au recruteur pour le compte de son client, sans prétendre connaître l'entreprise finale ; si recrutement direct : on s'adresse à l'entreprise ; si ESN : on valorise l'adaptabilité de missions seulement si les expériences le montrent). Structure : une accroche précise sur le poste, un ou deux paragraphes de preuves tirées des expériences fournies et reprenant naturellement les mots-clés de l'annonce que la personne maîtrise réellement, une phrase sur l'entreprise seulement si l'annonce en parle, une clôture courte (reprends la formule de fin fournie si elle existe, sinon reste sobre). Respecte la voix décrite et évite ce qui est listé à éviter. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
+  var system = window.PROMPTS ? window.PROMPTS.lettre : "Rédige une lettre de motivation sans inventer aucun fait. Réponds par {\"paragraphs\":[...]}.";
   {
     var btn = this; btn.disabled = true; st.setAttribute("data-busy", "1"); st.textContent = "Rédaction en cours…";
     iaAsk(system, user, "Annonce, expériences, voix et remarques (sans nom ni coordonnées).").then(function(out){
@@ -5689,6 +5864,7 @@ document.getElementById("btn-affiner-ia").addEventListener("click", function(){
       var paras = out.paragraphs.map(function(x){ return cleanLetterText(String(x)); }).filter(Boolean);
       var salut = en ? "Dear Hiring Manager," : "Madame, Monsieur,";
       l.corps = [salut].concat(paras);
+      l.remarquesIA = Array.isArray(out.remarques) ? out.remarques.map(function(x){ return cleanLetterText(String(x)); }).filter(Boolean).slice(0, 6) : [];
       renderLettrePreview(); refreshAffinerUI(); persist();
       st.textContent = "Lettre régénérée. Relis-la : « Version précédente » revient en arrière.";
     }).catch(function(err){ btn.disabled = false; st.removeAttribute("data-busy"); st.textContent = err.message === "annulé" ? "" : "Pas de réponse utilisable : " + err.message; refreshAffinerUI(); });
