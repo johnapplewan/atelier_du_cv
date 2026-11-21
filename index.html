@@ -215,6 +215,9 @@
   .cv-doc [contenteditable]:focus{ outline:2px solid var(--accent,#888); outline-offset:2px; }
   .ats-list{ margin:0 0 6px; padding-left:18px; font-size:12.5px; line-height:1.55; color:var(--ink-600); }
   .ats-far{ color:var(--danger,#B3261E); font-weight:600; }
+  .cv-doc .gap-star{ color:#B3261E; font-weight:700; cursor:help; margin-left:2px; }
+  .cv-doc .gap-note{ color:#B3261E; font-size:11px; margin:6px 0; }
+  .cv-doc .cv-skillline{ margin:2px 0; }
   .cv-doc .cv-sub{ font-weight:600; margin:8px 0 2px; }
   .cv-doc p{ margin:2px 0; }
   .cv-doc ul{ margin:4px 0 0; padding-left:16px; }
@@ -357,21 +360,102 @@
 
   <nav class="rail" id="rail">
     <div class="rail-tabs">
-      <button class="rail-item" data-tab="profils"><span class="num">01</span>Mes profils<span class="status-dot" id="dot-profils"></span></button>
-      <button class="rail-item" data-tab="recherche"><span class="num">02</span>Recherche<span class="status-dot" id="dot-recherche"></span></button>
-      <button class="rail-item" data-tab="offres"><span class="num">03</span>Offres<span class="status-dot" id="dot-offres"></span></button>
-      <button class="rail-item" data-tab="freelance"><span class="num">04</span>Freelance<span class="status-dot" id="dot-freelance"></span></button>
-      <button class="rail-item is-active" data-tab="annonce"><span class="num">05</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
-      <button class="rail-item" data-tab="cv"><span class="num">06</span>CV<span class="status-dot" id="dot-cv"></span></button>
-      <button class="rail-item" data-tab="lettre"><span class="num">07</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
-      <button class="rail-item" data-tab="annexe"><span class="num">08</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
-      <button class="rail-item" data-tab="candidatures"><span class="num">09</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
-      <button class="rail-item" data-tab="entretien"><span class="num">10</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
+      <button class="rail-item" data-tab="base"><span class="num">01</span>Ma base<span class="status-dot" id="dot-base"></span></button>
+      <button class="rail-item" data-tab="profils"><span class="num">02</span>Mes profils<span class="status-dot" id="dot-profils"></span></button>
+      <button class="rail-item" data-tab="recherche"><span class="num">03</span>Recherche<span class="status-dot" id="dot-recherche"></span></button>
+      <button class="rail-item" data-tab="offres"><span class="num">04</span>Offres<span class="status-dot" id="dot-offres"></span></button>
+      <button class="rail-item" data-tab="freelance"><span class="num">05</span>Freelance<span class="status-dot" id="dot-freelance"></span></button>
+      <button class="rail-item is-active" data-tab="annonce"><span class="num">06</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
+      <button class="rail-item" data-tab="cv"><span class="num">07</span>CV<span class="status-dot" id="dot-cv"></span></button>
+      <button class="rail-item" data-tab="lettre"><span class="num">08</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
+      <button class="rail-item" data-tab="annexe"><span class="num">09</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
+      <button class="rail-item" data-tab="candidatures"><span class="num">10</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
+      <button class="rail-item" data-tab="entretien"><span class="num">11</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
     </div>
     <div class="rail-foot">Ta bibliothèque (expériences, compétences, lettres, candidatures) reste dans ce navigateur. Seuls le lien d'une annonce ou les critères d'une recherche d'entreprises transitent, jamais ton CV ni tes coordonnées.</div>
   </nav>
 
   <main class="workspace">
+
+    <!-- PANEL MA BASE -->
+    <section class="panel panel-doc" id="panel-base">
+      <div class="panel-head">
+        <h2>Ma base</h2>
+        <p>Tout ce qui te concerne, au même endroit et seulement dans ce navigateur : expériences, formations, certifications, compétences, projets. Importe tous tes CV, la base les fusionne et les enrichit. Chaque profil et chaque annonce en tire ensuite un CV sur mesure.</p>
+      </div>
+      <div class="split">
+        <div class="controls-col">
+          <div class="card" style="margin-bottom:16px;">
+            <span class="eyebrow">Import rapide</span>
+            <p class="hint" style="margin:6px 0 10px;">Colle le texte d'un de tes CV, même avec du Markdown (#, **, tirets…) : les symboles sont nettoyés, et chaque rubrique (Expériences, Formation, Compétences, Langues, ou toute autre rubrique à toi) est reconnue d'après son titre : l'atelier repère les expériences, les formations et les compétences pour remplir ta bibliothèque. Tu peux importer autant de CV que tu veux : les expériences, formations et compétences identiques sont fusionnées et enrichies, le reste s'ajoute à ta base. Vérifie et ajuste ensuite ce qui a été détecté ci-dessous.</p>
+            <div class="field" style="margin-bottom:8px;"><label for="cv-import-label">Nom de ce CV (pour t'y retrouver)</label><input type="text" id="cv-import-label" placeholder="ex. CV IT 2024, CV communication"></div>
+            <textarea id="cv-import-text" style="min-height:140px;" placeholder="Colle ici le texte brut d'un CV existant…"></textarea>
+            <div class="toolbar-row" style="margin-top:10px;">
+              <button class="btn btn-primary btn-sm" id="btn-import-cv">Analyser et importer</button>
+              <label class="hint" style="display:inline-flex;gap:6px;align-items:center;"><input type="checkbox" id="cv-import-replace"> Remplacer ma bibliothèque actuelle</label>
+              <span class="hint" id="cv-import-status"></span>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="exp-block-head">
+              <span class="eyebrow">Bibliothèque — expériences</span>
+              <div class="toolbar-row">
+                <button class="btn btn-ghost btn-sm" id="btn-recompose"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg><span>Recomposer automatiquement</span></button>
+                <button class="btn btn-ghost btn-sm" id="btn-ia-cv" title="Reformule tes réalisations avec le vocabulaire de l'annonce, sans rien inventer">Reformuler pour l'annonce (IA)</button>
+                <button class="btn btn-ghost btn-sm" id="btn-ia-cv-undo" style="display:none;">Texte d'origine</button>
+                <button class="btn btn-ghost btn-sm" id="btn-add-exp">+ Ajouter</button>
+              </div>
+            </div>
+            <p class="hint" id="ia-cv-status" style="margin:0 0 6px;"></p>
+            <p class="hint" style="margin:0 0 10px;">Toutes tes expériences restent dans ta bibliothèque ; l'atelier les réordonne selon l'annonce pour mettre les plus pertinentes en premier.</p>
+            <div id="exp-list"></div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="exp-block-head"><span class="eyebrow">Bibliothèque — formations</span><button class="btn btn-ghost btn-sm" id="btn-add-formation">+ Ajouter</button></div>
+            <div id="formation-list"></div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="exp-block-head"><span class="eyebrow">Autres rubriques (projets, intérêts, certifications…)</span><button class="btn btn-ghost btn-sm" id="btn-add-section">+ Ajouter</button></div>
+            <div id="section-list"></div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="field">
+              <label>Bibliothèque — compétences</label>
+              <div style="display:flex;gap:8px;">
+                <input type="text" id="cv-skill-input" placeholder="ex. Gestion de projet">
+                <button class="btn btn-sm" id="btn-add-skill">Ajouter</button>
+              </div>
+              <div class="chips" id="cv-skill-chips"></div>
+              <div class="chips" id="cv-skill-suggest" style="margin-top:10px;"></div>
+            </div>
+          </div>
+
+
+          <div class="card" style="margin-bottom:16px;">
+            <div class="exp-block-head"><span class="eyebrow">Bibliothèque — certifications</span><button class="btn btn-ghost btn-sm" id="btn-add-cert" type="button">+ Ajouter</button></div>
+            <div id="cert-list"></div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <span class="eyebrow">CV importés</span>
+            <div id="sources-list" style="margin-top:8px;"></div>
+          </div>
+        </div>
+
+        <div class="preview-frame">
+          <div class="preview-toolbar"><span class="eyebrow">Carte de ma base</span></div>
+          <div class="card" id="base-map-card">
+            <div class="field"><label for="map-profil">Mettre en évidence ce qui sert un profil</label><select id="map-profil"></select></div>
+            <div id="base-map"></div>
+            <div id="base-map-detail" style="margin-top:12px;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- PANEL PROFILS -->
     <section class="panel" id="panel-profils">
@@ -572,7 +656,7 @@
     <section class="panel panel-doc" id="panel-cv">
       <div class="panel-head">
         <h2>Le CV, format ATS</h2>
-        <p>Une bibliothèque réutilisable d'expériences et de compétences : l'atelier recompose et réordonne le CV pour coller au mieux à l'annonce.</p>
+        <p>Le CV est composé à partir de ta base, selon le profil et l'annonce : les éléments les plus pertinents sont retenus, triés et organisés. Il se met à jour dès que ta base évolue. Un astérisque (*) signale ce qui pourrait manquer.</p>
       </div>
       <div class="split">
         <div class="controls-col">
@@ -619,52 +703,13 @@
             </div>
           </div>
 
-          <div class="card" style="margin-bottom:16px;">
-            <span class="eyebrow">Import rapide</span>
-            <p class="hint" style="margin:6px 0 10px;">Colle le texte d'un de tes CV, même avec du Markdown (#, **, tirets…) : les symboles sont nettoyés, et chaque rubrique (Expériences, Formation, Compétences, Langues, ou toute autre rubrique à toi) est reconnue d'après son titre : l'atelier repère les expériences, les formations et les compétences pour remplir ta bibliothèque. Tu peux recommencer avec un autre CV, les éléments s'ajoutent sans doublon. Vérifie et ajuste ensuite ce qui a été détecté ci-dessous.</p>
-            <textarea id="cv-import-text" style="min-height:140px;" placeholder="Colle ici le texte brut d'un CV existant…"></textarea>
-            <div class="toolbar-row" style="margin-top:10px;">
-              <button class="btn btn-primary btn-sm" id="btn-import-cv">Analyser et importer</button>
-              <label class="hint" style="display:inline-flex;gap:6px;align-items:center;"><input type="checkbox" id="cv-import-replace"> Remplacer ma bibliothèque actuelle</label>
-              <span class="hint" id="cv-import-status"></span>
-            </div>
-          </div>
-
-          <div class="card" style="margin-bottom:16px;">
-            <div class="exp-block-head">
-              <span class="eyebrow">Bibliothèque — expériences</span>
-              <div class="toolbar-row">
-                <button class="btn btn-ghost btn-sm" id="btn-recompose"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg><span>Recomposer automatiquement</span></button>
-                <button class="btn btn-ghost btn-sm" id="btn-ia-cv" title="Reformule tes réalisations avec le vocabulaire de l'annonce, sans rien inventer">Reformuler pour l'annonce (IA)</button>
-                <button class="btn btn-ghost btn-sm" id="btn-ia-cv-undo" style="display:none;">Texte d'origine</button>
-                <button class="btn btn-ghost btn-sm" id="btn-add-exp">+ Ajouter</button>
-              </div>
-            </div>
-            <p class="hint" id="ia-cv-status" style="margin:0 0 6px;"></p>
-            <p class="hint" style="margin:0 0 10px;">Toutes tes expériences restent dans ta bibliothèque ; l'atelier les réordonne selon l'annonce pour mettre les plus pertinentes en premier.</p>
-            <div id="exp-list"></div>
-          </div>
-
-          <div class="card" style="margin-bottom:16px;">
-            <div class="exp-block-head"><span class="eyebrow">Bibliothèque — formations</span><button class="btn btn-ghost btn-sm" id="btn-add-formation">+ Ajouter</button></div>
-            <div id="formation-list"></div>
-          </div>
-
-          <div class="card" style="margin-bottom:16px;">
-            <div class="exp-block-head"><span class="eyebrow">Autres rubriques (projets, intérêts, certifications…)</span><button class="btn btn-ghost btn-sm" id="btn-add-section">+ Ajouter</button></div>
-            <div id="section-list"></div>
-          </div>
-
-          <div class="card" style="margin-bottom:16px;">
-            <div class="field">
-              <label>Bibliothèque — compétences</label>
-              <div style="display:flex;gap:8px;">
-                <input type="text" id="cv-skill-input" placeholder="ex. Gestion de projet">
-                <button class="btn btn-sm" id="btn-add-skill">Ajouter</button>
-              </div>
-              <div class="chips" id="cv-skill-chips"></div>
-              <div class="chips" id="cv-skill-suggest" style="margin-top:10px;"></div>
-            </div>
+          <div class="card" style="margin-bottom:16px;" id="card-compo">
+            <span class="eyebrow">Composition de ce CV</span>
+            <p class="hint" style="margin:6px 0 10px;" id="compo-intro"></p>
+            <div class="toolbar-row" style="margin-bottom:10px;"><button class="btn btn-primary btn-sm" id="btn-compo-regen" type="button">Régénérer depuis ma base</button>
+              <button class="btn btn-ghost btn-sm" id="btn-compo-reset" type="button" title="Retire tes cases cochées et décochées pour ce CV">Revenir à la sélection automatique</button></div>
+            <div id="compo-gaps"></div>
+            <div id="compo-lists"></div>
           </div>
 
           <div class="card">
@@ -673,7 +718,7 @@
                 <div class="eyebrow" style="margin-bottom:4px;">Score de correspondance ATS</div>
                 <div class="gauge-num" id="ats-score">—</div>
               </div>
-              <div class="gauge-label">Part des mots-clés de l'annonce retrouvés dans ta bibliothèque. <span id="ats-tier"></span></div>
+              <div class="gauge-label">Part des mots-clés de l'annonce retrouvés dans ce CV. <span id="ats-tier"></span></div>
             </div>
             <p class="footnote" id="ats-missing"></p>
             <div id="ats-panel" style="display:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;">
@@ -1180,7 +1225,7 @@ function defaultState(){
     profil: { nom:"", titre:"", email:"", tel:"", ville:"", lien:"", langues:"", atouts:[], photo:null,
       voix:{ description:"", formuleFinale:"", eviter:"" }, freelance:{ services:[], offre:"", expIds:[], dispo:"", mode:"Télétravail ou sur site", zone:"", tjm:"", showTjm:false } },
     annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[], meta:{ lieu:"", contrat:"", salaire:"", date:"", secteur:"" }, emetteur:{ type:"", manual:false, raisons:[] }, clientFinal:"", spontanee:false, service:false, cible:"" },
-    library: { experiences:[], formations:[], competences:[], sections:[], lettresArchive:[], annexeItems:[] },
+    library: { experiences:[], formations:[], competences:[], sections:[], certifications:[], sources:[], lettresArchive:[], annexeItems:[] },
     cv: { lang:"fr", format:"standard", resume:"", selectedExp:[], selectedForm:[], autoMode:true },
     lettre: { lang:"fr", destinataire:"", ton:"formel", corps:null, corpsPrev:null, options:{}, remarques:[], motivations:[""], motivPrompts:[""], competencesChoisies:[], disponibilite:"", seed:1 },
     annexeDossier: { categorie:"", selectedItemIds:[] },
@@ -1219,6 +1264,8 @@ function normDossier(raw){
   };
   if(!out.annonce.keywords) out.annonce.keywords = [];
   if(!out.cv.excludedExp) out.cv.excludedExp = [];
+  if(!out.cv.pins) out.cv.pins = {};
+  if(!out.cv.hides) out.cv.hides = {};
   if(!out.cv.expOverrides) out.cv.expOverrides = {};
   if(!out.lettre.remarques) out.lettre.remarques = [];
   if(!out.lettre.motivations || !out.lettre.motivations.length) out.lettre.motivations = [""];
@@ -1234,7 +1281,7 @@ function normPersonData(raw){
   delete profil.suisse; delete profil.suisseActif;
   if(!profil.atouts) profil.atouts = [];
   var library = Object.assign({}, def.library, raw.library);
-  ["experiences","formations","competences","sections","lettresArchive","annexeItems"].forEach(function(k){ if(!Array.isArray(library[k])) library[k] = []; });
+  ["experiences","formations","competences","sections","certifications","sources","lettresArchive","annexeItems"].forEach(function(k){ if(!Array.isArray(library[k])) library[k] = []; });
   var dossiers;
   if(Array.isArray(raw.dossiers) && raw.dossiers.length){ dossiers = raw.dossiers.map(normDossier); }
   else {
@@ -1318,10 +1365,11 @@ function persist(){
 
 /* ---------------- onglets & statut ---------------- */
 
-var TABS = ["profils","recherche","offres","freelance","annonce","cv","lettre","annexe","candidatures","entretien"];
+var TABS = ["base","profils","recherche","offres","freelance","annonce","cv","lettre","annexe","candidatures","entretien"];
 var activeTab = "annonce";
 
 function statusFor(tab){
+  if(tab === "base"){ var L = state.library; return (L.experiences.length || L.formations.length || L.competences.length) ? "ready" : "empty"; }
   if(tab === "profils"){ return state.profils.length ? "ready" : "empty"; }
   if(tab === "offres"){ return (state.offresResultats || []).length ? "ready" : "empty"; }
   if(tab === "freelance"){ return flState().services.some(function(s){ return (s.titre || "").trim(); }) ? "ready" : "empty"; }
@@ -1370,6 +1418,7 @@ function refreshStatusDots(){
 function switchTab(tab){
   activeTab = tab;
   if(tab === "candidatures" && typeof renderCandidaturesList === "function"){ renderCandidaturesList(); }
+  if(tab === "base" && typeof renderBaseMap === "function"){ renderCertList(); renderSources(); renderBaseMap(); }
   if(tab === "profils" && typeof renderProfils === "function"){ renderProfils(); }
   if(tab === "recherche" && typeof rechProfilOptions === "function"){ rechProfilOptions(); renderRechResults(); }
   if(tab === "freelance" && typeof renderFreelance === "function"){ renderFreelance(); }
@@ -1464,7 +1513,7 @@ function pdfLibsReady(){
 
 // Nombre de pages maximum visé par document (le texte est resserré pour y tenir) :
 // la lettre tient sur une page, le CV sur deux.
-var PDF_MAX_PAGES = { "cv-preview": 2, "cv-anon": 2, "lettre-preview": 1 };
+var PDF_MAX_PAGES = { "cv-preview": 2, "cv-anon": 2, "cv-type": 2, "lettre-preview": 1 };
 var PDF_CAPTURE_SCALE = 1.5;
 
 // Construit une copie du document à la largeur d'une feuille A4, hors écran, pour que la mise en page
@@ -1474,6 +1523,7 @@ function makePdfClone(el, width){
   clone.removeAttribute("id");
   clone.querySelectorAll("[id]").forEach(function(n){ n.removeAttribute("id"); });
   clone.querySelectorAll("[contenteditable]").forEach(function(n){ n.removeAttribute("contenteditable"); });
+  clone.querySelectorAll(".gap-star, .gap-note").forEach(function(n){ n.remove(); });
   clone.style.cssText = "position:fixed;left:-10000px;top:0;width:" + width + "px;min-height:0;padding:0;margin:0;border:0;box-shadow:none;border-radius:0;background:#fff;";
   document.body.appendChild(clone);
   return clone;
@@ -1706,28 +1756,6 @@ function sortedCompetences(){
 
 function refreshCVStatus(){ refreshStatusDots(); }
 
-function recomposerCV(){
-  var kws = (state.annonce.keywords || []).concat(typeof profilKeywords === "function" ? profilKeywords() : []);
-  var lib = state.library;
-
-  var expScored = lib.experiences.map(function(e, idx){
-    return { id: e.id, idx: idx, score: scoreAgainstKeywords([e.poste, e.entreprise, e.details].join(" "), kws) };
-  });
-  expScored.sort(function(a, b){ return (b.score - a.score) || (a.idx - b.idx); });
-  state.cv.selectedExp = expScored.map(function(x){ return x.id; });
-  // CV sur mesure : on garde les 5 expériences les plus proches de l'annonce, les autres restent dans la base
-  // (décochables / recochables dans la liste) mais ne figurent pas dans ce CV.
-  state.cv.excludedExp = kws.length ? expScored.slice(5).filter(function(x){ return x.score === 0; }).map(function(x){ return x.id; }) : [];
-
-  var formScored = lib.formations.map(function(f, idx){
-    return { id: f.id, idx: idx, score: scoreAgainstKeywords([f.diplome, f.etablissement].join(" "), kws) };
-  });
-  formScored.sort(function(a, b){ return (b.score - a.score) || (a.idx - b.idx); });
-  state.cv.selectedForm = formScored.map(function(x){ return x.id; });
-
-  state.cv.autoMode = true;
-}
-
 function moveInSelection(key, id, dir){
   var libArr = key === "selectedExp" ? state.library.experiences : state.library.formations;
   var full = orderedList(libArr, state.cv[key]).map(function(x){ return x.id; });
@@ -1749,17 +1777,6 @@ window.onAnnonceChanged = function(){
   refreshCVStatus();
   persist();
 };
-
-function cvFullText(){
-  var p = state.profil, lib = state.library, cv = state.cv;
-  var parts = [cv.resume, p.langues];
-  p.atouts.forEach(function(a){ parts.push(a); });
-  lib.competences.forEach(function(c){ parts.push(c.label); });
-  lib.experiences.forEach(function(e){ if((cv.excludedExp || []).indexOf(e.id) === -1) parts.push(e.poste, e.entreprise, expDetails(e)); });
-  lib.formations.forEach(function(f){ parts.push(f.diplome, f.etablissement, f.details); });
-  (lib.sections || []).forEach(function(x){ parts.push(x.titre, x.texte); });
-  return norm(parts.join(" \n "));
-}
 
 function atsTier(pct){
   if(pct === null) return null;
@@ -1901,13 +1918,16 @@ function atsOptimize(){
     if(m.action === "include-exp"){
       m.ids.forEach(function(id){
         if((state.cv.excludedExp || []).indexOf(id) !== -1){
-          state.cv.excludedExp = state.cv.excludedExp.filter(function(x){ return x !== id; });
+          state.cv.pins = state.cv.pins || {}; state.cv.hides = state.cv.hides || {};
+          state.cv.pins["exp:" + id] = true; delete state.cv.hides["exp:" + id];
           var e = state.library.experiences.find(function(x){ return x.id === id; });
           done.push("expérience « " + (e && (e.poste || e.entreprise)) + " » remise dans le CV");
         }
       });
     } else if(m.action === "add-skill"){
-      if(addSkillRaw(m.term)) done.push("compétence « " + displayTerm(m.term) + " » ajoutée");
+      var created = addSkillRaw(m.term);
+      var sk = created || state.library.competences.find(function(c){ return norm(c.label) === norm(m.term); });
+      if(sk){ state.cv.pins = state.cv.pins || {}; state.cv.hides = state.cv.hides || {}; state.cv.pins["skill:" + sk.id] = true; delete state.cv.hides["skill:" + sk.id]; done.push("compétence « " + displayTerm(m.term) + " » " + (created ? "ajoutée" : "remise dans le CV")); }
     }
   });
   var after = atsAnalysis();
@@ -1985,21 +2005,18 @@ document.addEventListener("click", function(e){
 function renderExpList(){
   var wrap = document.getElementById("exp-list");
   wrap.innerHTML = "";
-  var items = orderedList(state.library.experiences, state.cv.selectedExp);
+  var items = state.library.experiences.slice();
   if(!items.length){
-    wrap.innerHTML = '<p class="empty-note">Ajoute une première expérience pour commencer ta bibliothèque.</p>';
+    wrap.innerHTML = '<p class="empty-note">Ajoute une première expérience ou importe un CV pour commencer ta base.</p>';
     return;
   }
   items.forEach(function(exp, i){
-    var score = scoreAgainstKeywords([exp.poste, exp.entreprise, exp.details].join(" "), state.annonce.keywords || []);
+    var nSrc = (exp.src || []).length;
     var block = document.createElement("div");
     block.className = "exp-block";
     block.innerHTML =
-      '<div class="exp-block-head"><span class="eyebrow">Expérience ' + (i + 1) + (score > 0 ? ' · pertinence ' + score : '') + '</span>' +
+      '<div class="exp-block-head"><span class="eyebrow">Expérience ' + (i + 1) + (nSrc > 1 ? ' · présente dans ' + nSrc + ' CV' : '') + '</span>' +
       '<div class="toolbar-row">' +
-        '<label class="hint" style="display:inline-flex;gap:5px;align-items:center;margin-right:6px;"><input type="checkbox" data-incl="' + exp.id + '"' + ((state.cv.excludedExp || []).indexOf(exp.id) === -1 ? " checked" : "") + '> dans ce CV</label>' +
-        '<button class="icon-btn" data-up="' + exp.id + '" title="Monter" aria-label="Monter"' + (i === 0 ? " disabled" : "") + '>' + icon("up") + '</button>' +
-        '<button class="icon-btn" data-down="' + exp.id + '" title="Descendre" aria-label="Descendre"' + (i === items.length - 1 ? " disabled" : "") + '>' + icon("down") + '</button>' +
         '<button class="icon-btn" data-remove-exp="' + exp.id + '" title="Retirer" aria-label="Retirer">' + icon("close") + '</button>' +
       '</div></div>' +
       '<div class="row2">' +
@@ -2014,30 +2031,15 @@ function renderExpList(){
     el.addEventListener("input", function(){
       var item = state.library.experiences.find(function(x){ return x.id === el.getAttribute("data-id"); });
       if(item){ item[el.getAttribute("data-f")] = el.value; }
-      renderCVPreview(); refreshCVStatus(); persist();
+      renderCVPreview(); renderBaseMap(); refreshCVStatus(); persist();
     });
-  });
-  wrap.querySelectorAll("[data-incl]").forEach(function(cb){
-    cb.addEventListener("change", function(){
-      var id = cb.getAttribute("data-incl");
-      var ex = (state.cv.excludedExp || []).filter(function(x){ return x !== id; });
-      if(!cb.checked) ex.push(id);
-      state.cv.excludedExp = ex;
-      renderCVPreview(); refreshCVStatus(); persist();
-    });
-  });
-  wrap.querySelectorAll("[data-up]").forEach(function(btn){
-    btn.addEventListener("click", function(){ moveInSelection("selectedExp", btn.getAttribute("data-up"), -1); });
-  });
-  wrap.querySelectorAll("[data-down]").forEach(function(btn){
-    btn.addEventListener("click", function(){ moveInSelection("selectedExp", btn.getAttribute("data-down"), 1); });
   });
   wrap.querySelectorAll("[data-remove-exp]").forEach(function(btn){
     btn.addEventListener("click", function(){
       var id = btn.getAttribute("data-remove-exp");
       state.library.experiences = state.library.experiences.filter(function(x){ return x.id !== id; });
       state.cv.selectedExp = state.cv.selectedExp.filter(function(x){ return x !== id; });
-      renderExpList(); renderCVPreview(); refreshCVStatus(); persist();
+      renderExpList(); renderCVPreview(); renderBaseMap(); refreshCVStatus(); persist();
     });
   });
 }
@@ -2045,7 +2047,7 @@ function renderExpList(){
 function renderFormList(){
   var wrap = document.getElementById("formation-list");
   wrap.innerHTML = "";
-  var items = orderedList(state.library.formations, state.cv.selectedForm);
+  var items = state.library.formations.slice();
   if(!items.length){
     wrap.innerHTML = '<p class="empty-note">Ajoute une formation.</p>';
     return;
@@ -2056,8 +2058,6 @@ function renderFormList(){
     block.innerHTML =
       '<div class="exp-block-head"><span class="eyebrow">Formation ' + (i + 1) + '</span>' +
       '<div class="toolbar-row">' +
-        '<button class="icon-btn" data-up="' + f.id + '" title="Monter" aria-label="Monter"' + (i === 0 ? " disabled" : "") + '>' + icon("up") + '</button>' +
-        '<button class="icon-btn" data-down="' + f.id + '" title="Descendre" aria-label="Descendre"' + (i === items.length - 1 ? " disabled" : "") + '>' + icon("down") + '</button>' +
         '<button class="icon-btn" data-remove-form="' + f.id + '" title="Retirer" aria-label="Retirer">' + icon("close") + '</button>' +
       '</div></div>' +
       '<div class="row2">' +
@@ -2072,21 +2072,15 @@ function renderFormList(){
     el.addEventListener("input", function(){
       var item = state.library.formations.find(function(x){ return x.id === el.getAttribute("data-id"); });
       if(item){ item[el.getAttribute("data-f")] = el.value; }
-      renderCVPreview(); persist();
+      renderCVPreview(); renderBaseMap(); persist();
     });
-  });
-  wrap.querySelectorAll("[data-up]").forEach(function(btn){
-    btn.addEventListener("click", function(){ moveInSelection("selectedForm", btn.getAttribute("data-up"), -1); });
-  });
-  wrap.querySelectorAll("[data-down]").forEach(function(btn){
-    btn.addEventListener("click", function(){ moveInSelection("selectedForm", btn.getAttribute("data-down"), 1); });
   });
   wrap.querySelectorAll("[data-remove-form]").forEach(function(btn){
     btn.addEventListener("click", function(){
       var id = btn.getAttribute("data-remove-form");
       state.library.formations = state.library.formations.filter(function(x){ return x.id !== id; });
       state.cv.selectedForm = state.cv.selectedForm.filter(function(x){ return x !== id; });
-      renderFormList(); renderCVPreview(); persist();
+      renderFormList(); renderCVPreview(); renderBaseMap(); persist();
     });
   });
 }
@@ -2259,6 +2253,7 @@ var IMPORT_SECTIONS = [
   { key:"exp",     re:/^(exp[ée]riences?|parcours professionnel|emplois?|historique professionnel|work experience|experience|carri[èe]re|missions)/ },
   { key:"form",    re:/^(formations?|[ée]tudes?|dipl[ôo]mes?|parcours (acad[ée]mique|scolaire)|education|cursus|scolarit[ée])/ },
   { key:"comp",    re:/^(comp[ée]tences?|skills|savoir[- ]faire|outils|technologies|expertises?|logiciels|hard skills|soft skills)/ },
+  { key:"certif", re:/^(certifications?|certificats?|habilitations?|brevets?)/ },
   { key:"langues", re:/^(langues?|languages?)/ },
   { key:"atouts",  re:/^(atouts?|qualit[ée]s|points forts|forces)/ }
 ];
@@ -2461,11 +2456,18 @@ function parseImportedCv(rawText){
     }
     else if(s.key === "comp"){
       var cl = content.filter(function(o){ return !o.blank; });
-      var structured = cl.some(function(o, i){ return (!o.bullet && cl[i+1] && cl[i+1].bullet) || (o.bullet && o.t.split(/\s+/).length > 4); });
+      var structured = cl.some(function(o, i){ return (!o.bullet && cl[i+1] && cl[i+1].bullet) || (o.bullet && o.t.split(/\s+/).length > 4 && o.t.indexOf(",") === -1); });
       if(structured){ out.sections.push({ id: uid(), titre: s.title, texte: toStructuredText(content) }); }
       else { out.skills = out.skills.concat(splitListItems(cl)); }
     }
     else if(s.key === "atouts"){ out.atouts = out.atouts.concat(splitListItems(content.filter(function(o){ return !o.blank; }))); }
+    else if(s.key === "certif"){
+      out.certifs = (out.certifs || []).concat(content.filter(function(o){ return !o.blank; }).map(function(o){
+        var yr = (o.t.match(/\b(19|20)\d{2}\b/) || [""])[0], t = o.t.replace(/\(?\b(19|20)\d{2}\b\)?/, "").replace(/\s+/g, " ").trim().replace(/[,\-–—:]+$/, "").trim();
+        var sp = splitTitleLine(t);
+        return { id: uid(), label: sp.a, organisme: sp.b, annee: yr };
+      }));
+    }
     else if(s.key === "services"){ out.services = (out.services || []).concat(content.filter(function(o){ return !o.blank; }).map(function(o){ return o.t; })); }
     else if(s.key === "langues"){ out.langues = (out.langues ? out.langues + ", " : "") + splitListItems(content.filter(function(o){ return !o.blank; })).join(", "); }
     else if(s.key === "profil"){ out.resume = (out.resume ? out.resume + " " : "") + content.filter(function(o){ return !o.blank; }).map(function(o){ return o.t; }).join(" "); }
@@ -2486,45 +2488,22 @@ function doImportCv(){
   var result = parseImportedCv(text);
   var replaceAll = document.getElementById("cv-import-replace").checked;
   if(replaceAll){
-    state.library.experiences = []; state.library.formations = []; state.library.competences = []; state.library.sections = [];
+    state.library.experiences = []; state.library.formations = []; state.library.competences = []; state.library.sections = []; state.library.certifications = []; state.library.sources = [];
     state.cv.selectedExp = []; state.cv.selectedForm = [];
   }
   if(!state.library.sections) state.library.sections = [];
 
-  function existsExp(poste, entreprise){
-    var key = norm(poste) + "|" + norm(entreprise);
-    return state.library.experiences.some(function(e){ return (norm(e.poste) + "|" + norm(e.entreprise)) === key; });
-  }
-  function existsForm(diplome, etablissement){
-    var key = norm(diplome) + "|" + norm(etablissement);
-    return state.library.formations.some(function(f){ return (norm(f.diplome) + "|" + norm(f.etablissement)) === key; });
-  }
-
-  var addedExp = 0, addedForm = 0, addedSkills = 0;
-  result.experiences.forEach(function(e){
-    if(!e.poste && !e.entreprise && !e.details) return;
-    if(existsExp(e.poste, e.entreprise)) return;
-    state.library.experiences.push(e);
-    state.cv.selectedExp.push(e.id);
-    addedExp++;
-  });
-  result.formations.forEach(function(f){
-    if(!f.diplome && !f.etablissement) return;
-    if(existsForm(f.diplome, f.etablissement)) return;
-    state.library.formations.push(f);
-    state.cv.selectedForm.push(f.id);
-    addedForm++;
-  });
-  result.skills.forEach(function(s){ if(addSkillRaw(s)) addedSkills++; });
+  // CV importé : on garde sa trace (nom, date), puis on fusionne dans la base au lieu de dupliquer.
+  var label = (document.getElementById("cv-import-label").value || "").trim() || ("CV du " + new Date().toLocaleDateString("fr-FR"));
+  var src = { id: uid(), label: label, date: new Date().toLocaleDateString("fr-FR") };
+  state.library.sources = state.library.sources || [];
+  var mr = mergeImportIntoBase(result, src.id);
+  state.library.sources.push(src);
+  var addedExp = mr.newExp, addedForm = mr.newForm, addedSkills = mr.newSkills, addedSections = mr.newSections;
   var addedServices = 0;
   (result.services || []).forEach(function(t){
     var fl = flState();
     if(t && !fl.services.some(function(x){ return norm(x.titre) === norm(t); })){ fl.services.push({ id: uid(), titre: t.slice(0, 120), description: "" }); addedServices++; }
-  });
-  var addedSections = 0;
-  (result.sections || []).forEach(function(sec){
-    if(state.library.sections.some(function(x){ return norm(x.titre) === norm(sec.titre); })) return;
-    state.library.sections.push(sec); addedSections++;
   });
   (result.atouts || []).forEach(function(a){ if(a && state.profil.atouts.indexOf(a) === -1) state.profil.atouts.push(a); });
 
@@ -2557,17 +2536,23 @@ function doImportCv(){
   fillText("langues", result.langues, "cv-langues", "langues", state.profil, "langues");
   fillText("resume", result.resume, "cv-resume", "résumé", state.cv, "resume");
 
-  if(addedExp || addedForm || addedSkills || addedSections || addedServices || filledProfil.length){
-    ta.value = "";
-    statusEl.textContent = "Importé : " + addedExp + " expérience(s), " + addedForm + " formation(s), " + addedSkills + " compétence(s), " + addedSections + " autre(s) rubrique(s)" + (addedServices ? ", " + addedServices + " prestation(s) freelance" : "") +
-      (filledProfil.length ? ", profil pré-rempli (" + filledProfil.join(", ") + ")" : "") + " — vérifie et ajuste ci-dessous.";
+  var any = addedExp || addedForm || addedSkills || addedSections || addedServices || mr.newCert || mr.enrichedExp || mr.enrichedForm || mr.enrichedSections || filledProfil.length;
+  if(any){
+    ta.value = ""; document.getElementById("cv-import-label").value = "";
+    var parts = [];
+    if(addedExp) parts.push(addedExp + " nouvelle(s) expérience(s)");
+    if(mr.enrichedExp) parts.push(mr.enrichedExp + " expérience(s) enrichie(s) (" + mr.addedBullets + " réalisation(s) ajoutée(s))");
+    if(addedForm) parts.push(addedForm + " formation(s)");
+    if(mr.enrichedForm) parts.push(mr.enrichedForm + " formation(s) complétée(s)");
+    if(mr.newCert) parts.push(mr.newCert + " certification(s)");
+    if(addedSkills) parts.push(addedSkills + " compétence(s)");
+    if(addedSections || mr.enrichedSections) parts.push((addedSections + mr.enrichedSections) + " rubrique(s)");
+    if(addedServices) parts.push(addedServices + " prestation(s) freelance");
+    statusEl.textContent = "Ajouté à ta base : " + (parts.join(", ") || "profil pré-rempli") + (filledProfil.length ? ". Profil pré-rempli (" + filledProfil.join(", ") + ")" : "") + ".";
   } else {
-    statusEl.textContent = "Rien de nouveau détecté (peut-être déjà présent, ou pas de date reconnaissable comme « 2020 - 2022 »). Ajuste le texte ou complète à la main ci-dessous.";
+    statusEl.textContent = "Rien de nouveau : tout est déjà dans ta base (ou aucune date reconnaissable comme « 2020 - 2022 »). Ajuste le texte ou complète à la main.";
   }
-
-  if(state.cv.autoMode && (state.annonce.keywords || []).length){ recomposerCV(); }
-  renderExpList(); renderFormList(); renderSkillChips(); renderSkillSuggestions(); renderSectionsList(); renderAtoutsChips();
-  renderCVPreview(); refreshCVStatus(); persist();
+  onBaseChanged(true); renderAtoutsChips();
 }
 
 function renderSkillChips(){
@@ -2654,8 +2639,8 @@ function renderPhotoThumb(){
 }
 
 var CV_LABELS = {
-  fr: { profil: "Profil", experience: "Expérience", formation: "Formation", competences: "Compétences", langues: "Langues", atouts: "Points forts", note: null },
-  en: { profil: "Profile", experience: "Experience", formation: "Education", competences: "Skills", langues: "Languages", atouts: "Strengths", note: "Content not auto-translated — ask for a translation in the conversation." }
+  fr: { profil: "Profil", experience: "Expérience", formation: "Formation", competences: "Compétences", langues: "Langues", atouts: "Points forts", certifications: "Certifications", note: null },
+  en: { profil: "Profile", experience: "Experience", formation: "Education", competences: "Skills", langues: "Languages", atouts: "Strengths", certifications: "Certifications", note: "Content not auto-translated — ask for a translation in the conversation." }
 };
 
 function structuredToHtml(texte){
@@ -2727,7 +2712,7 @@ function initPreviewEditing(){
     else if(list){
       var it = list.find(function(x){ return x.id === id; });
       if(it){
-        if(type === "exp" && field === "details" && state.cv.expOverrides && typeof state.cv.expOverrides[id] === "string"){ state.cv.expOverrides[id] = val; }
+        if(type === "exp" && field === "details"){ state.cv.expOverrides = state.cv.expOverrides || {}; state.cv.expOverrides[id] = val; }   // modifie ce CV seulement, pas la base
         else { it[field] = val; }
       }
     }
@@ -2741,7 +2726,8 @@ function initPreviewEditing(){
 function renderCVPreview(){
   var wrap = document.getElementById("cv-preview");
   var html = cvHtml();
-  wrap.innerHTML = html || '<p class="empty-note">Remplis ton profil et ta bibliothèque à gauche : le CV se construit ici.</p>';
+  wrap.innerHTML = html || '<p class="empty-note">Importe un CV dans « Ma base » et remplis ton profil : le CV se construit ici.</p>';
+  renderComposition();
   renderATS();
 }
 
@@ -2765,26 +2751,29 @@ function cvHtml(){
   html += '</div>';
 
   if(cv.resume) html += '<h3 class="cv-h">' + L.profil + '</h3><p data-edit="resume::resume" contenteditable="true" spellcheck="false">' + esc(cv.resume) + '</p>';
+  else html += '<p class="gap-note"><sup class="gap-star">*</sup> Accroche à ajouter (voir « Adapter l\'accroche »).</p>';
   if(p.atouts.length) html += '<h3 class="cv-h">' + L.atouts + '</h3><div class="cv-skills">' + p.atouts.map(function(a){ return '<span class="chip cv-skill" style="background:var(--accent-soft);color:var(--accent-ink);">' + esc(a) + '</span>'; }).join("") + '</div>';
 
-  var exps = orderedList(state.library.experiences, cv.selectedExp).filter(function(e){ return (e.poste || e.entreprise) && (cv.excludedExp || []).indexOf(e.id) === -1; });
-  if(exps.length){
-    html += '<h3 class="cv-h">' + L.experience + '</h3>';
-    exps.forEach(function(e){
-      html += '<div class="cv-item"><div class="cv-item-head"><span data-edit="exp:' + e.id + ':poste" contenteditable="true" spellcheck="false">' + esc(e.poste) + '</span><span data-edit="exp:' + e.id + ':dates" contenteditable="true" spellcheck="false">' + esc(e.dates) + '</span></div>';
+  var c = composeCv(), lib = state.library;
+  var byId = function(arr, id){ return arr.find(function(z){ return z.id === id; }); };
+  var star = function(k){ return gapStar(c, k); };
+
+  if(c.exp.length){
+    html += '<h3 class="cv-h">' + L.experience + star("sec:exp") + '</h3>';
+    c.exp.forEach(function(id){
+      var e = byId(lib.experiences, id); if(!e) return;
+      html += '<div class="cv-item"><div class="cv-item-head"><span data-edit="exp:' + e.id + ':poste" contenteditable="true" spellcheck="false">' + esc(e.poste) + star("exp:" + e.id) + '</span><span data-edit="exp:' + e.id + ':dates" contenteditable="true" spellcheck="false">' + esc(e.dates) + '</span></div>';
       if(e.entreprise) html += '<div class="cv-item-sub" data-edit="exp:' + e.id + ':entreprise" contenteditable="true" spellcheck="false">' + esc(e.entreprise) + '</div>';
-      if(expDetails(e)){
-        var lines = expDetails(e).split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
-        html += '<ul data-edit="exp:' + e.id + ':details" contenteditable="true" spellcheck="false">' + lines.map(function(l){ return "<li>" + esc(l) + "</li>"; }).join("") + '</ul>';
-      }
+      var lines = c.bullets[id] || [];
+      if(lines.length) html += '<ul data-edit="exp:' + e.id + ':details" contenteditable="true" spellcheck="false">' + lines.map(function(l){ return "<li>" + esc(l) + "</li>"; }).join("") + '</ul>';
       html += '</div>';
     });
   }
 
-  var forms = orderedList(state.library.formations, cv.selectedForm).filter(function(f){ return f.diplome || f.etablissement; });
-  if(forms.length){
+  if(c.forms.length){
     html += '<h3 class="cv-h">' + L.formation + '</h3>';
-    forms.forEach(function(f){
+    c.forms.forEach(function(id){
+      var f = byId(lib.formations, id); if(!f) return;
       html += '<div class="cv-item"><div class="cv-item-head"><span data-edit="form:' + f.id + ':diplome" contenteditable="true" spellcheck="false">' + esc(f.diplome) + '</span><span data-edit="form:' + f.id + ':dates" contenteditable="true" spellcheck="false">' + esc(f.dates) + '</span></div>';
       if(f.etablissement) html += '<div class="cv-item-sub" data-edit="form:' + f.id + ':etablissement" contenteditable="true" spellcheck="false">' + esc(f.etablissement) + '</div>';
       if(f.details){
@@ -2795,13 +2784,25 @@ function cvHtml(){
     });
   }
 
-  var skills = sortedCompetences();
-  if(skills.length){
-    html += '<h3 class="cv-h">' + L.competences + '</h3><div class="cv-skills">' +
-      skills.map(function(c){ return '<span class="chip cv-skill" style="background:var(--brass-soft);color:var(--brass);">' + esc(c.label) + '</span>'; }).join("") +
-      '</div>';
+  if(c.certs.length){
+    html += '<h3 class="cv-h">' + (L.certifications || "Certifications") + '</h3><ul>' + c.certs.map(function(id){
+      var x = byId(lib.certifications, id); if(!x) return "";
+      return "<li>" + esc(x.label) + (x.organisme ? ", " + esc(x.organisme) : "") + (x.annee ? " (" + esc(x.annee) + ")" : "") + "</li>";
+    }).join("") + '</ul>';
+  } else if(star("sec:cert")){ html += '<p class="gap-note">' + star("sec:cert") + ' Certifications : voir « À compléter ».</p>'; }
+
+  if(c.skills.length){
+    // compétences regroupées par catégorie, en texte simple (lisible par les outils de tri)
+    var groups = {}, order = [];
+    c.skills.forEach(function(id){
+      var sk = byId(lib.competences, id); if(!sk) return;
+      var cat = skillCat(sk); if(!groups[cat.key]){ groups[cat.key] = { label: cat.label, items: [] }; order.push(cat.key); }
+      groups[cat.key].items.push(sk.label);
+    });
+    html += '<h3 class="cv-h">' + L.competences + star("sec:skills") + '</h3>' + order.map(function(k){ return '<p class="cv-skillline"><strong>' + esc(groups[k].label) + ' :</strong> ' + groups[k].items.map(esc).join(", ") + '</p>'; }).join("");
   }
-  (state.library.sections || []).filter(function(sec){ return sec.titre || sec.texte; }).forEach(function(sec){
+  c.secs.forEach(function(id){
+    var sec = byId(lib.sections, id); if(!sec) return;
     html += '<h3 class="cv-h">' + esc(sec.titre) + '</h3><div data-edit="sec:' + sec.id + ':texte" contenteditable="true" spellcheck="false">' + structuredToHtml(sec.texte) + '</div>';
   });
   if(p.langues) html += '<h3 class="cv-h">' + L.langues + '</h3><p>' + esc(p.langues) + '</p>';
@@ -2842,7 +2843,7 @@ function anonymizedCvElement(maskEmployers, maskSchools){
   var html;
   state.profil = cp; state.library = cl; state.cv = cc;
   try{ html = cvHtml(); } finally { state.profil = realProfil; state.library = realLib; state.cv = realCv; }
-  html = html.replace(/ contenteditable="true"/g, "").replace(/ spellcheck="false"/g, "").replace(/ data-edit="[^"]*"/g, "");
+  html = html.replace(/<sup class="gap-star"[^>]*>\*<\/sup>/g, "").replace(/<p class="gap-note">.*?<\/p>/g, "").replace(/ contenteditable="true"/g, "").replace(/ spellcheck="false"/g, "").replace(/ data-edit="[^"]*"/g, "");
   var el = document.createElement("div");
   el.className = "paper cv-doc"; el.id = "cv-anon";
   el.innerHTML = html;
@@ -4180,6 +4181,8 @@ function renderProfilsList(){
         '<div class="field"><label>Ton des lettres pour ce profil</label><select data-pf="ton">' + [["formel","Formel"],["direct","Direct"],["chaleureux","Chaleureux"]].map(function(t){ return '<option value="' + t[0] + '"' + (pr.ton === t[0] ? " selected" : "") + '>' + t[1] + '</option>'; }).join("") + '</select></div>' +
         '<p class="hint">' + (pr.modes && pr.modes.debutant ? 'Réponse à des offres « débutants acceptés » uniquement : pas de candidature spontanée pour ce profil.' : 'Candidatures spontanées et réponses à des offres possibles.') + '</p>' +
         (todo.length ? '<div class="field"><label>À compléter pour ce profil</label><ul class="ats-list">' + todo.map(function(t){ return "<li>" + esc(t) + "</li>"; }).join("") + '</ul></div>' : '') +
+        '<div class="field"><label>CV type de ce profil</label><p class="hint" style="margin:0 0 6px;">Composé automatiquement depuis ta base : les éléments qui servent ce profil, triés et organisés. Il évolue dès que ta base évolue.</p>' +
+          '<div class="toolbar-row"><button class="btn btn-sm" type="button" data-pcv-view>Voir le CV type</button><button class="btn btn-ghost btn-sm" type="button" data-pcv-pdf>Télécharger (PDF)</button><span class="hint" data-pcv-status></span></div><div data-pcv-box style="margin-top:10px;"></div></div>' +
         '<div class="field"><label>Compléter avec un texte (CV, projet, fiche de poste…)</label><textarea data-pimport style="min-height:90px;" placeholder="Colle un texte : l\'atelier trie, organise et ajoute à ta base les expériences, formations et compétences trouvées."></textarea>' +
           '<div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pimport-go>Analyser et ajouter à ma base</button><span class="hint" data-pimport-status></span></div></div>' +
         '<div class="toolbar-row" style="justify-content:space-between;margin-top:8px;"><button class="btn btn-primary btn-sm" type="button" data-puse>Nouvelle candidature avec ce profil</button>' +
@@ -4221,6 +4224,13 @@ function renderProfilsList(){
       persist(); pr._open = true; renderProfils();
     });
     d.querySelector("[data-puse]").addEventListener("click", function(){ newDossierWithProfil(pr.id); });
+    d.querySelector("[data-pcv-view]").addEventListener("click", function(){ renderProfilCvBox(pr, d.querySelector("[data-pcv-box]")); });
+    d.querySelector("[data-pcv-pdf]").addEventListener("click", function(){
+      var st = d.querySelector("[data-pcv-status]"), r = profilCvElement(pr);
+      if(!pdfLibsReady()){ st.textContent = "Les bibliothèques PDF chargent encore : réessaie."; return; }
+      st.textContent = "Génération du PDF…";
+      buildPdfFromSections([r.el]).then(function(doc){ saveFileEverywhere(fileSafe((state.profil.nom || "cv") + "-CV-" + pr.nom) + ".pdf", doc.output("blob"), "cv-download-status"); st.textContent = "PDF généré."; }, function(){ st.textContent = "La génération a échoué."; });
+    });
   });
 }
 
@@ -4849,6 +4859,428 @@ function startFromOffre(o){
   switchTab("cv");
 }
 
+/* ===================== MA BASE : fusion de CV, catégories, certifications, carte ===================== */
+
+var SKILL_CATS = [
+  { key:"outils",     label:"Outils",                  re:/(photoshop|illustrator|indesign|figma|canva|premiere|after effects|excel|powerpoint|word|crm|erp|sirh|adobe|notion|jira|slack|visual studio|cursor|claude code|office|wordpress|shopify)/i },
+  { key:"methodes",   label:"Méthodes",                re:/(agile|scrum|kanban|gestion de projet|conduite|pilotage|roadmap|sp[ée]cifications?|documentation|tests?|qualit[ée]|lean|itil|budget|planning|reporting|cahier des charges|priorisation)/i },
+  { key:"relationnel",label:"Savoir-être",             re:/(management|leadership|communication|n[ée]gociation|relation|animation|p[ée]dagogie|autonomie|rigueur|organisation|esprit|travail d['’]équipe|polyvalence|adaptabilit[ée]|cr[ée]ativit[ée]|écoute|sens)/i },
+  { key:"tech",       label:"Savoir-faire techniques", re:/(javascript|typescript|python|php|java\b|react|node|html|css|sql|api|git|docker|llm|rag|mcp|agents?|\bia\b|intelligence artificielle|n8n|automatisation|prompt|cloud|linux|d[ée]veloppement|architecture|base de donn[ée]es|seo|sea|analytics|data|blockchain|web3|supabase|neon|vercel|cloudflare|github|montage|r[ée]alisation|photographie|audiovisuel)/i }
+];
+function skillCat(c){
+  if(c.cat){ var f = SKILL_CATS.find(function(x){ return x.key === c.cat; }); if(f) return f; }
+  var l = c.label || "";
+  for(var i = 0; i < SKILL_CATS.length; i++){ if(SKILL_CATS[i].re.test(l)) return SKILL_CATS[i]; }
+  return { key:"autres", label:"Autres compétences" };
+}
+
+function bulletWords(s){ return norm(s).replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(function(w){ return w.length > 2; }); }
+function similarText(a, b){
+  var A = bulletWords(a), B = bulletWords(b); if(!A.length || !B.length) return false;
+  var sa = {}, inter = 0; A.forEach(function(w){ sa[w] = 1; }); B.forEach(function(w){ if(sa[w]) inter++; });
+  return inter / (A.length + B.length - inter) >= 0.6;
+}
+function mergeLines(oldText, newText){
+  var lines = (oldText || "").split("\n").map(function(x){ return x.trim(); }).filter(Boolean), added = 0;
+  (newText || "").split("\n").map(function(x){ return x.trim(); }).filter(Boolean).forEach(function(l){
+    if(!lines.some(function(x){ return similarText(x, l); })){ lines.push(l); added++; }
+  });
+  return { text: lines.join("\n"), added: added };
+}
+function startYear(d){ var m = String(d || "").match(/(19|20)\d{2}/); return m ? m[0] : ""; }
+function addSource(it, srcId){ if(!srcId) return; it.src = it.src || []; if(it.src.indexOf(srcId) === -1) it.src.push(srcId); }
+
+function findSameExperience(list, e){
+  var ne = norm(e.entreprise), np = norm(e.poste), ys = startYear(e.dates);
+  return list.find(function(x){
+    var xe = norm(x.entreprise), xp = norm(x.poste);
+    if(ne && xe && (ne === xe || ne.indexOf(xe) !== -1 || xe.indexOf(ne) !== -1)){
+      return np === xp || np.indexOf(xp) !== -1 || xp.indexOf(np) !== -1 || (ys && ys === startYear(x.dates)) || similarText(e.poste, x.poste);
+    }
+    if(np && np === xp && (!ne || !xe)){ var a = startYear(e.dates), b = startYear(x.dates); return !a || !b || a === b; }
+    return false;
+  });
+}
+
+// Fusionne le résultat d'un import dans la base ; renvoie les compteurs.
+function mergeImportIntoBase(result, srcId){
+  var lib = state.library, r = { newExp:0, enrichedExp:0, newForm:0, enrichedForm:0, newSkills:0, newCert:0, newSections:0, enrichedSections:0, addedBullets:0 };
+  result.experiences.forEach(function(e){
+    if(!e.poste && !e.entreprise && !e.details) return;
+    var same = findSameExperience(lib.experiences, e);
+    if(same){
+      var m = mergeLines(same.details, e.details);
+      var changed = m.added > 0;
+      same.details = m.text; r.addedBullets += m.added;
+      if(!same.dates && e.dates){ same.dates = e.dates; changed = true; }
+      if(!same.entreprise && e.entreprise){ same.entreprise = e.entreprise; changed = true; }
+      addSource(same, srcId);
+      if(changed) r.enrichedExp++;
+    } else { e.src = []; addSource(e, srcId); lib.experiences.push(e); r.newExp++; }
+  });
+  result.formations.forEach(function(f){
+    if(!f.diplome && !f.etablissement) return;
+    var key = norm(f.diplome) + "|" + norm(f.etablissement);
+    var same = lib.formations.find(function(x){ return (norm(x.diplome) + "|" + norm(x.etablissement)) === key || (norm(x.diplome) === norm(f.diplome) && (!x.etablissement || !f.etablissement)); });
+    if(same){
+      var m = mergeLines(same.details, f.details), ch = m.added > 0;
+      same.details = m.text;
+      if(!same.etablissement && f.etablissement){ same.etablissement = f.etablissement; ch = true; }
+      if(!same.dates && f.dates){ same.dates = f.dates; ch = true; }
+      addSource(same, srcId); if(ch) r.enrichedForm++;
+    } else { f.src = []; addSource(f, srcId); lib.formations.push(f); r.newForm++; }
+  });
+  result.skills.forEach(function(s){ var it = addSkillRaw(s); if(it){ addSource(it, srcId); r.newSkills++; } else { var ex = lib.competences.find(function(c){ return norm(c.label) === norm(s); }); if(ex) addSource(ex, srcId); } });
+  (result.certifs || []).forEach(function(c){
+    if(!(c.label || "").trim()) return;
+    var same = lib.certifications.find(function(x){ return norm(x.label) === norm(c.label); });
+    if(same){ if(!same.annee && c.annee) same.annee = c.annee; if(!same.organisme && c.organisme) same.organisme = c.organisme; addSource(same, srcId); }
+    else { c.src = []; addSource(c, srcId); lib.certifications.push(c); r.newCert++; }
+  });
+  (result.sections || []).forEach(function(sec){
+    var same = lib.sections.find(function(x){ return norm(x.titre) === norm(sec.titre); });
+    if(same){ var m = mergeLines(same.texte, sec.texte); if(m.added){ same.texte = m.text; r.enrichedSections++; } addSource(same, srcId); }
+    else { sec.src = []; addSource(sec, srcId); lib.sections.push(sec); r.newSections++; }
+  });
+  return r;
+}
+
+/* ---- certifications : liste modifiable ---- */
+function renderCertList(){
+  var wrap = document.getElementById("cert-list"); if(!wrap) return;
+  var list = state.library.certifications;
+  wrap.innerHTML = list.length ? "" : '<p class="empty-note">Aucune certification. Ajoute celles que tu as (ou importe un CV qui en contient).</p>';
+  list.forEach(function(c){
+    var d = document.createElement("div"); d.className = "exp-block";
+    d.innerHTML = '<div class="exp-block-head"><span class="eyebrow">Certification</span><button class="icon-btn" type="button" data-del-cert="' + c.id + '" aria-label="Retirer" title="Retirer">' + icon("close") + '</button></div>' +
+      '<div class="field"><label>Intitulé</label><input type="text" data-cf="label" data-id="' + c.id + '" value="' + esc(c.label) + '"></div>' +
+      '<div class="row2"><div class="field"><label>Organisme</label><input type="text" data-cf="organisme" data-id="' + c.id + '" value="' + esc(c.organisme || "") + '"></div>' +
+      '<div class="field"><label>Année</label><input type="text" data-cf="annee" data-id="' + c.id + '" value="' + esc(c.annee || "") + '"></div></div>';
+    wrap.appendChild(d);
+  });
+  wrap.querySelectorAll("[data-cf]").forEach(function(el){
+    el.addEventListener("input", function(){ var it = state.library.certifications.find(function(x){ return x.id === el.getAttribute("data-id"); }); if(it){ it[el.getAttribute("data-cf")] = el.value; } onBaseChanged(false); });
+  });
+  wrap.querySelectorAll("[data-del-cert]").forEach(function(b){ b.addEventListener("click", function(){ state.library.certifications = state.library.certifications.filter(function(x){ return x.id !== b.getAttribute("data-del-cert"); }); renderCertList(); onBaseChanged(true); }); });
+}
+document.getElementById("btn-add-cert").addEventListener("click", function(){ state.library.certifications.push({ id: uid(), label: "", organisme: "", annee: "", src: [] }); renderCertList(); persist(); });
+
+/* ---- CV importés ---- */
+function renderSources(){
+  var wrap = document.getElementById("sources-list"); if(!wrap) return;
+  var list = state.library.sources || [];
+  wrap.innerHTML = list.length ? "" : '<p class="empty-note">Aucun import pour l\'instant.</p>';
+  list.slice().reverse().forEach(function(sr){
+    var n = function(arr){ return arr.filter(function(x){ return (x.src || []).indexOf(sr.id) !== -1; }).length; };
+    var p = document.createElement("p"); p.className = "hint"; p.style.margin = "0 0 6px";
+    p.innerHTML = '<strong>' + esc(sr.label) + '</strong> · ' + esc(sr.date) + ' · ' + n(state.library.experiences) + ' expérience(s), ' + n(state.library.formations) + ' formation(s), ' + n(state.library.competences) + ' compétence(s) rattachées';
+    wrap.appendChild(p);
+  });
+}
+
+// Appelé quand la base change : recompose les CV et rafraîchit les vues qui en dépendent.
+function onBaseChanged(rerenderLists){
+  if(rerenderLists){ renderExpList(); renderFormList(); renderSkillChips(); renderSkillSuggestions(); renderSectionsList(); renderCertList(); }
+  renderCVPreview(); renderBaseMap(); renderSources(); refreshStatusDots(); persist();
+}
+
+/* ---- carte de la base ---- */
+function leafDomains(text){
+  var t = norm(text || ""), out = [];
+  PROFIL_DOMAINES.forEach(function(d){ if(d.mots.some(function(m){ return countTerm(t, norm(m)) > 0; })) out.push(d.label.split(" / ")[0]); });
+  return out;
+}
+function baseTree(){
+  var lib = state.library, p = state.profil;
+  var branches = [
+    { key:"exp",  label:"Expériences", items: lib.experiences.filter(function(e){ return e.poste || e.entreprise; }).map(function(e){ return { label: (e.poste || e.entreprise) + (e.entreprise && e.poste ? " · " + e.entreprise : ""), text: [e.poste, e.entreprise, e.details].join(" "), dates: e.dates }; }) },
+    { key:"form", label:"Formations", items: lib.formations.filter(function(f){ return f.diplome || f.etablissement; }).map(function(f){ return { label: f.diplome + (f.etablissement ? " · " + f.etablissement : ""), text: [f.diplome, f.etablissement, f.details].join(" "), dates: f.dates }; }) },
+    { key:"cert", label:"Certifications", items: lib.certifications.filter(function(c){ return c.label; }).map(function(c){ return { label: c.label + (c.annee ? " (" + c.annee + ")" : ""), text: c.label + " " + (c.organisme || "") }; }) }
+  ];
+  SKILL_CATS.concat([{ key:"autres", label:"Autres compétences" }]).forEach(function(cat){
+    var items = lib.competences.filter(function(c){ return skillCat(c).key === cat.key; }).map(function(c){ return { label: c.label, text: c.label }; });
+    if(items.length) branches.push({ key:"skill-" + cat.key, label: cat.label, items: items });
+  });
+  branches.push({ key:"sec", label:"Projets et rubriques", items: (lib.sections || []).filter(function(x){ return x.titre; }).map(function(x){ return { label: x.titre, text: x.titre + " " + x.texte }; }) });
+  if((p.langues || "").trim()) branches.push({ key:"lang", label:"Langues", items: p.langues.split(/[,;]/).map(function(x){ return { label: x.trim(), text: x }; }).filter(function(x){ return x.label; }) });
+  return branches.filter(function(b){ return b.items.length || b.key === "exp" || b.key === "form"; });
+}
+
+var mapOpen = null;
+function renderBaseMap(){
+  var wrap = document.getElementById("base-map"); if(!wrap) return;
+  var sel = document.getElementById("map-profil"), cur = sel.value;
+  sel.innerHTML = '<option value="">Aucun</option>' + state.profils.map(function(pr){ return '<option value="' + pr.id + '">' + esc(pr.nom) + '</option>'; }).join("");
+  if(cur && state.profils.some(function(pr){ return pr.id === cur; })) sel.value = cur;
+  var tree = baseTree();
+  var W = 460, H = 380, cx = W / 2, cy = H / 2, R = 140;
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Carte de ta base : ' + tree.map(function(b){ return b.label + " " + b.items.length; }).join(", ") + '" style="max-width:520px;display:block;margin:0 auto;">';
+  var name = (state.profil.nom || "").trim() || "Moi";
+  tree.forEach(function(b, i){
+    var ang = -Math.PI / 2 + i * 2 * Math.PI / tree.length, x = cx + R * Math.cos(ang), y = cy + R * Math.sin(ang);
+    svg += '<line x1="' + cx + '" y1="' + cy + '" x2="' + x.toFixed(1) + '" y2="' + y.toFixed(1) + '" stroke="var(--border-strong)" stroke-width="1.5"/>';
+  });
+  svg += '<circle cx="' + cx + '" cy="' + cy + '" r="36" fill="var(--accent)"/><text x="' + cx + '" y="' + (cy + 4) + '" text-anchor="middle" font-size="12" font-weight="700" fill="var(--on-accent)">' + esc(name.length > 12 ? name.slice(0, 11) + "…" : name) + '</text>';
+  tree.forEach(function(b, i){
+    var ang = -Math.PI / 2 + i * 2 * Math.PI / tree.length, x = cx + R * Math.cos(ang), y = cy + R * Math.sin(ang);
+    var r = 22 + Math.min(14, b.items.length * 1.5), on = mapOpen === b.key;
+    svg += '<g class="map-node" data-branch="' + b.key + '" tabindex="0" role="button" aria-label="' + esc(b.label) + ', ' + b.items.length + ' élément(s)" style="cursor:pointer;">' +
+      '<circle cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) + '" r="' + r + '" fill="' + (on ? "var(--accent)" : "var(--surface-2)") + '" stroke="var(--accent)" stroke-width="2"/>' +
+      '<text x="' + x.toFixed(1) + '" y="' + (y - 2).toFixed(1) + '" text-anchor="middle" font-size="16" font-weight="700" fill="' + (on ? "var(--on-accent)" : "var(--ink-900)") + '">' + b.items.length + '</text>' +
+      '<text x="' + x.toFixed(1) + '" y="' + (y + r + 14).toFixed(1) + '" text-anchor="middle" font-size="11.5" fill="var(--ink-900)">' + esc(b.label.length > 22 ? b.label.slice(0, 21) + "…" : b.label) + '</text></g>';
+  });
+  svg += '</svg>';
+  wrap.innerHTML = svg;
+  wrap.querySelectorAll("[data-branch]").forEach(function(g){
+    var open = function(){ mapOpen = (mapOpen === g.getAttribute("data-branch")) ? null : g.getAttribute("data-branch"); renderBaseMap(); };
+    g.addEventListener("click", open);
+    g.addEventListener("keydown", function(e){ if(e.key === "Enter" || e.key === " "){ e.preventDefault(); open(); } });
+  });
+  var det = document.getElementById("base-map-detail"), br = tree.find(function(b){ return b.key === mapOpen; });
+  if(!br){ det.innerHTML = '<p class="hint">Clique sur une branche pour voir son contenu. Les étiquettes indiquent les domaines (profils) que chaque élément peut servir.</p>'; return; }
+  var pr = state.profils.find(function(x){ return x.id === sel.value; });
+  var kws = pr ? (pr.motsCles || []).map(function(k){ return { term: k, count: 1, kind: "skill" }; }) : [];
+  det.innerHTML = '<p class="eyebrow" style="margin:0 0 6px;">' + esc(br.label) + '</p>' + br.items.map(function(it){
+    var dom = leafDomains(it.text), hit = kws.length ? scoreAgainstKeywords(it.text, kws) > 0 : null;
+    return '<div style="display:flex;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:1px dashed var(--border);opacity:' + (hit === false ? .45 : 1) + ';"><span style="font-size:13px;">' + (hit ? "★ " : "") + esc(it.label) + (it.dates ? ' <span class="hint">(' + esc(it.dates) + ')</span>' : '') + '</span><span class="hint">' + esc(dom.slice(0, 3).join(" · ")) + '</span></div>';
+  }).join("");
+}
+document.getElementById("map-profil").addEventListener("change", renderBaseMap);
+
+/* ===================== COMPOSITION DU CV : ce que la base fournit, trié et organisé selon le profil et l'annonce ===================== */
+
+function dateRank(dates){
+  var d = String(dates || ""), now = new Date().getFullYear();
+  if(/pr[ée]sent|aujourd|en cours|depuis|actuel/i.test(d)) return now + 1;
+  var ys = d.match(/(19|20)\d{2}/g);
+  return ys ? Math.max.apply(null, ys.map(Number)) : 0;
+}
+
+function compoKeywords(){
+  var an = (state.annonce && state.annonce.keywords) || [];
+  var pk = typeof profilKeywords === "function" ? profilKeywords() : [];
+  return { all: an.concat(an).concat(pk), has: an.length + pk.length > 0 };   // l'annonce pèse double
+}
+
+// L'état d'une case : choix de la personne pour cette candidature, puis préférences du profil, sinon sélection automatique.
+function compoDecision(key, auto){
+  var cv = state.cv, pr = typeof currentProfil === "function" ? currentProfil() : null, pf = (pr && pr.cvPrefs) || {};
+  if((cv.hides || {})[key]) return false;
+  if((cv.pins || {})[key]) return true;
+  if((pf.hides || {})[key]) return false;
+  if((pf.pins || {})[key]) return true;
+  return auto;
+}
+
+function composeCv(){
+  var cv = state.cv, lib = state.library, K = compoKeywords(), kws = K.all;
+  cv.pins = cv.pins || {}; cv.hides = cv.hides || {};
+  var score = function(text){ return scoreAgainstKeywords(text, kws); };
+  var out = { exp: [], bullets: {}, skills: [], forms: [], certs: [], secs: [], auto: {}, gaps: [], K: K.has };
+
+  // expériences : pertinence, puis récence ; les 5 premières sont retenues d'office
+  var exps = lib.experiences.filter(function(e){ return e.poste || e.entreprise; }).map(function(e, i){
+    return { e: e, i: i, s: score([e.poste, e.entreprise, expDetails(e)].join(" ")), r: dateRank(e.dates) };
+  });
+  exps.sort(function(a, b){ return K.has ? ((b.s - a.s) || (b.r - a.r) || (a.i - b.i)) : ((b.r - a.r) || (a.i - b.i)); });
+  exps.forEach(function(x, rank){
+    var key = "exp:" + x.e.id, auto = rank < 5;
+    out.auto[key] = auto;
+    if(compoDecision(key, auto)) out.exp.push(x.e.id);
+  });
+  // réalisations retenues par expérience : les plus proches de l'annonce, 5 pour les deux premières, 3 ensuite
+  out.exp.forEach(function(id, pos){
+    var e = lib.experiences.find(function(z){ return z.id === id; });
+    var ov = cv.expOverrides && cv.expOverrides[id];
+    var lines = (typeof ov === "string" ? ov : (e.details || "")).split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
+    var max = pos < 2 ? 5 : 3;
+    if(typeof ov !== "string" && lines.length > max){
+      var scored = lines.map(function(l, i){ return { l: l, i: i, s: K.has ? score(l) : 0 }; });
+      var keep = scored.slice().sort(function(a, b){ return (b.s - a.s) || (a.i - b.i); }).slice(0, max).map(function(x){ return x.i; }).sort(function(a, b){ return a - b; });
+      lines = keep.map(function(i){ return lines[i]; });
+    }
+    out.bullets[id] = lines;
+  });
+
+  // compétences : celles qui comptent d'abord, 16 au plus
+  var sk = lib.competences.map(function(c, i){ return { c: c, i: i, s: score(c.label) }; });
+  sk.sort(function(a, b){ return (b.s - a.s) || (a.i - b.i); });
+  var nAuto = 0;
+  sk.forEach(function(x){
+    var key = "skill:" + x.c.id, auto = K.has ? (x.s > 0 && nAuto < 16) || (nAuto < 8) : nAuto < 14;
+    if(auto) nAuto++;
+    out.auto[key] = auto;
+    if(compoDecision(key, auto)) out.skills.push(x.c.id);
+  });
+
+  // formations : les 4 plus pertinentes / récentes
+  var fs = lib.formations.filter(function(f){ return f.diplome || f.etablissement; }).map(function(f, i){ return { f: f, i: i, s: score([f.diplome, f.etablissement, f.details].join(" ")), r: dateRank(f.dates) }; });
+  fs.sort(function(a, b){ return (b.s - a.s) || (b.r - a.r) || (a.i - b.i); });
+  fs.forEach(function(x, rank){ var key = "form:" + x.f.id, auto = rank < 4; out.auto[key] = auto; if(compoDecision(key, auto)) out.forms.push(x.f.id); });
+
+  // certifications : celles qui servent le profil, sinon jusqu'à 3
+  var cs = lib.certifications.filter(function(c){ return c.label; }).map(function(c, i){ return { c: c, i: i, s: score(c.label + " " + (c.organisme || "")) }; });
+  cs.sort(function(a, b){ return (b.s - a.s) || (a.i - b.i); });
+  cs.forEach(function(x, rank){ var key = "cert:" + x.c.id, auto = K.has ? (x.s > 0 || rank < 3) && rank < 5 : rank < 3; out.auto[key] = auto; if(compoDecision(key, auto)) out.certs.push(x.c.id); });
+
+  // rubriques (projets, centres d'intérêt…) : pertinentes, ou classiques en fin de CV
+  var tail = /compl[ée]mentaires|int[ée]r[êe]ts|loisirs|informations/i;
+  var ss = (lib.sections || []).filter(function(x){ return x.titre || x.texte; }).map(function(x, i){ return { x: x, i: i, s: score(x.titre + " " + x.texte), tail: tail.test(x.titre || "") }; });
+  ss.sort(function(a, b){ return (a.tail - b.tail) || (b.s - a.s) || (a.i - b.i); });
+  var nSec = 0;
+  ss.forEach(function(y){
+    var key = "sec:" + y.x.id, auto = K.has ? ((y.s > 0 || y.tail) && nSec < 4) : nSec < 3;
+    if(auto) nSec++;
+    out.auto[key] = auto;
+    if(compoDecision(key, auto)) out.secs.push(y.x.id);
+  });
+
+  cv.compo = out;
+  // compatibilité avec le reste de l'appli
+  var rest = lib.experiences.map(function(e){ return e.id; }).filter(function(id){ return out.exp.indexOf(id) === -1; });
+  cv.selectedExp = out.exp.concat(rest);
+  cv.excludedExp = rest;
+  cv.selectedForm = out.forms.concat(lib.formations.map(function(f){ return f.id; }).filter(function(id){ return out.forms.indexOf(id) === -1; }));
+  out.gaps = computeGaps(out);
+  return out;
+}
+
+function recomposerCV(){ state.cv.autoMode = true; composeCv(); }
+
+function compoText(c){
+  var lib = state.library, parts = [];
+  c.exp.forEach(function(id){ var e = lib.experiences.find(function(z){ return z.id === id; }); if(e){ parts.push(e.poste, e.entreprise, (c.bullets[id] || []).join(" \n ")); } });
+  c.skills.forEach(function(id){ var s = lib.competences.find(function(z){ return z.id === id; }); if(s) parts.push(s.label); });
+  c.forms.forEach(function(id){ var f = lib.formations.find(function(z){ return z.id === id; }); if(f) parts.push(f.diplome, f.etablissement, f.details); });
+  c.certs.forEach(function(id){ var x = lib.certifications.find(function(z){ return z.id === id; }); if(x) parts.push(x.label, x.organisme); });
+  c.secs.forEach(function(id){ var x = lib.sections.find(function(z){ return z.id === id; }); if(x) parts.push(x.titre, x.texte); });
+  return parts.join(" \n ");
+}
+
+function cvFullText(){
+  var p = state.profil, cv = state.cv, c = composeCv();
+  var parts = [cv.resume, cv.titre || p.titre, p.langues, compoText(c)];
+  (p.atouts || []).forEach(function(a){ parts.push(a); });
+  return norm(parts.join(" \n "));
+}
+
+/* ---- ce qui pourrait manquer (astérisques) ---- */
+var DOMAINE_CERT_HINT = { dev:"certification cloud ou langage", data:"certification data ou BI", projet:"certification de gestion de projet ou agile", rh:"formation ou certification RH", immo:"carte professionnelle ou formation immobilière", formation:"certification de formateur", ia:"certification ou formation en IA", design:"formation en design ou UX" };
+
+function computeGaps(c){
+  var lib = state.library, p = state.profil, cv = state.cv, gaps = [], pr = typeof currentProfil === "function" ? currentProfil() : null;
+  c.exp.forEach(function(id){
+    var e = lib.experiences.find(function(z){ return z.id === id; }); if(!e) return;
+    var nm = e.poste || e.entreprise;
+    if(!(e.dates || "").trim()) gaps.push({ key:"exp:" + id, text:"« " + nm + " » : dates manquantes." });
+    if((c.bullets[id] || []).length < 2) gaps.push({ key:"exp:" + id, text:"« " + nm + " » : peu de réalisations (2 à 4 sont attendues)." });
+  });
+  var allBullets = c.exp.reduce(function(a, id){ return a.concat(c.bullets[id] || []); }, []);
+  if(allBullets.length && !allBullets.some(function(b){ return /\d/.test(b); })) gaps.push({ key:"sec:exp", text:"Aucune réalisation chiffrée : ajoute un volume, un résultat ou une durée." });
+  if(!(cv.resume || "").trim()) gaps.push({ key:"sec:resume", text:"Accroche absente." });
+  if(!c.forms.length) gaps.push({ key:"sec:form", text:"Aucune formation." });
+  if(!c.certs.length){ var dom = pr && DOMAINE_CERT_HINT[pr.domaine]; if(dom) gaps.push({ key:"sec:cert", text:"Aucune certification : " + dom + ", si tu en as une." }); }
+  if(!(p.langues || "").trim()) gaps.push({ key:"sec:langues", text:"Langues non renseignées." });
+  if(!(p.email || "").trim() || !(p.tel || "").trim()) gaps.push({ key:"sec:contact", text:"Email ou téléphone manquant." });
+  if(c.K){
+    var txt = norm([cv.resume, compoText(c)].join(" "));
+    var wanted = []; ((state.annonce && state.annonce.keywords) || []).filter(function(k){ return k.kind === "skill"; }).forEach(function(k){ wanted.push(k.term); });
+    if(pr) (pr.motsCles || []).forEach(function(k){ if(wanted.indexOf(k) === -1) wanted.push(k); });
+    var miss = wanted.filter(function(t){ return !hasTerm(txt, t); }).slice(0, 6);
+    if(miss.length) gaps.push({ key:"sec:skills", text:"Mots-clés visés absents du CV : " + miss.join(", ") + "." });
+  }
+  return gaps;
+}
+function gapStar(c, key){
+  var g = (c.gaps || []).filter(function(x){ return x.key === key; });
+  return g.length ? '<sup class="gap-star" title="' + esc(g.map(function(x){ return x.text; }).join(" ")) + '">*</sup>' : "";
+}
+
+/* ---- carte « Composition de ce CV » dans l'onglet CV ---- */
+function renderComposition(){
+  var wrap = document.getElementById("compo-lists"); if(!wrap) return;
+  var c = state.cv.compo || composeCv(), lib = state.library, cv = state.cv;
+  var pr = typeof currentProfil === "function" ? currentProfil() : null;
+  document.getElementById("compo-intro").textContent = (pr ? "Profil « " + pr.nom + " »" : "Aucun profil") + (state.annonce.keywords && state.annonce.keywords.length ? ", annonce analysée" : ", pas d'annonce") +
+    " : " + c.exp.length + " expérience(s), " + c.skills.length + " compétence(s), " + c.forms.length + " formation(s) et " + c.certs.length + " certification(s) retenues dans ta base. Coche ou décoche pour ce CV ; le reste est automatique.";
+  var gw = document.getElementById("compo-gaps");
+  gw.innerHTML = c.gaps.length ? '<p class="eyebrow" style="margin:0 0 4px;">* À compléter</p><ul class="ats-list">' + c.gaps.map(function(g){ return "<li>" + esc(g.text) + "</li>"; }).join("") + "</ul>" : '<p class="hint">Rien ne semble manquer pour ce CV.</p>';
+  var row = function(key, label, on, extra){
+    return '<label class="hint" style="display:flex;gap:6px;align-items:flex-start;margin-bottom:3px;"><input type="checkbox" data-pin="' + key + '"' + (on ? " checked" : "") + '> <span>' + label + (extra ? ' <span style="opacity:.7">' + extra + '</span>' : '') + '</span></label>';
+  };
+  var html = "";
+  var exps = lib.experiences.filter(function(e){ return e.poste || e.entreprise; });
+  if(exps.length){
+    html += '<p class="eyebrow" style="margin:10px 0 4px;">Expériences</p>' + exps.map(function(e){
+      var on = c.exp.indexOf(e.id) !== -1, total = (e.details || "").split("\n").filter(function(x){ return x.trim(); }).length;
+      return row("exp:" + e.id, esc(e.poste || e.entreprise) + (e.entreprise && e.poste ? ", " + esc(e.entreprise) : ""), on, on ? (c.bullets[e.id] || []).length + "/" + total + " réalisations" : "");
+    }).join("");
+  }
+  var fl = lib.formations.filter(function(f){ return f.diplome || f.etablissement; });
+  if(fl.length) html += '<p class="eyebrow" style="margin:10px 0 4px;">Formations</p>' + fl.map(function(f){ return row("form:" + f.id, esc(f.diplome || f.etablissement), c.forms.indexOf(f.id) !== -1); }).join("");
+  var cl = lib.certifications.filter(function(x){ return x.label; });
+  if(cl.length) html += '<p class="eyebrow" style="margin:10px 0 4px;">Certifications</p>' + cl.map(function(x){ return row("cert:" + x.id, esc(x.label), c.certs.indexOf(x.id) !== -1); }).join("");
+  var sl = (lib.sections || []).filter(function(x){ return x.titre || x.texte; });
+  if(sl.length) html += '<p class="eyebrow" style="margin:10px 0 4px;">Rubriques</p>' + sl.map(function(x){ return row("sec:" + x.id, esc(x.titre), c.secs.indexOf(x.id) !== -1); }).join("");
+  if(lib.competences.length) html += '<p class="eyebrow" style="margin:10px 0 4px;">Compétences</p><div class="chips">' + lib.competences.map(function(sk){
+    var on = c.skills.indexOf(sk.id) !== -1;
+    return '<button type="button" class="chip' + (on ? "" : " suggest") + '" data-pin="skill:' + sk.id + '" aria-pressed="' + on + '">' + (on ? "✓ " : "") + esc(sk.label) + '</button>';
+  }).join("") + '</div>';
+  wrap.innerHTML = html;
+  wrap.querySelectorAll("[data-pin]").forEach(function(el){
+    el.addEventListener(el.tagName === "INPUT" ? "change" : "click", function(){
+      var key = el.getAttribute("data-pin"), now = el.tagName === "INPUT" ? el.checked : el.getAttribute("aria-pressed") !== "true";
+      cv.pins = cv.pins || {}; cv.hides = cv.hides || {};
+      delete cv.pins[key]; delete cv.hides[key];
+      if(now) cv.pins[key] = true; else cv.hides[key] = true;
+      renderCVPreview(); persist();
+    });
+  });
+}
+document.getElementById("btn-compo-regen").addEventListener("click", function(){ renderCVPreview(); renderExpList(); persist(); });
+document.getElementById("btn-compo-reset").addEventListener("click", function(){ state.cv.pins = {}; state.cv.hides = {}; renderCVPreview(); persist(); });
+
+
+/* ---- CV type d'un profil : composé depuis la base avec les seuls mots-clés du profil ---- */
+function profilCvElement(pr){
+  var realAnnonce = state.annonce, realCv = state.cv;
+  var cv = Object.assign({}, realCv, { profilId: pr.id, pins: {}, hides: {}, expOverrides: {}, titre: pr.titreVise || "", resume: pr.accroche || "", compo: null });
+  var html;
+  state.annonce = Object.assign({}, realAnnonce, { keywords: [] }); state.cv = cv;
+  try{ html = cvHtml(); } finally { state.annonce = realAnnonce; state.cv = realCv; }
+  var el = document.createElement("div"); el.className = "paper cv-doc"; el.id = "cv-type";
+  el.innerHTML = html;
+  var gaps = cv.compo ? cv.compo.gaps : [];
+  return { el: el, gaps: gaps };
+}
+function renderProfilCvBox(pr, box){
+  var r = profilCvElement(pr), lib = state.library;
+  // inclusion actuelle de chaque élément dans le CV type
+  var realAnnonce = state.annonce, realCv = state.cv, c;
+  var cv = Object.assign({}, realCv, { profilId: pr.id, pins: {}, hides: {}, expOverrides: {}, titre: pr.titreVise || "", resume: pr.accroche || "", compo: null });
+  state.annonce = Object.assign({}, realAnnonce, { keywords: [] }); state.cv = cv;
+  try{ c = composeCv(); } finally { state.annonce = realAnnonce; state.cv = realCv; }
+  pr.cvPrefs = pr.cvPrefs || { pins: {}, hides: {} };
+  var row = function(key, label, on){ return '<label class="hint" style="display:flex;gap:6px;margin-bottom:3px;"><input type="checkbox" data-ppin="' + key + '"' + (on ? " checked" : "") + '> <span>' + label + '</span></label>'; };
+  var list = '<div class="field"><label>Ajuster ce CV type</label><div style="columns:2;column-gap:18px;">' +
+    lib.experiences.filter(function(e){ return e.poste || e.entreprise; }).map(function(e){ return row("exp:" + e.id, esc(e.poste || e.entreprise), c.exp.indexOf(e.id) !== -1); }).join("") +
+    lib.formations.filter(function(f){ return f.diplome; }).map(function(f){ return row("form:" + f.id, esc(f.diplome), c.forms.indexOf(f.id) !== -1); }).join("") +
+    lib.certifications.filter(function(x){ return x.label; }).map(function(x){ return row("cert:" + x.id, esc(x.label), c.certs.indexOf(x.id) !== -1); }).join("") +
+    (lib.sections || []).filter(function(x){ return x.titre; }).map(function(x){ return row("sec:" + x.id, esc(x.titre), c.secs.indexOf(x.id) !== -1); }).join("") + '</div></div>';
+  box.innerHTML = '<div style="max-height:520px;overflow:auto;border:1px solid var(--border);border-radius:8px;"></div>' + list;
+  box.firstChild.appendChild(r.el);
+  r.el.style.cssText = "padding:18px;font-size:11.5px;";
+  r.el.querySelectorAll("[contenteditable]").forEach(function(n){ n.removeAttribute("contenteditable"); });
+  box.querySelectorAll("[data-ppin]").forEach(function(cb){
+    cb.addEventListener("change", function(){
+      var key = cb.getAttribute("data-ppin");
+      delete pr.cvPrefs.pins[key]; delete pr.cvPrefs.hides[key];
+      if(cb.checked) pr.cvPrefs.pins[key] = true; else pr.cvPrefs.hides[key] = true;
+      persist(); renderProfilCvBox(pr, box); renderCVPreview();
+    });
+  });
+}
+
 /* ===================== CANDIDATURES MULTIPLES : barre, bascule, sauvegarde locale ===================== */
 
 function renderDossierBar(){
@@ -4959,6 +5391,7 @@ function syncPersonUI(){
   ["nom", "titre", "email", "tel", "ville", "lien", "langues"].forEach(function(f){ document.getElementById("cv-" + f).value = state.profil[f] || ""; });
   renderPhotoThumb();
   renderArchiveList(); renderReferencePanel();
+  renderCertList(); renderSources(); renderBaseMap();
   renderCandidaturesList();
   if(typeof renderVoixCard === "function") renderVoixCard();
   syncDossierUI();
@@ -5345,6 +5778,9 @@ renderVoixCard();
 renderAnalyseCard();
 renderProfilSelect();
 renderProfils();
+renderCertList();
+renderSources();
+renderBaseMap();
 refreshIaState();
 
 </script>
