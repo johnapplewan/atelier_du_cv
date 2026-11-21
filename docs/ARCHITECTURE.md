@@ -177,9 +177,18 @@ Thème : clair / sombre / auto (`prefers-color-scheme`, attribut `data-theme` su
 
 `.app` (grille : barre haute, barre personne, barre candidature, rail + contenu), `.topbar`, `.dossier-bar` (barres Personne / Candidature), `.rail` / `.rail-item` / `.status-dot`, `.workspace`, `.panel` / `.panel-head`, `.split` / `.controls-col` / `.preview-frame` / `.preview-toolbar` (colonne de réglages + aperçu), `.card`, `.exp-block` / `.exp-block-head` (bloc d'édition d'un élément), `.field` / `.row2`, `.btn` (`-primary`, `-ghost`, `-sm`), `.icon-btn`, `.chip` / `.chips` (étiquettes ; `.suggest` = pointillé), `.segmented` (bascule), `.tier-pill` (`success`/`caution`/`danger`), `.gauge-wrap` / `.gauge-num` (score ATS), `.ats-list`, `.eyebrow`, `.hint`, `.empty-note`, `.toolbar-row`, `.download-status`, `.cat-card` / `.category-grid` (annexe), `.ref-panel`, `.app-footer`, documents : `.paper` + `.cv-doc` / `.lettre-doc` / `.annexe-doc` (voir contrainte PDF ci-dessous).
 
+
+### Navigation mobile (≤ 860 px)
+
+- **Barre du bas** (`#bottom-nav`) : 4 groupes, Préparer (Ma base, Mes profils), Chercher (Recherche, Offres, Freelance), Candidater (Annonce, CV, Lettre, Annexe), Suivi (Candidatures, Entretien). Pastille sur Suivi quand une relance est due.
+- **Bande d'onglets du haut** (`#rail`, collante) : n'affiche que les onglets du groupe actif (`body[data-group]`, attribut `data-group` sur chaque `.rail-item`). Le dernier onglet visité de chaque groupe est mémorisé (`lastTabByGroup`).
+- **Bouton Menu** (`#btn-menu`) : déplie les réglages d'interface, les barres Personne et Candidature, les exports (`body.menu-open`). Le titre de la candidature en cours s'affiche sous la marque (`#mobile-title`).
+- **Réglages / Aperçu** : sur les écrans à deux colonnes (`.panel-doc` : Ma base, CV, Lettre, Annexe), une bascule `.mobile-switch` montre une colonne à la fois (`data-view`).
+- Champs à 16 px (évite le zoom iOS), cibles tactiles d'au moins 44 px, `viewport-fit=cover` et marge de sécurité en bas (`env(safe-area-inset-bottom)`).
+
 ### Responsive et accessibilité (état)
 
-Points de rupture : 960 px, 860 px (le rail devient une rangée d'onglets défilante), 520 px. `prefers-reduced-motion` respecté. Contrastes vérifiés AA (clair et sombre). Boutons-icônes avec nom accessible, pastilles d'état avec alternative, lien d'évitement sur les pages légales. Non fait : audit RGAA complet, PDF non balisés, éditeurs `contenteditable` non testés avec tous les lecteurs d'écran.
+Points de rupture : 960 px, 860 px (navigation mobile, voir ci-dessus), 520 px. `prefers-reduced-motion` respecté. Contrastes vérifiés AA (clair et sombre). Boutons-icônes avec nom accessible, pastilles d'état avec alternative, lien d'évitement sur les pages légales. Non fait : audit RGAA complet, PDF non balisés, éditeurs `contenteditable` non testés avec tous les lecteurs d'écran.
 
 ### Contrainte forte : les documents (CV, lettre) et le PDF
 
