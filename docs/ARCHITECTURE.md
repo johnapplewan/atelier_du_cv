@@ -26,6 +26,7 @@ Principes de conception à conserver :
 | `index.html` | **Toute l'application** : HTML des écrans, CSS (`<style>`), JavaScript (`<script>`, sans framework ni build). |
 | `vendor/` | `fonts.css` + `fonts/*.woff2` (Newsreader, Public Sans, IBM Plex Mono, latin et latin-ext), `html2canvas.min.js`, `jspdf.umd.min.js` (génération PDF). |
 | `functions/api/*.js` | Cloudflare Pages Functions (côté serveur, voir §7). |
+| `prompts.js` | Méthodes d'écriture données à l'assistant IA (lettre RAPOS, règles d'humanisation, reformulation du CV). Chargé avant le script principal. Référence lisible : `docs/METHODE-LETTRE-RAPOS.md`. |
 | `legal/` | Pages légales statiques : mentions légales, confidentialité, CGU, accessibilité (`config.js` = identité de l'éditeur à compléter, `legal.css` = style propre). |
 | `_headers` | En-têtes de sécurité Cloudflare Pages (CSP restrictive, HSTS, X-Frame-Options…). |
 | `robots.txt`, `sitemap.xml` | Référencement. |
@@ -143,7 +144,8 @@ Dossier (une candidature en cours) = { id, titre, titreAuto, candidatureId,
 | Lettres | `generateLettre` → `generateLettreParagraphs` (offre), `LETTRE_SPONTANEE`, `generateOffreServiceParagraphs` | Ouverture selon le ton et le type d'émetteur, expériences proches, réalisations, mots-clés maîtrisés, voix de la personne, clôture. Aucun fait inventé. |
 | Anonymisation | `anonymizedCvElement`, `scrubForAI` | Retire nom, contacts, photo, liens ; options pour masquer employeurs et établissements. |
 | Export PDF | `buildPdfFromSections`, `fitPdfClone`, `addCanvasAsPages` | Recompose le document hors écran à largeur A4, resserre pour tenir en 2 pages (CV) / 1 page (lettre), coupe entre deux blocs, retire astérisques et zones éditables. |
-| Assistant IA | `iaAsk`, `iaReformulerCV`, `btn-affiner-ia` | Message sans nom ni coordonnées ; mode direct (version claude.ai) ou copier-coller. |
+| Assistant IA | `iaAsk`, `iaReformulerCV`, `btn-affiner-ia` | Message sans nom ni coordonnées ni noms d'employeurs ; mode direct (version claude.ai) ou copier-coller ; règles de `prompts.js` envoyées à chaque demande ; réponse `{paragraphs, remarques}`. |
+| Contrôle de style | `styleReport`, `renderStyleCheck` | Port JavaScript de l'analyseur d'humanisation : formules typiques, contrastes, tirets, rythme, débuts répétés, triades, paragraphes uniformes ; score estimé /100, longueur 150 à 250 mots, noms d'employeurs cités ; bouton « Corriger ces points avec Claude ». |
 
 ---
 
@@ -340,10 +342,13 @@ Numéros de ligne omis (ils changent) : chercher le nom dans `index.html`. Regro
 
 `renderDossierBar`, `syncDossierUI`, `switchDossier`, `personLabel`, `renderPersonBar`, `syncPersonUI`, `switchPerson`
 
+**CONTRÔLE DE STYLE DE LA LETTRE (heuristique locale)**
+
+`styleWords`, `styleSentences`, `coefVar`, `styleCount`, `styleReport`, `renderStyleCheck`
+
 **ASSISTANT IA (facultatif) + AFFINAGE DE LA LETTRE + VOIX**
 
 `iaPrefs`, `iaPrefSave`, `iaOn`, `refreshIaState`, `scrubForAI`, `extractJson`, `iaAsk`, `iaConfirm`, `relevantExperiences`, `annonceForAI`, `iaReformulerCV`, `refreshAffinerUI`, `addRemarque`, `lettreCurrentParagraphs`, `renderVoixCard`
-
 
 ---
 
