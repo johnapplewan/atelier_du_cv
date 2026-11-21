@@ -30,3 +30,16 @@ toute seule avec le site (aucune configuration ni clé). Elle récupère la page
 structurées (schema.org `JobPosting`) ou, à défaut, le texte de la page, et les renvoie à l'application.
 Seule l'adresse de l'annonce transite par cette fonction ; rien n'est stocké. Les sites qui bloquent les
 robots (LinkedIn, Indeed…) ne peuvent pas être lus : on colle alors le texte de l'annonce.
+
+## Recherche d'entreprises
+
+`functions/api/entreprises.js` et `functions/api/lieu.js` interrogent les API publiques « Recherche d'entreprises » et « API Adresse »
+(data.gouv.fr, Licence Ouverte 2.0) pour l'onglet Recherche (candidatures spontanées). Seuls le secteur, la zone et la taille sont transmis.
+
+## Pages légales et conformité
+
+- Pages : `legal/mentions-legales.html`, `legal/confidentialite.html`, `legal/cgu.html`, `legal/accessibilite.html`.
+- **À compléter avant production** : `legal/config.js` (identité de l'éditeur, adresse, contact, directeur de la publication). Les champs vides s'affichent en rouge « À COMPLÉTER ».
+- Polices (`vendor/fonts*`) et bibliothèques PDF (`vendor/*.js`) sont hébergées sur le site : aucune ressource tierce n'est chargée.
+- `_headers` : politique de sécurité du contenu (CSP), HSTS, X-Frame-Options, etc. (Cloudflare Pages).
+- `robots.txt` et `sitemap.xml` : à garder à jour si le domaine change.

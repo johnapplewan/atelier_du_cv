@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Atelier Candidature</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<!-- Génération de PDF côté navigateur : simples scripts techniques depuis un CDN public, aucune donnée ne leur est envoyée. -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<meta name="description" content="Atelier Candidature : base d'expériences, CV et lettres sur mesure, recherche d'entreprises et suivi de candidatures. Vos données restent dans votre navigateur.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231F3A66'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='Georgia,serif' font-style='italic'%3E%C2%A7%3C/text%3E%3C/svg%3E">
+<!-- Polices et bibliothèques PDF hébergées sur ce même site : aucune ressource n'est chargée depuis un service tiers. -->
+<link rel="stylesheet" href="vendor/fonts.css">
+<script src="vendor/html2canvas.min.js" defer></script>
+<script src="vendor/jspdf.umd.min.js" defer></script>
 <script>
 // Applique le thème choisi (clair/sombre) avant le premier rendu, pour éviter un flash de la
 // mauvaise palette. Rien n'est envoyé nulle part : juste une préférence lue depuis ce navigateur.
@@ -144,6 +144,9 @@
        élargissait toute la page au-delà de l'écran. */
     .topbar-status-row{ grid-column:1; padding:0 16px; justify-content:flex-start; }
   }
+  .app-footer{ display:flex; flex-wrap:wrap; gap:8px 18px; justify-content:space-between; padding:14px 28px; border-top:1px solid var(--border); background:var(--surface); font-size:12.5px; color:var(--ink-600); }
+  .app-footer nav{ display:flex; gap:14px; flex-wrap:wrap; }
+  .app-footer a{ color:var(--accent-ink); }
   .panel{ display:none; }
   .panel.active{ display:block; }
   /* Rendu hors-écran temporaire d'un onglet non actif le temps d'une capture PDF (html2canvas a besoin
@@ -210,6 +213,8 @@
   .cv-doc .cv-item-sub{ font-size:11.5px; color:#4B525C; margin:1px 0 4px; font-style:italic; }
   .cv-doc [contenteditable]:hover{ outline:1px dashed var(--accent,#888); outline-offset:2px; cursor:text; }
   .cv-doc [contenteditable]:focus{ outline:2px solid var(--accent,#888); outline-offset:2px; }
+  .ats-list{ margin:0 0 6px; padding-left:18px; font-size:12.5px; line-height:1.55; color:var(--ink-600); }
+  .ats-far{ color:var(--danger,#B3261E); font-weight:600; }
   .cv-doc .cv-sub{ font-weight:600; margin:8px 0 2px; }
   .cv-doc p{ margin:2px 0; }
   .cv-doc ul{ margin:4px 0 0; padding-left:16px; }
@@ -255,7 +260,6 @@
   .footnote{ font-size:11.5px; color:var(--ink-400); margin-top:14px; line-height:1.6; }
 
   .photo-thumb{ width:56px; height:70px; object-fit:cover; border-radius:5px; border:1px solid var(--border-strong); flex-shrink:0; }
-  #suisse-fields{ margin-top:2px; }
 
   .ref-panel{ border:1px solid var(--border); border-radius:8px; padding:10px 14px; background:var(--surface-2); }
   .ref-panel summary{ cursor:pointer; font-size:12.5px; font-weight:600; color:var(--ink-600); }
@@ -264,6 +268,7 @@
 </head>
 <body>
 
+<noscript><p style="padding:16px;">Atelier Candidature a besoin de JavaScript pour fonctionner. Vos données restent dans votre navigateur.</p></noscript>
 <dialog id="ia-dialog" style="max-width:560px;width:92vw;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);color:var(--ink-900);padding:22px;">
   <h3 style="margin:0 0 8px;font-size:17px;">Assistant IA : ton compte Claude, sans clé API</h3>
   <p class="hint" style="margin:0 0 10px;">L'atelier fonctionne sans IA. Quand tu demandes une reformulation ou une lettre sur mesure, le travail est fait par <strong>ton compte Claude</strong> :</p>
@@ -352,17 +357,122 @@
 
   <nav class="rail" id="rail">
     <div class="rail-tabs">
-      <button class="rail-item is-active" data-tab="annonce"><span class="num">01</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
-      <button class="rail-item" data-tab="cv"><span class="num">02</span>CV<span class="status-dot" id="dot-cv"></span></button>
-      <button class="rail-item" data-tab="lettre"><span class="num">03</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
-      <button class="rail-item" data-tab="annexe"><span class="num">04</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
-      <button class="rail-item" data-tab="candidatures"><span class="num">05</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
-      <button class="rail-item" data-tab="entretien"><span class="num">06</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
+      <button class="rail-item" data-tab="profils"><span class="num">01</span>Mes profils<span class="status-dot" id="dot-profils"></span></button>
+      <button class="rail-item" data-tab="recherche"><span class="num">02</span>Recherche<span class="status-dot" id="dot-recherche"></span></button>
+      <button class="rail-item" data-tab="freelance"><span class="num">03</span>Freelance<span class="status-dot" id="dot-freelance"></span></button>
+      <button class="rail-item is-active" data-tab="annonce"><span class="num">04</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
+      <button class="rail-item" data-tab="cv"><span class="num">05</span>CV<span class="status-dot" id="dot-cv"></span></button>
+      <button class="rail-item" data-tab="lettre"><span class="num">06</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
+      <button class="rail-item" data-tab="annexe"><span class="num">07</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
+      <button class="rail-item" data-tab="candidatures"><span class="num">08</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
+      <button class="rail-item" data-tab="entretien"><span class="num">09</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
     </div>
-    <div class="rail-foot">Ta bibliothèque (expériences, compétences, lettres, contenus, candidatures) reste uniquement dans ce navigateur : rien n'est envoyé ailleurs, à aucun moment.</div>
+    <div class="rail-foot">Ta bibliothèque (expériences, compétences, lettres, candidatures) reste dans ce navigateur. Seuls le lien d'une annonce ou les critères d'une recherche d'entreprises transitent, jamais ton CV ni tes coordonnées.</div>
   </nav>
 
   <main class="workspace">
+
+    <!-- PANEL PROFILS -->
+    <section class="panel" id="panel-profils">
+      <div class="panel-head">
+        <h2>Mes profils de recherche</h2>
+        <p>L'atelier lit ta base (expériences, formations, projets, compétences) et propose les profils que tu peux réellement défendre : IT, communication, immobilier… Chaque profil règle le titre visé, l'accroche, le ton des lettres et les mots-clés, puis sert de base à tes candidatures.</p>
+      </div>
+      <div style="max-width:980px;">
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">Profils que ta base permet de créer</span>
+          <p class="hint" style="margin:6px 0 10px;">Un profil est proposé s'il s'appuie sur des expériences ou, à défaut, sur de la formation et des projets. Les métiers accessibles sans expérience servent à répondre à des offres « débutants acceptés ».</p>
+          <div id="profils-suggestions"></div>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">Viser un autre métier</span>
+          <p class="hint" style="margin:6px 0 10px;">Tu veux changer de voie ? Écris le métier : l'atelier vérifie que ta base contient de quoi l'asseoir.</p>
+          <div style="display:flex;gap:8px;"><input type="text" id="viser-metier" placeholder="ex. Négociateur immobilier, UX designer…"><button class="btn btn-sm" id="btn-viser-metier" type="button">Vérifier et créer</button></div>
+          <p class="hint" id="viser-result" style="margin:8px 0 0;"></p>
+        </div>
+        <span class="eyebrow">Mes profils</span>
+        <div id="profils-list" style="margin-top:8px;"></div>
+      </div>
+    </section>
+
+    <!-- PANEL RECHERCHE -->
+    <section class="panel" id="panel-recherche">
+      <div class="panel-head">
+        <h2>Recherche d'entreprises</h2>
+        <p>Trouve des entreprises actives dans le secteur de ton profil et près de chez toi, même si elles n'ont publié aucune offre, puis prépare en un clic une candidature spontanée : CV et lettre adaptés à ce profil et à cette entreprise.</p>
+      </div>
+      <div style="max-width:980px;">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="row2">
+            <div class="field"><label for="rech-profil">Profil de recherche</label><select id="rech-profil"></select></div>
+            <div class="field"><label for="rech-taille">Taille de l'entreprise</label>
+              <select id="rech-taille"><option value="">Toutes</option><option value="tpe">Petites (moins de 10 salariés)</option><option value="pme">Moyennes (10 à 249)</option><option value="eti">Grandes (250 et plus)</option></select></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="rech-lieu">Lieu</label>
+              <div style="display:flex;gap:8px;"><input type="text" id="rech-lieu" placeholder="ex. Reims"><button class="btn btn-sm" id="btn-rech-lieu" type="button">Chercher le lieu</button></div>
+              <div class="chips" id="rech-lieu-list" style="margin-top:6px;"></div></div>
+            <div class="field"><label for="rech-rayon">Rayon</label>
+              <select id="rech-rayon"><option value="10">10 km</option><option value="30">30 km</option><option value="50">50 km</option><option value="100">Département</option><option value="France">Toute la France</option></select></div>
+          </div>
+          <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-rech-go" type="button">Rechercher des entreprises</button></div>
+          <p class="hint" id="rech-status" style="margin:10px 0 0;"></p>
+          <p class="hint" style="margin:6px 0 0;">Sources : API Recherche d'entreprises et API Adresse (données publiques, Licence Ouverte). Seuls le secteur, la zone et la taille sont transmis ; ni ton nom, ni tes coordonnées, ni ton CV.</p>
+        </div>
+        <div id="rech-results"></div>
+        <button class="btn btn-ghost btn-sm" id="rech-more" type="button" style="display:none;margin-top:8px;">Voir plus d'entreprises</button>
+      </div>
+    </section>
+
+    <!-- PANEL FREELANCE -->
+    <section class="panel" id="panel-freelance">
+      <div class="panel-head">
+        <h2>Freelance : proposer mes services</h2>
+        <p>Décris ton offre de service, puis trouve les structures qui peuvent te confier des missions (ESN, cabinets, agences d'intérim, portage, organismes de formation, entreprises) et envoie-leur une lettre d'offre de service ciblée, à la place d'une lettre de motivation.</p>
+      </div>
+      <div style="max-width:980px;">
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">Mon offre de service</span>
+          <div id="fl-services" style="margin-top:8px;"></div>
+          <div class="toolbar-row" style="margin:6px 0 12px;"><button class="btn btn-ghost btn-sm" id="btn-fl-add" type="button">+ Ajouter une prestation</button></div>
+          <div class="field"><label for="fl-offre">Présentation en deux phrases</label><textarea id="fl-offre" style="min-height:64px;" placeholder="Qui tu es, ce que tu apportes, pour quels clients."></textarea>
+            <div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-ghost btn-sm" id="btn-fl-offre-gen" type="button">Générer d'après mes prestations</button></div></div>
+          <div class="row2">
+            <div class="field"><label for="fl-dispo">Disponibilité</label><input type="text" id="fl-dispo" placeholder="ex. dès janvier, 3 jours par semaine"></div>
+            <div class="field"><label for="fl-mode">Modalités</label><select id="fl-mode"><option>Télétravail ou sur site</option><option>Télétravail</option><option>Sur site</option><option>Hybride</option></select></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="fl-zone">Zone d'intervention</label><input type="text" id="fl-zone" placeholder="ex. Reims, Paris, France entière à distance"></div>
+            <div class="field"><label for="fl-tjm">Tarif indicatif (facultatif)</label><input type="text" id="fl-tjm" placeholder="ex. à partir de 450 € par jour">
+              <label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:4px;"><input type="checkbox" id="fl-showtjm"> L'indiquer dans les lettres</label></div>
+          </div>
+          <div class="field"><label>Références : missions à citer (tirées de tes expériences)</label><div id="fl-refs"></div>
+            <p class="hint" style="margin:4px 0 0;">Sans sélection, les deux expériences les plus proches de tes prestations sont citées.</p></div>
+          <div class="field"><label for="fl-import">Compléter avec un texte (plaquette, missions, références, services…)</label>
+            <textarea id="fl-import" style="min-height:90px;" placeholder="Colle un texte : l'atelier trie et organise les prestations, missions et références, et les ajoute à ta base."></textarea>
+            <div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-ghost btn-sm" id="btn-fl-import" type="button">Analyser et ajouter</button><span class="hint" id="fl-import-status"></span></div></div>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">Qui démarcher</span>
+          <div class="row2" style="margin-top:8px;">
+            <div class="field"><label for="fl-profil">Profil de référence</label><select id="fl-profil"></select></div>
+            <div class="field"><label for="fl-taille">Taille</label><select id="fl-taille"><option value="">Toutes</option><option value="tpe">Petites (moins de 10 salariés)</option><option value="pme">Moyennes (10 à 249)</option><option value="eti">Grandes (250 et plus)</option></select></div>
+          </div>
+          <div class="field"><label>Types de structures</label><div class="chips" id="fl-cibles"></div></div>
+          <div class="row2">
+            <div class="field"><label for="fl-lieu">Lieu</label>
+              <div style="display:flex;gap:8px;"><input type="text" id="fl-lieu" placeholder="ex. Reims"><button class="btn btn-sm" id="btn-fl-lieu" type="button">Chercher le lieu</button></div>
+              <div class="chips" id="fl-lieu-list" style="margin-top:6px;"></div></div>
+            <div class="field"><label for="fl-rayon">Rayon</label><select id="fl-rayon"><option value="30">30 km</option><option value="50">50 km</option><option value="100">Département</option><option value="France" selected>Toute la France</option></select></div>
+          </div>
+          <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-fl-go" type="button">Rechercher des structures</button></div>
+          <p class="hint" id="fl-status" style="margin:10px 0 0;"></p>
+          <p class="hint" style="margin:6px 0 0;">Mêmes sources publiques que l'onglet Recherche : seuls le type d'activité, la zone et la taille sont transmis.</p>
+        </div>
+        <div id="fl-results"></div>
+        <button class="btn btn-ghost btn-sm" id="fl-more" type="button" style="display:none;margin-top:8px;">Voir plus de structures</button>
+      </div>
+    </section>
 
     <!-- PANEL ANNONCE -->
     <section class="panel active" id="panel-annonce">
@@ -407,6 +517,11 @@
               <option value="esn">Une ESN / société de conseil (mission chez un client)</option>
             </select>
             <p class="hint" id="an-emetteur-why" style="margin:6px 0 0;"></p>
+          </div>
+          <div class="field" id="an-profil-field" style="display:none;">
+            <label for="an-profil">Profil de recherche utilisé</label>
+            <select id="an-profil"></select>
+            <p class="hint" style="margin:6px 0 0;">Le profil règle le titre du CV, l'accroche, le ton de la lettre et les mots-clés mis en avant.</p>
           </div>
           <div class="field" id="an-client-field"><label for="an-client">Entreprise finale (si le cabinet la cite)</label><input type="text" id="an-client" placeholder="ex. un acteur de la distribution"></div>
           <div class="row2">
@@ -458,34 +573,14 @@
               <label>Photo (optionnelle)</label>
               <div id="prof-photo-thumb-wrap" style="margin-bottom:8px;"></div>
               <input type="file" id="prof-photo-input" accept="image/*" style="max-width:260px;">
-              <p class="hint">Utile surtout pour le format suisse. Redimensionnée automatiquement, elle reste dans ton navigateur.</p>
+              <p class="hint">Facultative. Redimensionnée automatiquement, elle reste dans ton navigateur et n'apparaît pas dans le CV anonymisé.</p>
             </div>
 
-            <div class="row2">
-              <div class="field">
-                <label>Format</label>
-                <div class="segmented" id="format-segmented">
-                  <button type="button" data-format="standard" class="active" aria-pressed="true">Standard</button>
-                  <button type="button" data-format="suisse" aria-pressed="false">Suisse</button>
-                </div>
-              </div>
-              <div class="field">
-                <label>Langue du CV</label>
-                <div class="segmented" id="lang-segmented">
-                  <button type="button" data-lang="fr" class="active" aria-pressed="true">Français</button>
-                  <button type="button" data-lang="en" aria-pressed="false">English</button>
-                </div>
-              </div>
-            </div>
-
-            <div id="suisse-fields" style="display:none;">
-              <div class="row2">
-                <div class="field"><label for="suisse-naissance">Date de naissance</label><input type="text" id="suisse-naissance" placeholder="jj/mm/aaaa"></div>
-                <div class="field"><label for="suisse-nationalite">Nationalité</label><input type="text" id="suisse-nationalite" placeholder="ex. Suisse"></div>
-              </div>
-              <div class="row2">
-                <div class="field"><label for="suisse-permis">Permis de travail</label><input type="text" id="suisse-permis" placeholder="ex. Permis B, non requis…"></div>
-                <div class="field"><label for="suisse-etat">État civil (optionnel)</label><input type="text" id="suisse-etat" placeholder="ex. Célibataire"></div>
+            <div class="field">
+              <label>Langue du CV</label>
+              <div class="segmented" id="lang-segmented">
+                <button type="button" data-lang="fr" class="active" aria-pressed="true">Français</button>
+                <button type="button" data-lang="en" aria-pressed="false">English</button>
               </div>
             </div>
           </div>
@@ -547,6 +642,15 @@
               <div class="gauge-label">Part des mots-clés de l'annonce retrouvés dans ta bibliothèque. <span id="ats-tier"></span></div>
             </div>
             <p class="footnote" id="ats-missing"></p>
+            <div id="ats-panel" style="display:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;">
+              <div class="toolbar-row">
+                <button class="btn btn-primary btn-sm" id="btn-ats-optimize" type="button" title="Applique les améliorations possibles à partir de ce que ta base contient déjà, sans rien inventer">Optimiser automatiquement</button>
+                <button class="btn btn-ghost btn-sm" id="btn-ats-plan" type="button" style="display:none;" title="Plan d'action au format Markdown, à donner à une IA">Plan d'action (.md)</button>
+                <button class="btn btn-ghost btn-sm" id="btn-ats-plan-copy" type="button">Copier le plan</button>
+              </div>
+              <p class="hint" id="ats-result" style="margin:8px 0 0;"></p>
+              <div id="ats-suggestions"></div>
+            </div>
           </div>
 
         </div>
@@ -554,8 +658,13 @@
         <div class="preview-frame">
           <div class="preview-toolbar">
             <span class="eyebrow">Aperçu</span>
-            <button class="btn btn-sm" id="btn-print-cv">Télécharger en PDF</button>
+            <span class="toolbar-row">
+              <button class="btn btn-sm" id="btn-print-cv">Télécharger en PDF</button>
+              <button class="btn btn-ghost btn-sm" id="btn-print-cv-anon" title="Sans nom, coordonnées, photo ni liens">PDF anonymisé</button>
+            </span>
           </div>
+          <div style="margin:0 0 8px;"><label class="hint" style="display:flex;gap:6px;align-items:center;"><input type="checkbox" id="anon-mask-employers"> Anonymiser aussi les noms d'employeurs dans le PDF anonymisé</label>
+          <label class="hint" style="display:flex;gap:6px;align-items:center;"><input type="checkbox" id="anon-mask-schools"> Anonymiser aussi les noms d'établissements de formation</label></div>
           <div class="paper cv-doc" id="cv-preview"></div>
           <span class="download-status" id="cv-download-status"></span>
         </div>
@@ -1035,9 +1144,8 @@ var PHRASES_EN = {
 function defaultState(){
   return {
     profil: { nom:"", titre:"", email:"", tel:"", ville:"", lien:"", langues:"", atouts:[], photo:null,
-      suisseActif:false, suisse:{ dateNaissance:"", nationalite:"", permis:"", etatCivil:"" },
-      voix:{ description:"", formuleFinale:"", eviter:"" } },
-    annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[], meta:{ lieu:"", contrat:"", salaire:"", date:"" }, emetteur:{ type:"", manual:false, raisons:[] }, clientFinal:"" },
+      voix:{ description:"", formuleFinale:"", eviter:"" }, freelance:{ services:[], offre:"", expIds:[], dispo:"", mode:"Télétravail ou sur site", zone:"", tjm:"", showTjm:false } },
+    annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[], meta:{ lieu:"", contrat:"", salaire:"", date:"", secteur:"" }, emetteur:{ type:"", manual:false, raisons:[] }, clientFinal:"", spontanee:false, service:false, cible:"" },
     library: { experiences:[], formations:[], competences:[], sections:[], lettresArchive:[], annexeItems:[] },
     cv: { lang:"fr", format:"standard", resume:"", selectedExp:[], selectedForm:[], autoMode:true },
     lettre: { lang:"fr", destinataire:"", ton:"formel", corps:null, corpsPrev:null, options:{}, remarques:[], motivations:[""], motivPrompts:[""], competencesChoisies:[], disponibilite:"", seed:1 },
@@ -1048,6 +1156,7 @@ function defaultState(){
 }
 
 var state = defaultState();
+state.profils = [];
 var STORAGE_KEY = "atelier-candidature-v2";
 
 /* ---------------- personnes et candidatures multiples ----------------
@@ -1087,7 +1196,8 @@ function normPersonData(raw){
   raw = raw || {};
   var def = defaultState();
   var rp = raw.profil || {};
-  var profil = Object.assign({}, def.profil, rp, { suisse: Object.assign({}, def.profil.suisse, rp.suisse), voix: Object.assign({}, def.profil.voix, rp.voix) });
+  var profil = Object.assign({}, def.profil, rp, { voix: Object.assign({}, def.profil.voix, rp.voix), freelance: Object.assign({}, def.profil.freelance, rp.freelance) });
+  delete profil.suisse; delete profil.suisseActif;
   if(!profil.atouts) profil.atouts = [];
   var library = Object.assign({}, def.library, raw.library);
   ["experiences","formations","competences","sections","lettresArchive","annexeItems"].forEach(function(k){ if(!Array.isArray(library[k])) library[k] = []; });
@@ -1098,7 +1208,8 @@ function normPersonData(raw){
     first.titre = dossierAutoTitle(first);
     dossiers = [first];
   }
-  return { profil: profil, library: library, candidatures: (raw.candidatures || []).map(function(c){ return Object.assign({ versions: [] }, c); }), dossiers: dossiers, currentId: raw.currentId };
+  var profils = Array.isArray(raw.profils) ? raw.profils : [];
+  return { profils: profils, profil: profil, library: library, candidatures: (raw.candidatures || []).map(function(c){ return Object.assign({ versions: [] }, c); }), dossiers: dossiers, currentId: raw.currentId };
 }
 function currentPerson(){
   return state.people.find(function(p){ return p.id === state.currentPersonId; }) || state.people[0];
@@ -1107,7 +1218,7 @@ function loadPerson(id){
   var person = state.people.find(function(p){ return p.id === id; }) || state.people[0];
   var data = normPersonData(person.data);
   state.currentPersonId = person.id;
-  state.profil = data.profil; state.library = data.library; state.candidatures = data.candidatures; state.dossiers = data.dossiers;
+  state.profils = data.profils; state.profil = data.profil; state.library = data.library; state.candidatures = data.candidatures; state.dossiers = data.dossiers;
   activateDossier(data.currentId);
 }
 function currentDossier(){
@@ -1122,7 +1233,7 @@ function activateDossier(id){
 function dossierAutoTitle(d){
   var a = d.annonce || {};
   var t = [a.poste, a.entreprise].map(function(x){ return (x || "").trim(); }).filter(Boolean).join(" · ");
-  return t || "Nouvelle candidature";
+  return (t || "Nouvelle candidature") + (a.spontanee ? " (spontanée)" : "") + (a.service ? " (offre de service)" : "");
 }
 // Chaque candidature ouverte apparaît toute seule dans le suivi (statut « à envoyer ») et s'y met à jour.
 function syncCandidatureTracking(d){
@@ -1131,7 +1242,9 @@ function syncCandidatureTracking(d){
   var c = state.candidatures.find(function(x){ return x.id === d.candidatureId; });
   if(!c){
     if(!has) return;
-    c = { id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "brouillon", notes: "", versions: [], auto: true, lastSync: "" };
+    c = { id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "brouillon", notes: "", versions: [], auto: true, lastSync: "", type: a.service ? "service" : (a.spontanee ? "spontanee" : "offre") };
+    if(a.service){ var rel2 = new Date(); rel2.setDate(rel2.getDate() + 10); c.notes = "Offre de service. Relance à prévoir vers le " + rel2.toLocaleDateString("fr-FR") + "."; }
+    else if(a.spontanee){ var rel = new Date(); rel.setDate(rel.getDate() + 10); c.notes = "Candidature spontanée. Relance à prévoir vers le " + rel.toLocaleDateString("fr-FR") + "."; }
     state.candidatures.push(c);
     d.candidatureId = c.id;
   }
@@ -1164,17 +1277,20 @@ function persist(){
   try{
     syncCurrentDossier();
     var person = currentPerson();
-    person.data = { profil: state.profil, library: state.library, candidatures: state.candidatures, dossiers: state.dossiers, currentId: state.currentId };
+    person.data = { profils: state.profils, profil: state.profil, library: state.library, candidatures: state.candidatures, dossiers: state.dossiers, currentId: state.currentId };
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 4, people: state.people, currentPersonId: state.currentPersonId }));
   }catch(e){}
 }
 
 /* ---------------- onglets & statut ---------------- */
 
-var TABS = ["annonce","cv","lettre","annexe","candidatures","entretien"];
+var TABS = ["profils","recherche","freelance","annonce","cv","lettre","annexe","candidatures","entretien"];
 var activeTab = "annonce";
 
 function statusFor(tab){
+  if(tab === "profils"){ return state.profils.length ? "ready" : "empty"; }
+  if(tab === "freelance"){ return flState().services.some(function(s){ return (s.titre || "").trim(); }) ? "ready" : "empty"; }
+  if(tab === "recherche"){ return (state.rechercheResultats || []).length ? "ready" : "empty"; }
   if(tab === "annonce"){
     if(!state.annonce.texte.trim()) return "empty";
     return (state.annonce.poste && state.annonce.entreprise) ? "ready" : "partial";
@@ -1219,6 +1335,9 @@ function refreshStatusDots(){
 function switchTab(tab){
   activeTab = tab;
   if(tab === "candidatures" && typeof renderCandidaturesList === "function"){ renderCandidaturesList(); }
+  if(tab === "profils" && typeof renderProfils === "function"){ renderProfils(); }
+  if(tab === "recherche" && typeof rechProfilOptions === "function"){ rechProfilOptions(); renderRechResults(); }
+  if(tab === "freelance" && typeof renderFreelance === "function"){ renderFreelance(); }
   TABS.forEach(function(t){
     document.getElementById("panel-"+t).classList.toggle("active", t === tab);
     document.querySelector('.rail-item[data-tab="'+t+'"]').classList.toggle("is-active", t === tab);
@@ -1309,7 +1428,7 @@ function pdfLibsReady(){
 
 // Nombre de pages maximum visé par document (le texte est resserré pour y tenir) :
 // la lettre tient sur une page, le CV sur deux.
-var PDF_MAX_PAGES = { "cv-preview": 2, "lettre-preview": 1 };
+var PDF_MAX_PAGES = { "cv-preview": 2, "cv-anon": 2, "lettre-preview": 1 };
 var PDF_CAPTURE_SCALE = 1.5;
 
 // Construit une copie du document à la largeur d'une feuille A4, hors écran, pour que la mise en page
@@ -1403,6 +1522,11 @@ function wireExportButton(btnId, statusId, getElements, filenameFn){
 wireExportButton("btn-print-cv", "cv-download-status",
   function(){ return [document.getElementById("cv-preview")]; },
   function(){ return fileSafe(state.profil.nom || "cv") + "-CV.pdf"; });
+
+var lastAnonRef = "";
+wireExportButton("btn-print-cv-anon", "cv-download-status",
+  function(){ var r = anonymizedCvElement(document.getElementById("anon-mask-employers").checked, document.getElementById("anon-mask-schools").checked); lastAnonRef = r.ref; return [r.el]; },
+  function(){ return fileSafe(lastAnonRef || "cv-anonyme") + "-CV-anonyme.pdf"; });
 
 wireExportButton("btn-print-lettre", "lettre-download-status",
   function(){ return [document.getElementById("lettre-preview")]; },
@@ -1501,11 +1625,11 @@ function guessAnnonceMeta(text){
     if(!poste && (m = l.match(/^(?:intitul[ée] du poste|poste|offre(?: d['’]emploi)?|job title|titre)\s*:\s*(.{3,90})$/i))) poste = m[1].trim();
     if(!entreprise && (m = l.match(/^(?:entreprise|soci[ée]t[ée]|employeur|company)\s*:\s*(.{2,60})$/i))) entreprise = m[1].trim();
   }
-  if(!poste && lines.length && lines[0].length <= 90 && !/[.!?]$/.test(lines[0])){
-    poste = lines[0].replace(/^(offre d['’]emploi|offre|annonce)\s*[:\-–]\s*/i, "");
+  if(!poste && lines.length && lines[0].length <= 90 && !/[!?]$/.test(lines[0])){
+    poste = lines[0].replace(/\.$/, "").replace(/^(offre d['’]emploi|offre|annonce)\s*[:\-–]\s*/i, "");
     if((m = poste.match(/^(.{3,70}?)\s+(?:chez|[-–—@|])\s+([A-ZÀ-Ý][^|]{1,40})$/)) ){ poste = m[1].trim(); if(!entreprise) entreprise = m[2].trim(); }
   }
-  if(!entreprise && (m = (text || "").match(/(?:rejoindre|rejoignez|chez)\s+([A-ZÀ-Ý][\wÀ-ÿ&'’.-]+(?:\s+[A-ZÀ-Ý][\wÀ-ÿ&'’.-]+){0,3})/))) entreprise = m[1].trim();
+  if(!entreprise && (m = (text || "").match(/(?:rejoindre|rejoignez|chez)[ ]+([A-ZÀ-Ý][\wÀ-ÿ&'’-]+(?:[ ]+[A-ZÀ-Ý][\wÀ-ÿ&'’-]+){0,3})/))) entreprise = m[1].trim();
   return { poste: poste, entreprise: entreprise };
 }
 
@@ -1522,6 +1646,7 @@ function reanalyzeAnnonce(fromText){
   state.annonce.texte = anTexte.value;
   state.annonce.keywords = extractKeywords(anTexte.value);
   if(typeof runEmetteurAnalysis === "function"){ runEmetteurAnalysis(); renderAnalyseCard(); }
+  if(typeof autoProfilForAnnonce === "function"){ autoProfilForAnnonce(); }
   renderKeywordChips();
   if (typeof window.onAnnonceChanged === "function") window.onAnnonceChanged();
   renderLettreSkillSuggestions();
@@ -1546,7 +1671,7 @@ function sortedCompetences(){
 function refreshCVStatus(){ refreshStatusDots(); }
 
 function recomposerCV(){
-  var kws = state.annonce.keywords || [];
+  var kws = (state.annonce.keywords || []).concat(typeof profilKeywords === "function" ? profilKeywords() : []);
   var lib = state.library;
 
   var expScored = lib.experiences.map(function(e, idx){
@@ -1581,6 +1706,7 @@ function moveInSelection(key, id, dir){
 }
 
 window.onAnnonceChanged = function(){
+  ATS_LAST_LOG = null;
   if(state.cv.autoMode){ recomposerCV(); }
   renderExpList(); renderFormList(); renderSkillChips(); renderSkillSuggestions();
   renderCVPreview();
@@ -1599,17 +1725,6 @@ function cvFullText(){
   return norm(parts.join(" \n "));
 }
 
-function computeATS(){
-  var kws = state.annonce.keywords;
-  if(!kws || !kws.length) return { pct: null, missing: [] };
-  var full = cvFullText();
-  var missing = [], matched = 0;
-  kws.forEach(function(k){
-    if(countTerm(full, norm(k.term)) > 0){ matched++; } else { missing.push(k.term); }
-  });
-  return { pct: Math.round((matched / kws.length) * 100), missing: missing };
-}
-
 function atsTier(pct){
   if(pct === null) return null;
   if(pct >= 70) return "success";
@@ -1617,25 +1732,219 @@ function atsTier(pct){
   return "danger";
 }
 
+/* ---------------- score ATS, suggestions, optimisation automatique, plan d'action ---------------- */
+
+// Équivalences prudentes : si ton CV dit l'une, l'annonce peut dire l'autre (c'est le même savoir-faire).
+var ATS_SYNONYMS = [["ia","intelligence artificielle"],["rh","ressources humaines"],["seo","référencement naturel"],["crm","gestion de la relation client"],
+  ["javascript","js"],["ci/cd","intégration continue"],["llm","grands modèles de langage"],["gestion de projet","pilotage de projet"],
+  ["relation client","relation clients"],["community management","gestion des réseaux sociaux"],["analyse de données","data analyse"],["montage vidéo","montage"]];
+
+function variantsOf(term){
+  var t = term.toLowerCase(), out = [t];
+  out.push(t.slice(-1) === "s" ? t.slice(0, -1) : t + "s");
+  ATS_SYNONYMS.forEach(function(g){ if(g.indexOf(t) !== -1){ g.forEach(function(x){ if(out.indexOf(x) === -1) out.push(x); }); } });
+  return out;
+}
+function hasTerm(normText, term){
+  return variantsOf(term).some(function(v){ return countTerm(normText, norm(v)) > 0; });
+}
+// Tout ce que la base contient sur la personne (y compris ce qui n'est pas dans ce CV).
+function ownMaterialText(){
+  var lib = state.library, p = state.profil, parts = [p.langues, p.titre];
+  (p.atouts || []).forEach(function(a){ parts.push(a); });
+  lib.competences.forEach(function(c){ parts.push(c.label); });
+  lib.experiences.forEach(function(e){ parts.push(e.poste, e.entreprise, e.details); });
+  lib.formations.forEach(function(f){ parts.push(f.diplome, f.etablissement, f.details); });
+  (lib.sections || []).forEach(function(x){ parts.push(x.titre, x.texte); });
+  (lib.lettresArchive || []).forEach(function(x){ parts.push(x.texte); });
+  (lib.annexeItems || []).forEach(function(x){ parts.push(x.label, x.note); });
+  return norm(parts.join(" \n "));
+}
+function annonceLooksEnglish(){
+  var t = " " + norm(state.annonce.texte || "").slice(0, 3000) + " ";
+  var en = (t.match(/ (the|and|with|you|your|we|our|experience|team|will|skills) /g) || []).length;
+  var fr = (t.match(/ (le|la|les|des|et|avec|vous|votre|nous|notre|une|dans|pour) /g) || []).length;
+  return en > fr && en >= 6;
+}
+
+function atsAnalysis(){
+  var kws = state.annonce.keywords || [];
+  if(!kws.length) return null;
+  var full = cvFullText(), own = ownMaterialText();
+  var excluded = state.library.experiences.filter(function(e){ return (state.cv.excludedExp || []).indexOf(e.id) !== -1; })
+    .map(function(e){ return { e: e, text: norm([e.poste, e.entreprise, e.details].join(" ")) }; });
+  var found = [], missing = [];
+  kws.forEach(function(k){
+    if(hasTerm(full, k.term)){ found.push(k.term); return; }
+    var item = { term: k.term, kind: k.kind, count: k.count, action: "manual", detail: "", ids: [] };
+    var ex = excluded.filter(function(x){ return hasTerm(x.text, k.term); });
+    if(ex.length){ item.action = "include-exp"; item.ids = ex.map(function(x){ return x.e.id; }); item.detail = "Présent dans l'expérience « " + (ex[0].e.poste || ex[0].e.entreprise) + " », aujourd'hui hors de ce CV."; }
+    else if(hasTerm(own, k.term)){
+      if(k.kind === "skill"){ item.action = "add-skill"; item.detail = "Présent ailleurs dans ta base (lettres, rubriques, annexe) mais pas dans ce CV."; }
+      else { item.detail = "Mot fréquent de l'annonce, déjà évoqué dans ta base : reprends-le dans une réalisation si c'est pertinent."; }
+    }
+    else { item.detail = k.kind === "skill" ? "Absent de ta base. Si tu le maîtrises, ajoute-le (compétence ou réalisation qui le montre)." : "Terme fréquent de l'annonce, absent de ta base : vérifie s'il désigne une compétence ou un contexte du poste."; }
+    missing.push(item);
+  });
+  var notes = [];
+  var p = state.profil;
+  if(!(p.email || "").trim() || !(p.tel || "").trim()) notes.push({ action: "manual", text: "Renseigne ton email et ton téléphone : un CV sans coordonnées est écarté par beaucoup de filtres." });
+  if(!(state.cv.resume || "").trim()) notes.push({ action: "auto-resume", text: "Ajoute une accroche de 2 phrases qui reprend les mots-clés de l'annonce." });
+  var poste = (state.annonce.poste || "").trim();
+  if(poste && countTerm(norm([p.titre, state.cv.resume].join(" ")), norm(poste)) === 0 && !hasTerm(norm([p.titre, state.cv.resume].join(" ")), poste)) notes.push({ action: "manual", text: "L'intitulé visé (« " + poste + " ») n'apparaît ni dans ton titre ni dans l'accroche. Si c'est bien ton métier visé, reprends-le tel quel." });
+  if(annonceLooksEnglish() && state.cv.lang !== "en") notes.push({ action: "manual", text: "L'annonce est en anglais : passe le CV en English (boutons « Langue du CV »)." });
+  return { pct: Math.round((found.length / kws.length) * 100), found: found, missing: missing, notes: notes, total: kws.length };
+}
+
+function computeATS(){
+  var a = atsAnalysis();
+  if(!a) return { pct: null, missing: [] };
+  return { pct: a.pct, missing: a.missing.map(function(m){ return m.term; }) };
+}
+
+var ATS_FAR_THRESHOLD = 40;   // en dessous, après optimisation : poste trop éloigné du profil actuel
+var ATS_LAST_LOG = null;
+
 function renderATS(){
-  var ats = computeATS();
+  var a = atsAnalysis();
   var scoreEl = document.getElementById("ats-score");
   var tierEl = document.getElementById("ats-tier");
   var missingEl = document.getElementById("ats-missing");
-  if(ats.pct === null){
-    scoreEl.textContent = "—";
-    tierEl.innerHTML = "";
-    missingEl.textContent = "Renseigne l'annonce (étape 01) pour calculer un score.";
-  } else {
-    scoreEl.textContent = ats.pct + "%";
-    var tier = atsTier(ats.pct);
-    var labelMap = { success: "bonne couverture", caution: "couverture partielle", danger: "couverture faible" };
-    tierEl.innerHTML = '<span class="tier-pill ' + tier + '">' + labelMap[tier] + '</span>';
-    missingEl.textContent = ats.missing.length
-      ? "Mots-clés absents de ta bibliothèque : " + ats.missing.slice(0, 8).join(", ") + (ats.missing.length > 8 ? "…" : "")
-      : "Tous les mots-clés détectés apparaissent dans ta bibliothèque.";
+  var panel = document.getElementById("ats-panel");
+  if(!a){
+    scoreEl.textContent = "—"; tierEl.innerHTML = "";
+    missingEl.textContent = "Renseigne l'annonce (onglet Annonce) pour calculer un score.";
+    panel.style.display = "none";
+    return;
   }
+  panel.style.display = "block";
+  scoreEl.textContent = a.pct + "%";
+  var tier = atsTier(a.pct);
+  var labelMap = { success: "bonne couverture", caution: "couverture partielle", danger: "couverture faible" };
+  tierEl.innerHTML = '<span class="tier-pill ' + tier + '">' + labelMap[tier] + '</span>';
+  missingEl.textContent = a.missing.length
+    ? "Mots-clés absents du CV : " + a.missing.slice(0, 8).map(function(m){ return m.term; }).join(", ") + (a.missing.length > 8 ? "…" : "")
+    : "Tous les mots-clés détectés apparaissent dans le CV.";
+
+  var auto = a.missing.filter(function(m){ return m.action !== "manual"; });
+  var autoNotes = a.notes.filter(function(n){ return n.action === "auto-resume"; });
+  var manual = a.missing.filter(function(m){ return m.action === "manual"; });
+  var manualNotes = a.notes.filter(function(n){ return n.action === "manual"; });
+  var canAuto = auto.length + autoNotes.length > 0;
+  document.getElementById("btn-ats-optimize").disabled = !canAuto;
+  document.getElementById("btn-ats-plan").style.display = a.pct < 99 ? "inline-flex" : "none";
+
+  var html = "";
+  if(auto.length || autoNotes.length){
+    html += '<p class="eyebrow" style="margin:10px 0 4px;">Je peux le faire (bouton « Optimiser »)</p><ul class="ats-list">';
+    auto.forEach(function(m){ html += "<li><strong>" + esc(displayTerm(m.term)) + "</strong> : " + esc(m.detail) + "</li>"; });
+    autoNotes.forEach(function(n){ html += "<li>" + esc(n.text) + "</li>"; });
+    html += "</ul>";
+  }
+  if(manual.length || manualNotes.length){
+    html += '<p class="eyebrow" style="margin:10px 0 4px;">À toi de jouer</p><ul class="ats-list">';
+    manualNotes.forEach(function(n){ html += "<li>" + esc(n.text) + "</li>"; });
+    manual.forEach(function(m){ html += "<li><strong>" + esc(displayTerm(m.term)) + "</strong> : " + esc(m.detail) + "</li>"; });
+    html += "</ul>";
+  }
+  document.getElementById("ats-suggestions").innerHTML = html || '<p class="hint">Rien à améliorer côté mots-clés.</p>';
+
+  var res = document.getElementById("ats-result");
+  var far = a.pct < ATS_FAR_THRESHOLD && !canAuto;
+  var txt = "";
+  if(ATS_LAST_LOG){ txt += ATS_LAST_LOG.before + "% → " + a.pct + "% après optimisation. " + (ATS_LAST_LOG.done.length ? "Fait : " + ATS_LAST_LOG.done.join(" ; ") + "." : "Rien de plus à ajouter automatiquement."); }
+  if(far){ txt += (txt ? " " : "") + "Ce poste semble trop éloigné de ton profil actuel (" + a.missing.length + " mots-clés sur " + a.total + " non couverts). Le plan d'action liste ce qu'il faudrait faire évoluer pour l'atteindre."; }
+  res.textContent = txt;
+  res.className = far ? "hint ats-far" : "hint";
 }
+
+function atsOptimize(){
+  var a = atsAnalysis(); if(!a) return;
+  var done = [];
+  a.missing.forEach(function(m){
+    if(m.action === "include-exp"){
+      m.ids.forEach(function(id){
+        if((state.cv.excludedExp || []).indexOf(id) !== -1){
+          state.cv.excludedExp = state.cv.excludedExp.filter(function(x){ return x !== id; });
+          var e = state.library.experiences.find(function(x){ return x.id === id; });
+          done.push("expérience « " + (e && (e.poste || e.entreprise)) + " » remise dans le CV");
+        }
+      });
+    } else if(m.action === "add-skill"){
+      if(addSkillRaw(m.term)) done.push("compétence « " + displayTerm(m.term) + " » ajoutée");
+    }
+  });
+  var after = atsAnalysis();
+  if(after && ((after.notes || []).some(function(n){ return n.action === "auto-resume"; }) || after.found.length)){
+    var before = state.cv.resume;
+    document.getElementById("btn-resume-auto").click();
+    if(state.cv.resume !== before) done.push("accroche adaptée à l'annonce");
+  }
+  ATS_LAST_LOG = { before: a.pct, done: done };
+  renderSkillChips(); renderSkillSuggestions(); renderExpList(); renderCVPreview(); refreshCVStatus(); persist();
+}
+
+function atsPlanMarkdown(){
+  var a = atsAnalysis(); if(!a) return "";
+  var an = state.annonce, p = state.profil;
+  var tools = /^(excel|powerpoint|word|sql|python|javascript|react|node|html|css|java|php|photoshop|illustrator|indesign|figma|canva|n8n|github|cloudflare|supabase|vercel|docker|git|typescript|api|rag|mcp|llm|crm|erp|seo|sea|analytics|premiere|after effects)/i;
+  var soft = /management|leadership|autonomie|rigueur|organisation|polyvalence|travail d'équipe|esprit d'équipe|relation client|communication|négociation|pédagogie|animation/i;
+  var advice = function(m){
+    var t = m.term;
+    if(m.action === "manual" && tools.test(t)) return ["Suivre une formation courte ou une certification sur « " + t + " ».", "Réaliser un mini-projet montrable (dépôt public, démo, cas client) et l'ajouter à la base.", "Formuler ensuite une réalisation avec résultat chiffré pour le CV."];
+    if(soft.test(t)) return ["Choisir une situation vécue où « " + t + " » a compté (contexte, action, résultat).", "L'ajouter comme réalisation dans l'expérience concernée."];
+    if(m.kind === "skill") return ["Vérifier si tu pratiques déjà « " + t + " » sous un autre nom, sinon planifier un apprentissage ciblé.", "Ajouter une réalisation qui le démontre."];
+    return ["Vérifier ce que recouvre « " + t + " » dans l'annonce (compétence, contexte, secteur) et le relier à une expérience réelle si c'est le cas."];
+  };
+  var scrub = function(x){ return scrubForAI(x); };
+  var md = [];
+  md.push("# Plan d'action : " + (an.poste || "poste visé") + (an.entreprise ? " (" + an.entreprise + ")" : ""));
+  md.push("");
+  md.push("Score ATS actuel : **" + a.pct + "%** (" + a.found.length + " mots-clés sur " + a.total + " couverts). Objectif : 85% ou plus.");
+  md.push("");
+  md.push("## Contexte");
+  md.push("- Poste visé : " + (an.poste || "n/a") + (an.entreprise ? " chez " + an.entreprise : ""));
+  var meta = an.meta || {};
+  if(meta.lieu) md.push("- Lieu : " + meta.lieu);
+  if(meta.contrat) md.push("- Contrat : " + meta.contrat);
+  md.push("- Mots-clés de l'annonce : " + (an.keywords || []).map(function(k){ return k.term; }).join(", "));
+  md.push("");
+  md.push("## Déjà couvert");
+  md.push(a.found.length ? a.found.map(function(t){ return "- " + t; }).join("\n") : "- (rien pour l'instant)");
+  md.push("");
+  md.push("## Écarts à combler");
+  if(!a.missing.length) md.push("Aucun écart sur les mots-clés détectés.");
+  a.missing.forEach(function(m, i){
+    md.push("### " + (i + 1) + ". " + m.term);
+    md.push("- Demandé dans l'annonce" + (m.count > 1 ? " (" + m.count + " occurrences)" : "") + ".");
+    md.push("- État : " + (m.action === "manual" ? "absent de ma base." : "présent dans ma base, à intégrer au CV (peut être fait par l'atelier)."));
+    advice(m).forEach(function(l){ md.push("- [ ] " + l); });
+    md.push("");
+  });
+  if(a.notes.length){ md.push("## Autres points"); a.notes.forEach(function(n){ md.push("- [ ] " + n.text); }); md.push(""); }
+  md.push("## Mon profil actuel (sans coordonnées)");
+  state.library.experiences.forEach(function(e){ md.push("- " + scrub(e.poste) + (e.entreprise ? ", " + scrub(e.entreprise) : "") + (e.dates ? " (" + e.dates + ")" : "")); });
+  state.library.formations.forEach(function(f){ md.push("- Formation : " + scrub(f.diplome) + (f.etablissement ? ", " + scrub(f.etablissement) : "")); });
+  if(state.library.competences.length) md.push("- Compétences : " + state.library.competences.map(function(c){ return scrub(c.label); }).join(", "));
+  md.push("");
+  md.push("## Message à donner à une IA");
+  md.push("> Tu es coach de carrière. Je vise le poste « " + (an.poste || "…") + " ». Voici l'écart entre mon profil et l'annonce (sections « Déjà couvert » et « Écarts à combler » ci-dessus). Pour chaque écart, propose un plan sur 4 semaines : ressources gratuites ou peu coûteuses, un livrable concret à produire, et la façon honnête de le présenter sur mon CV. Classe les écarts par rapport gain/effort et dis-moi lesquels ne valent pas l'effort. N'invente aucune expérience : propose seulement ce que je peux réellement faire et prouver.");
+  return md.join("\n") + "\n";
+}
+
+document.addEventListener("click", function(e){
+  var t = e.target.closest && e.target.closest("button");
+  if(!t) return;
+  if(t.id === "btn-ats-optimize"){ atsOptimize(); }
+  if(t.id === "btn-ats-plan"){
+    var md = atsPlanMarkdown(); if(!md) return;
+    saveFileEverywhere(fileSafe((state.annonce.poste || "poste") + "-plan-action") + ".md", new Blob([md], { type: "text/markdown;charset=utf-8" }), "ats-result");
+  }
+  if(t.id === "btn-ats-plan-copy"){
+    var md2 = atsPlanMarkdown(); if(!md2) return;
+    try{ navigator.clipboard.writeText(md2).then(function(){ document.getElementById("ats-result").textContent = "Plan copié."; }); }catch(err){}
+  }
+});
 
 function renderExpList(){
   var wrap = document.getElementById("exp-list");
@@ -1909,6 +2218,7 @@ function parseImportedCvLegacy(rawText){
 /* ---- import structuré : nettoyage markdown + détection de rubriques ---- */
 
 var IMPORT_SECTIONS = [
+  { key:"services", re:/^(services?|prestations?|offres? de services?|ce que je propose|interventions? propos[ée]es?|domaines? d['’]intervention)/ },
   { key:"profil",  re:/^(profil|resume|r[ée]sum[ée]|summary|a propos|à propos|presentation|présentation|objectif|accroche|about)/ },
   { key:"exp",     re:/^(exp[ée]riences?|parcours professionnel|emplois?|historique professionnel|work experience|experience|carri[èe]re|missions)/ },
   { key:"form",    re:/^(formations?|[ée]tudes?|dipl[ôo]mes?|parcours (acad[ée]mique|scolaire)|education|cursus|scolarit[ée])/ },
@@ -2120,6 +2430,7 @@ function parseImportedCv(rawText){
       else { out.skills = out.skills.concat(splitListItems(cl)); }
     }
     else if(s.key === "atouts"){ out.atouts = out.atouts.concat(splitListItems(content.filter(function(o){ return !o.blank; }))); }
+    else if(s.key === "services"){ out.services = (out.services || []).concat(content.filter(function(o){ return !o.blank; }).map(function(o){ return o.t; })); }
     else if(s.key === "langues"){ out.langues = (out.langues ? out.langues + ", " : "") + splitListItems(content.filter(function(o){ return !o.blank; })).join(", "); }
     else if(s.key === "profil"){ out.resume = (out.resume ? out.resume + " " : "") + content.filter(function(o){ return !o.blank; }).map(function(o){ return o.t; }).join(" "); }
     else {
@@ -2169,6 +2480,11 @@ function doImportCv(){
     addedForm++;
   });
   result.skills.forEach(function(s){ if(addSkillRaw(s)) addedSkills++; });
+  var addedServices = 0;
+  (result.services || []).forEach(function(t){
+    var fl = flState();
+    if(t && !fl.services.some(function(x){ return norm(x.titre) === norm(t); })){ fl.services.push({ id: uid(), titre: t.slice(0, 120), description: "" }); addedServices++; }
+  });
   var addedSections = 0;
   (result.sections || []).forEach(function(sec){
     if(state.library.sections.some(function(x){ return norm(x.titre) === norm(sec.titre); })) return;
@@ -2205,9 +2521,9 @@ function doImportCv(){
   fillText("langues", result.langues, "cv-langues", "langues", state.profil, "langues");
   fillText("resume", result.resume, "cv-resume", "résumé", state.cv, "resume");
 
-  if(addedExp || addedForm || addedSkills || addedSections || filledProfil.length){
+  if(addedExp || addedForm || addedSkills || addedSections || addedServices || filledProfil.length){
     ta.value = "";
-    statusEl.textContent = "Importé : " + addedExp + " expérience(s), " + addedForm + " formation(s), " + addedSkills + " compétence(s), " + addedSections + " autre(s) rubrique(s)" +
+    statusEl.textContent = "Importé : " + addedExp + " expérience(s), " + addedForm + " formation(s), " + addedSkills + " compétence(s), " + addedSections + " autre(s) rubrique(s)" + (addedServices ? ", " + addedServices + " prestation(s) freelance" : "") +
       (filledProfil.length ? ", profil pré-rempli (" + filledProfil.join(", ") + ")" : "") + " — vérifie et ajuste ci-dessous.";
   } else {
     statusEl.textContent = "Rien de nouveau détecté (peut-être déjà présent, ou pas de date reconnaissable comme « 2020 - 2022 »). Ajuste le texte ou complète à la main ci-dessous.";
@@ -2387,27 +2703,27 @@ function initPreviewEditing(){
 }
 
 function renderCVPreview(){
+  var wrap = document.getElementById("cv-preview");
+  var html = cvHtml();
+  wrap.innerHTML = html || '<p class="empty-note">Remplis ton profil et ta bibliothèque à gauche : le CV se construit ici.</p>';
+  renderATS();
+}
+
+// HTML du CV d'après l'état courant ("" si rien à montrer). Sert à l'aperçu et au CV anonymisé.
+function cvHtml(){
   var p = state.profil, cv = state.cv;
   var L = CV_LABELS[cv.lang] || CV_LABELS.fr;
-  var wrap = document.getElementById("cv-preview");
 
   var hasAnyExp = state.library.experiences.some(function(e){ return e.poste || e.entreprise; });
-  if(!p.nom.trim() && !hasAnyExp){
-    wrap.innerHTML = '<p class="empty-note">Remplis ton profil et ta bibliothèque à gauche : le CV se construit ici.</p>';
-    renderATS();
-    return;
-  }
+  if(!p.nom.trim() && !hasAnyExp){ return ""; }
 
   var html = '<div style="display:flex;justify-content:space-between;gap:16px;">';
   html += '<div style="flex:1;min-width:0;">';
   html += '<p class="cv-name">' + (esc(p.nom) || "Ton nom") + '</p>';
-  if(p.titre) html += '<p class="cv-title">' + esc(p.titre) + '</p>';
+  var titreCv = cv.titre || p.titre;
+  if(titreCv) html += '<p class="cv-title">' + esc(titreCv) + '</p>';
   var contacts = [p.email, p.tel, p.ville, p.lien].filter(Boolean).map(esc);
   if(contacts.length) html += '<p class="cv-contact">' + contacts.map(function(x){ return "<span>" + x + "</span>"; }).join("") + '</p>';
-  if(p.suisseActif){
-    var sw = [p.suisse.dateNaissance && ("Né(e) le " + p.suisse.dateNaissance), p.suisse.nationalite, p.suisse.permis, p.suisse.etatCivil].filter(Boolean).map(esc);
-    if(sw.length) html += '<p class="cv-contact">' + sw.map(function(x){ return "<span>" + x + "</span>"; }).join("") + '</p>';
-  }
   html += '</div>';
   if(p.photo){ html += '<img src="' + p.photo + '" alt="" style="width:72px;height:90px;object-fit:cover;border-radius:4px;border:1px solid #D6D0C0;flex-shrink:0;">'; }
   html += '</div>';
@@ -2456,8 +2772,45 @@ function renderCVPreview(){
 
   if(L.note) html += '<p class="footnote" style="margin-top:18px;font-style:italic;">' + esc(L.note) + '</p>';
 
-  wrap.innerHTML = html;
-  renderATS();
+  return html;
+}
+
+/* ---- CV anonymisé : sans nom, coordonnées, photo ni liens ; employeurs masqués en option ---- */
+function anonymizedCvElement(maskEmployers, maskSchools){
+  var realProfil = state.profil, realLib = state.library, realCv = state.cv;
+  var secrets = [realProfil.nom, realProfil.email, realProfil.tel, realProfil.ville, realProfil.lien].filter(Boolean);
+  (realProfil.nom || "").split(/\s+/).forEach(function(w){ if(w.length >= 3) secrets.push(w); });
+  var employers = [];
+  if(maskEmployers){ realLib.experiences.forEach(function(e){ if((e.entreprise || "").trim().length >= 3) employers.push(e.entreprise.trim()); }); }
+  if(maskSchools){ realLib.formations.forEach(function(f){ if((f.etablissement || "").trim().length >= 3) employers.push(f.etablissement.trim()); }); }
+  var all = secrets.concat([]).sort(function(a, b){ return b.length - a.length; });
+  employers.sort(function(a, b){ return b.length - a.length; });
+  var clean = function(t){
+    t = String(t || "");
+    all.forEach(function(sv){ t = t.replace(new RegExp(escapeRegex(sv), "gi"), ""); });
+    employers.forEach(function(sv){ t = t.replace(new RegExp(escapeRegex(sv), "gi"), "l'entreprise"); });
+    return t.replace(/[\w.+-]+@[\w-]+\.[a-z]{2,}/gi, "").replace(/(?:\+?\d[\d\s.\-]{7,}\d)/g, function(m){ return /\d{4}\s*[-–]\s*\d{4}/.test(m) ? m : ""; })
+            .replace(/https?:\/\/\S+|www\.\S+|linkedin\.com\S*|github\.com\S*/gi, "").replace(/[ \t]{2,}/g, " ").replace(/\s+([,;.])/g, "$1").trim();
+  };
+  var ref = "Profil réf. " + String(Math.abs(djb2(String(state.currentPersonId) + "|" + (state.annonce.poste || "") + "|" + (realProfil.titre || "")))).slice(0, 6);
+  var cp = Object.assign({}, realProfil, { nom: ref, email: "", tel: "", ville: "Coordonnées communiquées sur demande", lien: "", photo: null, titre: clean(realProfil.titre), langues: clean(realProfil.langues), atouts: realProfil.atouts.map(clean) });
+  var cl = Object.assign({}, realLib, {
+    experiences: realLib.experiences.map(function(e){
+      var ov = realCv.expOverrides && realCv.expOverrides[e.id];
+      return Object.assign({}, e, { poste: clean(e.poste), entreprise: maskEmployers ? "Employeur confidentiel" : clean(e.entreprise), details: clean(typeof ov === "string" ? ov : e.details) });
+    }),
+    formations: realLib.formations.map(function(f){ return Object.assign({}, f, { diplome: clean(f.diplome), etablissement: maskSchools ? "Établissement confidentiel" : clean(f.etablissement), details: clean(f.details) }); }),
+    sections: (realLib.sections || []).map(function(x){ return Object.assign({}, x, { titre: clean(x.titre), texte: clean(x.texte) }); })
+  });
+  var cc = Object.assign({}, realCv, { resume: clean(realCv.resume), titre: clean(realCv.titre), expOverrides: {} });
+  var html;
+  state.profil = cp; state.library = cl; state.cv = cc;
+  try{ html = cvHtml(); } finally { state.profil = realProfil; state.library = realLib; state.cv = realCv; }
+  html = html.replace(/ contenteditable="true"/g, "").replace(/ spellcheck="false"/g, "").replace(/ data-edit="[^"]*"/g, "");
+  var el = document.createElement("div");
+  el.className = "paper cv-doc"; el.id = "cv-anon";
+  el.innerHTML = html;
+  return { el: el, ref: ref };
 }
 
 function initCVModule(){
@@ -2471,28 +2824,12 @@ function initCVModule(){
   resumeEl.value = state.cv.resume || "";
   resumeEl.addEventListener("input", function(){ state.cv.resume = resumeEl.value; renderCVPreview(); persist(); });
 
-  [["suisse-naissance", "dateNaissance"], ["suisse-nationalite", "nationalite"], ["suisse-permis", "permis"], ["suisse-etat", "etatCivil"]].forEach(function(pair){
-    var el = document.getElementById(pair[0]);
-    el.value = state.profil.suisse[pair[1]] || "";
-    el.addEventListener("input", function(){ state.profil.suisse[pair[1]] = el.value; renderCVPreview(); persist(); });
-  });
-
-  document.getElementById("format-segmented").addEventListener("click", function(e){
-    var btn = e.target.closest("button"); if(!btn) return;
-    state.cv.format = btn.getAttribute("data-format");
-    this.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b === btn); });
-    state.profil.suisseActif = state.cv.format === "suisse";
-    document.getElementById("suisse-fields").style.display = state.profil.suisseActif ? "block" : "none";
-    renderCVPreview(); persist();
-  });
   document.getElementById("lang-segmented").addEventListener("click", function(e){
     var btn = e.target.closest("button"); if(!btn) return;
     state.cv.lang = btn.getAttribute("data-lang");
     this.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b === btn); });
     renderCVPreview(); persist();
   });
-  document.querySelectorAll('#format-segmented button').forEach(function(b){ var on = b.getAttribute("data-format") === state.cv.format; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
-  document.getElementById("suisse-fields").style.display = (state.cv.format === "suisse") ? "block" : "none";
   document.querySelectorAll('#lang-segmented button').forEach(function(b){ var on = b.getAttribute("data-lang") === state.cv.lang; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
 
   document.getElementById("btn-add-atout").addEventListener("click", function(){
@@ -2916,7 +3253,7 @@ function humanList(arr, en){
 }
 // retire les tics typographiques qui trahissent un texte généré
 function cleanLetterText(s){
-  return s.replace(/\s+[—–]\s+/g, ", ").replace(/[—–]/g, "-").replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/\s{2,}/g, " ").trim();
+  return s.replace(/(\d{4})\s+[—–]\s+/g, "$1 - ").replace(/\s+[—–]\s+/g, ", ").replace(/[—–]/g, "-").replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/\s{2,}/g, " ").trim();
 }
 
 // Ouvertures et clôtures quand l'annonce vient d'un intermédiaire (cabinet, agence d'intérim)
@@ -2932,6 +3269,26 @@ var LETTRE_INTERMEDIAIRE = {
       "Your advertisement for the {poste} position{client} caught my attention, and I would like to discuss it with you."],
     cloture: ["I remain available for a call with you, and then an interview with your client if my profile is of interest.",
       "I would be glad to talk it through by phone, and can send a detailed CV and my availability on request."]
+  }
+};
+
+// Candidature spontanée : pas d'annonce, on s'appuie sur le secteur de l'entreprise et le profil de recherche.
+var LETTRE_SPONTANEE = {
+  fr: {
+    formel: ["Je vous adresse une candidature spontanée pour un poste de {poste} chez {entreprise}, même si aucune offre n'est publiée pour le moment.",
+      "Je souhaite proposer ma candidature à un poste de {poste} chez {entreprise}."],
+    direct: ["Je candidate spontanément à un poste de {poste} chez {entreprise}.",
+      "Aucune offre n'est publiée chez {entreprise}, mais mon profil de {poste} peut vous intéresser."],
+    chaleureux: ["C'est avec plaisir que je vous propose mon profil pour un poste de {poste} chez {entreprise}, même sans offre publiée.",
+      "Votre entreprise m'a donné envie de vous écrire, même sans offre publiée, pour un poste de {poste}."],
+    cloture: ["Si une opportunité correspondant à ce profil s'ouvre chez vous, je serais disponible pour en discuter. Je peux envoyer un CV détaillé sur simple demande.",
+      "Je reste à votre disposition pour échanger, même brièvement, sur les besoins que vous pourriez avoir."]
+  },
+  en: {
+    formel: ["I am sending an unsolicited application for a {poste} position at {entreprise}, even though no opening is currently advertised."],
+    direct: ["I am applying speculatively for a {poste} role at {entreprise}."],
+    chaleureux: ["I would be glad to offer my profile for a {poste} position at {entreprise}, even without an advertised opening."],
+    cloture: ["If an opportunity matching this profile opens up, I would be glad to discuss it. I can send a detailed CV on request."]
   }
 };
 
@@ -2973,14 +3330,21 @@ function pickProjects(kws){
   });
 }
 
+function generateLettre(){ return state.annonce.service ? generateOffreServiceParagraphs() : generateLettreParagraphs(); }
+
 function generateLettreParagraphs(){
   var l = state.lettre, an = state.annonce, en = l.lang === "en";
   var poste = an.poste.trim();
   var entreprise = an.entreprise.trim();
   var bank = (LETTRE_AUTO[en ? "en" : "fr"])[l.ton] || LETTRE_AUTO[en ? "en" : "fr"].formel;
   var rng = mulberry32(djb2(poste + "|" + entreprise + "|" + l.ton + "|" + l.lang + "|" + (l.seed || 1)));
+  var spont = !!an.spontanee;
+  if(spont){
+    var sb = LETTRE_SPONTANEE[en ? "en" : "fr"];
+    bank = { ouverture: sb[l.ton] || sb.formel, cloture: sb.cloture, transition: bank.transition };
+  }
   var emType = (an.emetteur && an.emetteur.type) || "direct";
-  var intermediaire = (emType === "recruteur" || emType === "interim");
+  var intermediaire = !spont && (emType === "recruteur" || emType === "interim");
   if(intermediaire){
     var ib = LETTRE_INTERMEDIAIRE[en ? "en" : "fr"];
     var clientTxt = (an.clientFinal || "").trim() ? (en ? " for " : " pour ") + an.clientFinal.trim() : (en ? " for your client" : " pour votre client");
@@ -3002,9 +3366,10 @@ function generateLettreParagraphs(){
   paras.push(en ? "Dear Hiring Manager," : "Madame, Monsieur,");
 
   // 1. ouverture + profil
-  var titre = (state.profil.titre || "").trim();
+  var titre = (state.cv.titre || state.profil.titre || "").trim();
   if(titre && titre === titre.toUpperCase()) titre = titre.toLowerCase();
   var p1 = fill(pick(bank.ouverture, rng));
+  if(spont && an.meta && an.meta.secteur) p1 += en ? " Your activity (" + an.meta.secteur + ") matches my profile." : " Votre activité (" + an.meta.secteur + ") correspond à mon profil.";
   if(titre) p1 += en ? " I work as " + titre + "." : " Je suis " + lowerFirst(titre) + ".";
   paras.push(p1);
 
@@ -3038,8 +3403,8 @@ function generateLettreParagraphs(){
   (l.competencesChoisies || []).forEach(function(c){ if(matched.map(norm).indexOf(norm(c)) === -1) matched.push(c); });
   if(matched.length){
     paras.push(en
-      ? "Your advertisement mentions " + humanList(matched.map(displayTerm), true) + ". I use these in my daily work."
-      : "Votre annonce mentionne " + humanList(matched.map(displayTerm), false) + ". Ce sont des sujets que je pratique dans mon travail.");
+      ? (spont ? "My profile rests on " + humanList(matched.map(displayTerm), true) + ", which I use in my daily work." : "Your advertisement mentions " + humanList(matched.map(displayTerm), true) + ". I use these in my daily work.")
+      : (spont ? "Mon profil s'appuie notamment sur " + humanList(matched.map(displayTerm), false) + ", des sujets que je pratique dans mon travail." : "Votre annonce mentionne " + humanList(matched.map(displayTerm), false) + ". Ce sont des sujets que je pratique dans mon travail."));
   }
 
   // 4. apports personnels (facultatifs), repris tels quels
@@ -3073,14 +3438,14 @@ function renderLettrePreview(){
   var poste = an.poste.trim();
   var entreprise = an.entreprise.trim();
   var edited = Array.isArray(l.corps) && l.corps.length;
-  var paragraphs = edited ? l.corps : generateLettreParagraphs();
+  var paragraphs = edited ? l.corps : generateLettre();
 
   var today = new Date();
   var dateStr = en
     ? MOIS_EN[today.getMonth()] + " " + today.getDate() + ", " + today.getFullYear()
     : today.getDate() + " " + ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"][today.getMonth()] + " " + today.getFullYear();
 
-  var objLabel = en ? "Subject: Application for the position of " : "Objet : Candidature au poste de ";
+  var objLabel = an.service ? (en ? "Subject: Proposal of services: " : "Objet : Proposition de services : ") : (en ? "Subject: Application for the position of " : "Objet : Candidature au poste de ");
   var attnLabel = en ? "Attention: " : "À l'attention de ";
 
   var html = "";
@@ -3111,7 +3476,7 @@ document.getElementById("lettre-texte").addEventListener("input", function(){
   wrap.addEventListener("focusout", function(e){
     if(!e.target.getAttribute || !e.target.getAttribute("data-lp")) return;
     var texts = Array.prototype.map.call(wrap.querySelectorAll("[data-lp]"), function(p){ return p.innerText.replace(/\s+/g, " ").trim(); }).filter(Boolean);
-    var current = Array.isArray(state.lettre.corps) ? state.lettre.corps : generateLettreParagraphs();
+    var current = Array.isArray(state.lettre.corps) ? state.lettre.corps : generateLettre();
     if(texts.join("\n") === current.join("\n")) return;
     state.lettre.corps = texts;
     persist(); renderLettrePreview();
@@ -3284,7 +3649,7 @@ function renderCandidaturesList(){
     block.className = "exp-block";
     block.innerHTML =
       '<div class="exp-block-head">' +
-        '<span class="tier-pill ' + meta.tier + '">' + esc(meta.label) + '</span>' +
+        '<span class="tier-pill ' + meta.tier + '">' + esc(meta.label) + '</span>' + (c.type === "spontanee" ? '<span class="hint" style="margin-left:8px;">Candidature spontanée</span>' : (c.type === "service" ? '<span class="hint" style="margin-left:8px;">Offre de service</span>' : '')) +
         '<button class="icon-btn" data-remove="' + c.id + '" title="Retirer" aria-label="Retirer">' + icon("close") + '</button>' +
       '</div>' +
       '<div class="row2">' +
@@ -3596,6 +3961,733 @@ document.getElementById("btn-fetch-annonce").addEventListener("click", fetchAnno
 anUrl.addEventListener("paste", function(){ setTimeout(function(){ if(/^https?:\/\//i.test(anUrl.value.trim())){ reanalyzeAnnonce(); fetchAnnonce(); } }, 50); });
 anUrl.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); fetchAnnonce(); } });
 
+/* ===================== MES PROFILS DE RECHERCHE ===================== */
+
+// Domaines proposés. `mots` : ce qu'on cherche dans la base ; `naf` : codes d'activité (recherche d'entreprises à venir) ;
+// `debutant` : métiers accessibles sans expérience (réponse à des offres « débutants acceptés », pas de candidature spontanée).
+var PROFIL_DOMAINES = [
+  { key:"dev", label:"IT / Développement", titres:["Développeur web","Développeur full stack","Concepteur d'applications","Intégrateur web"], naf:["62.01Z","62.02A"],
+    mots:["javascript","react","node","html","css","python","php","java","sql","api","github","git","typescript","docker","développement","application web","front","back","architecture applicative","cloudflare","vercel","supabase","neon"] },
+  { key:"ia", label:"IA / Automatisation", titres:["Concepteur de solutions IA","Ingénieur IA appliquée","Consultant automatisation"], naf:["62.01Z","62.02A","63.11Z"],
+    mots:["llm","ia","intelligence artificielle","agents","mcp","n8n","automatisation","prompt","rag","workflow","claude","gpt","openai","github actions","skills"] },
+  { key:"data", label:"Data / Analyse", titres:["Data analyst","Analyste BI","Chargé d'études"], naf:["62.01Z","63.11Z","70.22Z"],
+    mots:["sql","python","power bi","tableau","reporting","analyse de données","excel","statistiques","data","bi","kpi","dashboard","indicateurs"] },
+  { key:"comm", label:"Communication / Marketing", titres:["Chargé de communication","Responsable marketing","Community manager"], naf:["73.11Z","70.21Z","73.12Z"],
+    mots:["communication","marketing","réseaux sociaux","community management","seo","rédaction","contenu","campagne","événementiel","relations presse","stratégie de communication","branding","marketing digital"] },
+  { key:"crea", label:"Audiovisuel / Création", titres:["Réalisateur","Monteur vidéo","Directeur artistique"], naf:["59.11A","59.11B","74.10Z"],
+    mots:["audiovisuel","montage","réalisation","film","photographie","direction artistique","graphisme","premiere","after effects","photoshop","illustrator","motion","postproduction","création graphique"] },
+  { key:"design", label:"Design / UX", titres:["UX designer","Webdesigner","Product designer"], naf:["74.10Z","62.01Z"],
+    mots:["ux","ui","figma","maquette","prototype","design system","parcours utilisateur","interface","design","wireframe"] },
+  { key:"projet", label:"Gestion de projet / Produit", titres:["Chef de projet","Product owner","Chargé de mission"], naf:["70.22Z","62.02A"],
+    mots:["gestion de projet","chef de projet","product owner","agile","scrum","kanban","roadmap","coordination","planning","budget","pilotage","conduite de projet","cahier des charges","spécifications"] },
+  { key:"immo", label:"Immobilier", titres:["Négociateur immobilier","Conseiller immobilier","Chargé de gestion locative"], naf:["68.31Z","68.20A","68.32A"], debutant:true,
+    mots:["immobilier","transaction","estimation","mandat","syndic","gestion locative","investissement locatif","diagnostic","promoteur","acquéreur","vendeur","bien immobilier"] },
+  { key:"vente", label:"Commercial / Business", titres:["Commercial","Business developer","Chargé d'affaires"], naf:["70.22Z"], debutant:true,
+    mots:["vente","prospection","négociation","account management","crm","b2b","chiffre d'affaires","développement commercial","clients","devis","closing"] },
+  { key:"rh", label:"RH / Recrutement", titres:["Chargé de recrutement","Assistant RH","Gestionnaire de paie"], naf:["78.10Z","70.22Z"],
+    mots:["recrutement","ressources humaines","paie","onboarding","sirh","sourcing","entretiens","rh"] },
+  { key:"formation", label:"Formation / Transmission", titres:["Formateur","Intervenant en formation","Concepteur pédagogique"], naf:["85.59A","85.59B"],
+    mots:["formation","formateur","pédagogie","enseignement","animation","ateliers","supports pédagogiques","transmission","apprentissage","blockchain","web3"] },
+  { key:"admin", label:"Administratif / Gestion", titres:["Assistant administratif","Gestionnaire administratif","Assistant de gestion"], naf:["82.11Z","69.20Z"], debutant:true,
+    mots:["comptabilité","facturation","gestion administrative","secrétariat","assistant","back-office","saisie","classement","planning","organisation"] },
+  { key:"client", label:"Service client / Accueil", titres:["Conseiller clientèle","Chargé de relation client","Hôte d'accueil"], naf:["82.20Z"], debutant:true,
+    mots:["service client","relation client","accueil","sav","support","satisfaction client","réclamations","téléphone"] }
+];
+
+function profilBaseSources(){
+  var lib = state.library;
+  var exp = lib.experiences.map(function(e){ return { id: e.id, label: e.poste || e.entreprise, text: norm([e.poste, e.entreprise, e.details].join(" ")) }; });
+  var other = norm([].concat(
+    lib.formations.map(function(f){ return [f.diplome, f.etablissement, f.details].join(" "); }),
+    lib.competences.map(function(c){ return c.label; }),
+    (lib.sections || []).map(function(x){ return x.titre + " " + x.texte; }),
+    (state.profil.atouts || []), [state.profil.titre, state.cv && state.cv.resume]
+  ).join(" \n "));
+  var forms = norm(lib.formations.map(function(f){ return [f.diplome, f.etablissement, f.details].join(" "); }).join(" \n "));
+  return { exp: exp, other: other, forms: forms };
+}
+
+// Preuves de la base pour un domaine : mots trouvés dans les expériences, dans le reste (formation, projets, compétences).
+function profilEvidence(dom){
+  var src = profilBaseSources();
+  var expHits = {}, otherHits = {}, expMatch = {};
+  dom.mots.forEach(function(m){
+    var nm = norm(m);
+    src.exp.forEach(function(e){ if(countTerm(e.text, nm) > 0){ expHits[m] = true; expMatch[e.id] = e.label; } });
+    if(countTerm(src.other, nm) > 0) otherHits[m] = true;
+  });
+  // titres visés qui apparaissent déjà dans la base
+  dom.titres.forEach(function(t){ var nt = norm(t); src.exp.forEach(function(e){ if(e.text.indexOf(nt) !== -1){ expHits[t] = true; expMatch[e.id] = e.label; } }); });
+  var expKw = Object.keys(expHits), otherKw = Object.keys(otherHits).filter(function(k){ return !expHits[k]; });
+  var score = expKw.length * 2 + otherKw.length;
+  var level = "insuffisant";
+  if(expKw.length >= 3 || (expKw.length >= 2 && Object.keys(expMatch).length >= 2)) level = "exerce";
+  else if(expKw.length + otherKw.length >= 3) level = "assise";
+  else if(dom.debutant) level = "debutant";
+  var missing = dom.mots.filter(function(m){ return !expHits[m] && !otherHits[m]; }).slice(0, 8);
+  return { dom: dom, score: score, level: level, expKw: expKw, otherKw: otherKw, exps: Object.keys(expMatch).map(function(id){ return expMatch[id]; }), missing: missing };
+}
+
+var PROFIL_LEVELS = {
+  exerce: { label: "Déjà exercé", tier: "success", modes: { spontanee: true, offres: true, debutant: false } },
+  assise: { label: "Base suffisante (formation, projets)", tier: "caution", modes: { spontanee: true, offres: true, debutant: false } },
+  debutant: { label: "Accessible sans expérience", tier: "caution", modes: { spontanee: false, offres: true, debutant: true } },
+  insuffisant: { label: "Pas assez d'éléments", tier: "danger", modes: { spontanee: false, offres: false, debutant: false } }
+};
+
+function profilSuggestions(){
+  var all = PROFIL_DOMAINES.map(profilEvidence);
+  var made = {}; state.profils.forEach(function(p){ made[p.domaine] = true; });
+  var good = all.filter(function(e){ return (e.level === "exerce" || e.level === "assise") && !made[e.dom.key]; }).sort(function(a, b){ return b.score - a.score; });
+  var beginner = all.filter(function(e){ return e.level === "debutant" && e.score >= 1 && !made[e.dom.key]; }).sort(function(a, b){ return b.score - a.score; }).slice(0, 3);
+  var weak = all.filter(function(e){ return e.level === "insuffisant" && e.score >= 1; }).sort(function(a, b){ return b.score - a.score; }).slice(0, 3);
+  return { good: good, beginner: beginner, weak: weak };
+}
+
+function profilAccroche(pr){
+  var src = profilBaseSources();
+  var dom = PROFIL_DOMAINES.find(function(d){ return d.key === pr.domaine; });
+  var kws = (pr.motsCles || []).filter(function(k){ return countTerm(src.other + " " + src.exp.map(function(e){ return e.text; }).join(" "), norm(k)) > 0; }).slice(0, 6).map(displayTerm);
+  var titre = pr.titreVise || (dom ? dom.titres[0] : "");
+  var out = titre ? titre + "." : "";
+  if(kws.length) out += (out ? " " : "") + "Compétences clés : " + kws.join(", ") + ".";
+  return out;
+}
+
+function profilTodo(pr){
+  var dom = PROFIL_DOMAINES.find(function(d){ return d.key === pr.domaine; });
+  var ev = dom ? profilEvidence(dom) : null;
+  var todo = [];
+  if(!(pr.lieu || "").trim()) todo.push("Renseigne le lieu de recherche : il sert à trouver offres et entreprises.");
+  if(!(pr.contrats || []).length) todo.push("Choisis les types de contrat visés.");
+  if(ev && ev.level === "assise") todo.push("Ajoute une expérience ou un projet personnel qui montre ce métier en situation, pas seulement la formation.");
+  if(ev && ev.level === "debutant") todo.push("Sans expérience dans ce domaine, mets en avant formation, projets et savoir-être. Ce profil sert à répondre à des offres « débutants acceptés ».");
+  if(ev && ev.missing.length) todo.push("Si tu les maîtrises, ajoute à ta base : " + ev.missing.slice(0, 6).join(", ") + ".");
+  var exps = state.library.experiences.filter(function(e){ return norm(e.poste + " " + e.details).indexOf(norm((dom && dom.mots[0]) || "~~")) !== -1; });
+  var hasNumber = state.library.experiences.some(function(e){ return /\d+\s*(%|€|k€|clients|projets|personnes|ans)/i.test(e.details || ""); });
+  if(!hasNumber) todo.push("Ajoute au moins une réalisation chiffrée (volume, résultat, durée) : les recruteurs et les filtres ATS la repèrent.");
+  return todo;
+}
+
+function createProfil(dom, level, extra){
+  var ev = profilEvidence(dom);
+  var lv = PROFIL_LEVELS[level || ev.level];
+  var pr = {
+    id: uid(), domaine: dom.key, nom: dom.label, titreVise: dom.titres[0], titresAlt: dom.titres.slice(1),
+    secteur: dom.label, lieu: state.profil.ville || "", rayon: "30", contrats: ["CDI"], ton: "formel",
+    motsCles: ev.expKw.concat(ev.otherKw).filter(function(k){ return dom.titres.indexOf(k) === -1; }).concat(dom.mots.filter(function(m){ return ev.expKw.indexOf(m) === -1 && ev.otherKw.indexOf(m) === -1; }).slice(0, 4)).slice(0, 14),
+    niveau: level || ev.level, modes: lv.modes, expIds: [], accroche: "", created: Date.now()
+  };
+  if(extra) Object.assign(pr, extra);
+  pr.accroche = profilAccroche(pr);
+  state.profils.push(pr);
+  persist();
+  return pr;
+}
+
+function profilNiveauPill(level){ var l = PROFIL_LEVELS[level]; return '<span class="tier-pill ' + l.tier + '">' + esc(l.label) + '</span>'; }
+
+function renderProfils(){
+  var wrap = document.getElementById("profils-suggestions");
+  if(!wrap) return;
+  var sg = profilSuggestions();
+  var html = "";
+  var card = function(ev, mode){
+    return '<div class="exp-block"><div class="exp-block-head"><strong>' + esc(ev.dom.label) + '</strong>' + profilNiveauPill(ev.level) + '</div>' +
+      '<p class="hint" style="margin:0 0 6px;">' +
+        (ev.exps.length ? 'Dans tes expériences : ' + esc(ev.exps.slice(0, 3).join(", ")) + '. ' : '') +
+        (ev.expKw.length || ev.otherKw.length ? 'Repéré : ' + esc(ev.expKw.concat(ev.otherKw).slice(0, 7).join(", ")) + '.' : 'Aucun élément repéré dans ta base pour l\'instant.') +
+      '</p>' +
+      '<p class="hint" style="margin:0 0 8px;">' + (mode === "beginner" ? 'Métier accessible sans expérience : tu y réponds à des offres « débutants acceptés », pas par candidature spontanée.' : 'Candidatures spontanées et réponses à des offres possibles.') + '</p>' +
+      '<button class="btn btn-primary btn-sm" type="button" data-create-profil="' + ev.dom.key + '">Créer ce profil</button></div>';
+  };
+  html += sg.good.length ? sg.good.map(function(e){ return card(e, "good"); }).join("") : '<p class="empty-note">Aucun profil à proposer d\'après ta base pour l\'instant : importe ou complète un CV (onglet CV), ou ajoute un métier visé ci-dessous.</p>';
+  if(sg.beginner.length){ html += '<p class="eyebrow" style="margin:14px 0 6px;">Métiers accessibles sans expérience</p>' + sg.beginner.map(function(e){ return card(e, "beginner"); }).join(""); }
+  if(sg.weak.length){
+    html += '<p class="eyebrow" style="margin:14px 0 6px;">À renforcer avant de viser</p>' + sg.weak.map(function(e){
+      return '<div class="exp-block"><div class="exp-block-head"><strong>' + esc(e.dom.label) + '</strong>' + profilNiveauPill("insuffisant") + '</div><p class="hint" style="margin:0;">Quelques éléments repérés (' + esc(e.expKw.concat(e.otherKw).join(", ")) + '), mais trop peu pour une candidature crédible. À ajouter : ' + esc(e.missing.slice(0, 5).join(", ")) + '.</p></div>';
+    }).join("");
+  }
+  wrap.innerHTML = html;
+  wrap.querySelectorAll("[data-create-profil]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var dom = PROFIL_DOMAINES.find(function(d){ return d.key === b.getAttribute("data-create-profil"); });
+      createProfil(dom); renderProfils(); refreshStatusDots();
+    });
+  });
+  renderProfilsList();
+}
+
+var CONTRATS_CHOIX = ["CDI","CDD","Freelance","Alternance","Stage","Intérim"];
+
+function renderProfilsList(){
+  var wrap = document.getElementById("profils-list");
+  wrap.innerHTML = state.profils.length ? "" : '<p class="empty-note">Aucun profil créé. Crée-en un à partir des propositions ci-dessus.</p>';
+  state.profils.forEach(function(pr){
+    var lv = PROFIL_LEVELS[pr.niveau] || PROFIL_LEVELS.assise;
+    var d = document.createElement("details");
+    d.className = "card"; d.style.marginBottom = "12px"; d.setAttribute("data-pid", pr.id);
+    d.open = !!pr._open;
+    var todo = profilTodo(pr);
+    d.innerHTML = '<summary style="cursor:pointer;display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><strong>' + esc(pr.nom) + '</strong>' + profilNiveauPill(pr.niveau) +
+      '<span class="hint">' + esc(pr.titreVise) + (pr.lieu ? " · " + esc(pr.lieu) : "") + '</span></summary>' +
+      '<div style="margin-top:12px;">' +
+        '<div class="row2"><div class="field"><label>Nom du profil</label><input type="text" data-pf="nom" value="' + esc(pr.nom) + '"></div>' +
+          '<div class="field"><label>Intitulé de poste visé</label><input type="text" data-pf="titreVise" value="' + esc(pr.titreVise) + '"></div></div>' +
+        '<div class="row2"><div class="field"><label>Lieu de recherche</label><input type="text" data-pf="lieu" value="' + esc(pr.lieu) + '" placeholder="ex. Reims, Paris, Île-de-France"></div>' +
+          '<div class="field"><label>Rayon</label><select data-pf="rayon">' + ["10","30","50","100","France"].map(function(r){ return '<option value="' + r + '"' + (pr.rayon === r ? " selected" : "") + '>' + (r === "France" ? "Toute la France" : r + " km") + '</option>'; }).join("") + '</select></div></div>' +
+        '<div class="field"><label>Contrats visés</label><div class="chips">' + CONTRATS_CHOIX.map(function(c){ var on = (pr.contrats || []).indexOf(c) !== -1; return '<button type="button" class="chip' + (on ? "" : " suggest") + '" data-pcontrat="' + c + '" aria-pressed="' + on + '">' + (on ? "✓ " : "") + c + '</button>'; }).join("") + '</div></div>' +
+        '<div class="field"><label>Mots-clés du profil (séparés par des virgules)</label><textarea data-pf="motsCles" style="min-height:60px;">' + esc((pr.motsCles || []).join(", ")) + '</textarea></div>' +
+        '<div class="field"><label>Accroche du profil</label><textarea data-pf="accroche" style="min-height:70px;">' + esc(pr.accroche) + '</textarea>' +
+          '<div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pregen>Régénérer l\'accroche d\'après ma base</button></div></div>' +
+        '<div class="field"><label>Ton des lettres pour ce profil</label><select data-pf="ton">' + [["formel","Formel"],["direct","Direct"],["chaleureux","Chaleureux"]].map(function(t){ return '<option value="' + t[0] + '"' + (pr.ton === t[0] ? " selected" : "") + '>' + t[1] + '</option>'; }).join("") + '</select></div>' +
+        '<p class="hint">' + (pr.modes && pr.modes.debutant ? 'Réponse à des offres « débutants acceptés » uniquement : pas de candidature spontanée pour ce profil.' : 'Candidatures spontanées et réponses à des offres possibles.') + '</p>' +
+        (todo.length ? '<div class="field"><label>À compléter pour ce profil</label><ul class="ats-list">' + todo.map(function(t){ return "<li>" + esc(t) + "</li>"; }).join("") + '</ul></div>' : '') +
+        '<div class="field"><label>Compléter avec un texte (CV, projet, fiche de poste…)</label><textarea data-pimport style="min-height:90px;" placeholder="Colle un texte : l\'atelier trie, organise et ajoute à ta base les expériences, formations et compétences trouvées."></textarea>' +
+          '<div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pimport-go>Analyser et ajouter à ma base</button><span class="hint" data-pimport-status></span></div></div>' +
+        '<div class="toolbar-row" style="justify-content:space-between;margin-top:8px;"><button class="btn btn-primary btn-sm" type="button" data-puse>Nouvelle candidature avec ce profil</button>' +
+          '<button class="btn btn-ghost btn-sm" type="button" data-pdel>Supprimer ce profil</button></div>' +
+      '</div>';
+    wrap.appendChild(d);
+    d.addEventListener("toggle", function(){ pr._open = d.open; });
+    d.querySelectorAll("[data-pf]").forEach(function(el){
+      el.addEventListener("input", function(){
+        var f = el.getAttribute("data-pf");
+        pr[f] = f === "motsCles" ? el.value.split(/[,;\n]/).map(function(x){ return x.trim(); }).filter(Boolean) : el.value;
+        persist();
+        if(f === "nom" || f === "titreVise" || f === "lieu"){ var sm = d.querySelector("summary"); sm.querySelector("strong").textContent = pr.nom; sm.querySelector(".hint").textContent = pr.titreVise + (pr.lieu ? " · " + pr.lieu : ""); }
+      });
+    });
+    d.querySelectorAll("[data-pcontrat]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var c = b.getAttribute("data-pcontrat"), arr = pr.contrats || [];
+        pr.contrats = arr.indexOf(c) === -1 ? arr.concat([c]) : arr.filter(function(x){ return x !== c; });
+        persist(); pr._open = true; renderProfilsList();
+      });
+    });
+    d.querySelector("[data-pregen]").addEventListener("click", function(){ pr.accroche = profilAccroche(pr); persist(); pr._open = true; renderProfilsList(); });
+    d.querySelector("[data-pdel]").addEventListener("click", function(){
+      if(!confirm("Supprimer le profil « " + pr.nom + " » ? Ta base d'expériences n'est pas touchée.")) return;
+      state.profils = state.profils.filter(function(x){ return x.id !== pr.id; });
+      state.dossiers.forEach(function(dd){ if(dd.cv.profilId === pr.id){ dd.cv.profilId = ""; } });
+      persist(); renderProfils(); renderProfilSelect(); refreshStatusDots();
+    });
+    d.querySelector("[data-pimport-go]").addEventListener("click", function(){
+      var ta = d.querySelector("[data-pimport]"), st = d.querySelector("[data-pimport-status]");
+      if(!ta.value.trim()){ st.textContent = "Colle d'abord un texte."; return; }
+      var cvTa = document.getElementById("cv-import-text");
+      cvTa.value = ta.value;
+      doImportCv();
+      st.textContent = document.getElementById("cv-import-status").textContent || "Ajouté à ta base.";
+      ta.value = "";
+      pr.accroche = pr.accroche || profilAccroche(pr);
+      persist(); pr._open = true; renderProfils();
+    });
+    d.querySelector("[data-puse]").addEventListener("click", function(){ newDossierWithProfil(pr.id); });
+  });
+}
+
+function newDossierWithProfil(profilId){
+  document.getElementById("btn-new-dossier").click();
+  state.cv.profilId = profilId; state.cv.profilManuel = true;
+  applyProfilToDossier(profilId, true);
+  syncDossierUI(); persist();
+  switchTab("annonce");
+}
+
+function currentProfil(){ return state.profils.find(function(p){ return p.id === state.cv.profilId; }) || null; }
+function profilKeywords(){
+  var pr = currentProfil();
+  return pr ? (pr.motsCles || []).map(function(k){ return { term: k, count: 1, kind: "skill" }; }) : [];
+}
+// Applique un profil à la candidature en cours : titre visé, accroche (si vide), ton de la lettre.
+function applyProfilToDossier(id, force){
+  var pr = state.profils.find(function(p){ return p.id === id; });
+  state.cv.profilId = pr ? pr.id : "";
+  if(!pr){ state.cv.titre = ""; return; }
+  state.cv.titre = pr.titreVise || "";
+  if(pr.accroche && (!(state.cv.resume || "").trim() || force)){ state.cv.resume = pr.accroche; var r = document.getElementById("cv-resume"); if(r) r.value = state.cv.resume; }
+  if(pr.ton) state.lettre.ton = pr.ton;
+  if((state.annonce.keywords || []).length || (pr.motsCles || []).length){ recomposerCV(); }
+}
+
+// Profil le plus proche d'une annonce (recouvrement mots-clés + intitulé).
+function bestProfilForAnnonce(){
+  if(!state.profils.length) return null;
+  var text = norm([state.annonce.poste, state.annonce.texte].join(" "));
+  var best = null, bs = 0;
+  state.profils.forEach(function(pr){
+    var sc = 0;
+    (pr.motsCles || []).forEach(function(k){ if(countTerm(text, norm(k)) > 0) sc += 1; });
+    if(pr.titreVise && text.indexOf(norm(pr.titreVise)) !== -1) sc += 3;
+    (pr.titresAlt || []).forEach(function(t){ if(text.indexOf(norm(t)) !== -1) sc += 2; });
+    if(sc > bs){ bs = sc; best = pr; }
+  });
+  return bs >= 2 ? best : null;
+}
+
+function renderProfilSelect(){
+  var sel = document.getElementById("an-profil");
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Aucun profil</option>' + state.profils.map(function(p){ return '<option value="' + p.id + '"' + (state.cv.profilId === p.id ? " selected" : "") + '>' + esc(p.nom) + ' : ' + esc(p.titreVise) + '</option>'; }).join("");
+  document.getElementById("an-profil-field").style.display = state.profils.length ? "block" : "none";
+}
+document.getElementById("an-profil").addEventListener("change", function(){
+  state.cv.profilManuel = true;
+  applyProfilToDossier(this.value, !!this.value);
+  syncDossierUI(); persist();
+});
+
+// À chaque nouvelle analyse d'annonce : propose automatiquement le profil le plus proche (sauf choix manuel).
+function autoProfilForAnnonce(){
+  if(state.cv.profilManuel || !state.profils.length) return;
+  var best = bestProfilForAnnonce();
+  var id = best ? best.id : "";
+  if(id !== (state.cv.profilId || "")){ applyProfilToDossier(id, false); }
+  renderProfilSelect();
+}
+
+document.getElementById("btn-viser-metier").addEventListener("click", function(){
+  var inp = document.getElementById("viser-metier"), out = document.getElementById("viser-result");
+  var title = inp.value.trim();
+  if(!title){ out.textContent = "Écris le métier visé."; return; }
+  var words = norm(title).split(/[^a-z0-9]+/).filter(function(w){ return w.length >= 4; });
+  var best = null, bs = 0;
+  PROFIL_DOMAINES.forEach(function(d){
+    var hay = norm([d.label].concat(d.titres, d.mots).join(" "));
+    var sc = words.reduce(function(a, w){ return a + (hay.indexOf(w) !== -1 ? 1 : 0); }, 0);
+    if(sc > bs){ bs = sc; best = d; }
+  });
+  var dom = best && bs ? best : { key: "custom", label: title, titres: [title], naf: [], mots: words };
+  var ev = profilEvidence(dom);
+  if(state.profils.some(function(p){ return p.domaine === dom.key && dom.key !== "custom"; })){ out.textContent = "Tu as déjà un profil « " + dom.label + " »."; return; }
+  if(ev.level === "insuffisant"){
+    out.textContent = "Pas assez d'éléments dans ta base pour viser « " + title + " » de façon crédible. À ajouter : une formation, un projet personnel ou une expérience qui le montre" + (ev.missing.length ? " (" + ev.missing.slice(0, 5).join(", ") + ")" : "") + ". Tu peux aussi répondre à des offres qui acceptent les débutants en collant l'annonce (onglet Annonce).";
+    return;
+  }
+  var pr = createProfil(dom, ev.level, { titreVise: title, nom: title });
+  out.textContent = "Profil créé : « " + title + " » (" + PROFIL_LEVELS[ev.level].label.toLowerCase() + ").";
+  inp.value = ""; pr._open = true; renderProfils(); refreshStatusDots();
+});
+
+/* ===================== RECHERCHE D'ENTREPRISES (candidatures spontanées) ===================== */
+
+var NAF_LABELS = { "62.01Z":"programmation informatique", "62.02A":"conseil en systèmes et logiciels informatiques", "63.11Z":"traitement de données et hébergement",
+  "70.22Z":"conseil pour les affaires et la gestion", "73.11Z":"agences de publicité", "70.21Z":"conseil en relations publiques et communication", "73.12Z":"régie publicitaire de médias",
+  "59.11A":"production de films pour la télévision", "59.11B":"production de films institutionnels et publicitaires", "74.10Z":"design et création spécialisés",
+  "68.31Z":"agences immobilières", "68.20A":"location de logements", "68.32A":"administration d'immeubles", "78.10Z":"agences de placement",
+  "62.09Z":"autres activités informatiques", "78.20Z":"mise à disposition de personnel temporaire", "78.30Z":"autre mise à disposition de ressources humaines", "85.59A":"formation continue d'adultes", "85.59B":"autres enseignements", "82.11Z":"services administratifs de bureau", "69.20Z":"activités comptables", "82.20Z":"centres d'appels" };
+
+var rechPlace = null;     // lieu choisi : {label, lat, lon, dep}
+var rechLast = null;      // dernière recherche : {profilId, params, page}
+state.rechercheResultats = [];
+
+function titleCaseName(s){
+  s = String(s || "").trim();
+  if(s !== s.toUpperCase() || s.length < 4) return s;
+  var small = { de:1, du:1, des:1, la:1, le:1, les:1, et:1, en:1, sur:1, sous:1, d:1, l:1 };
+  return s.toLowerCase().replace(/[^\s'’-]+/g, function(w, i){ return (i > 0 && small[w]) ? w : w.charAt(0).toUpperCase() + w.slice(1); });
+}
+
+function rechProfilOptions(){
+  var sel = document.getElementById("rech-profil"), cur = sel.value;
+  var list = state.profils;
+  if(!list.length){ sel.innerHTML = '<option value="">Crée d\'abord un profil (onglet Mes profils)</option>'; return; }
+  sel.innerHTML = list.map(function(p){
+    var ok = p.modes && p.modes.spontanee;
+    return '<option value="' + p.id + '"' + (ok ? "" : " disabled") + '>' + esc(p.nom) + (ok ? "" : " (offres « débutants acceptés » seulement)") + '</option>';
+  }).join("");
+  if(cur && list.some(function(p){ return p.id === cur && p.modes && p.modes.spontanee; })) sel.value = cur;
+  else { var first = list.find(function(p){ return p.modes && p.modes.spontanee; }); if(first) sel.value = first.id; }
+  rechLoadProfil();
+}
+function rechCurrentProfil(){ return state.profils.find(function(p){ return p.id === document.getElementById("rech-profil").value; }) || null; }
+function rechLoadProfil(){
+  var pr = rechCurrentProfil(); if(!pr) return;
+  var inp = document.getElementById("rech-lieu");
+  if(!inp.value) inp.value = pr.lieu || "";
+  var r = document.getElementById("rech-rayon"); r.value = pr.rayon || "30";
+}
+document.getElementById("rech-profil").addEventListener("change", function(){ rechPlace = null; document.getElementById("rech-lieu").value = ""; rechLoadProfil(); });
+
+function rechLieuSearch(){
+  var q = document.getElementById("rech-lieu").value.trim(), box = document.getElementById("rech-lieu-list"), st = document.getElementById("rech-status");
+  box.innerHTML = "";
+  if(q.length < 2){ st.textContent = "Écris le nom d'une commune."; return; }
+  st.textContent = "Recherche du lieu…";
+  rechFetch("/api/lieu?q=" + encodeURIComponent(q)).then(function(d){
+    if(!d.ok || !(d.places || []).length){ st.textContent = "Aucune commune trouvée."; return; }
+    st.textContent = "Choisis la commune :";
+    d.places.forEach(function(pl){
+      var b = document.createElement("button"); b.type = "button"; b.className = "chip suggest"; b.textContent = pl.label + " (" + pl.postcode + ")";
+      b.addEventListener("click", function(){ rechPlace = pl; document.getElementById("rech-lieu").value = pl.label; box.innerHTML = ""; st.textContent = "Lieu : " + pl.label + ", " + pl.context + "."; });
+      box.appendChild(b);
+    });
+    if(d.places.length === 1){ box.firstChild.click(); }
+  }, function(){ st.textContent = rechOffline(); });
+}
+function rechOffline(){ return "La recherche n'est disponible que sur le site déployé (Cloudflare), pas dans cette version ou hors ligne."; }
+function rechFetch(url){
+  if(location.protocol === "file:" || (window.claude && typeof window.claude.use === "function")) return Promise.reject(new Error("offline"));
+  return fetch(url).then(function(r){ return r.json().then(function(d){ return d; }, function(){ throw new Error("noapi"); }); });
+}
+document.getElementById("btn-rech-lieu").addEventListener("click", rechLieuSearch);
+document.getElementById("rech-lieu").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); rechLieuSearch(); } });
+document.getElementById("rech-lieu").addEventListener("input", function(){ rechPlace = null; });
+
+function rechRun(page){
+  var pr = rechCurrentProfil(), st = document.getElementById("rech-status");
+  if(!pr){ st.textContent = "Choisis un profil."; return; }
+  var dom = PROFIL_DOMAINES.find(function(d){ return d.key === pr.domaine; });
+  if(!dom || !(dom.naf || []).length){ st.textContent = "Ce profil n'a pas de secteur d'activité associé : choisis un profil standard (IT, communication, immobilier…)."; return; }
+  var rayon = document.getElementById("rech-rayon").value, taille = document.getElementById("rech-taille").value;
+  var qs = ["naf=" + encodeURIComponent(dom.naf.join(",")), "page=" + (page || 1)];
+  if(taille) qs.push("taille=" + taille);
+  if(rayon !== "France"){
+    if(!rechPlace){ st.textContent = "Choisis d'abord un lieu (bouton « Chercher le lieu »), ou mets « Toute la France »."; return; }
+    if(+rayon <= 50){ qs.push("lat=" + rechPlace.lat, "lon=" + rechPlace.lon, "radius=" + rayon); }
+    else { qs.push("dep=" + encodeURIComponent(rechPlace.dep)); }
+  }
+  st.textContent = "Recherche en cours…";
+  var btn = document.getElementById("btn-rech-go"); btn.disabled = true;
+  rechFetch("/api/entreprises?" + qs.join("&")).then(function(d){
+    btn.disabled = false;
+    if(!d.ok){ st.textContent = d.reason === "rate" ? "Trop de recherches d'un coup : réessaie dans une minute." : "La recherche n'a pas abouti (" + (d.reason || "erreur") + "). Réessaie."; return; }
+    rechLast = { profilId: pr.id, page: d.page, totalPages: d.totalPages, total: d.total };
+    state.rechercheResultats = (page > 1 ? state.rechercheResultats : []).concat(d.results.map(function(r){ r._profilId = pr.id; return r; }));
+    st.textContent = d.total + " entreprise(s) active(s) dans ce secteur" + (rayon === "France" ? "" : " autour de " + (rechPlace ? rechPlace.label : "") ) + ". Aucune n'a forcément d'offre publiée : c'est le principe de la candidature spontanée.";
+    renderRechResults(); refreshStatusDots();
+  }, function(e){ btn.disabled = false; st.textContent = rechOffline(); });
+}
+document.getElementById("btn-rech-go").addEventListener("click", function(){ rechRun(1); });
+
+function renderRechResults(){
+  var wrap = document.getElementById("rech-results"), ec = state.profil.ecartes || {};
+  var list = state.rechercheResultats.filter(function(r){ return !ec[r.siren]; });
+  if(!list.length){ wrap.innerHTML = state.rechercheResultats.length ? '<p class="empty-note">Toutes les entreprises de cette page sont écartées.</p>' : ""; document.getElementById("rech-more").style.display = "none"; return; }
+  wrap.innerHTML = "";
+  list.forEach(function(r){
+    var nom = titleCaseName(r.nom), naf = NAF_LABELS[r.naf] || r.naf;
+    var b = document.createElement("div"); b.className = "exp-block";
+    b.innerHTML = '<div class="exp-block-head"><strong>' + esc(nom) + '</strong><span class="hint">' + esc(r.ville) + (r.cp ? " (" + esc(r.cp) + ")" : "") + '</span></div>' +
+      '<p class="hint" style="margin:0 0 8px;">' + esc(naf) + ' · effectif : ' + esc(r.effectif) + (r.employeur ? " · employeur" : "") + (r.creation ? " · créée en " + esc(r.creation) : "") + '</p>' +
+      '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-spont="' + r.siren + '">Candidature spontanée</button>' +
+      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="https://duckduckgo.com/?q=' + encodeURIComponent(nom + " recrutement " + r.ville) + '">Chercher leur page recrutement</a>' +
+      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(r.fiche) + '">Fiche entreprise</a>' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-ecarter="' + r.siren + '">Écarter</button></div>';
+    wrap.appendChild(b);
+  });
+  wrap.querySelectorAll("[data-spont]").forEach(function(btn){
+    btn.addEventListener("click", function(){ startSpontanee(state.rechercheResultats.find(function(r){ return r.siren === btn.getAttribute("data-spont"); })); });
+  });
+  wrap.querySelectorAll("[data-ecarter]").forEach(function(btn){
+    btn.addEventListener("click", function(){ state.profil.ecartes = state.profil.ecartes || {}; state.profil.ecartes[btn.getAttribute("data-ecarter")] = true; persist(); renderRechResults(); });
+  });
+  var more = document.getElementById("rech-more");
+  more.style.display = (rechLast && rechLast.page < rechLast.totalPages) ? "inline-flex" : "none";
+}
+document.getElementById("rech-more").addEventListener("click", function(){ rechRun((rechLast ? rechLast.page : 1) + 1); });
+
+// Crée une candidature spontanée pour l'entreprise choisie, avec le profil de recherche.
+function startSpontanee(res){
+  var pr = state.profils.find(function(p){ return p.id === res._profilId; });
+  if(!res || !pr) return;
+  persist();
+  document.getElementById("btn-new-dossier").click();
+  var nom = titleCaseName(res.nom), naf = NAF_LABELS[res.naf] || "";
+  anPoste.value = pr.titreVise; anEntreprise.value = nom; anUrl.value = res.fiche;
+  anTexte.value = "Candidature spontanée chez " + nom + ". Secteur : " + naf + ". Lieu : " + res.ville + ". Compétences du profil : " + (pr.motsCles || []).join(", ") + ".";
+  state.annonce.spontanee = true;
+  state.annonce.meta = { lieu: res.ville + (res.cp ? " (" + res.cp + ")" : ""), contrat: "", salaire: "", date: "", secteur: naf };
+  state.annonce.emetteur = { type: "direct", manual: true, raisons: [] };
+  state.cv.profilId = pr.id; state.cv.profilManuel = true;
+  reanalyzeAnnonce();
+  applyProfilToDossier(pr.id, true);
+  syncDossierUI(); persist();
+  switchTab("lettre");
+}
+
+/* ===================== FREELANCE : offre de service et démarchage des intermédiaires ===================== */
+
+// Types de structures à démarcher : codes d'activité (NAF) pour la recherche d'entreprises.
+var FL_CIBLES = {
+  esn:       { label: "ESN / SSII", naf: ["62.01Z","62.02A","62.09Z"], intro: "intervenir sur les missions de vos clients" },
+  conseil:   { label: "Cabinets de conseil", naf: ["70.22Z","62.02A"], intro: "renforcer vos équipes sur des missions de conseil" },
+  interim:   { label: "Agences d'intérim et de mise à disposition", naf: ["78.20Z","78.30Z"], intro: "référencer mon profil pour des missions freelance" },
+  recrut:    { label: "Cabinets de recrutement", naf: ["78.10Z"], intro: "référencer mon profil freelance pour les besoins de vos clients" },
+  portage:   { label: "Portage et services RH", naf: ["78.30Z"], intro: "référencer mon profil pour des missions en portage ou en indépendant" },
+  formation: { label: "Organismes de formation", naf: ["85.59A","85.59B"], intro: "intervenir auprès de vos apprenants et de vos clients" },
+  agence:    { label: "Agences (communication, marketing, web)", naf: ["73.11Z","70.21Z","73.12Z","74.10Z"], intro: "renforcer vos équipes sur des projets ponctuels" },
+  direct:    { label: "Entreprises du secteur du profil", naf: [], intro: "intervenir en mission ponctuelle ou récurrente" }
+};
+// Cibles conseillées selon le domaine du profil
+var FL_CIBLES_PAR_DOMAINE = {
+  dev:["esn","conseil","portage"], ia:["esn","conseil","portage"], data:["esn","conseil","portage"], design:["agence","esn","portage"], projet:["conseil","esn","portage"],
+  comm:["agence","portage","conseil"], crea:["agence","portage","direct"], formation:["formation","portage","conseil"], rh:["recrut","conseil","portage"],
+  immo:["direct","conseil"], vente:["conseil","interim","portage"], admin:["interim","portage"], client:["interim","portage"]
+};
+
+function flState(){
+  var p = state.profil;
+  p.freelance = Object.assign({ services: [], offre: "", expIds: [], dispo: "", mode: "Télétravail ou sur site", zone: "", tjm: "", showTjm: false }, p.freelance);
+  if(!Array.isArray(p.freelance.services)) p.freelance.services = [];
+  if(!Array.isArray(p.freelance.expIds)) p.freelance.expIds = [];
+  return p.freelance;
+}
+
+var flCibles = {};      // cibles cochées {cle:true}
+var flPlace = null, flLast = null;
+state.flResultats = [];
+
+function renderFreelance(){
+  var fl = flState();
+  if(!document.getElementById("fl-services")) return;
+  // services
+  var sw = document.getElementById("fl-services"); sw.innerHTML = "";
+  if(!fl.services.length) sw.innerHTML = '<p class="empty-note">Ajoute les prestations que tu proposes (ex. « Conception d\'applications web », « Formation à l\'audiovisuel »), ou colle un texte plus bas.</p>';
+  fl.services.forEach(function(sv, i){
+    var d = document.createElement("div"); d.className = "exp-block";
+    d.innerHTML = '<div class="exp-block-head"><span class="eyebrow">Prestation ' + (i + 1) + '</span><button class="icon-btn" type="button" data-fl-del="' + i + '" aria-label="Retirer cette prestation" title="Retirer">' + icon("close") + '</button></div>' +
+      '<div class="field"><label>Intitulé</label><input type="text" data-fl-svc="titre" data-i="' + i + '" value="' + esc(sv.titre) + '"></div>' +
+      '<div class="field"><label>En une ou deux phrases : ce que tu livres, pour qui</label><textarea data-fl-svc="description" data-i="' + i + '" style="min-height:60px;">' + esc(sv.description || "") + '</textarea></div>';
+    sw.appendChild(d);
+  });
+  sw.querySelectorAll("[data-fl-svc]").forEach(function(el){
+    el.addEventListener("input", function(){ fl.services[+el.getAttribute("data-i")][el.getAttribute("data-fl-svc")] = el.value; persist(); });
+  });
+  sw.querySelectorAll("[data-fl-del]").forEach(function(b){ b.addEventListener("click", function(){ fl.services.splice(+b.getAttribute("data-fl-del"), 1); persist(); renderFreelance(); }); });
+  // champs simples
+  [["fl-dispo","dispo"],["fl-zone","zone"],["fl-tjm","tjm"],["fl-offre","offre"]].forEach(function(pair){ var el = document.getElementById(pair[0]); if(document.activeElement !== el) el.value = fl[pair[1]] || ""; });
+  document.getElementById("fl-mode").value = fl.mode || "Télétravail ou sur site";
+  document.getElementById("fl-showtjm").checked = !!fl.showTjm;
+  // références = expériences de la base
+  var rw = document.getElementById("fl-refs"); rw.innerHTML = "";
+  var exps = state.library.experiences.filter(function(e){ return e.poste || e.entreprise; });
+  if(!exps.length) rw.innerHTML = '<p class="empty-note">Aucune expérience dans la base : importe un CV (onglet CV) ou colle un texte plus bas.</p>';
+  exps.forEach(function(e){
+    var on = fl.expIds.indexOf(e.id) !== -1;
+    var lab = document.createElement("label"); lab.className = "hint"; lab.style.cssText = "display:flex;gap:6px;align-items:flex-start;margin-bottom:4px;";
+    lab.innerHTML = '<input type="checkbox" data-fl-ref="' + e.id + '"' + (on ? " checked" : "") + '> <span><strong>' + esc(e.poste || e.entreprise) + '</strong>' + (e.entreprise && e.poste ? ", " + esc(e.entreprise) : "") + (e.dates ? " (" + esc(e.dates) + ")" : "") + '</span>';
+    rw.appendChild(lab);
+  });
+  rw.querySelectorAll("[data-fl-ref]").forEach(function(cb){
+    cb.addEventListener("change", function(){
+      var id = cb.getAttribute("data-fl-ref");
+      fl.expIds = fl.expIds.filter(function(x){ return x !== id; }); if(cb.checked) fl.expIds.push(id);
+      persist();
+    });
+  });
+  // profil + cibles conseillées
+  var ps = document.getElementById("fl-profil"), cur = ps.value;
+  ps.innerHTML = '<option value="">Aucun profil précis</option>' + state.profils.map(function(p){ return '<option value="' + p.id + '">' + esc(p.nom) + '</option>'; }).join("");
+  if(cur && state.profils.some(function(p){ return p.id === cur; })) ps.value = cur;
+  renderFlCibles();
+  renderFlResults();
+}
+function flProfil(){ return state.profils.find(function(p){ return p.id === document.getElementById("fl-profil").value; }) || null; }
+function flRecommended(){
+  var pr = flProfil();
+  return (pr && FL_CIBLES_PAR_DOMAINE[pr.domaine]) || ["esn", "conseil", "portage"];
+}
+function renderFlCibles(){
+  var wrap = document.getElementById("fl-cibles"), rec = flRecommended();
+  wrap.innerHTML = "";
+  Object.keys(FL_CIBLES).forEach(function(k){
+    var on = !!flCibles[k], b = document.createElement("button");
+    b.type = "button"; b.className = "chip" + (on ? "" : " suggest"); b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.textContent = (on ? "✓ " : "") + FL_CIBLES[k].label + (rec.indexOf(k) !== -1 ? " · conseillé" : "");
+    b.addEventListener("click", function(){ flCibles[k] = !flCibles[k]; renderFlCibles(); });
+    wrap.appendChild(b);
+  });
+}
+document.getElementById("fl-profil").addEventListener("change", function(){ flCibles = {}; flRecommended().forEach(function(k){ flCibles[k] = true; }); renderFlCibles(); });
+
+// saisies simples
+[["fl-dispo","dispo"],["fl-zone","zone"],["fl-tjm","tjm"],["fl-offre","offre"]].forEach(function(pair){
+  document.getElementById(pair[0]).addEventListener("input", function(){ flState()[pair[1]] = this.value; persist(); });
+});
+document.getElementById("fl-mode").addEventListener("change", function(){ flState().mode = this.value; persist(); });
+document.getElementById("fl-showtjm").addEventListener("change", function(){ flState().showTjm = this.checked; persist(); });
+document.getElementById("btn-fl-add").addEventListener("click", function(){ flState().services.push({ id: uid(), titre: "", description: "" }); persist(); renderFreelance(); });
+document.getElementById("btn-fl-offre-gen").addEventListener("click", function(){
+  var fl = flState(), t = (state.cv.titre || state.profil.titre || "").trim();
+  if(t && t === t.toUpperCase()) t = t.toLowerCase();
+  var names = fl.services.map(function(s){ return s.titre; }).filter(Boolean);
+  fl.offre = (t ? "Je suis " + lowerFirst(t) + ", en freelance. " : "Je travaille en freelance. ") + (names.length ? "Je propose : " + names.join(" ; ") + "." : "");
+  persist(); renderFreelance();
+});
+// Compléter avec un texte : même tri que l'import de CV, plus les rubriques « Services / Prestations »
+document.getElementById("btn-fl-import").addEventListener("click", function(){
+  var ta = document.getElementById("fl-import"), st = document.getElementById("fl-import-status");
+  if(!ta.value.trim()){ st.textContent = "Colle d'abord un texte."; return; }
+  document.getElementById("cv-import-text").value = ta.value;
+  doImportCv();
+  st.textContent = document.getElementById("cv-import-status").textContent || "Ajouté.";
+  ta.value = ""; persist(); renderFreelance();
+});
+
+/* ---- recherche des structures à démarcher ---- */
+function flFetch(url){
+  if(location.protocol === "file:" || (window.claude && typeof window.claude.use === "function")) return Promise.reject(new Error("offline"));
+  return fetch(url).then(function(r){ return r.json().then(function(d){ return d; }, function(){ throw new Error("noapi"); }); });
+}
+function flLieuSearch(){
+  var q = document.getElementById("fl-lieu").value.trim(), box = document.getElementById("fl-lieu-list"), st = document.getElementById("fl-status");
+  box.innerHTML = ""; if(q.length < 2){ st.textContent = "Écris le nom d'une commune."; return; }
+  st.textContent = "Recherche du lieu…";
+  flFetch("/api/lieu?q=" + encodeURIComponent(q)).then(function(d){
+    if(!d.ok || !(d.places || []).length){ st.textContent = "Aucune commune trouvée."; return; }
+    st.textContent = "Choisis la commune :";
+    d.places.forEach(function(pl){
+      var b = document.createElement("button"); b.type = "button"; b.className = "chip suggest"; b.textContent = pl.label + " (" + pl.postcode + ")";
+      b.addEventListener("click", function(){ flPlace = pl; document.getElementById("fl-lieu").value = pl.label; box.innerHTML = ""; st.textContent = "Lieu : " + pl.label + ", " + pl.context + "."; });
+      box.appendChild(b);
+    });
+    if(d.places.length === 1) box.firstChild.click();
+  }, function(){ st.textContent = rechOffline(); });
+}
+document.getElementById("btn-fl-lieu").addEventListener("click", flLieuSearch);
+document.getElementById("fl-lieu").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); flLieuSearch(); } });
+document.getElementById("fl-lieu").addEventListener("input", function(){ flPlace = null; });
+
+function flRun(page){
+  var st = document.getElementById("fl-status"), pr = flProfil();
+  var keys = Object.keys(flCibles).filter(function(k){ return flCibles[k]; });
+  if(!keys.length){ st.textContent = "Coche au moins un type de structure à démarcher."; return; }
+  var naf = [];
+  keys.forEach(function(k){
+    var codes = FL_CIBLES[k].naf;
+    if(k === "direct"){ var dom = pr && PROFIL_DOMAINES.find(function(d){ return d.key === pr.domaine; }); codes = (dom && dom.naf) || []; }
+    codes.forEach(function(c){ if(naf.indexOf(c) === -1) naf.push(c); });
+  });
+  if(!naf.length){ st.textContent = "Pour « Entreprises du secteur du profil », choisis un profil standard."; return; }
+  var rayon = document.getElementById("fl-rayon").value, taille = document.getElementById("fl-taille").value;
+  var qs = ["naf=" + encodeURIComponent(naf.slice(0, 8).join(",")), "page=" + (page || 1)];
+  if(taille) qs.push("taille=" + taille);
+  if(rayon !== "France"){
+    if(!flPlace){ st.textContent = "Choisis d'abord un lieu (bouton « Chercher le lieu »), ou mets « Toute la France »."; return; }
+    if(+rayon <= 50){ qs.push("lat=" + flPlace.lat, "lon=" + flPlace.lon, "radius=" + rayon); } else { qs.push("dep=" + encodeURIComponent(flPlace.dep)); }
+  }
+  var btn = document.getElementById("btn-fl-go"); btn.disabled = true; st.textContent = "Recherche en cours…";
+  flFetch("/api/entreprises?" + qs.join("&")).then(function(d){
+    btn.disabled = false;
+    if(!d.ok){ st.textContent = d.reason === "rate" ? "Trop de recherches d'un coup : réessaie dans une minute." : "La recherche n'a pas abouti (" + (d.reason || "erreur") + ")."; return; }
+    flLast = { page: d.page, totalPages: d.totalPages };
+    var cible = keys.length === 1 ? keys[0] : keys[0];
+    state.flResultats = (page > 1 ? state.flResultats : []).concat(d.results.map(function(r){ r._cibles = keys.slice(); r._profilId = pr ? pr.id : ""; return r; }));
+    st.textContent = d.total + " structure(s) active(s) correspondant à ces types" + (rayon === "France" ? "" : " autour de " + (flPlace ? flPlace.label : "")) + ". Une structure peut être classée dans un autre type que celui coché : vérifie avant d'écrire.";
+    renderFlResults();
+  }, function(){ btn.disabled = false; st.textContent = rechOffline(); });
+}
+document.getElementById("btn-fl-go").addEventListener("click", function(){ flRun(1); });
+document.getElementById("fl-more").addEventListener("click", function(){ flRun((flLast ? flLast.page : 1) + 1); });
+
+// Quel type de structure est cette entreprise ? d'après son code d'activité
+function flCibleDe(res){
+  var order = ["interim","recrut","portage","formation","agence","esn","conseil"];
+  var wanted = res._cibles || [];
+  for(var i = 0; i < order.length; i++){ var k = order[i]; if(wanted.indexOf(k) !== -1 && FL_CIBLES[k].naf.indexOf(res.naf) !== -1) return k; }
+  return wanted.indexOf("direct") !== -1 ? "direct" : (wanted[0] || "conseil");
+}
+
+function renderFlResults(){
+  var wrap = document.getElementById("fl-results"), ec = state.profil.ecartes || {};
+  var list = state.flResultats.filter(function(r){ return !ec[r.siren]; });
+  document.getElementById("fl-more").style.display = (flLast && flLast.page < flLast.totalPages && state.flResultats.length) ? "inline-flex" : "none";
+  if(!list.length){ wrap.innerHTML = ""; return; }
+  wrap.innerHTML = "";
+  list.forEach(function(r){
+    var nom = titleCaseName(r.nom), naf = NAF_LABELS[r.naf] || r.naf, ck = flCibleDe(r);
+    var b = document.createElement("div"); b.className = "exp-block";
+    b.innerHTML = '<div class="exp-block-head"><strong>' + esc(nom) + '</strong><span class="hint">' + esc(r.ville) + (r.cp ? " (" + esc(r.cp) + ")" : "") + '</span></div>' +
+      '<p class="hint" style="margin:0 0 8px;">' + esc(FL_CIBLES[ck].label) + ' · ' + esc(naf) + ' · effectif : ' + esc(r.effectif) + '</p>' +
+      '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-fl-lettre="' + r.siren + '">Lettre d\'offre de service</button>' +
+      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="https://duckduckgo.com/?q=' + encodeURIComponent(nom + " devenir prestataire freelance partenaire " + r.ville) + '">Chercher leur page prestataires</a>' +
+      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(r.fiche) + '">Fiche entreprise</a>' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-fl-ecarter="' + r.siren + '">Écarter</button></div>';
+    wrap.appendChild(b);
+  });
+  wrap.querySelectorAll("[data-fl-lettre]").forEach(function(btn){
+    btn.addEventListener("click", function(){ startOffreService(state.flResultats.find(function(r){ return r.siren === btn.getAttribute("data-fl-lettre"); })); });
+  });
+  wrap.querySelectorAll("[data-fl-ecarter]").forEach(function(btn){
+    btn.addEventListener("click", function(){ state.profil.ecartes = state.profil.ecartes || {}; state.profil.ecartes[btn.getAttribute("data-fl-ecarter")] = true; persist(); renderFlResults(); });
+  });
+}
+
+// Nouvelle « candidature » de type offre de service pour la structure choisie.
+function startOffreService(res){
+  var fl = flState();
+  if(!res) return;
+  if(!fl.services.some(function(s){ return (s.titre || "").trim(); })){
+    document.getElementById("fl-status").textContent = "Ajoute d'abord au moins une prestation dans « Mon offre de service ».";
+    return;
+  }
+  persist();
+  document.getElementById("btn-new-dossier").click();
+  var ck = flCibleDe(res), nom = titleCaseName(res.nom), naf = NAF_LABELS[res.naf] || "";
+  var main = fl.services.filter(function(s){ return (s.titre || "").trim(); })[0].titre;
+  anPoste.value = main; anEntreprise.value = nom; anUrl.value = res.fiche;
+  anTexte.value = "Offre de service à " + nom + " (" + FL_CIBLES[ck].label + "). Secteur : " + naf + ". Prestations : " + fl.services.map(function(s){ return s.titre; }).filter(Boolean).join(", ") + ".";
+  state.annonce.service = true; state.annonce.cible = ck;
+  state.annonce.meta = { lieu: res.ville + (res.cp ? " (" + res.cp + ")" : ""), contrat: "Freelance", salaire: "", date: "", secteur: naf };
+  state.annonce.emetteur = { type: "direct", manual: true, raisons: [] };
+  var pr = flProfil();
+  if(pr){ state.cv.profilId = pr.id; state.cv.profilManuel = true; }
+  reanalyzeAnnonce();
+  if(pr){ applyProfilToDossier(pr.id, false); }
+  state.lettre.disponibilite = "";
+  syncDossierUI(); persist();
+  switchTab("lettre");
+}
+
+/* ---- lettre d'offre de service (à la place de la lettre de motivation) ---- */
+function generateOffreServiceParagraphs(){
+  var l = state.lettre, an = state.annonce, fl = flState(), en = l.lang === "en";
+  var cible = FL_CIBLES[an.cible] || FL_CIBLES.conseil;
+  var nom = (an.entreprise || "").trim();
+  var titre = (state.cv.titre || state.profil.titre || "").trim();
+  if(titre && titre === titre.toUpperCase()) titre = titre.toLowerCase();
+  var svcs = fl.services.filter(function(s){ return (s.titre || "").trim(); });
+  var paras = [en ? "Dear Sir or Madam," : "Madame, Monsieur,"];
+
+  var who = titre ? (en ? "I am " + titre + " working as a freelancer" : "Je suis " + lowerFirst(titre) + ", en freelance") : (en ? "I work as a freelancer" : "Je travaille en freelance");
+  paras.push(en
+    ? who + ", and I would like to offer " + (nom ? nom + " " : "you ") + "my services to " + cible.intro + "."
+    : who + ", et je souhaite proposer mes services" + (nom ? " à " + nom : "") + " pour " + cible.intro + ".");
+
+  if(svcs.length){
+    var first = svcs[0];
+    paras.push((en ? "My services: " : "Mes interventions : ") + svcs.map(function(s){ return lowerFirst(s.titre.trim()); }).join(en ? "; " : " ; ") + "." + ((first.description || "").trim() ? " " + first.description.trim().replace(/\s+/g, " ") : ""));
+  }
+  // références : expériences cochées, sinon les deux plus proches des prestations
+  var refs = state.library.experiences.filter(function(e){ return fl.expIds.indexOf(e.id) !== -1; });
+  if(!refs.length){
+    var kw = svcs.map(function(s){ return { term: s.titre, count: 1, kind: "skill" }; });
+    refs = state.library.experiences.filter(function(e){ return e.poste || e.entreprise; }).map(function(e, i){ return { e: e, i: i, sc: scoreAgainstKeywords([e.poste, e.entreprise, expDetails(e)].join(" "), kw) }; })
+      .sort(function(a, b){ return (b.sc - a.sc) || (a.i - b.i); }).slice(0, 2).map(function(x){ return x.e; });
+  }
+  refs.slice(0, 3).forEach(function(e, i){
+    var facts = expDetails(e).split("\n").map(trimEnd).filter(Boolean).slice(0, 2).map(lowerFirst);
+    var s = en
+      ? (i === 0 ? "Recent reference: " : "Also: ") + (e.poste || "mission") + (e.entreprise ? " at " + e.entreprise : "") + (e.dates ? " (" + e.dates + ")" : "") + (facts.length ? ", " + facts.join("; ") + "." : ".")
+      : (i === 0 ? "Référence récente : " : "Autre référence : ") + (e.poste || "mission") + (e.entreprise ? " chez " + e.entreprise : "") + (e.dates ? " (" + e.dates + ")" : "") + (facts.length ? ", " + facts.join(" ; ") + "." : ".");
+    paras.push(s);
+  });
+  // modalités
+  var mod = [];
+  if((fl.dispo || "").trim()) mod.push((en ? "Availability: " : "Disponibilité : ") + fl.dispo.trim());
+  if((fl.mode || "").trim()) mod.push((en ? "Working mode: " : "Modalités : ") + fl.mode.trim().toLowerCase() + ((fl.zone || "").trim() ? (en ? ", " : ", ") + fl.zone.trim() : ""));
+  if(fl.showTjm && (fl.tjm || "").trim()) mod.push((en ? "Daily rate: " : "Tarif indicatif : ") + fl.tjm.trim());
+  if(mod.length) paras.push(mod.join(". ") + ".");
+  paras.push(en
+    ? "I can send my CV and detailed references, and I am available for a short call whenever suits you."
+    : (an.cible === "interim" || an.cible === "recrut" || an.cible === "portage"
+        ? "Je peux transmettre mon CV et des références détaillées pour que mon profil soit référencé, et je reste disponible pour un échange de vingt minutes."
+        : "Je peux envoyer mon CV et des références détaillées, et je reste disponible pour un échange de vingt minutes à votre convenance."));
+  return paras.map(cleanLetterText);
+}
+
 /* ===================== CANDIDATURES MULTIPLES : barre, bascule, sauvegarde locale ===================== */
 
 function renderDossierBar(){
@@ -3616,15 +4708,15 @@ function renderDossierBar(){
 
 // Recharge toute l'interface depuis le dossier actif (champs, aperçus, suggestions).
 function syncDossierUI(){
+  ATS_LAST_LOG = null;
+  renderProfilSelect(); renderProfils();
   anPoste.value = state.annonce.poste || "";
   anEntreprise.value = state.annonce.entreprise || "";
   anUrl.value = state.annonce.url || "";
   anTexte.value = state.annonce.texte || "";
   renderAnalyseCard();
   document.getElementById("cv-resume").value = state.cv.resume || "";
-  document.querySelectorAll('#format-segmented button').forEach(function(b){ var on = b.getAttribute("data-format") === state.cv.format; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
   document.querySelectorAll('#lang-segmented button').forEach(function(b){ var on = b.getAttribute("data-lang") === state.cv.lang; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
-  document.getElementById("suisse-fields").style.display = (state.cv.format === "suisse") ? "block" : "none";
   document.getElementById("l-destinataire").value = state.lettre.destinataire || "";
   document.getElementById("l-disponibilite").value = state.lettre.disponibilite || "";
   document.querySelectorAll('#tone-segmented button').forEach(function(b){ var on = b.getAttribute('data-tone') === state.lettre.ton; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
@@ -3658,7 +4750,7 @@ document.getElementById("btn-new-dossier").addEventListener("click", function(){
   persist();
   var cur = currentDossier(), d = makeDossier();
   // la nouvelle candidature part de la même base ; on reprend seulement les réglages de présentation
-  d.cv.lang = state.cv.lang; d.cv.format = state.cv.format; d.cv.resume = state.cv.resume;
+  d.cv.lang = state.cv.lang; d.cv.resume = state.cv.resume;
   d.lettre.lang = state.lettre.lang; d.lettre.ton = state.lettre.ton;
   state.dossiers.push(normDossier(d));
   activateDossier(d.id);
@@ -3704,9 +4796,6 @@ function renderPersonBar(){
 // Recharge tout ce qui dépend de la personne (profil, base, suivi) puis de la candidature active.
 function syncPersonUI(){
   ["nom", "titre", "email", "tel", "ville", "lien", "langues"].forEach(function(f){ document.getElementById("cv-" + f).value = state.profil[f] || ""; });
-  [["suisse-naissance", "dateNaissance"], ["suisse-nationalite", "nationalite"], ["suisse-permis", "permis"], ["suisse-etat", "etatCivil"]].forEach(function(pair){
-    document.getElementById(pair[0]).value = state.profil.suisse[pair[1]] || "";
-  });
   renderPhotoThumb();
   renderArchiveList(); renderReferencePanel();
   renderCandidaturesList();
@@ -3750,7 +4839,7 @@ document.getElementById("btn-backup").addEventListener("click", function(){
   persist();
   var p = currentPerson();
   var data = JSON.stringify({ app: "atelier-candidature", version: 4, exportedAt: new Date().toISOString(), nom: personLabel(p),
-    data: { profil: state.profil, library: state.library, candidatures: state.candidatures, dossiers: state.dossiers, currentId: state.currentId } }, null, 1);
+    data: { profils: state.profils, profil: state.profil, library: state.library, candidatures: state.candidatures, dossiers: state.dossiers, currentId: state.currentId } }, null, 1);
   var blob = new Blob([data], { type: "application/json" });
   var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -3885,6 +4974,8 @@ function relevantExperiences(max){
 function annonceForAI(){
   var em = state.annonce.emetteur || {};
   return { poste: scrubForAI(state.annonce.poste), entreprise: scrubForAI(state.annonce.entreprise),
+    candidature_spontanee: !!state.annonce.spontanee,
+    offre_de_service_freelance: state.annonce.service ? { cible: (FL_CIBLES[state.annonce.cible] || {}).label || "", prestations: flState().services.map(function(s){ return { titre: scrubForAI(s.titre), description: scrubForAI(s.description) }; }), disponibilite: scrubForAI(flState().dispo), modalites: scrubForAI(flState().mode + " " + flState().zone), tarif: flState().showTjm ? scrubForAI(flState().tjm) : "" } : null,
     qui_publie: em.type ? (EMETTEUR_LABELS[em.type] || em.type) : "non déterminé",
     entreprise_finale: scrubForAI(state.annonce.clientFinal),
     lieu: scrubForAI((state.annonce.meta || {}).lieu), contrat: scrubForAI((state.annonce.meta || {}).contrat),
@@ -3983,7 +5074,7 @@ function addRemarque(){
 document.getElementById("btn-affiner-add").addEventListener("click", addRemarque);
 document.getElementById("affiner-input").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); addRemarque(); } });
 
-function lettreCurrentParagraphs(){ return Array.isArray(state.lettre.corps) && state.lettre.corps.length ? state.lettre.corps : generateLettreParagraphs(); }
+function lettreCurrentParagraphs(){ return Array.isArray(state.lettre.corps) && state.lettre.corps.length ? state.lettre.corps : generateLettre(); }
 
 document.getElementById("btn-affiner-ia").addEventListener("click", function(){
   var l = state.lettre, st = document.getElementById("affiner-status");
@@ -4004,7 +5095,7 @@ document.getElementById("btn-affiner-ia").addEventListener("click", function(){
     langue: en ? "anglais" : "français", ton: l.ton,
     options: { courte: !!(l.options && l.options.court), plus_de_faits_concrets: !!(l.options && l.options.concret) },
     annonce: annonceForAI(),
-    titre_professionnel: scrubForAI(state.profil.titre),
+    titre_professionnel: scrubForAI(state.cv.titre || state.profil.titre),
     experiences: relevantExperiences(4).map(function(e){ return { poste: scrubForAI(e.poste), entreprise: scrubForAI(e.entreprise), dates: e.dates, realisations: scrubForAI(expDetails(e)).split("\n").filter(Boolean).slice(0, 5) }; }),
     competences: state.library.competences.map(function(c){ return scrubForAI(c.label); }).slice(0, 30),
     voix: { description: scrubForAI(voix.description), a_eviter: scrubForAI(voix.eviter), formule_de_fin: scrubForAI(voix.formuleFinale) },
@@ -4014,7 +5105,7 @@ document.getElementById("btn-affiner-ia").addEventListener("click", function(){
     remarques: l.remarques || [],
     format_reponse: '{"paragraphs":["..."]}'
   };
-  var system = "Tu rédiges des lettres de motivation pour une personne précise, avec sa voix. 150 à 250 mots, sans formule d'appel ni signature (l'application les ajoute). Adapte l'adresse au type d'émetteur (si cabinet ou intérim : on écrit au recruteur pour le compte de son client, sans prétendre connaître l'entreprise finale ; si recrutement direct : on s'adresse à l'entreprise ; si ESN : on valorise l'adaptabilité de missions seulement si les expériences le montrent). Structure : une accroche précise sur le poste, un ou deux paragraphes de preuves tirées des expériences fournies et reprenant naturellement les mots-clés de l'annonce que la personne maîtrise réellement, une phrase sur l'entreprise seulement si l'annonce en parle, une clôture courte (reprends la formule de fin fournie si elle existe, sinon reste sobre). Respecte la voix décrite et évite ce qui est listé à éviter. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
+  var system = "Tu rédiges des lettres de motivation pour une personne précise, avec sa voix. 150 à 250 mots, sans formule d'appel ni signature (l'application les ajoute). Si offre_de_service_freelance n'est pas nul, ce n'est pas une candidature : écris une lettre d'offre de service d'un indépendant à la structure ciblée (prestations, références tirées des expériences, modalités), sans parler de poste ni de candidature. Si candidature_spontanee est vrai, il n'y a pas d'annonce : écris une candidature spontanée (secteur et lieu de l'entreprise, profil visé), sans prétendre qu'un poste est ouvert. Adapte l'adresse au type d'émetteur (si cabinet ou intérim : on écrit au recruteur pour le compte de son client, sans prétendre connaître l'entreprise finale ; si recrutement direct : on s'adresse à l'entreprise ; si ESN : on valorise l'adaptabilité de missions seulement si les expériences le montrent). Structure : une accroche précise sur le poste, un ou deux paragraphes de preuves tirées des expériences fournies et reprenant naturellement les mots-clés de l'annonce que la personne maîtrise réellement, une phrase sur l'entreprise seulement si l'annonce en parle, une clôture courte (reprends la formule de fin fournie si elle existe, sinon reste sobre). Respecte la voix décrite et évite ce qui est listé à éviter. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
   {
     var btn = this; btn.disabled = true; st.setAttribute("data-busy", "1"); st.textContent = "Rédaction en cours…";
     iaAsk(system, user, "Annonce, expériences, voix et remarques (sans nom ni coordonnées).").then(function(out){
@@ -4091,8 +5182,19 @@ renderDossierBar();
 renderPersonBar();
 renderVoixCard();
 renderAnalyseCard();
+renderProfilSelect();
+renderProfils();
 refreshIaState();
 
 </script>
+<footer class="app-footer" role="contentinfo">
+  <span>Version de pré-production · aucun cookie, aucun suivi, vos données restent dans votre navigateur.</span>
+  <nav aria-label="Informations légales">
+    <a href="legal/mentions-legales.html">Mentions légales</a>
+    <a href="legal/confidentialite.html">Confidentialité</a>
+    <a href="legal/cgu.html">Conditions d'utilisation</a>
+    <a href="legal/accessibilite.html">Accessibilité</a>
+  </nav>
+</footer>
 </body>
 </html>

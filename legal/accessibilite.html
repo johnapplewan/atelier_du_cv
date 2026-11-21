@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accessibilité · Atelier Candidature</title>
+<meta name="description" content="Déclaration d'accessibilité du site Atelier Candidature.">
+<link rel="stylesheet" href="../vendor/fonts.css">
+<link rel="stylesheet" href="legal.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site">
+  <a class="brand" href="../">Atelier Candidature</a>
+  <nav class="legal-nav" aria-label="Pages légales">
+    <a href="mentions-legales.html">Mentions légales</a>
+    <a href="confidentialite.html">Confidentialité</a>
+    <a href="cgu.html">Conditions d'utilisation</a>
+    <a href="accessibilite.html">Accessibilité</a>
+  </nav>
+</header>
+<main id="contenu">
+<p class="banner todo" id="todo-banner" hidden>Version de pré-production : certaines informations de l'éditeur restent à compléter (champs en rouge).</p>
+
+<h1>Déclaration d'accessibilité</h1>
+<p class="meta">Dernière mise à jour : <span data-l="maj"></span></p>
+
+<p>L'éditeur s'engage à rendre ce site accessible, dans l'esprit des WCAG 2.1 niveau AA et du RGAA.</p>
+
+<h2>État de conformité</h2>
+<p>Le site n'a pas fait l'objet d'un audit RGAA complet par un tiers : son niveau de conformité n'est pas évalué officiellement. Un audit interne a porté sur les contrastes de couleurs, les icônes et le comportement sur mobile.</p>
+
+<h2>Mesures en place</h2>
+<ul>
+  <li>Contrastes de couleurs vérifiés au niveau AA, thèmes clair, sombre et automatique ;</li>
+  <li>boutons-icônes dotés d'un nom accessible, indicateurs d'état avec alternative textuelle ;</li>
+  <li>navigation au clavier et focus visible, lien d'évitement sur les pages légales ;</li>
+  <li>affichage adaptatif jusqu'aux petits écrans, respect de la préférence de réduction des animations ;</li>
+  <li>langue de la page déclarée.</li>
+</ul>
+
+<h2>Limites connues</h2>
+<ul>
+  <li>Les documents PDF générés (CV, lettre) sont des images : ils ne sont pas balisés pour les lecteurs d'écran. Le texte reste disponible dans l'application ;</li>
+  <li>certains éditeurs de texte intégrés à l'aperçu (CV, lettre) n'ont pas encore été testés avec tous les lecteurs d'écran.</li>
+</ul>
+
+<h2>Retour d'information et contact</h2>
+<p>Si vous ne parvenez pas à accéder à un contenu ou à une fonction, écrivez à <span data-l="editeur.email"></span> : une alternative vous sera proposée. En l'absence de réponse satisfaisante, vous pouvez saisir le Défenseur des droits : <a href="https://formulaire.defenseurdesdroits.fr/" rel="noopener">formulaire.defenseurdesdroits.fr</a>.</p>
+
+</main>
+<footer class="site">
+  <p>Atelier Candidature, version de pré-production. Aucun cookie, aucun suivi, aucune donnée de candidature envoyée à l'éditeur.</p>
+  <p><a href="../">Retour à l'application</a></p>
+</footer>
+<script src="config.js"></script>
+<script src="legal.js"></script>
+</body>
+</html>
