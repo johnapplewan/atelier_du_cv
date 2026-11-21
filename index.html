@@ -82,13 +82,18 @@
   :focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
   @media (prefers-reduced-motion: reduce){ *{ animation-duration:0.001ms !important; transition-duration:0.001ms !important; } }
 
-  .app{ display:grid; grid-template-columns:232px 1fr; grid-template-rows:auto 1fr; grid-template-areas:"top top" "rail main"; min-height:100vh; }
+  .app{ display:grid; grid-template-columns:232px 1fr; grid-template-rows:auto auto 1fr; grid-template-areas:"top top" "doss doss" "rail main"; min-height:100vh; }
   .topbar{ grid-area:top; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:18px 28px; border-bottom:1px solid var(--border); background:var(--surface); flex-wrap:wrap; }
   .brand{ display:flex; align-items:baseline; gap:10px; }
   .brand-mark{ font-family:var(--font-display); font-style:italic; font-weight:500; font-size:22px; color:var(--accent); }
   .brand-name{ font-family:var(--font-display); font-weight:600; font-size:18px; }
   .brand-sub{ font-size:12.5px; color:var(--ink-600); }
   .topbar-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .dossier-bar{ grid-area:doss; display:flex; align-items:center; gap:10px; flex-wrap:wrap; padding:10px 28px; background:var(--surface-2); border-bottom:1px solid var(--border); min-width:0; }
+  .dossier-bar select{ min-width:180px; max-width:300px; }
+  .dossier-bar input[type=text]{ min-width:150px; max-width:230px; }
+  .dossier-bar .spacer{ flex:1 1 20px; }
+  @media (max-width:860px){ .dossier-bar{ padding:10px 16px; } .dossier-bar select,.dossier-bar input[type=text]{ max-width:none; flex:1 1 180px; } }
   .topbar-status-row{ grid-column:2; padding:0 28px; display:flex; gap:16px; justify-content:flex-end; }
 
   .btn{ display:inline-flex; align-items:center; gap:7px; padding:9px 15px; border-radius:8px; border:1px solid var(--border-strong); background:var(--surface-2); color:var(--ink-900); font-size:13.5px; font-weight:600; cursor:pointer; transition:background .15s ease, border-color .15s ease, transform .05s ease; white-space:nowrap; }
@@ -118,7 +123,7 @@
   /* En dessous de ~860px, la barre latérale fixe (232px) écraserait le contenu : elle devient
      une rangée d'onglets horizontale et défilable, au-dessus du contenu plutôt qu'à côté. */
   @media (max-width:860px){
-    .app{ grid-template-columns:1fr; grid-template-areas:"top" "rail" "main"; }
+    .app{ grid-template-columns:1fr; grid-template-areas:"top" "doss" "rail" "main"; }
     /* Un enfant de grille garde par défaut min-width:auto (sa taille de contenu minimale), même
        sur une seule colonne : sans ce reset, un onglet ou un bouton qui ne se réduit pas assez
        repousse toute la grille au-delà de l'écran. */
@@ -278,6 +283,18 @@
       <button class="btn btn-primary btn-sm" id="btn-export-all">Télécharger le dossier complet (PDF)</button>
     </div>
   </header>
+  <div class="dossier-bar" id="dossier-bar">
+    <label for="dossier-select" class="eyebrow" style="margin:0;">Candidature</label>
+    <select id="dossier-select" aria-label="Choisir la candidature"></select>
+    <input type="text" id="dossier-title" aria-label="Nom de la candidature" placeholder="Nom de la candidature">
+    <button class="btn btn-primary btn-sm" id="btn-new-dossier" title="Démarrer une nouvelle annonce avec ta base d'expériences">+ Nouvelle candidature</button>
+    <button class="btn btn-ghost btn-sm" id="btn-dup-dossier" title="Partir de cette candidature pour une annonce voisine">Dupliquer</button>
+    <button class="btn btn-ghost btn-sm" id="btn-del-dossier">Supprimer</button>
+    <span class="spacer"></span>
+    <button class="btn btn-ghost btn-sm" id="btn-backup" title="Télécharge ta base et tes candidatures dans un fichier sur ton ordinateur">Sauvegarder</button>
+    <button class="btn btn-ghost btn-sm" id="btn-restore">Restaurer…</button>
+    <input type="file" id="restore-file" accept="application/json,.json" style="display:none">
+  </div>
   <div class="topbar-status-row">
     <span class="download-status" id="export-cv-lettre-status"></span>
     <span class="download-status" id="export-all-status"></span>
@@ -359,7 +376,8 @@
               <div class="field"><label for="cv-ville">Ville</label><input type="text" id="cv-ville" placeholder="ex. Lyon"></div>
               <div class="field"><label for="cv-lien">Lien (LinkedIn, portfolio…)</label><input type="text" id="cv-lien" placeholder="linkedin.com/in/…"></div>
             </div>
-            <div class="field"><label for="cv-resume">Résumé (2-3 phrases)</label><textarea id="cv-resume" placeholder="Ce que tu apportes, en une ou deux phrases claires."></textarea></div>
+            <div class="field"><label for="cv-resume">Résumé (2-3 phrases)</label><textarea id="cv-resume" placeholder="Ce que tu apportes, en une ou deux phrases claires."></textarea>
+              <div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-ghost btn-sm" id="btn-resume-auto" type="button">Adapter l'accroche à l'annonce</button><span class="hint" id="resume-auto-status"></span></div></div>
             <div class="field"><label for="cv-langues">Langues</label><input type="text" id="cv-langues" placeholder="ex. Français (natif), Anglais (courant)"></div>
 
             <div class="field">
@@ -955,8 +973,76 @@ try{
   }
 }catch(e){ /* stockage indisponible ou corrompu : on repart d'un état par défaut */ }
 
+/* ---------------- candidatures multiples ----------------
+   La BASE (profil, bibliothèque d'expériences/formations/compétences/rubriques, lettres archivées,
+   suivi) est commune. Chaque candidature (« dossier ») a ses propres annonce, CV recomposé, lettre,
+   annexe et entraînement. state.annonce / state.cv / state.lettre… pointent toujours vers le dossier
+   actif, ce qui garde tout le reste du code inchangé. */
+
+function makeDossier(titre){
+  var d = defaultState();
+  return { id: uid(), titre: titre || "", titreAuto: !titre, created: Date.now(),
+    annonce: d.annonce, cv: d.cv, lettre: d.lettre, annexeDossier: d.annexeDossier, entretien: d.entretien };
+}
+function normDossier(raw){
+  var d = makeDossier();
+  var out = {
+    id: raw.id || d.id, titre: raw.titre || "", titreAuto: raw.titreAuto !== false, created: raw.created || Date.now(),
+    annonce: Object.assign({}, d.annonce, raw.annonce),
+    cv: Object.assign({}, d.cv, raw.cv),
+    lettre: Object.assign({}, d.lettre, raw.lettre),
+    annexeDossier: Object.assign({}, d.annexeDossier, raw.annexeDossier),
+    entretien: Object.assign({}, d.entretien, raw.entretien, { reponses: Object.assign({}, raw.entretien && raw.entretien.reponses) })
+  };
+  if(!out.annonce.keywords) out.annonce.keywords = [];
+  if(!out.cv.excludedExp) out.cv.excludedExp = [];
+  if(!out.lettre.motivPrompts) out.lettre.motivPrompts = out.lettre.motivations.map(function(){ return ""; });
+  return out;
+}
+function currentDossier(){
+  return state.dossiers.find(function(d){ return d.id === state.currentId; }) || state.dossiers[0];
+}
+function activateDossier(id){
+  var d = state.dossiers.find(function(x){ return x.id === id; }) || state.dossiers[0];
+  state.currentId = d.id;
+  state.annonce = d.annonce; state.cv = d.cv; state.lettre = d.lettre;
+  state.annexeDossier = d.annexeDossier; state.entretien = d.entretien;
+}
+function dossierAutoTitle(d){
+  var a = d.annonce || {};
+  var t = [a.poste, a.entreprise].map(function(x){ return (x || "").trim(); }).filter(Boolean).join(" · ");
+  return t || "Nouvelle candidature";
+}
+function syncCurrentDossier(){
+  var d = currentDossier(); if(!d) return;
+  d.annonce = state.annonce; d.cv = state.cv; d.lettre = state.lettre;
+  d.annexeDossier = state.annexeDossier; d.entretien = state.entretien;
+  if(d.titreAuto || !d.titre) d.titre = dossierAutoTitle(d);
+}
+
+(function initDossiers(){
+  state.dossiers = [];
+  var src = null;
+  try{ src = JSON.parse(localStorage.getItem("atelier-candidature-v2") || "null"); }catch(e){}
+  if(src && Array.isArray(src.dossiers) && src.dossiers.length){
+    src.dossiers.forEach(function(raw){ state.dossiers.push(normDossier(raw)); });
+  } else {
+    // ancien format (une seule candidature) : elle devient le premier dossier
+    var first = normDossier({ annonce: state.annonce, cv: state.cv, lettre: state.lettre, annexeDossier: state.annexeDossier, entretien: state.entretien });
+    first.titreAuto = true; first.titre = dossierAutoTitle(first);
+    state.dossiers.push(first);
+  }
+  activateDossier(src && src.currentId);
+})();
+
 function persist(){
-  try{ localStorage.setItem("atelier-candidature-v2", JSON.stringify(state)); }catch(e){}
+  try{
+    syncCurrentDossier();
+    localStorage.setItem("atelier-candidature-v2", JSON.stringify({
+      version: 3, profil: state.profil, library: state.library, candidatures: state.candidatures,
+      dossiers: state.dossiers, currentId: state.currentId
+    }));
+  }catch(e){}
 }
 
 /* ---------------- onglets & statut ---------------- */
@@ -1281,7 +1367,30 @@ function renderKeywordChips(){
   });
 }
 
-function reanalyzeAnnonce(){
+// Devine l'intitulé et l'entreprise à partir du texte collé (seulement si les champs sont vides).
+function guessAnnonceMeta(text){
+  var lines = (text || "").split(/\r?\n/).map(function(l){ return l.replace(/^[#*\-\s]+/, "").replace(/\*\*/g, "").trim(); }).filter(Boolean);
+  var poste = "", entreprise = "", m;
+  for(var i = 0; i < Math.min(lines.length, 25) && (!poste || !entreprise); i++){
+    var l = lines[i];
+    if(!poste && (m = l.match(/^(?:intitul[ée] du poste|poste|offre(?: d['’]emploi)?|job title|titre)\s*:\s*(.{3,90})$/i))) poste = m[1].trim();
+    if(!entreprise && (m = l.match(/^(?:entreprise|soci[ée]t[ée]|employeur|company)\s*:\s*(.{2,60})$/i))) entreprise = m[1].trim();
+  }
+  if(!poste && lines.length && lines[0].length <= 90 && !/[.!?]$/.test(lines[0])){
+    poste = lines[0].replace(/^(offre d['’]emploi|offre|annonce)\s*[:\-–]\s*/i, "");
+    if((m = poste.match(/^(.{3,70}?)\s+(?:chez|[-–—@|])\s+([A-ZÀ-Ý][^|]{1,40})$/)) ){ poste = m[1].trim(); if(!entreprise) entreprise = m[2].trim(); }
+  }
+  if(!entreprise && (m = (text || "").match(/(?:rejoindre|rejoignez|chez)\s+([A-ZÀ-Ý][\wÀ-ÿ&'’.-]+(?:\s+[A-ZÀ-Ý][\wÀ-ÿ&'’.-]+){0,3})/))) entreprise = m[1].trim();
+  return { poste: poste, entreprise: entreprise };
+}
+
+function reanalyzeAnnonce(fromText){
+  if(!fromText || !anTexte.value.trim()){ /* rien à deviner */ }
+  else if(!anPoste.value.trim() || !anEntreprise.value.trim()){
+    var g = guessAnnonceMeta(anTexte.value);
+    if(!anPoste.value.trim() && g.poste) anPoste.value = g.poste;
+    if(!anEntreprise.value.trim() && g.entreprise) anEntreprise.value = g.entreprise;
+  }
   state.annonce.poste = anPoste.value;
   state.annonce.entreprise = anEntreprise.value;
   state.annonce.url = anUrl.value;
@@ -1294,9 +1403,10 @@ function reanalyzeAnnonce(){
   renderAnnexeSuggestions();
   refreshStatusDots();
   persist();
+  renderDossierBar();
 }
 [anPoste, anEntreprise, anUrl].forEach(function(el){ el.addEventListener("input", reanalyzeAnnonce); });
-anTexte.addEventListener("input", debounce(reanalyzeAnnonce, 350));
+anTexte.addEventListener("input", debounce(function(){ reanalyzeAnnonce(true); }, 350));
 
 /* ===================== MODULE CV (bibliothèque + auto-composition) ===================== */
 
@@ -1318,6 +1428,9 @@ function recomposerCV(){
   });
   expScored.sort(function(a, b){ return (b.score - a.score) || (a.idx - b.idx); });
   state.cv.selectedExp = expScored.map(function(x){ return x.id; });
+  // CV sur mesure : on garde les 5 expériences les plus proches de l'annonce, les autres restent dans la base
+  // (décochables / recochables dans la liste) mais ne figurent pas dans ce CV.
+  state.cv.excludedExp = kws.length ? expScored.slice(5).filter(function(x){ return x.score === 0; }).map(function(x){ return x.id; }) : [];
 
   var formScored = lib.formations.map(function(f, idx){
     return { id: f.id, idx: idx, score: scoreAgainstKeywords([f.diplome, f.etablissement].join(" "), kws) };
@@ -1354,7 +1467,7 @@ function cvFullText(){
   var parts = [cv.resume, p.langues];
   p.atouts.forEach(function(a){ parts.push(a); });
   lib.competences.forEach(function(c){ parts.push(c.label); });
-  lib.experiences.forEach(function(e){ parts.push(e.poste, e.entreprise, e.details); });
+  lib.experiences.forEach(function(e){ if((cv.excludedExp || []).indexOf(e.id) === -1) parts.push(e.poste, e.entreprise, e.details); });
   lib.formations.forEach(function(f){ parts.push(f.diplome, f.etablissement, f.details); });
   (lib.sections || []).forEach(function(x){ parts.push(x.titre, x.texte); });
   return norm(parts.join(" \n "));
@@ -1413,6 +1526,7 @@ function renderExpList(){
     block.innerHTML =
       '<div class="exp-block-head"><span class="eyebrow">Expérience ' + (i + 1) + (score > 0 ? ' · pertinence ' + score : '') + '</span>' +
       '<div class="toolbar-row">' +
+        '<label class="hint" style="display:inline-flex;gap:5px;align-items:center;margin-right:6px;"><input type="checkbox" data-incl="' + exp.id + '"' + ((state.cv.excludedExp || []).indexOf(exp.id) === -1 ? " checked" : "") + '> dans ce CV</label>' +
         '<button class="icon-btn" data-up="' + exp.id + '" title="Monter" aria-label="Monter"' + (i === 0 ? " disabled" : "") + '>' + icon("up") + '</button>' +
         '<button class="icon-btn" data-down="' + exp.id + '" title="Descendre" aria-label="Descendre"' + (i === items.length - 1 ? " disabled" : "") + '>' + icon("down") + '</button>' +
         '<button class="icon-btn" data-remove-exp="' + exp.id + '" title="Retirer" aria-label="Retirer">' + icon("close") + '</button>' +
@@ -1429,6 +1543,15 @@ function renderExpList(){
     el.addEventListener("input", function(){
       var item = state.library.experiences.find(function(x){ return x.id === el.getAttribute("data-id"); });
       if(item){ item[el.getAttribute("data-f")] = el.value; }
+      renderCVPreview(); refreshCVStatus(); persist();
+    });
+  });
+  wrap.querySelectorAll("[data-incl]").forEach(function(cb){
+    cb.addEventListener("change", function(){
+      var id = cb.getAttribute("data-incl");
+      var ex = (state.cv.excludedExp || []).filter(function(x){ return x !== id; });
+      if(!cb.checked) ex.push(id);
+      state.cv.excludedExp = ex;
       renderCVPreview(); refreshCVStatus(); persist();
     });
   });
@@ -2163,7 +2286,7 @@ function renderCVPreview(){
   if(cv.resume) html += '<h3 class="cv-h">' + L.profil + '</h3><p data-edit="resume::resume" contenteditable="true" spellcheck="false">' + esc(cv.resume) + '</p>';
   if(p.atouts.length) html += '<h3 class="cv-h">' + L.atouts + '</h3><div class="cv-skills">' + p.atouts.map(function(a){ return '<span class="chip cv-skill" style="background:var(--accent-soft);color:var(--accent-ink);">' + esc(a) + '</span>'; }).join("") + '</div>';
 
-  var exps = orderedList(state.library.experiences, cv.selectedExp).filter(function(e){ return e.poste || e.entreprise; });
+  var exps = orderedList(state.library.experiences, cv.selectedExp).filter(function(e){ return (e.poste || e.entreprise) && (cv.excludedExp || []).indexOf(e.id) === -1; });
   if(exps.length){
     html += '<h3 class="cv-h">' + L.experience + '</h3>';
     exps.forEach(function(e){
@@ -2290,6 +2413,24 @@ function initCVModule(){
     state.library.formations.push(item);
     state.cv.selectedForm.push(item.id);
     renderFormList(); renderCVPreview(); persist();
+  });
+  document.getElementById("btn-resume-auto").addEventListener("click", function(){
+    var st = document.getElementById("resume-auto-status");
+    var kws = state.annonce.keywords || [];
+    var txt = cvFullText();
+    var matched = kws.filter(function(k){ return (k.kind === "skill" || k.term.length >= 5) && countTerm(txt, norm(k.term)) > 0; }).slice(0, 6).map(function(k){ return displayTerm(k.term); });
+    var titre = (state.profil.titre || "").trim();
+    if(titre && titre === titre.toUpperCase()) titre = titre.charAt(0) + titre.slice(1).toLowerCase();
+    if(!titre && !matched.length){ st.textContent = "Colle d'abord l'annonce et renseigne ton titre."; return; }
+    var en = state.cv.lang === "en";
+    var base = (state.cv.resume || "").split(/(?<=[.!?])\s+/).filter(function(x){ return !/^(Compétences clés|Key skills)/.test(x); }).join(" ").trim();
+    var tail = matched.length ? (en ? "Key skills for this role: " : "Compétences clés pour ce poste : ") + matched.join(", ") + "." : "";
+    var head = base || (titre ? titre + "." : "");
+    var out = (head + " " + tail).trim();
+    state.cv.resume = out;
+    document.getElementById("cv-resume").value = out;
+    st.textContent = matched.length ? "Accroche mise à jour avec les mots-clés de l'annonce que tu maîtrises." : "Aucun mot-clé de l'annonce trouvé dans ta base pour l'instant.";
+    renderCVPreview(); persist();
   });
   document.getElementById("btn-add-section").addEventListener("click", function(){
     state.library.sections.push({ id: uid(), titre: "", texte: "" });
@@ -3143,6 +3284,122 @@ function renderEntretienCorrige(){
 document.getElementById("btn-generer-questions").addEventListener("click", genererQuestionsEntretien);
 document.getElementById("btn-voir-corrige").addEventListener("click", renderEntretienCorrige);
 
+
+/* ===================== CANDIDATURES MULTIPLES : barre, bascule, sauvegarde locale ===================== */
+
+function renderDossierBar(){
+  var sel = document.getElementById("dossier-select");
+  sel.innerHTML = "";
+  state.dossiers.forEach(function(d){
+    var o = document.createElement("option");
+    o.value = d.id; o.textContent = d.titre || dossierAutoTitle(d);
+    if(d.id === state.currentId) o.selected = true;
+    sel.appendChild(o);
+  });
+  var cur = currentDossier();
+  var t = document.getElementById("dossier-title");
+  if(document.activeElement !== t) t.value = cur.titreAuto ? "" : cur.titre;
+  t.placeholder = cur.titreAuto ? dossierAutoTitle(cur) : "Nom de la candidature";
+  document.getElementById("btn-del-dossier").disabled = state.dossiers.length <= 1;
+}
+
+// Recharge toute l'interface depuis le dossier actif (champs, aperçus, suggestions).
+function syncDossierUI(){
+  anPoste.value = state.annonce.poste || "";
+  anEntreprise.value = state.annonce.entreprise || "";
+  anUrl.value = state.annonce.url || "";
+  anTexte.value = state.annonce.texte || "";
+  document.getElementById("cv-resume").value = state.cv.resume || "";
+  document.querySelectorAll('#format-segmented button').forEach(function(b){ var on = b.getAttribute("data-format") === state.cv.format; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
+  document.querySelectorAll('#lang-segmented button').forEach(function(b){ var on = b.getAttribute("data-lang") === state.cv.lang; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
+  document.getElementById("suisse-fields").style.display = (state.cv.format === "suisse") ? "block" : "none";
+  document.getElementById("l-destinataire").value = state.lettre.destinataire || "";
+  document.getElementById("l-disponibilite").value = state.lettre.disponibilite || "";
+  document.querySelectorAll('#tone-segmented button').forEach(function(b){ var on = b.getAttribute('data-tone') === state.lettre.ton; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+  document.querySelectorAll('#lettre-lang-segmented button').forEach(function(b){ var on = b.getAttribute('data-lang') === state.lettre.lang; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+  renderKeywordChips();
+  renderExpList(); renderFormList(); renderSkillChips(); renderSkillSuggestions(); renderSectionsList(); renderAtoutsChips();
+  renderCVPreview(); refreshCVStatus();
+  renderMotivList(); renderLettreSkillSuggestions(); renderLettrePreview();
+  renderAnnexeCategoryGrid(); renderAnnexeSuggestions(); renderAnnexeItemsList(); renderAnnexePreview();
+  renderEntretienQuestions();
+  renderDossierBar(); refreshStatusDots();
+}
+
+function switchDossier(id){
+  persist();
+  activateDossier(id);
+  syncDossierUI(); persist();
+}
+
+document.getElementById("dossier-select").addEventListener("change", function(){ switchDossier(this.value); });
+document.getElementById("dossier-title").addEventListener("input", function(){
+  var d = currentDossier(), v = this.value.trim();
+  if(v){ d.titre = v; d.titreAuto = false; } else { d.titreAuto = true; d.titre = dossierAutoTitle(d); }
+  persist();
+  var o = document.querySelector('#dossier-select option[value="' + d.id + '"]'); if(o) o.textContent = d.titre;
+});
+
+document.getElementById("btn-new-dossier").addEventListener("click", function(){
+  persist();
+  var cur = currentDossier(), d = makeDossier();
+  // la nouvelle candidature part de la même base ; on reprend seulement les réglages de présentation
+  d.cv.lang = state.cv.lang; d.cv.format = state.cv.format; d.cv.resume = state.cv.resume;
+  d.lettre.lang = state.lettre.lang; d.lettre.ton = state.lettre.ton;
+  state.dossiers.push(normDossier(d));
+  activateDossier(d.id);
+  syncDossierUI(); persist();
+  switchTab("annonce");
+  anTexte.focus();
+});
+document.getElementById("btn-dup-dossier").addEventListener("click", function(){
+  persist();
+  var copy = normDossier(JSON.parse(JSON.stringify(currentDossier())));
+  copy.id = uid(); copy.created = Date.now();
+  copy.titre = (currentDossier().titre || "Candidature") + " (copie)"; copy.titreAuto = false;
+  state.dossiers.push(copy);
+  activateDossier(copy.id);
+  syncDossierUI(); persist();
+  switchTab("annonce");
+});
+document.getElementById("btn-del-dossier").addEventListener("click", function(){
+  if(state.dossiers.length <= 1) return;
+  var d = currentDossier();
+  if(!confirm("Supprimer la candidature « " + (d.titre || "sans nom") + " » ? Ta base d'expériences n'est pas touchée.")) return;
+  state.dossiers = state.dossiers.filter(function(x){ return x.id !== d.id; });
+  activateDossier(state.dossiers[state.dossiers.length - 1].id);
+  syncDossierUI(); persist();
+});
+
+// Sauvegarde / restauration : un fichier .json stocké sur l'ordinateur, rien ne transite par un serveur.
+document.getElementById("btn-backup").addEventListener("click", function(){
+  persist();
+  var data = JSON.stringify({ app: "atelier-candidature", version: 3, exportedAt: new Date().toISOString(),
+    profil: state.profil, library: state.library, candidatures: state.candidatures, dossiers: state.dossiers, currentId: state.currentId }, null, 1);
+  var blob = new Blob([data], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "atelier-candidature-base-" + todayISO() + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+});
+document.getElementById("btn-restore").addEventListener("click", function(){ document.getElementById("restore-file").click(); });
+document.getElementById("restore-file").addEventListener("change", function(e){
+  var f = e.target.files && e.target.files[0]; if(!f) return;
+  var r = new FileReader();
+  r.onload = function(){
+    try{
+      var raw = JSON.parse(r.result);
+      if(!raw || !Array.isArray(raw.dossiers)) throw new Error("format");
+      if(!confirm("Remplacer ta base et tes candidatures actuelles par le contenu de ce fichier ?")) return;
+      localStorage.setItem("atelier-candidature-v2", JSON.stringify(raw));
+      location.reload();
+    }catch(err){ alert("Ce fichier n'est pas une sauvegarde de l'atelier."); }
+  };
+  r.readAsText(f);
+  e.target.value = "";
+});
+
 /* ===================== INIT GÉNÉRAL ===================== */
 
 initCVModule();
@@ -3171,6 +3428,7 @@ renderKeywordChips();
 if (typeof window.onAnnonceChanged === "function") window.onAnnonceChanged();
 
 refreshStatusDots();
+renderDossierBar();
 
 </script>
 </body>
