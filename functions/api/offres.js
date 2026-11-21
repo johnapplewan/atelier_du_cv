@@ -27,13 +27,31 @@ function json(body, status = 200) {
   });
 }
 
+// Scopes essayés dans l'ordre : celui fixé par FT_SCOPE, sinon l'API seule, puis avec le scope propre à l'application
+// (« application_ » + identifiant client), que certains comptes France Travail exigent.
+function scopeCandidates(env) {
+  if (env.FT_SCOPE) return [env.FT_SCOPE];
+  return ["api_offresdemploiv2 o2dsoffre", "api_offresdemploiv2 o2dsoffre application_" + env.FT_CLIENT_ID];
+}
+
 async function getToken(env, fetchImpl) {
   if (cachedToken && cachedToken.exp > Date.now() + 30000) return { token: cachedToken.value };
+  let last = { error: "token", detail: "" };
+  for (const scope of scopeCandidates(env)) {
+    const r = await requestToken(env, fetchImpl, scope);
+    if (r.token) return r;
+    last = r;
+    if (r.error !== "scope") break; // seul un refus de scope justifie d'essayer le suivant
+  }
+  return last;
+}
+
+async function requestToken(env, fetchImpl, scope) {
   const body = new URLSearchParams({
     grant_type: "client_credentials",
     client_id: env.FT_CLIENT_ID,
     client_secret: env.FT_CLIENT_SECRET,
-    scope: env.FT_SCOPE || "api_offresdemploiv2 o2dsoffre",
+    scope,
   });
   const urls = env.FT_TOKEN_URL ? [env.FT_TOKEN_URL] : TOKEN_URLS;
   let res = null, data = {};
@@ -52,6 +70,8 @@ async function getToken(env, fetchImpl) {
   cachedToken = { value: data.access_token, exp: Date.now() + (Number(data.expires_in) || 1200) * 1000 };
   return { token: cachedToken.value };
 }
+
+export { requestToken };
 
 export async function onRequestGet(context) {
   const env = context.env || {};

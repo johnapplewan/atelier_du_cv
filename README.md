@@ -56,3 +56,9 @@ Cloudflare → Workers & Pages → projet → Settings → Variables and Secrets
 | `FT_SCOPE` | facultatif ; défaut `api_offresdemploiv2 o2dsoffre` (à aligner sur les scopes affichés pour l'application) |
 
 Tant que `FT_CLIENT_ID` et `FT_CLIENT_SECRET` sont absents, l'onglet « Offres » indique que la recherche n'est pas activée.
+
+### Diagnostic des accès France Travail (temporaire)
+
+`functions/api/ft-diagnostic.js` est **désactivé** tant que la variable `FT_DIAG` n'est pas `1`. Activé, `/api/ft-diagnostic?probe=1` indique,
+pour une liste de scopes connus, lesquels sont accordés à l'application (aucun identifiant ni secret n'est renvoyé). Retirer `FT_DIAG` après usage.
+Si `FT_SCOPE` est absent, la fonction `/api/offres` essaie `api_offresdemploiv2 o2dsoffre`, puis la même chose avec `application_<FT_CLIENT_ID>`.
