@@ -155,7 +155,7 @@ Dossier (une candidature en cours) = { id, titre, titreAuto, candidatureId,
 | `/api/lieu` | `q` | Communes (libellé, code postal, code INSEE, département, latitude, longitude) | Le nom saisi (API Adresse) |
 | `/api/entreprises` | `naf`, `lat`/`lon`/`radius` ou `dep`, `taille`, `page` | 20 entreprises actives (nom, activité, effectif, ville, fiche) | Secteur, zone, taille (API Recherche d'entreprises) |
 | `/api/offres` | `q`, `commune`, `distance`, `contrat`, `experience`, `depuis`, `page` | 20 offres normalisées | Critères de recherche (API France Travail ; variables `FT_CLIENT_ID`, `FT_CLIENT_SECRET`, `FT_SCOPE` facultatif) |
-| `/api/ft-diagnostic` | — | Désactivé (retiré) | — |
+| `/api/ft-diagnostic` | `probe`, `scope`, `path` | Diagnostic des accès France Travail ; **inactif** tant que la variable `FT_DIAG` n'existe pas (à supprimer du dépôt si inutile) | — |
 
 ---
 
