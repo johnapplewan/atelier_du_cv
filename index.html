@@ -1747,27 +1747,7 @@ anTexte.addEventListener("input", debounce(function(){ reanalyzeAnnonce(true); }
 
 /* ===================== MODULE CV (bibliothèque + auto-composition) ===================== */
 
-function sortedCompetences(){
-  var kws = state.annonce.keywords || [];
-  return state.library.competences.map(function(c){
-    return { c: c, score: scoreAgainstKeywords(c.label, kws) };
-  }).sort(function(a, b){ return b.score - a.score; }).map(function(x){ return x.c; });
-}
-
 function refreshCVStatus(){ refreshStatusDots(); }
-
-function moveInSelection(key, id, dir){
-  var libArr = key === "selectedExp" ? state.library.experiences : state.library.formations;
-  var full = orderedList(libArr, state.cv[key]).map(function(x){ return x.id; });
-  var idx = full.indexOf(id);
-  var newIdx = idx + dir;
-  if(idx === -1 || newIdx < 0 || newIdx >= full.length) return;
-  var tmp = full[idx]; full[idx] = full[newIdx]; full[newIdx] = tmp;
-  state.cv[key] = full;
-  state.cv.autoMode = false;
-  if(key === "selectedExp"){ renderExpList(); } else { renderFormList(); }
-  renderCVPreview(); persist();
-}
 
 window.onAnnonceChanged = function(){
   ATS_LAST_LOG = null;
