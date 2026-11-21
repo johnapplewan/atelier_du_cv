@@ -265,21 +265,33 @@
 <body>
 
 <dialog id="ia-dialog" style="max-width:560px;width:92vw;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);color:var(--ink-900);padding:22px;">
-  <h3 style="margin:0 0 8px;font-size:17px;">Assistant IA (facultatif)</h3>
-  <p class="hint" style="margin:0 0 10px;">L'atelier fonctionne sans IA. En l'activant, la reformulation du CV et la lettre sur mesure passent par l'API d'Anthropic, avec <strong>ta propre clé</strong>, directement depuis ton navigateur (aucun serveur intermédiaire).</p>
+  <h3 style="margin:0 0 8px;font-size:17px;">Assistant IA : ton compte Claude, sans clé API</h3>
+  <p class="hint" style="margin:0 0 10px;">L'atelier fonctionne sans IA. Quand tu demandes une reformulation ou une lettre sur mesure, le travail est fait par <strong>ton compte Claude</strong> :</p>
   <ul class="hint" style="margin:0 0 12px;padding-left:18px;line-height:1.55;">
-    <li><strong>Jamais envoyés</strong> : nom, email, téléphone, adresse, liens, photo. Ils sont aussi retirés du texte des expériences.</li>
-    <li><strong>Envoyés</strong> : le texte de l'annonce, tes expériences (poste, entreprise, réalisations), tes compétences, ta « voix » et tes remarques.</li>
-    <li>Tu vois le texte exact avant chaque envoi.</li>
-    <li>La clé reste dans ce navigateur, en clair : utilise une clé avec une limite de dépense.</li>
+    <li><strong>Dans la version publiée sur claude.ai</strong> : un clic, Claude répond directement dans la page (Claude te demande ton accord la première fois).</li>
+    <li><strong>Sur le site habituel</strong> : l'atelier prépare le message, tu le colles dans claude.ai, puis tu recolles la réponse ici. Rien n'est envoyé automatiquement.</li>
+    <li><strong>Jamais inclus</strong> : nom, email, téléphone, adresse, liens, photo. Ils sont aussi retirés du texte des expériences.</li>
+    <li><strong>Inclus</strong> : le texte de l'annonce, tes expériences (poste, entreprise, réalisations), tes compétences, ta « voix » et tes remarques.</li>
   </ul>
-  <div class="field"><label for="ia-key">Clé API Anthropic</label><input type="password" id="ia-key" placeholder="sk-ant-…" autocomplete="off"></div>
-  <div class="field"><label for="ia-model">Modèle</label><select id="ia-model"><option value="claude-sonnet-5-5">Claude Sonnet 5.5 (recommandé)</option><option value="claude-haiku-5-5">Claude Haiku 5.5 (plus rapide, moins cher)</option></select></div>
-  <label class="hint" style="display:flex;gap:6px;align-items:center;margin-bottom:12px;"><input type="checkbox" id="ia-skip"> Ne plus demander de confirmation avant chaque envoi (déconseillé)</label>
+  <p class="hint" id="ia-mode-line" style="margin:0 0 10px;"></p>
+  <label class="hint" style="display:flex;gap:6px;align-items:center;margin-bottom:12px;"><input type="checkbox" id="ia-skip"> Ne plus afficher l'aperçu avant l'envoi direct (version claude.ai)</label>
   <div class="toolbar-row" style="justify-content:flex-end;">
-    <button class="btn btn-ghost btn-sm" id="ia-forget" type="button">Oublier la clé</button>
-    <button class="btn btn-ghost btn-sm" id="ia-cancel" type="button">Fermer</button>
-    <button class="btn btn-primary btn-sm" id="ia-save" type="button">Enregistrer</button>
+    <button class="btn btn-primary btn-sm" id="ia-save" type="button">Fermer</button>
+  </div>
+</dialog>
+<dialog id="ia-paste" style="max-width:760px;width:94vw;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);color:var(--ink-900);padding:22px;">
+  <h3 style="margin:0 0 6px;font-size:17px;">Utiliser mon compte Claude</h3>
+  <p class="hint" style="margin:0 0 10px;" id="ia-paste-what"></p>
+  <div class="field"><label for="ia-paste-prompt">1. Copie ce message</label>
+    <textarea id="ia-paste-prompt" readonly style="min-height:150px;font-size:12px;"></textarea>
+    <div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-sm" id="ia-paste-copy" type="button">Copier le message</button>
+    <a class="btn btn-ghost btn-sm" href="https://claude.ai/new" target="_blank" rel="noopener">Ouvrir claude.ai</a><span class="hint" id="ia-paste-copied"></span></div></div>
+  <div class="field"><label for="ia-paste-answer">2. Colle ici la réponse de Claude</label>
+    <textarea id="ia-paste-answer" style="min-height:120px;font-size:12px;" placeholder="Colle la réponse complète : l'atelier en extrait le texte."></textarea>
+    <p class="hint" id="ia-paste-error" style="margin:6px 0 0;color:var(--danger,#B3261E);"></p></div>
+  <div class="toolbar-row" style="justify-content:flex-end;">
+    <button class="btn btn-ghost btn-sm" id="ia-paste-cancel" type="button">Annuler</button>
+    <button class="btn btn-primary btn-sm" id="ia-paste-ok" type="button">Utiliser la réponse</button>
   </div>
 </dialog>
 <dialog id="ia-confirm" style="max-width:720px;width:94vw;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);color:var(--ink-900);padding:22px;">
@@ -307,7 +319,7 @@
         <button type="button" data-theme-choice="dark" aria-pressed="false">Sombre</button>
         <button type="button" data-theme-choice="auto" class="active" aria-pressed="true">Auto</button>
       </div>
-      <button class="btn btn-ghost btn-sm" id="btn-ia-settings" title="Assistant IA facultatif : reformulation et lettre sur mesure">Assistant IA : <span id="ia-state">désactivé</span></button>
+      <button class="btn btn-ghost btn-sm" id="btn-ia-settings" title="Assistant IA facultatif : reformulation et lettre sur mesure">Assistant IA : <span id="ia-state">copier-coller</span></button>
       <button class="btn btn-ghost btn-sm" id="btn-reset" title="Effacer la bibliothèque et repartir de zéro">Tout effacer</button>
       <button class="btn btn-ghost btn-sm" id="btn-export-cv-lettre">CV + Lettre (PDF)</button>
       <button class="btn btn-primary btn-sm" id="btn-export-all">Télécharger le dossier complet (PDF)</button>
@@ -575,7 +587,8 @@
             </div>
             <div class="chips" id="affiner-remarques" style="margin-top:8px;"></div>
             <div class="toolbar-row" style="margin-top:12px;">
-              <button class="btn btn-primary btn-sm" id="btn-affiner-go" type="button">Régénérer avec ces remarques</button>
+              <button class="btn btn-primary btn-sm" id="btn-affiner-ia" type="button">Réécrire avec Claude</button>
+              <button class="btn btn-ghost btn-sm" id="btn-affiner-go" type="button">Régénérer</button>
               <button class="btn btn-ghost btn-sm" id="btn-affiner-undo" type="button" disabled>Version précédente</button>
             </div>
             <p class="hint" id="affiner-status" style="margin:8px 0 0;"></p>
@@ -3625,27 +3638,32 @@ document.getElementById("restore-file").addEventListener("change", function(e){
 
 /* ===================== ASSISTANT IA (facultatif) + AFFINAGE DE LA LETTRE + VOIX ===================== */
 
-var IA_KEY = "atelier-candidature-ia";
-function iaLoad(){ try{ return Object.assign({ key:"", model:"claude-sonnet-5-5", skip:false }, JSON.parse(localStorage.getItem(IA_KEY) || "{}")); }catch(e){ return { key:"", model:"claude-sonnet-5-5", skip:false }; } }
-function iaSave(cfg){ try{ localStorage.setItem(IA_KEY, JSON.stringify(cfg)); }catch(e){} }
-function iaOn(){ return !!iaLoad().key; }
-function refreshIaState(){ document.getElementById("ia-state").textContent = iaOn() ? "activé" : "désactivé"; refreshAffinerUI(); }
+var IA_PREF = "atelier-candidature-ia-pref";
+function iaPrefs(){ try{ return Object.assign({ skip:false }, JSON.parse(localStorage.getItem(IA_PREF) || "{}")); }catch(e){ return { skip:false }; } }
+function iaPrefSave(v){ try{ localStorage.setItem(IA_PREF, JSON.stringify(v)); }catch(e){} }
+
+// Dans une page publiée sur claude.ai, « sample » fait répondre Claude avec le compte de la personne qui ouvre la page.
+var iaSample = null;
+if(window.claude && typeof window.claude.use === "function"){
+  try{ window.claude.use("sample").then(function(ns){ iaSample = ns || null; refreshIaState(); }, function(){}); }catch(e){}
+}
+function iaOn(){ return true; }
+function refreshIaState(){
+  var el = document.getElementById("ia-state");
+  if(el) el.textContent = iaSample ? "mon compte Claude" : "copier-coller";
+  refreshAffinerUI();
+}
 
 document.getElementById("btn-ia-settings").addEventListener("click", function(){
-  var cfg = iaLoad();
-  document.getElementById("ia-key").value = cfg.key;
-  document.getElementById("ia-model").value = cfg.model;
-  document.getElementById("ia-skip").checked = !!cfg.skip;
+  document.getElementById("ia-skip").checked = !!iaPrefs().skip;
+  document.getElementById("ia-mode-line").textContent = iaSample
+    ? "Mode actuel : envoi direct à ton compte Claude depuis cette page."
+    : "Mode actuel : copier-coller vers claude.ai (cette page n'est pas hébergée sur claude.ai).";
   document.getElementById("ia-dialog").showModal();
 });
-document.getElementById("ia-cancel").addEventListener("click", function(){ document.getElementById("ia-dialog").close(); });
 document.getElementById("ia-save").addEventListener("click", function(){
-  iaSave({ key: document.getElementById("ia-key").value.trim(), model: document.getElementById("ia-model").value, skip: document.getElementById("ia-skip").checked });
-  document.getElementById("ia-dialog").close(); refreshIaState();
-});
-document.getElementById("ia-forget").addEventListener("click", function(){
-  iaSave({ key:"", model: document.getElementById("ia-model").value, skip:false });
-  document.getElementById("ia-key").value = ""; refreshIaState();
+  iaPrefSave({ skip: document.getElementById("ia-skip").checked });
+  document.getElementById("ia-dialog").close();
 });
 
 // Retire de tout texte envoyé : nom, email, téléphone, adresse, liens (les expériences peuvent les contenir).
@@ -3662,9 +3680,47 @@ function scrubForAI(text){
           .replace(/https?:\/\/\S+|www\.\S+|linkedin\.com\S*/gi, "[lien]");
 }
 
+function extractJson(txt){
+  var t = String(txt || "").replace(/```(?:json)?/gi, "");
+  var m = t.match(/\{[\s\S]*\}/);
+  if(!m) throw new Error("aucun JSON trouvé dans la réponse");
+  return JSON.parse(m[0]);
+}
+
+// Demande à Claude (compte de la personne) : envoi direct si la page tourne sur claude.ai, sinon copier-coller.
+// `what` décrit ce qui part, pour l'aperçu.
+function iaAsk(system, userObj, what){
+  var prompt = system + "\n\n=== DONNÉES (JSON) ===\n" + JSON.stringify(userObj, null, 1) + "\n\nRéponds uniquement par l'objet JSON demandé, sans texte avant ni après.";
+  if(iaSample){
+    var go = iaPrefs().skip ? Promise.resolve(true) : iaConfirm(what, prompt);
+    return go.then(function(ok){
+      if(!ok) throw new Error("annulé");
+      return iaSample(prompt, { modelTier: "default", cache: false }).then(function(r){ return extractJson(r.text); },
+        function(e){ throw new Error((e && e.code === "not_granted") ? "accès à Claude refusé" : ((e && e.message) || "Claude n'a pas répondu")); });
+    });
+  }
+  return new Promise(function(resolve, reject){
+    var dlg = document.getElementById("ia-paste");
+    var ta = document.getElementById("ia-paste-prompt"), ans = document.getElementById("ia-paste-answer"), err = document.getElementById("ia-paste-error");
+    document.getElementById("ia-paste-what").textContent = what + " Rien n'est envoyé automatiquement : tu copies le message dans claude.ai.";
+    ta.value = prompt; ans.value = ""; err.textContent = ""; document.getElementById("ia-paste-copied").textContent = "";
+    var finish = function(fn, v){ dlg.close(); fn(v); };
+    document.getElementById("ia-paste-copy").onclick = function(){
+      var done = function(){ document.getElementById("ia-paste-copied").textContent = "Copié."; };
+      try{ navigator.clipboard.writeText(prompt).then(done, function(){ ta.select(); document.getElementById("ia-paste-copied").textContent = "Sélectionné : fais Ctrl+C."; }); }
+      catch(e){ ta.select(); document.getElementById("ia-paste-copied").textContent = "Sélectionné : fais Ctrl+C."; }
+    };
+    document.getElementById("ia-paste-ok").onclick = function(){
+      try{ finish(resolve, extractJson(ans.value)); }
+      catch(e){ err.textContent = "Réponse illisible (" + e.message + "). Colle la réponse complète de Claude."; }
+    };
+    document.getElementById("ia-paste-cancel").onclick = function(){ finish(reject, new Error("annulé")); };
+    dlg.addEventListener("cancel", function(){ reject(new Error("annulé")); }, { once: true });
+    dlg.showModal();
+  });
+}
+
 function iaConfirm(what, text){
-  var cfg = iaLoad();
-  if(cfg.skip) return Promise.resolve(true);
   return new Promise(function(resolve){
     var dlg = document.getElementById("ia-confirm");
     document.getElementById("ia-confirm-what").textContent = what;
@@ -3675,27 +3731,6 @@ function iaConfirm(what, text){
     dlg.addEventListener("cancel", function(){ resolve(false); }, { once: true });
     dlg.showModal();
   });
-}
-
-function iaCall(system, userObj, maxTokens){
-  var cfg = iaLoad();
-  return fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-api-key": cfg.key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-    body: JSON.stringify({ model: cfg.model, max_tokens: maxTokens || 1500, system: system, messages: [{ role: "user", content: JSON.stringify(userObj, null, 1) }] })
-  }).then(function(res){
-    return res.json().catch(function(){ return {}; }).then(function(data){
-      if(!res.ok){
-        var msg = (data && data.error && data.error.message) || ("erreur " + res.status);
-        if(res.status === 401) msg = "clé refusée (401). Vérifie-la dans « Assistant IA ».";
-        throw new Error(msg);
-      }
-      var txt = (data.content || []).map(function(b){ return b.text || ""; }).join("");
-      var m = txt.match(/\{[\s\S]*\}/);
-      if(!m) throw new Error("réponse inattendue");
-      return JSON.parse(m[0]);
-    });
-  }, function(){ throw new Error("connexion impossible (réseau ou navigateur qui bloque la requête)."); });
 }
 
 var IA_STYLE_RULES = "Style : écris comme une personne, pas comme un modèle. Phrases de longueurs variées, verbes simples et précis, faits concrets. Interdits : tirets cadratins ou demi-cadratins, listes de trois éléments par réflexe, tournures « ce n'est pas X, c'est Y », phrases de conclusion qui répètent, formules creuses (passionné, dynamique, véritable atout, au cœur de, résonne, enthousiasme débordant, force de proposition). N'invente AUCUN fait, chiffre, employeur, diplôme, outil ou résultat : n'utilise que ce qui est fourni.";
@@ -3712,7 +3747,6 @@ function annonceForAI(){
 /* ---- CV : reformulation des réalisations pour l'annonce ---- */
 function iaReformulerCV(){
   var st = document.getElementById("ia-cv-status");
-  if(!iaOn()){ st.textContent = "Active d'abord l'assistant IA (bouton en haut)."; document.getElementById("btn-ia-settings").click(); return; }
   if(!state.annonce.texte.trim()){ st.textContent = "Colle d'abord le texte de l'annonce."; return; }
   var exps = relevantExperiences(5);
   if(!exps.length){ st.textContent = "Aucune expérience dans la base."; return; }
@@ -3725,10 +3759,9 @@ function iaReformulerCV(){
     format_reponse: '{"accroche":"...","experiences":[{"id":"...","realisations":["..."]}]}'
   };
   var system = "Tu adaptes un CV à une annonce pour qu'il passe les filtres ATS tout en restant fidèle aux faits. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
-  iaConfirm("Annonce, expériences et accroche (sans nom ni coordonnées) :", JSON.stringify(user, null, 1)).then(function(ok){
-    if(!ok) return;
+  {
     var btn = document.getElementById("btn-ia-cv"); btn.disabled = true; st.textContent = "Reformulation en cours…";
-    iaCall(system, user, 2500).then(function(out){
+    iaAsk(system, user, "Annonce, expériences et accroche (sans nom ni coordonnées).").then(function(out){
       btn.disabled = false;
       var n = 0;
       (out.experiences || []).forEach(function(r){
@@ -3743,8 +3776,8 @@ function iaReformulerCV(){
       st.textContent = n + " expérience(s) reformulée(s) pour cette annonce. « Texte d'origine » les remet telles que dans ta base. Relis avant d'envoyer.";
       document.getElementById("btn-ia-cv-undo").style.display = "inline-flex";
       renderCVPreview(); renderExpList(); persist();
-    }).catch(function(err){ btn.disabled = false; st.textContent = "L'IA n'a pas répondu : " + err.message; });
-  });
+    }).catch(function(err){ btn.disabled = false; st.textContent = err.message === "annulé" ? "" : "Pas de réponse utilisable : " + err.message; });
+  }
 }
 document.getElementById("btn-ia-cv").addEventListener("click", iaReformulerCV);
 document.getElementById("btn-ia-cv-undo").addEventListener("click", function(){
@@ -3790,7 +3823,7 @@ function refreshAffinerUI(){
   document.getElementById("btn-affiner-undo").disabled = !(l.corpsPrev && l.corpsPrev.length);
   var st = document.getElementById("affiner-status");
   if(!st.getAttribute("data-busy")){
-    st.textContent = iaOn() ? "Assistant IA actif : les remarques libres sont prises en compte." : "Sans assistant IA, seuls les boutons rapides s'appliquent. Les remarques libres demandent l'assistant IA (bouton en haut).";
+    st.textContent = "« Régénérer » applique les boutons rapides en local. « Réécrire avec Claude » rédige une lettre sur mesure avec tes remarques et ta voix, via ton compte Claude" + (iaSample ? "." : " (copier-coller).");
   }
 }
 function addRemarque(){
@@ -3805,7 +3838,7 @@ document.getElementById("affiner-input").addEventListener("keydown", function(e)
 
 function lettreCurrentParagraphs(){ return Array.isArray(state.lettre.corps) && state.lettre.corps.length ? state.lettre.corps : generateLettreParagraphs(); }
 
-document.getElementById("btn-affiner-go").addEventListener("click", function(){
+document.getElementById("btn-affiner-ia").addEventListener("click", function(){
   var l = state.lettre, st = document.getElementById("affiner-status");
   document.getElementById("affiner-input").value && addRemarque();
   var before = lettreCurrentParagraphs();
@@ -3813,7 +3846,6 @@ document.getElementById("btn-affiner-go").addEventListener("click", function(){
     l.corpsPrev = before; l.corps = null; l.seed = (l.seed || 1) + 1;
     renderLettrePreview(); refreshAffinerUI(); persist();
   };
-  if(!iaOn()){ finishLocal(); return; }
   // IA : lettre sur mesure à partir de l'annonce, des expériences, de la voix et des remarques
   var voix = state.profil.voix || {};
   var sample = state.library.lettresArchive.filter(function(x){ return x.texte && x.texte.trim() && (x.outcome === "entretien" || x.outcome === "offre"); })[0]
@@ -3836,10 +3868,9 @@ document.getElementById("btn-affiner-go").addEventListener("click", function(){
     format_reponse: '{"paragraphs":["..."]}'
   };
   var system = "Tu rédiges des lettres de motivation pour une personne précise, avec sa voix. 150 à 250 mots, sans formule d'appel ni signature (l'application les ajoute). Structure : une accroche précise sur le poste, un ou deux paragraphes de preuves tirées des expériences fournies et reprenant naturellement les mots-clés de l'annonce que la personne maîtrise réellement, une phrase sur l'entreprise seulement si l'annonce en parle, une clôture courte (reprends la formule de fin fournie si elle existe, sinon reste sobre). Respecte la voix décrite et évite ce qui est listé à éviter. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
-  iaConfirm("Annonce, expériences, voix et remarques (sans nom ni coordonnées) :", JSON.stringify(user, null, 1)).then(function(ok){
-    if(!ok) return;
+  {
     var btn = this; btn.disabled = true; st.setAttribute("data-busy", "1"); st.textContent = "Rédaction en cours…";
-    iaCall(system, user, 1800).then(function(out){
+    iaAsk(system, user, "Annonce, expériences, voix et remarques (sans nom ni coordonnées).").then(function(out){
       btn.disabled = false; st.removeAttribute("data-busy");
       if(!out.paragraphs || !out.paragraphs.length) throw new Error("réponse vide");
       l.corpsPrev = before;
@@ -3848,8 +3879,13 @@ document.getElementById("btn-affiner-go").addEventListener("click", function(){
       l.corps = [salut].concat(paras);
       renderLettrePreview(); refreshAffinerUI(); persist();
       st.textContent = "Lettre régénérée. Relis-la : « Version précédente » revient en arrière.";
-    }).catch(function(err){ btn.disabled = false; st.removeAttribute("data-busy"); st.textContent = "L'IA n'a pas répondu : " + err.message; });
-  }.bind(this));
+    }).catch(function(err){ btn.disabled = false; st.removeAttribute("data-busy"); st.textContent = err.message === "annulé" ? "" : "Pas de réponse utilisable : " + err.message; refreshAffinerUI(); });
+  }
+});
+document.getElementById("btn-affiner-go").addEventListener("click", function(){
+  var l = state.lettre, before = lettreCurrentParagraphs();
+  l.corpsPrev = before; l.corps = null; l.seed = (l.seed || 1) + 1;
+  renderLettrePreview(); refreshAffinerUI(); persist();
 });
 document.getElementById("btn-affiner-undo").addEventListener("click", function(){
   var l = state.lettre;
