@@ -912,6 +912,7 @@
           <button class="btn btn-ghost btn-sm" id="btn-add-candidature">+ Ajouter manuellement</button>
         </div>
         <p class="hint" id="candidatures-summary" style="margin:0 0 14px;"></p>
+        <div id="relances-due" style="margin-bottom:14px;"></div>
         <div id="candidatures-list"></div>
       </div>
     </section>
@@ -1326,8 +1327,8 @@ function syncCandidatureTracking(d){
   if(!c){
     if(!has) return;
     c = { id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "brouillon", notes: "", versions: [], auto: true, lastSync: "", type: a.service ? "service" : (a.spontanee ? "spontanee" : "offre") };
-    if(a.service){ var rel2 = new Date(); rel2.setDate(rel2.getDate() + 10); c.notes = "Offre de service. Relance à prévoir vers le " + rel2.toLocaleDateString("fr-FR") + "."; }
-    else if(a.spontanee){ var rel = new Date(); rel.setDate(rel.getDate() + 10); c.notes = "Candidature spontanée. Relance à prévoir vers le " + rel.toLocaleDateString("fr-FR") + "."; }
+    if(a.service){ c.relance = addDays(todayISO(), 10); c.notes = "Offre de service. Relance prévue le " + new Date(c.relance + "T12:00:00").toLocaleDateString("fr-FR") + "."; }
+    else if(a.spontanee){ c.relance = addDays(todayISO(), 10); c.notes = "Candidature spontanée. Relance prévue le " + new Date(c.relance + "T12:00:00").toLocaleDateString("fr-FR") + "."; }
     state.candidatures.push(c);
     d.candidatureId = c.id;
   }
@@ -1394,6 +1395,7 @@ function statusFor(tab){
     return state.annexeDossier.selectedItemIds.length ? "ready" : "partial";
   }
   if(tab === "candidatures"){
+    if(typeof relancesDues === "function" && relancesDues().length) return "partial";
     return state.candidatures.length ? "ready" : "empty";
   }
   if(tab === "entretien"){
@@ -3349,6 +3351,36 @@ function pickProjects(kws){
   });
 }
 
+// Depuis quelle année la personne pratique un outil ou un sujet (d'après ses expériences).
+function termSinceYear(term){
+  var best = 0;
+  state.library.experiences.forEach(function(e){
+    var y = parseInt(startYear(e.dates), 10);
+    if(y && hasTerm(norm([e.poste, e.details].join(" ")), term) && (!best || y < best)) best = y;
+  });
+  return best ? String(best) : "";
+}
+// La phrase de l'annonce qui recoupe le plus de mots-clés : ce que la personne a remarqué.
+function annonceHighlight(){
+  var an = state.annonce, kws = an.keywords || [];
+  if(!an.texte || an.spontanee || an.service || !kws.length) return "";
+  var best = "", bs = 1;
+  an.texte.split(/(?<=[.!?])\s+|\n+/).forEach(function(sn){
+    sn = sn.trim().replace(/^[-•*]\s*/, "");
+    if(sn.length < 25 || sn.length > 150) return;
+    var sc = scoreAgainstKeywords(sn, kws);
+    if(sc > bs){ bs = sc; best = sn; }
+  });
+  if(!best) return "";
+  // la phrase de l'annonce parle de « nous » ; la lettre s'adresse à « vous »
+  var swaps = [[/^nous (recherchons|cherchons)\b/i, "vous recherchez"], [/^nous proposons\b/i, "vous proposez"], [/^nous souhaitons\b/i, "vous souhaitez"], [/^nous avons\b/i, "vous avez"], [/^nous sommes\b/i, "vous êtes"]];
+  var out = trimEnd(best);
+  swaps.forEach(function(sw){ out = out.replace(sw[0], sw[1]); });
+  if(/^nous\b/i.test(out)) return "";
+  out = out.replace(/\bnotre\b/gi, "votre").replace(/\bnos\b/gi, "vos");
+  return out.replace(/^vous (recherchez|cherchez) quelqu'un pour\b/i, "vous cherchez quelqu'un pour");
+}
+
 function generateLettre(){ return state.annonce.service ? generateOffreServiceParagraphs() : generateLettreParagraphs(); }
 
 function generateLettreParagraphs(){
@@ -3389,6 +3421,8 @@ function generateLettreParagraphs(){
   if(titre && titre === titre.toUpperCase()) titre = titre.toLowerCase();
   var p1 = fill(pick(bank.ouverture, rng));
   if(spont && an.meta && an.meta.secteur) p1 += en ? " Your activity (" + an.meta.secteur + ") matches my profile." : " Votre activité (" + an.meta.secteur + ") correspond à mon profil.";
+  var hl = annonceHighlight();
+  if(hl) p1 += en ? " What caught my attention in your advertisement: " + lowerFirst(hl) + "." : " Dans votre annonce, ce qui retient mon attention : " + lowerFirst(hl) + ".";
   if(titre) p1 += en ? " I work as " + titre + "." : " Je suis " + lowerFirst(titre) + ".";
   paras.push(p1);
 
@@ -3418,7 +3452,16 @@ function generateLettreParagraphs(){
   // 3. mots-clés de l'annonce que la bibliothèque contient réellement
   var matched = kws.filter(function(k){ return (k.kind === "skill" || k.term.length >= 5) && countTerm(cvText, norm(k.term)) > 0; }).slice(0, 6).map(function(k){ return k.term; });
   (l.competencesChoisies || []).forEach(function(c){ if(matched.map(norm).indexOf(norm(c)) === -1) matched.push(c); });
-  if(matched.length){
+  var sinceTxt = "";
+  if(matched.length && !spont){
+    var groups = {}, order = [];
+    matched.slice(0, 4).forEach(function(t){ var y = termSinceYear(t) || "0"; if(!groups[y]){ groups[y] = []; order.push(y); } groups[y].push(displayTerm(t)); });
+    var segs = order.filter(function(y){ return y !== "0"; }).sort().map(function(y){ return humanList(groups[y], en) + (en ? " since " : " depuis ") + y; });
+    var rest = groups["0"] ? humanList(groups["0"], en) : "";
+    if(segs.length) sinceTxt = en ? "Your advertisement asks for these topics. I use " + segs.join("; ") + (rest ? ", as well as " + rest : "") + "." : "Votre annonce demande ces sujets. Je pratique " + segs.join(", ") + (rest ? ", ainsi que " + rest : "") + ".";
+  }
+  if(sinceTxt){ paras.push(sinceTxt); }
+  else if(matched.length){
     paras.push(en
       ? (spont ? "My profile rests on " + humanList(matched.map(displayTerm), true) + ", which I use in my daily work." : "Your advertisement mentions " + humanList(matched.map(displayTerm), true) + ". I use these in my daily work.")
       : (spont ? "Mon profil s'appuie notamment sur " + humanList(matched.map(displayTerm), false) + ", des sujets que je pratique dans mon travail." : "Votre annonce mentionne " + humanList(matched.map(displayTerm), false) + ". Ce sont des sujets que je pratique dans mon travail."));
@@ -3428,6 +3471,13 @@ function generateLettreParagraphs(){
   (l.motivations || []).map(function(m){ return m.trim(); }).filter(Boolean).forEach(function(m){
     paras.push(/[.!?]$/.test(m) ? m : m + ".");
   });
+
+  // 4b. solution : une proposition de travail, sans rien affirmer de la structure
+  if(!intermediaire){
+    paras.push(en
+      ? "I would suggest starting with a conversation about your current priorities, then showing concretely what I can contribute" + (posteTxt && !spont ? " to the " + posteTxt + " role" : "") + "."
+      : "Je propose de commencer par un échange sur vos priorités du moment, puis de montrer concrètement ce que je peux apporter" + (posteTxt && !spont ? " à ce poste de " + posteTxt : "") + ".");
+  }
 
   // 5. clôture
   var voix = state.profil.voix || {};
@@ -3640,6 +3690,35 @@ function todayISO(){
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 }
 
+function addDays(iso, n){
+  var d = iso ? new Date(iso + "T12:00:00") : new Date();
+  d.setDate(d.getDate() + n);
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+var STATUTS_CLOS = { entretien: 1, refus: 1, offre: 1 };
+// Relances à faire : date de relance atteinte, candidature envoyée et sans réponse.
+function relancesDues(){
+  var today = todayISO();
+  return state.candidatures.filter(function(c){ return c.relance && c.relance <= today && !STATUTS_CLOS[c.statut] && c.statut !== "brouillon"; })
+    .sort(function(a, b){ return a.relance.localeCompare(b.relance); });
+}
+function renderRelancesDue(){
+  var box = document.getElementById("relances-due"); if(!box) return;
+  var due = relancesDues();
+  if(!due.length){ box.innerHTML = ""; return; }
+  box.innerHTML = '<p class="eyebrow" style="margin:0 0 6px;">À relancer (' + due.length + ')</p>' + due.map(function(c){
+    var late = Math.max(0, Math.round((new Date(todayISO()) - new Date(c.relance)) / 86400000));
+    return '<div class="exp-block" style="margin-bottom:8px;"><div class="exp-block-head"><strong>' + esc(c.poste || "Sans intitulé") + (c.entreprise ? " · " + esc(c.entreprise) : "") + '</strong><span class="hint">' + (late ? "en retard de " + late + " jour" + (late > 1 ? "s" : "") : "aujourd'hui") + '</span></div>' +
+      '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-relance-done="' + c.id + '">Relance faite</button>' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-relance-later="' + c.id + '">Reporter de 3 jours</button>' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-relance-stop="' + c.id + '">Ne plus relancer</button></div></div>';
+  }).join("");
+  var byId = function(id){ return state.candidatures.find(function(x){ return x.id === id; }); };
+  box.querySelectorAll("[data-relance-done]").forEach(function(b){ b.addEventListener("click", function(){ var c = byId(b.getAttribute("data-relance-done")); if(c){ c.statut = "relance"; c.relance = addDays(todayISO(), 7); } renderCandidaturesList(); refreshStatusDots(); persist(); }); });
+  box.querySelectorAll("[data-relance-later]").forEach(function(b){ b.addEventListener("click", function(){ var c = byId(b.getAttribute("data-relance-later")); if(c){ c.relance = addDays(todayISO(), 3); } renderCandidaturesList(); refreshStatusDots(); persist(); }); });
+  box.querySelectorAll("[data-relance-stop]").forEach(function(b){ b.addEventListener("click", function(){ var c = byId(b.getAttribute("data-relance-stop")); if(c){ c.relance = ""; } renderCandidaturesList(); refreshStatusDots(); persist(); }); });
+}
+
 function renderCandidaturesSummary(){
   var el = document.getElementById("candidatures-summary");
   var total = state.candidatures.length;
@@ -3649,7 +3728,10 @@ function renderCandidaturesSummary(){
   var parts = [total + " candidature" + (total>1?"s":"")];
   if(counts.entretien) parts.push(counts.entretien + " entretien" + (counts.entretien>1?"s":""));
   if(counts.offre) parts.push(counts.offre + " offre" + (counts.offre>1?"s":""));
+  var nd = relancesDues().length;
+  if(nd) parts.push(nd + " relance" + (nd>1?"s":"") + " à faire");
   el.textContent = parts.join(" · ");
+  renderRelancesDue();
 }
 
 function renderCandidaturesList(){
@@ -3676,6 +3758,7 @@ function renderCandidaturesList(){
       '</div>' +
       '<div class="row2">' +
         '<div class="field"><label>Date</label><input type="text" data-f="date" data-id="' + c.id + '" value="' + esc(c.date) + '" placeholder="aaaa-mm-jj"></div>' +
+        '<div class="field"><label>Relance prévue</label><input type="text" data-f="relance" data-id="' + c.id + '" value="' + esc(c.relance || "") + '" placeholder="aaaa-mm-jj"></div>' +
         '<div class="field"><label>Statut</label><select data-f="statut" data-id="' + c.id + '">' +
           CANDIDATURE_STATUTS.map(function(s){ return '<option value="'+s.key+'"'+(c.statut===s.key?" selected":"")+'>'+s.label+'</option>'; }).join("") +
         '</select></div>' +
@@ -3695,7 +3778,11 @@ function renderCandidaturesList(){
   wrap.querySelectorAll("select").forEach(function(el){
     el.addEventListener("change", function(){
       var item = state.candidatures.find(function(c){ return c.id === el.getAttribute("data-id"); });
-      if(item){ item.statut = el.value; }
+      if(item){
+        item.statut = el.value;
+        if(STATUTS_CLOS[item.statut] || item.statut === "brouillon"){ if(STATUTS_CLOS[item.statut]) item.relance = ""; }
+        else if(!item.relance || item.relance < todayISO()){ item.relance = addDays(todayISO(), item.statut === "relance" ? 7 : 7); }
+      }
       renderCandidaturesList(); refreshStatusDots(); persist();
     });
   });
@@ -3768,7 +3855,7 @@ document.getElementById("btn-save-current-candidature").addEventListener("click"
   renderCandidaturesList(); refreshStatusDots();
 });
 document.getElementById("btn-add-candidature").addEventListener("click", function(){
-  state.candidatures.push({ id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "envoyee", notes: "", versions: [] });
+  state.candidatures.push({ id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "envoyee", notes: "", versions: [], relance: addDays(todayISO(), 7) });
   renderCandidaturesList(); refreshStatusDots(); persist();
 });
 
@@ -5494,7 +5581,8 @@ function styleReport(paras){
   var employers = [];
   (state.library.experiences || []).forEach(function(e){
     var nm = (e.entreprise || "").trim().replace(/\s*[—–-]\s*.*$/, "").trim();
-    if(nm.length >= 3 && text.toLowerCase().indexOf(nm.toLowerCase()) !== -1 && employers.indexOf(nm) === -1) employers.push(nm);
+    var target = ((state.annonce && state.annonce.entreprise) || "").toLowerCase();
+    if(nm.length >= 3 && text.toLowerCase().indexOf(nm.toLowerCase()) !== -1 && employers.indexOf(nm) === -1 && target.indexOf(nm.toLowerCase()) === -1) employers.push(nm);
   });
   var total = Math.min(100, pen.reduce(function(a, p){ return a + p.points; }, 0));
   return { score: Math.round((100 - total) * 10) / 10, penalties: pen.sort(function(a, b){ return b.points - a.points; }), words: nb, employers: employers, reliable: nb >= 120 };
