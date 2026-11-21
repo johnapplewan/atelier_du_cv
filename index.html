@@ -353,6 +353,7 @@
 
   <nav class="rail" id="rail">
     <div class="rail-tabs">
+      <button class="rail-item" data-tab="profils"><span class="num">00</span>Mes profils<span class="status-dot" id="dot-profils"></span></button>
       <button class="rail-item is-active" data-tab="annonce"><span class="num">01</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
       <button class="rail-item" data-tab="cv"><span class="num">02</span>CV<span class="status-dot" id="dot-cv"></span></button>
       <button class="rail-item" data-tab="lettre"><span class="num">03</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
@@ -364,6 +365,29 @@
   </nav>
 
   <main class="workspace">
+
+    <!-- PANEL PROFILS -->
+    <section class="panel" id="panel-profils">
+      <div class="panel-head">
+        <h2>Mes profils de recherche</h2>
+        <p>L'atelier lit ta base (expériences, formations, projets, compétences) et propose les profils que tu peux réellement défendre : IT, communication, immobilier… Chaque profil règle le titre visé, l'accroche, le ton des lettres et les mots-clés, puis sert de base à tes candidatures.</p>
+      </div>
+      <div style="max-width:980px;">
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">Profils que ta base permet de créer</span>
+          <p class="hint" style="margin:6px 0 10px;">Un profil est proposé s'il s'appuie sur des expériences ou, à défaut, sur de la formation et des projets. Les métiers accessibles sans expérience servent à répondre à des offres « débutants acceptés ».</p>
+          <div id="profils-suggestions"></div>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">Viser un autre métier</span>
+          <p class="hint" style="margin:6px 0 10px;">Tu veux changer de voie ? Écris le métier : l'atelier vérifie que ta base contient de quoi l'asseoir.</p>
+          <div style="display:flex;gap:8px;"><input type="text" id="viser-metier" placeholder="ex. Négociateur immobilier, UX designer…"><button class="btn btn-sm" id="btn-viser-metier" type="button">Vérifier et créer</button></div>
+          <p class="hint" id="viser-result" style="margin:8px 0 0;"></p>
+        </div>
+        <span class="eyebrow">Mes profils</span>
+        <div id="profils-list" style="margin-top:8px;"></div>
+      </div>
+    </section>
 
     <!-- PANEL ANNONCE -->
     <section class="panel active" id="panel-annonce">
@@ -408,6 +432,11 @@
               <option value="esn">Une ESN / société de conseil (mission chez un client)</option>
             </select>
             <p class="hint" id="an-emetteur-why" style="margin:6px 0 0;"></p>
+          </div>
+          <div class="field" id="an-profil-field" style="display:none;">
+            <label for="an-profil">Profil de recherche utilisé</label>
+            <select id="an-profil"></select>
+            <p class="hint" style="margin:6px 0 0;">Le profil règle le titre du CV, l'accroche, le ton de la lettre et les mots-clés mis en avant.</p>
           </div>
           <div class="field" id="an-client-field"><label for="an-client">Entreprise finale (si le cabinet la cite)</label><input type="text" id="an-client" placeholder="ex. un acteur de la distribution"></div>
           <div class="row2">
@@ -549,7 +578,8 @@
               <button class="btn btn-ghost btn-sm" id="btn-print-cv-anon" title="Sans nom, coordonnées, photo ni liens">PDF anonymisé</button>
             </span>
           </div>
-          <label class="hint" style="display:flex;gap:6px;align-items:center;margin:0 0 8px;"><input type="checkbox" id="anon-mask-employers"> Anonymiser aussi les noms d'employeurs dans le PDF anonymisé</label>
+          <div style="margin:0 0 8px;"><label class="hint" style="display:flex;gap:6px;align-items:center;"><input type="checkbox" id="anon-mask-employers"> Anonymiser aussi les noms d'employeurs dans le PDF anonymisé</label>
+          <label class="hint" style="display:flex;gap:6px;align-items:center;"><input type="checkbox" id="anon-mask-schools"> Anonymiser aussi les noms d'établissements de formation</label></div>
           <div class="paper cv-doc" id="cv-preview"></div>
           <span class="download-status" id="cv-download-status"></span>
         </div>
@@ -1041,6 +1071,7 @@ function defaultState(){
 }
 
 var state = defaultState();
+state.profils = [];
 var STORAGE_KEY = "atelier-candidature-v2";
 
 /* ---------------- personnes et candidatures multiples ----------------
@@ -1092,7 +1123,8 @@ function normPersonData(raw){
     first.titre = dossierAutoTitle(first);
     dossiers = [first];
   }
-  return { profil: profil, library: library, candidatures: (raw.candidatures || []).map(function(c){ return Object.assign({ versions: [] }, c); }), dossiers: dossiers, currentId: raw.currentId };
+  var profils = Array.isArray(raw.profils) ? raw.profils : [];
+  return { profils: profils, profil: profil, library: library, candidatures: (raw.candidatures || []).map(function(c){ return Object.assign({ versions: [] }, c); }), dossiers: dossiers, currentId: raw.currentId };
 }
 function currentPerson(){
   return state.people.find(function(p){ return p.id === state.currentPersonId; }) || state.people[0];
@@ -1101,7 +1133,7 @@ function loadPerson(id){
   var person = state.people.find(function(p){ return p.id === id; }) || state.people[0];
   var data = normPersonData(person.data);
   state.currentPersonId = person.id;
-  state.profil = data.profil; state.library = data.library; state.candidatures = data.candidatures; state.dossiers = data.dossiers;
+  state.profils = data.profils; state.profil = data.profil; state.library = data.library; state.candidatures = data.candidatures; state.dossiers = data.dossiers;
   activateDossier(data.currentId);
 }
 function currentDossier(){
@@ -1158,17 +1190,18 @@ function persist(){
   try{
     syncCurrentDossier();
     var person = currentPerson();
-    person.data = { profil: state.profil, library: state.library, candidatures: state.candidatures, dossiers: state.dossiers, currentId: state.currentId };
+    person.data = { profils: state.profils, profil: state.profil, library: state.library, candidatures: state.candidatures, dossiers: state.dossiers, currentId: state.currentId };
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 4, people: state.people, currentPersonId: state.currentPersonId }));
   }catch(e){}
 }
 
 /* ---------------- onglets & statut ---------------- */
 
-var TABS = ["annonce","cv","lettre","annexe","candidatures","entretien"];
+var TABS = ["profils","annonce","cv","lettre","annexe","candidatures","entretien"];
 var activeTab = "annonce";
 
 function statusFor(tab){
+  if(tab === "profils"){ return state.profils.length ? "ready" : "empty"; }
   if(tab === "annonce"){
     if(!state.annonce.texte.trim()) return "empty";
     return (state.annonce.poste && state.annonce.entreprise) ? "ready" : "partial";
@@ -1213,6 +1246,7 @@ function refreshStatusDots(){
 function switchTab(tab){
   activeTab = tab;
   if(tab === "candidatures" && typeof renderCandidaturesList === "function"){ renderCandidaturesList(); }
+  if(tab === "profils" && typeof renderProfils === "function"){ renderProfils(); }
   TABS.forEach(function(t){
     document.getElementById("panel-"+t).classList.toggle("active", t === tab);
     document.querySelector('.rail-item[data-tab="'+t+'"]').classList.toggle("is-active", t === tab);
@@ -1400,7 +1434,7 @@ wireExportButton("btn-print-cv", "cv-download-status",
 
 var lastAnonRef = "";
 wireExportButton("btn-print-cv-anon", "cv-download-status",
-  function(){ var r = anonymizedCvElement(document.getElementById("anon-mask-employers").checked); lastAnonRef = r.ref; return [r.el]; },
+  function(){ var r = anonymizedCvElement(document.getElementById("anon-mask-employers").checked, document.getElementById("anon-mask-schools").checked); lastAnonRef = r.ref; return [r.el]; },
   function(){ return fileSafe(lastAnonRef || "cv-anonyme") + "-CV-anonyme.pdf"; });
 
 wireExportButton("btn-print-lettre", "lettre-download-status",
@@ -1521,6 +1555,7 @@ function reanalyzeAnnonce(fromText){
   state.annonce.texte = anTexte.value;
   state.annonce.keywords = extractKeywords(anTexte.value);
   if(typeof runEmetteurAnalysis === "function"){ runEmetteurAnalysis(); renderAnalyseCard(); }
+  if(typeof autoProfilForAnnonce === "function"){ autoProfilForAnnonce(); }
   renderKeywordChips();
   if (typeof window.onAnnonceChanged === "function") window.onAnnonceChanged();
   renderLettreSkillSuggestions();
@@ -1545,7 +1580,7 @@ function sortedCompetences(){
 function refreshCVStatus(){ refreshStatusDots(); }
 
 function recomposerCV(){
-  var kws = state.annonce.keywords || [];
+  var kws = (state.annonce.keywords || []).concat(typeof profilKeywords === "function" ? profilKeywords() : []);
   var lib = state.library;
 
   var expScored = lib.experiences.map(function(e, idx){
@@ -2587,7 +2622,8 @@ function cvHtml(){
   var html = '<div style="display:flex;justify-content:space-between;gap:16px;">';
   html += '<div style="flex:1;min-width:0;">';
   html += '<p class="cv-name">' + (esc(p.nom) || "Ton nom") + '</p>';
-  if(p.titre) html += '<p class="cv-title">' + esc(p.titre) + '</p>';
+  var titreCv = cv.titre || p.titre;
+  if(titreCv) html += '<p class="cv-title">' + esc(titreCv) + '</p>';
   var contacts = [p.email, p.tel, p.ville, p.lien].filter(Boolean).map(esc);
   if(contacts.length) html += '<p class="cv-contact">' + contacts.map(function(x){ return "<span>" + x + "</span>"; }).join("") + '</p>';
   html += '</div>';
@@ -2642,12 +2678,13 @@ function cvHtml(){
 }
 
 /* ---- CV anonymisé : sans nom, coordonnées, photo ni liens ; employeurs masqués en option ---- */
-function anonymizedCvElement(maskEmployers){
+function anonymizedCvElement(maskEmployers, maskSchools){
   var realProfil = state.profil, realLib = state.library, realCv = state.cv;
   var secrets = [realProfil.nom, realProfil.email, realProfil.tel, realProfil.ville, realProfil.lien].filter(Boolean);
   (realProfil.nom || "").split(/\s+/).forEach(function(w){ if(w.length >= 3) secrets.push(w); });
   var employers = [];
   if(maskEmployers){ realLib.experiences.forEach(function(e){ if((e.entreprise || "").trim().length >= 3) employers.push(e.entreprise.trim()); }); }
+  if(maskSchools){ realLib.formations.forEach(function(f){ if((f.etablissement || "").trim().length >= 3) employers.push(f.etablissement.trim()); }); }
   var all = secrets.concat([]).sort(function(a, b){ return b.length - a.length; });
   employers.sort(function(a, b){ return b.length - a.length; });
   var clean = function(t){
@@ -2664,10 +2701,10 @@ function anonymizedCvElement(maskEmployers){
       var ov = realCv.expOverrides && realCv.expOverrides[e.id];
       return Object.assign({}, e, { poste: clean(e.poste), entreprise: maskEmployers ? "Employeur confidentiel" : clean(e.entreprise), details: clean(typeof ov === "string" ? ov : e.details) });
     }),
-    formations: realLib.formations.map(function(f){ return Object.assign({}, f, { diplome: clean(f.diplome), etablissement: clean(f.etablissement), details: clean(f.details) }); }),
+    formations: realLib.formations.map(function(f){ return Object.assign({}, f, { diplome: clean(f.diplome), etablissement: maskSchools ? "Établissement confidentiel" : clean(f.etablissement), details: clean(f.details) }); }),
     sections: (realLib.sections || []).map(function(x){ return Object.assign({}, x, { titre: clean(x.titre), texte: clean(x.texte) }); })
   });
-  var cc = Object.assign({}, realCv, { resume: clean(realCv.resume), expOverrides: {} });
+  var cc = Object.assign({}, realCv, { resume: clean(realCv.resume), titre: clean(realCv.titre), expOverrides: {} });
   var html;
   state.profil = cp; state.library = cl; state.cv = cc;
   try{ html = cvHtml(); } finally { state.profil = realProfil; state.library = realLib; state.cv = realCv; }
@@ -3204,7 +3241,7 @@ function generateLettreParagraphs(){
   paras.push(en ? "Dear Hiring Manager," : "Madame, Monsieur,");
 
   // 1. ouverture + profil
-  var titre = (state.profil.titre || "").trim();
+  var titre = (state.cv.titre || state.profil.titre || "").trim();
   if(titre && titre === titre.toUpperCase()) titre = titre.toLowerCase();
   var p1 = fill(pick(bank.ouverture, rng));
   if(titre) p1 += en ? " I work as " + titre + "." : " Je suis " + lowerFirst(titre) + ".";
@@ -3798,6 +3835,315 @@ document.getElementById("btn-fetch-annonce").addEventListener("click", fetchAnno
 anUrl.addEventListener("paste", function(){ setTimeout(function(){ if(/^https?:\/\//i.test(anUrl.value.trim())){ reanalyzeAnnonce(); fetchAnnonce(); } }, 50); });
 anUrl.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); fetchAnnonce(); } });
 
+/* ===================== MES PROFILS DE RECHERCHE ===================== */
+
+// Domaines proposés. `mots` : ce qu'on cherche dans la base ; `naf` : codes d'activité (recherche d'entreprises à venir) ;
+// `debutant` : métiers accessibles sans expérience (réponse à des offres « débutants acceptés », pas de candidature spontanée).
+var PROFIL_DOMAINES = [
+  { key:"dev", label:"IT / Développement", titres:["Développeur web","Développeur full stack","Concepteur d'applications","Intégrateur web"], naf:["62.01Z","62.02A"],
+    mots:["javascript","react","node","html","css","python","php","java","sql","api","github","git","typescript","docker","développement","application web","front","back","architecture applicative","cloudflare","vercel","supabase","neon"] },
+  { key:"ia", label:"IA / Automatisation", titres:["Concepteur de solutions IA","Ingénieur IA appliquée","Consultant automatisation"], naf:["62.01Z","62.02A","63.11Z"],
+    mots:["llm","ia","intelligence artificielle","agents","mcp","n8n","automatisation","prompt","rag","workflow","claude","gpt","openai","github actions","skills"] },
+  { key:"data", label:"Data / Analyse", titres:["Data analyst","Analyste BI","Chargé d'études"], naf:["62.01Z","63.11Z","70.22Z"],
+    mots:["sql","python","power bi","tableau","reporting","analyse de données","excel","statistiques","data","bi","kpi","dashboard","indicateurs"] },
+  { key:"comm", label:"Communication / Marketing", titres:["Chargé de communication","Responsable marketing","Community manager"], naf:["73.11Z","70.21Z","73.12Z"],
+    mots:["communication","marketing","réseaux sociaux","community management","seo","rédaction","contenu","campagne","événementiel","relations presse","stratégie de communication","branding","marketing digital"] },
+  { key:"crea", label:"Audiovisuel / Création", titres:["Réalisateur","Monteur vidéo","Directeur artistique"], naf:["59.11A","59.11B","74.10Z"],
+    mots:["audiovisuel","montage","réalisation","film","photographie","direction artistique","graphisme","premiere","after effects","photoshop","illustrator","motion","postproduction","création graphique"] },
+  { key:"design", label:"Design / UX", titres:["UX designer","Webdesigner","Product designer"], naf:["74.10Z","62.01Z"],
+    mots:["ux","ui","figma","maquette","prototype","design system","parcours utilisateur","interface","design","wireframe"] },
+  { key:"projet", label:"Gestion de projet / Produit", titres:["Chef de projet","Product owner","Chargé de mission"], naf:["70.22Z","62.02A"],
+    mots:["gestion de projet","chef de projet","product owner","agile","scrum","kanban","roadmap","coordination","planning","budget","pilotage","conduite de projet","cahier des charges","spécifications"] },
+  { key:"immo", label:"Immobilier", titres:["Négociateur immobilier","Conseiller immobilier","Chargé de gestion locative"], naf:["68.31Z","68.20A","68.32A"], debutant:true,
+    mots:["immobilier","transaction","estimation","mandat","syndic","gestion locative","investissement locatif","diagnostic","promoteur","acquéreur","vendeur","bien immobilier"] },
+  { key:"vente", label:"Commercial / Business", titres:["Commercial","Business developer","Chargé d'affaires"], naf:["70.22Z"], debutant:true,
+    mots:["vente","prospection","négociation","account management","crm","b2b","chiffre d'affaires","développement commercial","clients","devis","closing"] },
+  { key:"rh", label:"RH / Recrutement", titres:["Chargé de recrutement","Assistant RH","Gestionnaire de paie"], naf:["78.10Z","70.22Z"],
+    mots:["recrutement","ressources humaines","paie","onboarding","sirh","sourcing","entretiens","rh"] },
+  { key:"formation", label:"Formation / Transmission", titres:["Formateur","Intervenant en formation","Concepteur pédagogique"], naf:["85.59A","85.59B"],
+    mots:["formation","formateur","pédagogie","enseignement","animation","ateliers","supports pédagogiques","transmission","apprentissage","blockchain","web3"] },
+  { key:"admin", label:"Administratif / Gestion", titres:["Assistant administratif","Gestionnaire administratif","Assistant de gestion"], naf:["82.11Z","69.20Z"], debutant:true,
+    mots:["comptabilité","facturation","gestion administrative","secrétariat","assistant","back-office","saisie","classement","planning","organisation"] },
+  { key:"client", label:"Service client / Accueil", titres:["Conseiller clientèle","Chargé de relation client","Hôte d'accueil"], naf:["82.20Z"], debutant:true,
+    mots:["service client","relation client","accueil","sav","support","satisfaction client","réclamations","téléphone"] }
+];
+
+function profilBaseSources(){
+  var lib = state.library;
+  var exp = lib.experiences.map(function(e){ return { id: e.id, label: e.poste || e.entreprise, text: norm([e.poste, e.entreprise, e.details].join(" ")) }; });
+  var other = norm([].concat(
+    lib.formations.map(function(f){ return [f.diplome, f.etablissement, f.details].join(" "); }),
+    lib.competences.map(function(c){ return c.label; }),
+    (lib.sections || []).map(function(x){ return x.titre + " " + x.texte; }),
+    (state.profil.atouts || []), [state.profil.titre, state.cv && state.cv.resume]
+  ).join(" \n "));
+  var forms = norm(lib.formations.map(function(f){ return [f.diplome, f.etablissement, f.details].join(" "); }).join(" \n "));
+  return { exp: exp, other: other, forms: forms };
+}
+
+// Preuves de la base pour un domaine : mots trouvés dans les expériences, dans le reste (formation, projets, compétences).
+function profilEvidence(dom){
+  var src = profilBaseSources();
+  var expHits = {}, otherHits = {}, expMatch = {};
+  dom.mots.forEach(function(m){
+    var nm = norm(m);
+    src.exp.forEach(function(e){ if(countTerm(e.text, nm) > 0){ expHits[m] = true; expMatch[e.id] = e.label; } });
+    if(countTerm(src.other, nm) > 0) otherHits[m] = true;
+  });
+  // titres visés qui apparaissent déjà dans la base
+  dom.titres.forEach(function(t){ var nt = norm(t); src.exp.forEach(function(e){ if(e.text.indexOf(nt) !== -1){ expHits[t] = true; expMatch[e.id] = e.label; } }); });
+  var expKw = Object.keys(expHits), otherKw = Object.keys(otherHits).filter(function(k){ return !expHits[k]; });
+  var score = expKw.length * 2 + otherKw.length;
+  var level = "insuffisant";
+  if(expKw.length >= 3 || (expKw.length >= 2 && Object.keys(expMatch).length >= 2)) level = "exerce";
+  else if(expKw.length + otherKw.length >= 3) level = "assise";
+  else if(dom.debutant) level = "debutant";
+  var missing = dom.mots.filter(function(m){ return !expHits[m] && !otherHits[m]; }).slice(0, 8);
+  return { dom: dom, score: score, level: level, expKw: expKw, otherKw: otherKw, exps: Object.keys(expMatch).map(function(id){ return expMatch[id]; }), missing: missing };
+}
+
+var PROFIL_LEVELS = {
+  exerce: { label: "Déjà exercé", tier: "success", modes: { spontanee: true, offres: true, debutant: false } },
+  assise: { label: "Base suffisante (formation, projets)", tier: "caution", modes: { spontanee: true, offres: true, debutant: false } },
+  debutant: { label: "Accessible sans expérience", tier: "caution", modes: { spontanee: false, offres: true, debutant: true } },
+  insuffisant: { label: "Pas assez d'éléments", tier: "danger", modes: { spontanee: false, offres: false, debutant: false } }
+};
+
+function profilSuggestions(){
+  var all = PROFIL_DOMAINES.map(profilEvidence);
+  var made = {}; state.profils.forEach(function(p){ made[p.domaine] = true; });
+  var good = all.filter(function(e){ return (e.level === "exerce" || e.level === "assise") && !made[e.dom.key]; }).sort(function(a, b){ return b.score - a.score; });
+  var beginner = all.filter(function(e){ return e.level === "debutant" && e.score >= 1 && !made[e.dom.key]; }).sort(function(a, b){ return b.score - a.score; }).slice(0, 3);
+  var weak = all.filter(function(e){ return e.level === "insuffisant" && e.score >= 1; }).sort(function(a, b){ return b.score - a.score; }).slice(0, 3);
+  return { good: good, beginner: beginner, weak: weak };
+}
+
+function profilAccroche(pr){
+  var src = profilBaseSources();
+  var dom = PROFIL_DOMAINES.find(function(d){ return d.key === pr.domaine; });
+  var kws = (pr.motsCles || []).filter(function(k){ return countTerm(src.other + " " + src.exp.map(function(e){ return e.text; }).join(" "), norm(k)) > 0; }).slice(0, 6).map(displayTerm);
+  var titre = pr.titreVise || (dom ? dom.titres[0] : "");
+  var out = titre ? titre + "." : "";
+  if(kws.length) out += (out ? " " : "") + "Compétences clés : " + kws.join(", ") + ".";
+  return out;
+}
+
+function profilTodo(pr){
+  var dom = PROFIL_DOMAINES.find(function(d){ return d.key === pr.domaine; });
+  var ev = dom ? profilEvidence(dom) : null;
+  var todo = [];
+  if(!(pr.lieu || "").trim()) todo.push("Renseigne le lieu de recherche : il sert à trouver offres et entreprises.");
+  if(!(pr.contrats || []).length) todo.push("Choisis les types de contrat visés.");
+  if(ev && ev.level === "assise") todo.push("Ajoute une expérience ou un projet personnel qui montre ce métier en situation, pas seulement la formation.");
+  if(ev && ev.level === "debutant") todo.push("Sans expérience dans ce domaine, mets en avant formation, projets et savoir-être. Ce profil sert à répondre à des offres « débutants acceptés ».");
+  if(ev && ev.missing.length) todo.push("Si tu les maîtrises, ajoute à ta base : " + ev.missing.slice(0, 6).join(", ") + ".");
+  var exps = state.library.experiences.filter(function(e){ return norm(e.poste + " " + e.details).indexOf(norm((dom && dom.mots[0]) || "~~")) !== -1; });
+  var hasNumber = state.library.experiences.some(function(e){ return /\d+\s*(%|€|k€|clients|projets|personnes|ans)/i.test(e.details || ""); });
+  if(!hasNumber) todo.push("Ajoute au moins une réalisation chiffrée (volume, résultat, durée) : les recruteurs et les filtres ATS la repèrent.");
+  return todo;
+}
+
+function createProfil(dom, level, extra){
+  var ev = profilEvidence(dom);
+  var lv = PROFIL_LEVELS[level || ev.level];
+  var pr = {
+    id: uid(), domaine: dom.key, nom: dom.label, titreVise: dom.titres[0], titresAlt: dom.titres.slice(1),
+    secteur: dom.label, lieu: state.profil.ville || "", rayon: "30", contrats: ["CDI"], ton: "formel",
+    motsCles: ev.expKw.concat(ev.otherKw).filter(function(k){ return dom.titres.indexOf(k) === -1; }).concat(dom.mots.filter(function(m){ return ev.expKw.indexOf(m) === -1 && ev.otherKw.indexOf(m) === -1; }).slice(0, 4)).slice(0, 14),
+    niveau: level || ev.level, modes: lv.modes, expIds: [], accroche: "", created: Date.now()
+  };
+  if(extra) Object.assign(pr, extra);
+  pr.accroche = profilAccroche(pr);
+  state.profils.push(pr);
+  persist();
+  return pr;
+}
+
+function profilNiveauPill(level){ var l = PROFIL_LEVELS[level]; return '<span class="tier-pill ' + l.tier + '">' + esc(l.label) + '</span>'; }
+
+function renderProfils(){
+  var wrap = document.getElementById("profils-suggestions");
+  if(!wrap) return;
+  var sg = profilSuggestions();
+  var html = "";
+  var card = function(ev, mode){
+    return '<div class="exp-block"><div class="exp-block-head"><strong>' + esc(ev.dom.label) + '</strong>' + profilNiveauPill(ev.level) + '</div>' +
+      '<p class="hint" style="margin:0 0 6px;">' +
+        (ev.exps.length ? 'Dans tes expériences : ' + esc(ev.exps.slice(0, 3).join(", ")) + '. ' : '') +
+        (ev.expKw.length || ev.otherKw.length ? 'Repéré : ' + esc(ev.expKw.concat(ev.otherKw).slice(0, 7).join(", ")) + '.' : 'Aucun élément repéré dans ta base pour l\'instant.') +
+      '</p>' +
+      '<p class="hint" style="margin:0 0 8px;">' + (mode === "beginner" ? 'Métier accessible sans expérience : tu y réponds à des offres « débutants acceptés », pas par candidature spontanée.' : 'Candidatures spontanées et réponses à des offres possibles.') + '</p>' +
+      '<button class="btn btn-primary btn-sm" type="button" data-create-profil="' + ev.dom.key + '">Créer ce profil</button></div>';
+  };
+  html += sg.good.length ? sg.good.map(function(e){ return card(e, "good"); }).join("") : '<p class="empty-note">Aucun profil à proposer d\'après ta base pour l\'instant : importe ou complète un CV (onglet CV), ou ajoute un métier visé ci-dessous.</p>';
+  if(sg.beginner.length){ html += '<p class="eyebrow" style="margin:14px 0 6px;">Métiers accessibles sans expérience</p>' + sg.beginner.map(function(e){ return card(e, "beginner"); }).join(""); }
+  if(sg.weak.length){
+    html += '<p class="eyebrow" style="margin:14px 0 6px;">À renforcer avant de viser</p>' + sg.weak.map(function(e){
+      return '<div class="exp-block"><div class="exp-block-head"><strong>' + esc(e.dom.label) + '</strong>' + profilNiveauPill("insuffisant") + '</div><p class="hint" style="margin:0;">Quelques éléments repérés (' + esc(e.expKw.concat(e.otherKw).join(", ")) + '), mais trop peu pour une candidature crédible. À ajouter : ' + esc(e.missing.slice(0, 5).join(", ")) + '.</p></div>';
+    }).join("");
+  }
+  wrap.innerHTML = html;
+  wrap.querySelectorAll("[data-create-profil]").forEach(function(b){
+    b.addEventListener("click", function(){
+      var dom = PROFIL_DOMAINES.find(function(d){ return d.key === b.getAttribute("data-create-profil"); });
+      createProfil(dom); renderProfils(); refreshStatusDots();
+    });
+  });
+  renderProfilsList();
+}
+
+var CONTRATS_CHOIX = ["CDI","CDD","Freelance","Alternance","Stage","Intérim"];
+
+function renderProfilsList(){
+  var wrap = document.getElementById("profils-list");
+  wrap.innerHTML = state.profils.length ? "" : '<p class="empty-note">Aucun profil créé. Crée-en un à partir des propositions ci-dessus.</p>';
+  state.profils.forEach(function(pr){
+    var lv = PROFIL_LEVELS[pr.niveau] || PROFIL_LEVELS.assise;
+    var d = document.createElement("details");
+    d.className = "card"; d.style.marginBottom = "12px"; d.setAttribute("data-pid", pr.id);
+    d.open = !!pr._open;
+    var todo = profilTodo(pr);
+    d.innerHTML = '<summary style="cursor:pointer;display:flex;gap:10px;align-items:center;flex-wrap:wrap;"><strong>' + esc(pr.nom) + '</strong>' + profilNiveauPill(pr.niveau) +
+      '<span class="hint">' + esc(pr.titreVise) + (pr.lieu ? " · " + esc(pr.lieu) : "") + '</span></summary>' +
+      '<div style="margin-top:12px;">' +
+        '<div class="row2"><div class="field"><label>Nom du profil</label><input type="text" data-pf="nom" value="' + esc(pr.nom) + '"></div>' +
+          '<div class="field"><label>Intitulé de poste visé</label><input type="text" data-pf="titreVise" value="' + esc(pr.titreVise) + '"></div></div>' +
+        '<div class="row2"><div class="field"><label>Lieu de recherche</label><input type="text" data-pf="lieu" value="' + esc(pr.lieu) + '" placeholder="ex. Reims, Paris, Île-de-France"></div>' +
+          '<div class="field"><label>Rayon</label><select data-pf="rayon">' + ["10","30","50","100","France"].map(function(r){ return '<option value="' + r + '"' + (pr.rayon === r ? " selected" : "") + '>' + (r === "France" ? "Toute la France" : r + " km") + '</option>'; }).join("") + '</select></div></div>' +
+        '<div class="field"><label>Contrats visés</label><div class="chips">' + CONTRATS_CHOIX.map(function(c){ var on = (pr.contrats || []).indexOf(c) !== -1; return '<button type="button" class="chip' + (on ? "" : " suggest") + '" data-pcontrat="' + c + '" aria-pressed="' + on + '">' + (on ? "✓ " : "") + c + '</button>'; }).join("") + '</div></div>' +
+        '<div class="field"><label>Mots-clés du profil (séparés par des virgules)</label><textarea data-pf="motsCles" style="min-height:60px;">' + esc((pr.motsCles || []).join(", ")) + '</textarea></div>' +
+        '<div class="field"><label>Accroche du profil</label><textarea data-pf="accroche" style="min-height:70px;">' + esc(pr.accroche) + '</textarea>' +
+          '<div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pregen>Régénérer l\'accroche d\'après ma base</button></div></div>' +
+        '<div class="field"><label>Ton des lettres pour ce profil</label><select data-pf="ton">' + [["formel","Formel"],["direct","Direct"],["chaleureux","Chaleureux"]].map(function(t){ return '<option value="' + t[0] + '"' + (pr.ton === t[0] ? " selected" : "") + '>' + t[1] + '</option>'; }).join("") + '</select></div>' +
+        '<p class="hint">' + (pr.modes && pr.modes.debutant ? 'Réponse à des offres « débutants acceptés » uniquement : pas de candidature spontanée pour ce profil.' : 'Candidatures spontanées et réponses à des offres possibles.') + '</p>' +
+        (todo.length ? '<div class="field"><label>À compléter pour ce profil</label><ul class="ats-list">' + todo.map(function(t){ return "<li>" + esc(t) + "</li>"; }).join("") + '</ul></div>' : '') +
+        '<div class="field"><label>Compléter avec un texte (CV, projet, fiche de poste…)</label><textarea data-pimport style="min-height:90px;" placeholder="Colle un texte : l\'atelier trie, organise et ajoute à ta base les expériences, formations et compétences trouvées."></textarea>' +
+          '<div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pimport-go>Analyser et ajouter à ma base</button><span class="hint" data-pimport-status></span></div></div>' +
+        '<div class="toolbar-row" style="justify-content:space-between;margin-top:8px;"><button class="btn btn-primary btn-sm" type="button" data-puse>Nouvelle candidature avec ce profil</button>' +
+          '<button class="btn btn-ghost btn-sm" type="button" data-pdel>Supprimer ce profil</button></div>' +
+      '</div>';
+    wrap.appendChild(d);
+    d.addEventListener("toggle", function(){ pr._open = d.open; });
+    d.querySelectorAll("[data-pf]").forEach(function(el){
+      el.addEventListener("input", function(){
+        var f = el.getAttribute("data-pf");
+        pr[f] = f === "motsCles" ? el.value.split(/[,;\n]/).map(function(x){ return x.trim(); }).filter(Boolean) : el.value;
+        persist();
+        if(f === "nom" || f === "titreVise" || f === "lieu"){ var sm = d.querySelector("summary"); sm.querySelector("strong").textContent = pr.nom; sm.querySelector(".hint").textContent = pr.titreVise + (pr.lieu ? " · " + pr.lieu : ""); }
+      });
+    });
+    d.querySelectorAll("[data-pcontrat]").forEach(function(b){
+      b.addEventListener("click", function(){
+        var c = b.getAttribute("data-pcontrat"), arr = pr.contrats || [];
+        pr.contrats = arr.indexOf(c) === -1 ? arr.concat([c]) : arr.filter(function(x){ return x !== c; });
+        persist(); pr._open = true; renderProfilsList();
+      });
+    });
+    d.querySelector("[data-pregen]").addEventListener("click", function(){ pr.accroche = profilAccroche(pr); persist(); pr._open = true; renderProfilsList(); });
+    d.querySelector("[data-pdel]").addEventListener("click", function(){
+      if(!confirm("Supprimer le profil « " + pr.nom + " » ? Ta base d'expériences n'est pas touchée.")) return;
+      state.profils = state.profils.filter(function(x){ return x.id !== pr.id; });
+      state.dossiers.forEach(function(dd){ if(dd.cv.profilId === pr.id){ dd.cv.profilId = ""; } });
+      persist(); renderProfils(); renderProfilSelect(); refreshStatusDots();
+    });
+    d.querySelector("[data-pimport-go]").addEventListener("click", function(){
+      var ta = d.querySelector("[data-pimport]"), st = d.querySelector("[data-pimport-status]");
+      if(!ta.value.trim()){ st.textContent = "Colle d'abord un texte."; return; }
+      var cvTa = document.getElementById("cv-import-text");
+      cvTa.value = ta.value;
+      doImportCv();
+      st.textContent = document.getElementById("cv-import-status").textContent || "Ajouté à ta base.";
+      ta.value = "";
+      pr.accroche = pr.accroche || profilAccroche(pr);
+      persist(); pr._open = true; renderProfils();
+    });
+    d.querySelector("[data-puse]").addEventListener("click", function(){ newDossierWithProfil(pr.id); });
+  });
+}
+
+function newDossierWithProfil(profilId){
+  document.getElementById("btn-new-dossier").click();
+  state.cv.profilId = profilId; state.cv.profilManuel = true;
+  applyProfilToDossier(profilId, true);
+  syncDossierUI(); persist();
+  switchTab("annonce");
+}
+
+function currentProfil(){ return state.profils.find(function(p){ return p.id === state.cv.profilId; }) || null; }
+function profilKeywords(){
+  var pr = currentProfil();
+  return pr ? (pr.motsCles || []).map(function(k){ return { term: k, count: 1, kind: "skill" }; }) : [];
+}
+// Applique un profil à la candidature en cours : titre visé, accroche (si vide), ton de la lettre.
+function applyProfilToDossier(id, force){
+  var pr = state.profils.find(function(p){ return p.id === id; });
+  state.cv.profilId = pr ? pr.id : "";
+  if(!pr){ state.cv.titre = ""; return; }
+  state.cv.titre = pr.titreVise || "";
+  if(pr.accroche && (!(state.cv.resume || "").trim() || force)){ state.cv.resume = pr.accroche; var r = document.getElementById("cv-resume"); if(r) r.value = state.cv.resume; }
+  if(pr.ton) state.lettre.ton = pr.ton;
+  if((state.annonce.keywords || []).length || (pr.motsCles || []).length){ recomposerCV(); }
+}
+
+// Profil le plus proche d'une annonce (recouvrement mots-clés + intitulé).
+function bestProfilForAnnonce(){
+  if(!state.profils.length) return null;
+  var text = norm([state.annonce.poste, state.annonce.texte].join(" "));
+  var best = null, bs = 0;
+  state.profils.forEach(function(pr){
+    var sc = 0;
+    (pr.motsCles || []).forEach(function(k){ if(countTerm(text, norm(k)) > 0) sc += 1; });
+    if(pr.titreVise && text.indexOf(norm(pr.titreVise)) !== -1) sc += 3;
+    (pr.titresAlt || []).forEach(function(t){ if(text.indexOf(norm(t)) !== -1) sc += 2; });
+    if(sc > bs){ bs = sc; best = pr; }
+  });
+  return bs >= 2 ? best : null;
+}
+
+function renderProfilSelect(){
+  var sel = document.getElementById("an-profil");
+  if(!sel) return;
+  sel.innerHTML = '<option value="">Aucun profil</option>' + state.profils.map(function(p){ return '<option value="' + p.id + '"' + (state.cv.profilId === p.id ? " selected" : "") + '>' + esc(p.nom) + ' : ' + esc(p.titreVise) + '</option>'; }).join("");
+  document.getElementById("an-profil-field").style.display = state.profils.length ? "block" : "none";
+}
+document.getElementById("an-profil").addEventListener("change", function(){
+  state.cv.profilManuel = true;
+  applyProfilToDossier(this.value, !!this.value);
+  syncDossierUI(); persist();
+});
+
+// À chaque nouvelle analyse d'annonce : propose automatiquement le profil le plus proche (sauf choix manuel).
+function autoProfilForAnnonce(){
+  if(state.cv.profilManuel || !state.profils.length) return;
+  var best = bestProfilForAnnonce();
+  var id = best ? best.id : "";
+  if(id !== (state.cv.profilId || "")){ applyProfilToDossier(id, false); }
+  renderProfilSelect();
+}
+
+document.getElementById("btn-viser-metier").addEventListener("click", function(){
+  var inp = document.getElementById("viser-metier"), out = document.getElementById("viser-result");
+  var title = inp.value.trim();
+  if(!title){ out.textContent = "Écris le métier visé."; return; }
+  var words = norm(title).split(/[^a-z0-9]+/).filter(function(w){ return w.length >= 4; });
+  var best = null, bs = 0;
+  PROFIL_DOMAINES.forEach(function(d){
+    var hay = norm([d.label].concat(d.titres, d.mots).join(" "));
+    var sc = words.reduce(function(a, w){ return a + (hay.indexOf(w) !== -1 ? 1 : 0); }, 0);
+    if(sc > bs){ bs = sc; best = d; }
+  });
+  var dom = best && bs ? best : { key: "custom", label: title, titres: [title], naf: [], mots: words };
+  var ev = profilEvidence(dom);
+  if(state.profils.some(function(p){ return p.domaine === dom.key && dom.key !== "custom"; })){ out.textContent = "Tu as déjà un profil « " + dom.label + " »."; return; }
+  if(ev.level === "insuffisant"){
+    out.textContent = "Pas assez d'éléments dans ta base pour viser « " + title + " » de façon crédible. À ajouter : une formation, un projet personnel ou une expérience qui le montre" + (ev.missing.length ? " (" + ev.missing.slice(0, 5).join(", ") + ")" : "") + ". Tu peux aussi répondre à des offres qui acceptent les débutants en collant l'annonce (onglet Annonce).";
+    return;
+  }
+  var pr = createProfil(dom, ev.level, { titreVise: title, nom: title });
+  out.textContent = "Profil créé : « " + title + " » (" + PROFIL_LEVELS[ev.level].label.toLowerCase() + ").";
+  inp.value = ""; pr._open = true; renderProfils(); refreshStatusDots();
+});
+
 /* ===================== CANDIDATURES MULTIPLES : barre, bascule, sauvegarde locale ===================== */
 
 function renderDossierBar(){
@@ -3819,6 +4165,7 @@ function renderDossierBar(){
 // Recharge toute l'interface depuis le dossier actif (champs, aperçus, suggestions).
 function syncDossierUI(){
   ATS_LAST_LOG = null;
+  renderProfilSelect(); renderProfils();
   anPoste.value = state.annonce.poste || "";
   anEntreprise.value = state.annonce.entreprise || "";
   anUrl.value = state.annonce.url || "";
@@ -3948,7 +4295,7 @@ document.getElementById("btn-backup").addEventListener("click", function(){
   persist();
   var p = currentPerson();
   var data = JSON.stringify({ app: "atelier-candidature", version: 4, exportedAt: new Date().toISOString(), nom: personLabel(p),
-    data: { profil: state.profil, library: state.library, candidatures: state.candidatures, dossiers: state.dossiers, currentId: state.currentId } }, null, 1);
+    data: { profils: state.profils, profil: state.profil, library: state.library, candidatures: state.candidatures, dossiers: state.dossiers, currentId: state.currentId } }, null, 1);
   var blob = new Blob([data], { type: "application/json" });
   var a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -4202,7 +4549,7 @@ document.getElementById("btn-affiner-ia").addEventListener("click", function(){
     langue: en ? "anglais" : "français", ton: l.ton,
     options: { courte: !!(l.options && l.options.court), plus_de_faits_concrets: !!(l.options && l.options.concret) },
     annonce: annonceForAI(),
-    titre_professionnel: scrubForAI(state.profil.titre),
+    titre_professionnel: scrubForAI(state.cv.titre || state.profil.titre),
     experiences: relevantExperiences(4).map(function(e){ return { poste: scrubForAI(e.poste), entreprise: scrubForAI(e.entreprise), dates: e.dates, realisations: scrubForAI(expDetails(e)).split("\n").filter(Boolean).slice(0, 5) }; }),
     competences: state.library.competences.map(function(c){ return scrubForAI(c.label); }).slice(0, 30),
     voix: { description: scrubForAI(voix.description), a_eviter: scrubForAI(voix.eviter), formule_de_fin: scrubForAI(voix.formuleFinale) },
@@ -4289,6 +4636,8 @@ renderDossierBar();
 renderPersonBar();
 renderVoixCard();
 renderAnalyseCard();
+renderProfilSelect();
+renderProfils();
 refreshIaState();
 
 </script>
