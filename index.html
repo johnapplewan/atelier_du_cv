@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Atelier Candidature</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
-<!-- Génération de PDF côté navigateur : simples scripts techniques depuis un CDN public, aucune donnée ne leur est envoyée. -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" defer></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+<meta name="description" content="Atelier Candidature : base d'expériences, CV et lettres sur mesure, recherche d'entreprises et suivi de candidatures. Vos données restent dans votre navigateur.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231F3A66'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='Georgia,serif' font-style='italic'%3E%C2%A7%3C/text%3E%3C/svg%3E">
+<!-- Polices et bibliothèques PDF hébergées sur ce même site : aucune ressource n'est chargée depuis un service tiers. -->
+<link rel="stylesheet" href="vendor/fonts.css">
+<script src="vendor/html2canvas.min.js" defer></script>
+<script src="vendor/jspdf.umd.min.js" defer></script>
 <script>
 // Applique le thème choisi (clair/sombre) avant le premier rendu, pour éviter un flash de la
 // mauvaise palette. Rien n'est envoyé nulle part : juste une préférence lue depuis ce navigateur.
@@ -144,6 +144,9 @@
        élargissait toute la page au-delà de l'écran. */
     .topbar-status-row{ grid-column:1; padding:0 16px; justify-content:flex-start; }
   }
+  .app-footer{ display:flex; flex-wrap:wrap; gap:8px 18px; justify-content:space-between; padding:14px 28px; border-top:1px solid var(--border); background:var(--surface); font-size:12.5px; color:var(--ink-600); }
+  .app-footer nav{ display:flex; gap:14px; flex-wrap:wrap; }
+  .app-footer a{ color:var(--accent-ink); }
   .panel{ display:none; }
   .panel.active{ display:block; }
   /* Rendu hors-écran temporaire d'un onglet non actif le temps d'une capture PDF (html2canvas a besoin
@@ -265,6 +268,7 @@
 </head>
 <body>
 
+<noscript><p style="padding:16px;">Atelier Candidature a besoin de JavaScript pour fonctionner. Vos données restent dans votre navigateur.</p></noscript>
 <dialog id="ia-dialog" style="max-width:560px;width:92vw;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);color:var(--ink-900);padding:22px;">
   <h3 style="margin:0 0 8px;font-size:17px;">Assistant IA : ton compte Claude, sans clé API</h3>
   <p class="hint" style="margin:0 0 10px;">L'atelier fonctionne sans IA. Quand tu demandes une reformulation ou une lettre sur mesure, le travail est fait par <strong>ton compte Claude</strong> :</p>
@@ -353,15 +357,16 @@
 
   <nav class="rail" id="rail">
     <div class="rail-tabs">
-      <button class="rail-item" data-tab="profils"><span class="num">00</span>Mes profils<span class="status-dot" id="dot-profils"></span></button>
-      <button class="rail-item is-active" data-tab="annonce"><span class="num">01</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
-      <button class="rail-item" data-tab="cv"><span class="num">02</span>CV<span class="status-dot" id="dot-cv"></span></button>
-      <button class="rail-item" data-tab="lettre"><span class="num">03</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
-      <button class="rail-item" data-tab="annexe"><span class="num">04</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
-      <button class="rail-item" data-tab="candidatures"><span class="num">05</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
-      <button class="rail-item" data-tab="entretien"><span class="num">06</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
+      <button class="rail-item" data-tab="profils"><span class="num">01</span>Mes profils<span class="status-dot" id="dot-profils"></span></button>
+      <button class="rail-item" data-tab="recherche"><span class="num">02</span>Recherche<span class="status-dot" id="dot-recherche"></span></button>
+      <button class="rail-item is-active" data-tab="annonce"><span class="num">03</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
+      <button class="rail-item" data-tab="cv"><span class="num">04</span>CV<span class="status-dot" id="dot-cv"></span></button>
+      <button class="rail-item" data-tab="lettre"><span class="num">05</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
+      <button class="rail-item" data-tab="annexe"><span class="num">06</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
+      <button class="rail-item" data-tab="candidatures"><span class="num">07</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
+      <button class="rail-item" data-tab="entretien"><span class="num">08</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
     </div>
-    <div class="rail-foot">Ta bibliothèque (expériences, compétences, lettres, contenus, candidatures) reste uniquement dans ce navigateur : rien n'est envoyé ailleurs, à aucun moment.</div>
+    <div class="rail-foot">Ta bibliothèque (expériences, compétences, lettres, candidatures) reste dans ce navigateur. Seuls le lien d'une annonce ou les critères d'une recherche d'entreprises transitent, jamais ton CV ni tes coordonnées.</div>
   </nav>
 
   <main class="workspace">
@@ -386,6 +391,35 @@
         </div>
         <span class="eyebrow">Mes profils</span>
         <div id="profils-list" style="margin-top:8px;"></div>
+      </div>
+    </section>
+
+    <!-- PANEL RECHERCHE -->
+    <section class="panel" id="panel-recherche">
+      <div class="panel-head">
+        <h2>Recherche d'entreprises</h2>
+        <p>Trouve des entreprises actives dans le secteur de ton profil et près de chez toi, même si elles n'ont publié aucune offre, puis prépare en un clic une candidature spontanée : CV et lettre adaptés à ce profil et à cette entreprise.</p>
+      </div>
+      <div style="max-width:980px;">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="row2">
+            <div class="field"><label for="rech-profil">Profil de recherche</label><select id="rech-profil"></select></div>
+            <div class="field"><label for="rech-taille">Taille de l'entreprise</label>
+              <select id="rech-taille"><option value="">Toutes</option><option value="tpe">Petites (moins de 10 salariés)</option><option value="pme">Moyennes (10 à 249)</option><option value="eti">Grandes (250 et plus)</option></select></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="rech-lieu">Lieu</label>
+              <div style="display:flex;gap:8px;"><input type="text" id="rech-lieu" placeholder="ex. Reims"><button class="btn btn-sm" id="btn-rech-lieu" type="button">Chercher le lieu</button></div>
+              <div class="chips" id="rech-lieu-list" style="margin-top:6px;"></div></div>
+            <div class="field"><label for="rech-rayon">Rayon</label>
+              <select id="rech-rayon"><option value="10">10 km</option><option value="30">30 km</option><option value="50">50 km</option><option value="100">Département</option><option value="France">Toute la France</option></select></div>
+          </div>
+          <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-rech-go" type="button">Rechercher des entreprises</button></div>
+          <p class="hint" id="rech-status" style="margin:10px 0 0;"></p>
+          <p class="hint" style="margin:6px 0 0;">Sources : API Recherche d'entreprises et API Adresse (données publiques, Licence Ouverte). Seuls le secteur, la zone et la taille sont transmis ; ni ton nom, ni tes coordonnées, ni ton CV.</p>
+        </div>
+        <div id="rech-results"></div>
+        <button class="btn btn-ghost btn-sm" id="rech-more" type="button" style="display:none;margin-top:8px;">Voir plus d'entreprises</button>
       </div>
     </section>
 
@@ -1060,7 +1094,7 @@ function defaultState(){
   return {
     profil: { nom:"", titre:"", email:"", tel:"", ville:"", lien:"", langues:"", atouts:[], photo:null,
       voix:{ description:"", formuleFinale:"", eviter:"" } },
-    annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[], meta:{ lieu:"", contrat:"", salaire:"", date:"" }, emetteur:{ type:"", manual:false, raisons:[] }, clientFinal:"" },
+    annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[], meta:{ lieu:"", contrat:"", salaire:"", date:"", secteur:"" }, emetteur:{ type:"", manual:false, raisons:[] }, clientFinal:"", spontanee:false },
     library: { experiences:[], formations:[], competences:[], sections:[], lettresArchive:[], annexeItems:[] },
     cv: { lang:"fr", format:"standard", resume:"", selectedExp:[], selectedForm:[], autoMode:true },
     lettre: { lang:"fr", destinataire:"", ton:"formel", corps:null, corpsPrev:null, options:{}, remarques:[], motivations:[""], motivPrompts:[""], competencesChoisies:[], disponibilite:"", seed:1 },
@@ -1148,7 +1182,7 @@ function activateDossier(id){
 function dossierAutoTitle(d){
   var a = d.annonce || {};
   var t = [a.poste, a.entreprise].map(function(x){ return (x || "").trim(); }).filter(Boolean).join(" · ");
-  return t || "Nouvelle candidature";
+  return (t || "Nouvelle candidature") + (a.spontanee ? " (spontanée)" : "");
 }
 // Chaque candidature ouverte apparaît toute seule dans le suivi (statut « à envoyer ») et s'y met à jour.
 function syncCandidatureTracking(d){
@@ -1157,7 +1191,8 @@ function syncCandidatureTracking(d){
   var c = state.candidatures.find(function(x){ return x.id === d.candidatureId; });
   if(!c){
     if(!has) return;
-    c = { id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "brouillon", notes: "", versions: [], auto: true, lastSync: "" };
+    c = { id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "brouillon", notes: "", versions: [], auto: true, lastSync: "", type: a.spontanee ? "spontanee" : "offre" };
+    if(a.spontanee){ var rel = new Date(); rel.setDate(rel.getDate() + 10); c.notes = "Candidature spontanée. Relance à prévoir vers le " + rel.toLocaleDateString("fr-FR") + "."; }
     state.candidatures.push(c);
     d.candidatureId = c.id;
   }
@@ -1197,11 +1232,12 @@ function persist(){
 
 /* ---------------- onglets & statut ---------------- */
 
-var TABS = ["profils","annonce","cv","lettre","annexe","candidatures","entretien"];
+var TABS = ["profils","recherche","annonce","cv","lettre","annexe","candidatures","entretien"];
 var activeTab = "annonce";
 
 function statusFor(tab){
   if(tab === "profils"){ return state.profils.length ? "ready" : "empty"; }
+  if(tab === "recherche"){ return (state.rechercheResultats || []).length ? "ready" : "empty"; }
   if(tab === "annonce"){
     if(!state.annonce.texte.trim()) return "empty";
     return (state.annonce.poste && state.annonce.entreprise) ? "ready" : "partial";
@@ -1247,6 +1283,7 @@ function switchTab(tab){
   activeTab = tab;
   if(tab === "candidatures" && typeof renderCandidaturesList === "function"){ renderCandidaturesList(); }
   if(tab === "profils" && typeof renderProfils === "function"){ renderProfils(); }
+  if(tab === "recherche" && typeof rechProfilOptions === "function"){ rechProfilOptions(); renderRechResults(); }
   TABS.forEach(function(t){
     document.getElementById("panel-"+t).classList.toggle("active", t === tab);
     document.querySelector('.rail-item[data-tab="'+t+'"]').classList.toggle("is-active", t === tab);
@@ -1722,7 +1759,7 @@ function renderATS(){
   var panel = document.getElementById("ats-panel");
   if(!a){
     scoreEl.textContent = "—"; tierEl.innerHTML = "";
-    missingEl.textContent = "Renseigne l'annonce (étape 01) pour calculer un score.";
+    missingEl.textContent = "Renseigne l'annonce (onglet Annonce) pour calculer un score.";
     panel.style.display = "none";
     return;
   }
@@ -3174,6 +3211,26 @@ var LETTRE_INTERMEDIAIRE = {
   }
 };
 
+// Candidature spontanée : pas d'annonce, on s'appuie sur le secteur de l'entreprise et le profil de recherche.
+var LETTRE_SPONTANEE = {
+  fr: {
+    formel: ["Je vous adresse une candidature spontanée pour un poste de {poste} chez {entreprise}, même si aucune offre n'est publiée pour le moment.",
+      "Je souhaite proposer ma candidature à un poste de {poste} chez {entreprise}."],
+    direct: ["Je candidate spontanément à un poste de {poste} chez {entreprise}.",
+      "Aucune offre n'est publiée chez {entreprise}, mais mon profil de {poste} peut vous intéresser."],
+    chaleureux: ["C'est avec plaisir que je vous propose mon profil pour un poste de {poste} chez {entreprise}, même sans offre publiée.",
+      "Votre entreprise m'a donné envie de vous écrire, même sans offre publiée, pour un poste de {poste}."],
+    cloture: ["Si une opportunité correspondant à ce profil s'ouvre chez vous, je serais disponible pour en discuter. Je peux envoyer un CV détaillé sur simple demande.",
+      "Je reste à votre disposition pour échanger, même brièvement, sur les besoins que vous pourriez avoir."]
+  },
+  en: {
+    formel: ["I am sending an unsolicited application for a {poste} position at {entreprise}, even though no opening is currently advertised."],
+    direct: ["I am applying speculatively for a {poste} role at {entreprise}."],
+    chaleureux: ["I would be glad to offer my profile for a {poste} position at {entreprise}, even without an advertised opening."],
+    cloture: ["If an opportunity matching this profile opens up, I would be glad to discuss it. I can send a detailed CV on request."]
+  }
+};
+
 function datesFr(d, en){
   d = (d || "").trim();
   if(!d) return "";
@@ -3218,8 +3275,13 @@ function generateLettreParagraphs(){
   var entreprise = an.entreprise.trim();
   var bank = (LETTRE_AUTO[en ? "en" : "fr"])[l.ton] || LETTRE_AUTO[en ? "en" : "fr"].formel;
   var rng = mulberry32(djb2(poste + "|" + entreprise + "|" + l.ton + "|" + l.lang + "|" + (l.seed || 1)));
+  var spont = !!an.spontanee;
+  if(spont){
+    var sb = LETTRE_SPONTANEE[en ? "en" : "fr"];
+    bank = { ouverture: sb[l.ton] || sb.formel, cloture: sb.cloture, transition: bank.transition };
+  }
   var emType = (an.emetteur && an.emetteur.type) || "direct";
-  var intermediaire = (emType === "recruteur" || emType === "interim");
+  var intermediaire = !spont && (emType === "recruteur" || emType === "interim");
   if(intermediaire){
     var ib = LETTRE_INTERMEDIAIRE[en ? "en" : "fr"];
     var clientTxt = (an.clientFinal || "").trim() ? (en ? " for " : " pour ") + an.clientFinal.trim() : (en ? " for your client" : " pour votre client");
@@ -3244,6 +3306,7 @@ function generateLettreParagraphs(){
   var titre = (state.cv.titre || state.profil.titre || "").trim();
   if(titre && titre === titre.toUpperCase()) titre = titre.toLowerCase();
   var p1 = fill(pick(bank.ouverture, rng));
+  if(spont && an.meta && an.meta.secteur) p1 += en ? " Your activity (" + an.meta.secteur + ") matches my profile." : " Votre activité (" + an.meta.secteur + ") correspond à mon profil.";
   if(titre) p1 += en ? " I work as " + titre + "." : " Je suis " + lowerFirst(titre) + ".";
   paras.push(p1);
 
@@ -3277,8 +3340,8 @@ function generateLettreParagraphs(){
   (l.competencesChoisies || []).forEach(function(c){ if(matched.map(norm).indexOf(norm(c)) === -1) matched.push(c); });
   if(matched.length){
     paras.push(en
-      ? "Your advertisement mentions " + humanList(matched.map(displayTerm), true) + ". I use these in my daily work."
-      : "Votre annonce mentionne " + humanList(matched.map(displayTerm), false) + ". Ce sont des sujets que je pratique dans mon travail.");
+      ? (spont ? "My profile rests on " + humanList(matched.map(displayTerm), true) + ", which I use in my daily work." : "Your advertisement mentions " + humanList(matched.map(displayTerm), true) + ". I use these in my daily work.")
+      : (spont ? "Mon profil s'appuie notamment sur " + humanList(matched.map(displayTerm), false) + ", des sujets que je pratique dans mon travail." : "Votre annonce mentionne " + humanList(matched.map(displayTerm), false) + ". Ce sont des sujets que je pratique dans mon travail."));
   }
 
   // 4. apports personnels (facultatifs), repris tels quels
@@ -3523,7 +3586,7 @@ function renderCandidaturesList(){
     block.className = "exp-block";
     block.innerHTML =
       '<div class="exp-block-head">' +
-        '<span class="tier-pill ' + meta.tier + '">' + esc(meta.label) + '</span>' +
+        '<span class="tier-pill ' + meta.tier + '">' + esc(meta.label) + '</span>' + (c.type === "spontanee" ? '<span class="hint" style="margin-left:8px;">Candidature spontanée</span>' : '') +
         '<button class="icon-btn" data-remove="' + c.id + '" title="Retirer" aria-label="Retirer">' + icon("close") + '</button>' +
       '</div>' +
       '<div class="row2">' +
@@ -4144,6 +4207,143 @@ document.getElementById("btn-viser-metier").addEventListener("click", function()
   inp.value = ""; pr._open = true; renderProfils(); refreshStatusDots();
 });
 
+/* ===================== RECHERCHE D'ENTREPRISES (candidatures spontanées) ===================== */
+
+var NAF_LABELS = { "62.01Z":"programmation informatique", "62.02A":"conseil en systèmes et logiciels informatiques", "63.11Z":"traitement de données et hébergement",
+  "70.22Z":"conseil pour les affaires et la gestion", "73.11Z":"agences de publicité", "70.21Z":"conseil en relations publiques et communication", "73.12Z":"régie publicitaire de médias",
+  "59.11A":"production de films pour la télévision", "59.11B":"production de films institutionnels et publicitaires", "74.10Z":"design et création spécialisés",
+  "68.31Z":"agences immobilières", "68.20A":"location de logements", "68.32A":"administration d'immeubles", "78.10Z":"agences de placement",
+  "85.59A":"formation continue d'adultes", "85.59B":"autres enseignements", "82.11Z":"services administratifs de bureau", "69.20Z":"activités comptables", "82.20Z":"centres d'appels" };
+
+var rechPlace = null;     // lieu choisi : {label, lat, lon, dep}
+var rechLast = null;      // dernière recherche : {profilId, params, page}
+state.rechercheResultats = [];
+
+function titleCaseName(s){
+  s = String(s || "").trim();
+  if(s !== s.toUpperCase() || s.length < 4) return s;
+  var small = { de:1, du:1, des:1, la:1, le:1, les:1, et:1, en:1, sur:1, sous:1, d:1, l:1 };
+  return s.toLowerCase().replace(/[^\s'’-]+/g, function(w, i){ return (i > 0 && small[w]) ? w : w.charAt(0).toUpperCase() + w.slice(1); });
+}
+
+function rechProfilOptions(){
+  var sel = document.getElementById("rech-profil"), cur = sel.value;
+  var list = state.profils;
+  if(!list.length){ sel.innerHTML = '<option value="">Crée d\'abord un profil (onglet Mes profils)</option>'; return; }
+  sel.innerHTML = list.map(function(p){
+    var ok = p.modes && p.modes.spontanee;
+    return '<option value="' + p.id + '"' + (ok ? "" : " disabled") + '>' + esc(p.nom) + (ok ? "" : " (offres « débutants acceptés » seulement)") + '</option>';
+  }).join("");
+  if(cur && list.some(function(p){ return p.id === cur && p.modes && p.modes.spontanee; })) sel.value = cur;
+  else { var first = list.find(function(p){ return p.modes && p.modes.spontanee; }); if(first) sel.value = first.id; }
+  rechLoadProfil();
+}
+function rechCurrentProfil(){ return state.profils.find(function(p){ return p.id === document.getElementById("rech-profil").value; }) || null; }
+function rechLoadProfil(){
+  var pr = rechCurrentProfil(); if(!pr) return;
+  var inp = document.getElementById("rech-lieu");
+  if(!inp.value) inp.value = pr.lieu || "";
+  var r = document.getElementById("rech-rayon"); r.value = pr.rayon || "30";
+}
+document.getElementById("rech-profil").addEventListener("change", function(){ rechPlace = null; document.getElementById("rech-lieu").value = ""; rechLoadProfil(); });
+
+function rechLieuSearch(){
+  var q = document.getElementById("rech-lieu").value.trim(), box = document.getElementById("rech-lieu-list"), st = document.getElementById("rech-status");
+  box.innerHTML = "";
+  if(q.length < 2){ st.textContent = "Écris le nom d'une commune."; return; }
+  st.textContent = "Recherche du lieu…";
+  rechFetch("/api/lieu?q=" + encodeURIComponent(q)).then(function(d){
+    if(!d.ok || !(d.places || []).length){ st.textContent = "Aucune commune trouvée."; return; }
+    st.textContent = "Choisis la commune :";
+    d.places.forEach(function(pl){
+      var b = document.createElement("button"); b.type = "button"; b.className = "chip suggest"; b.textContent = pl.label + " (" + pl.postcode + ")";
+      b.addEventListener("click", function(){ rechPlace = pl; document.getElementById("rech-lieu").value = pl.label; box.innerHTML = ""; st.textContent = "Lieu : " + pl.label + ", " + pl.context + "."; });
+      box.appendChild(b);
+    });
+    if(d.places.length === 1){ box.firstChild.click(); }
+  }, function(){ st.textContent = rechOffline(); });
+}
+function rechOffline(){ return "La recherche n'est disponible que sur le site déployé (Cloudflare), pas dans cette version ou hors ligne."; }
+function rechFetch(url){
+  if(location.protocol === "file:" || (window.claude && typeof window.claude.use === "function")) return Promise.reject(new Error("offline"));
+  return fetch(url).then(function(r){ return r.json().then(function(d){ return d; }, function(){ throw new Error("noapi"); }); });
+}
+document.getElementById("btn-rech-lieu").addEventListener("click", rechLieuSearch);
+document.getElementById("rech-lieu").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); rechLieuSearch(); } });
+document.getElementById("rech-lieu").addEventListener("input", function(){ rechPlace = null; });
+
+function rechRun(page){
+  var pr = rechCurrentProfil(), st = document.getElementById("rech-status");
+  if(!pr){ st.textContent = "Choisis un profil."; return; }
+  var dom = PROFIL_DOMAINES.find(function(d){ return d.key === pr.domaine; });
+  if(!dom || !(dom.naf || []).length){ st.textContent = "Ce profil n'a pas de secteur d'activité associé : choisis un profil standard (IT, communication, immobilier…)."; return; }
+  var rayon = document.getElementById("rech-rayon").value, taille = document.getElementById("rech-taille").value;
+  var qs = ["naf=" + encodeURIComponent(dom.naf.join(",")), "page=" + (page || 1)];
+  if(taille) qs.push("taille=" + taille);
+  if(rayon !== "France"){
+    if(!rechPlace){ st.textContent = "Choisis d'abord un lieu (bouton « Chercher le lieu »), ou mets « Toute la France »."; return; }
+    if(+rayon <= 50){ qs.push("lat=" + rechPlace.lat, "lon=" + rechPlace.lon, "radius=" + rayon); }
+    else { qs.push("dep=" + encodeURIComponent(rechPlace.dep)); }
+  }
+  st.textContent = "Recherche en cours…";
+  var btn = document.getElementById("btn-rech-go"); btn.disabled = true;
+  rechFetch("/api/entreprises?" + qs.join("&")).then(function(d){
+    btn.disabled = false;
+    if(!d.ok){ st.textContent = d.reason === "rate" ? "Trop de recherches d'un coup : réessaie dans une minute." : "La recherche n'a pas abouti (" + (d.reason || "erreur") + "). Réessaie."; return; }
+    rechLast = { profilId: pr.id, page: d.page, totalPages: d.totalPages, total: d.total };
+    state.rechercheResultats = (page > 1 ? state.rechercheResultats : []).concat(d.results.map(function(r){ r._profilId = pr.id; return r; }));
+    st.textContent = d.total + " entreprise(s) active(s) dans ce secteur" + (rayon === "France" ? "" : " autour de " + (rechPlace ? rechPlace.label : "") ) + ". Aucune n'a forcément d'offre publiée : c'est le principe de la candidature spontanée.";
+    renderRechResults(); refreshStatusDots();
+  }, function(e){ btn.disabled = false; st.textContent = rechOffline(); });
+}
+document.getElementById("btn-rech-go").addEventListener("click", function(){ rechRun(1); });
+
+function renderRechResults(){
+  var wrap = document.getElementById("rech-results"), ec = state.profil.ecartes || {};
+  var list = state.rechercheResultats.filter(function(r){ return !ec[r.siren]; });
+  if(!list.length){ wrap.innerHTML = state.rechercheResultats.length ? '<p class="empty-note">Toutes les entreprises de cette page sont écartées.</p>' : ""; document.getElementById("rech-more").style.display = "none"; return; }
+  wrap.innerHTML = "";
+  list.forEach(function(r){
+    var nom = titleCaseName(r.nom), naf = NAF_LABELS[r.naf] || r.naf;
+    var b = document.createElement("div"); b.className = "exp-block";
+    b.innerHTML = '<div class="exp-block-head"><strong>' + esc(nom) + '</strong><span class="hint">' + esc(r.ville) + (r.cp ? " (" + esc(r.cp) + ")" : "") + '</span></div>' +
+      '<p class="hint" style="margin:0 0 8px;">' + esc(naf) + ' · effectif : ' + esc(r.effectif) + (r.employeur ? " · employeur" : "") + (r.creation ? " · créée en " + esc(r.creation) : "") + '</p>' +
+      '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-spont="' + r.siren + '">Candidature spontanée</button>' +
+      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="https://duckduckgo.com/?q=' + encodeURIComponent(nom + " recrutement " + r.ville) + '">Chercher leur page recrutement</a>' +
+      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(r.fiche) + '">Fiche entreprise</a>' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-ecarter="' + r.siren + '">Écarter</button></div>';
+    wrap.appendChild(b);
+  });
+  wrap.querySelectorAll("[data-spont]").forEach(function(btn){
+    btn.addEventListener("click", function(){ startSpontanee(state.rechercheResultats.find(function(r){ return r.siren === btn.getAttribute("data-spont"); })); });
+  });
+  wrap.querySelectorAll("[data-ecarter]").forEach(function(btn){
+    btn.addEventListener("click", function(){ state.profil.ecartes = state.profil.ecartes || {}; state.profil.ecartes[btn.getAttribute("data-ecarter")] = true; persist(); renderRechResults(); });
+  });
+  var more = document.getElementById("rech-more");
+  more.style.display = (rechLast && rechLast.page < rechLast.totalPages) ? "inline-flex" : "none";
+}
+document.getElementById("rech-more").addEventListener("click", function(){ rechRun((rechLast ? rechLast.page : 1) + 1); });
+
+// Crée une candidature spontanée pour l'entreprise choisie, avec le profil de recherche.
+function startSpontanee(res){
+  var pr = state.profils.find(function(p){ return p.id === res._profilId; });
+  if(!res || !pr) return;
+  persist();
+  document.getElementById("btn-new-dossier").click();
+  var nom = titleCaseName(res.nom), naf = NAF_LABELS[res.naf] || "";
+  anPoste.value = pr.titreVise; anEntreprise.value = nom; anUrl.value = res.fiche;
+  anTexte.value = "Candidature spontanée chez " + nom + ". Secteur : " + naf + ". Lieu : " + res.ville + ". Compétences du profil : " + (pr.motsCles || []).join(", ") + ".";
+  state.annonce.spontanee = true;
+  state.annonce.meta = { lieu: res.ville + (res.cp ? " (" + res.cp + ")" : ""), contrat: "", salaire: "", date: "", secteur: naf };
+  state.annonce.emetteur = { type: "direct", manual: true, raisons: [] };
+  state.cv.profilId = pr.id; state.cv.profilManuel = true;
+  reanalyzeAnnonce();
+  applyProfilToDossier(pr.id, true);
+  syncDossierUI(); persist();
+  switchTab("lettre");
+}
+
 /* ===================== CANDIDATURES MULTIPLES : barre, bascule, sauvegarde locale ===================== */
 
 function renderDossierBar(){
@@ -4430,6 +4630,7 @@ function relevantExperiences(max){
 function annonceForAI(){
   var em = state.annonce.emetteur || {};
   return { poste: scrubForAI(state.annonce.poste), entreprise: scrubForAI(state.annonce.entreprise),
+    candidature_spontanee: !!state.annonce.spontanee,
     qui_publie: em.type ? (EMETTEUR_LABELS[em.type] || em.type) : "non déterminé",
     entreprise_finale: scrubForAI(state.annonce.clientFinal),
     lieu: scrubForAI((state.annonce.meta || {}).lieu), contrat: scrubForAI((state.annonce.meta || {}).contrat),
@@ -4559,7 +4760,7 @@ document.getElementById("btn-affiner-ia").addEventListener("click", function(){
     remarques: l.remarques || [],
     format_reponse: '{"paragraphs":["..."]}'
   };
-  var system = "Tu rédiges des lettres de motivation pour une personne précise, avec sa voix. 150 à 250 mots, sans formule d'appel ni signature (l'application les ajoute). Adapte l'adresse au type d'émetteur (si cabinet ou intérim : on écrit au recruteur pour le compte de son client, sans prétendre connaître l'entreprise finale ; si recrutement direct : on s'adresse à l'entreprise ; si ESN : on valorise l'adaptabilité de missions seulement si les expériences le montrent). Structure : une accroche précise sur le poste, un ou deux paragraphes de preuves tirées des expériences fournies et reprenant naturellement les mots-clés de l'annonce que la personne maîtrise réellement, une phrase sur l'entreprise seulement si l'annonce en parle, une clôture courte (reprends la formule de fin fournie si elle existe, sinon reste sobre). Respecte la voix décrite et évite ce qui est listé à éviter. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
+  var system = "Tu rédiges des lettres de motivation pour une personne précise, avec sa voix. 150 à 250 mots, sans formule d'appel ni signature (l'application les ajoute). Si candidature_spontanee est vrai, il n'y a pas d'annonce : écris une candidature spontanée (secteur et lieu de l'entreprise, profil visé), sans prétendre qu'un poste est ouvert. Adapte l'adresse au type d'émetteur (si cabinet ou intérim : on écrit au recruteur pour le compte de son client, sans prétendre connaître l'entreprise finale ; si recrutement direct : on s'adresse à l'entreprise ; si ESN : on valorise l'adaptabilité de missions seulement si les expériences le montrent). Structure : une accroche précise sur le poste, un ou deux paragraphes de preuves tirées des expériences fournies et reprenant naturellement les mots-clés de l'annonce que la personne maîtrise réellement, une phrase sur l'entreprise seulement si l'annonce en parle, une clôture courte (reprends la formule de fin fournie si elle existe, sinon reste sobre). Respecte la voix décrite et évite ce qui est listé à éviter. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
   {
     var btn = this; btn.disabled = true; st.setAttribute("data-busy", "1"); st.textContent = "Rédaction en cours…";
     iaAsk(system, user, "Annonce, expériences, voix et remarques (sans nom ni coordonnées).").then(function(out){
@@ -4641,5 +4842,14 @@ renderProfils();
 refreshIaState();
 
 </script>
+<footer class="app-footer" role="contentinfo">
+  <span>Version de pré-production · aucun cookie, aucun suivi, vos données restent dans votre navigateur.</span>
+  <nav aria-label="Informations légales">
+    <a href="legal/mentions-legales.html">Mentions légales</a>
+    <a href="legal/confidentialite.html">Confidentialité</a>
+    <a href="legal/cgu.html">Conditions d'utilisation</a>
+    <a href="legal/accessibilite.html">Accessibilité</a>
+  </nav>
+</footer>
 </body>
 </html>

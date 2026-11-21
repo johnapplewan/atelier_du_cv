@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Politique de confidentialité · Atelier Candidature</title>
+<meta name="description" content="Quelles données sont traitées, où elles restent, et quels sont vos droits.">
+<link rel="stylesheet" href="../vendor/fonts.css">
+<link rel="stylesheet" href="legal.css">
+</head>
+<body>
+<a class="skip" href="#contenu">Aller au contenu</a>
+<header class="site">
+  <a class="brand" href="../">Atelier Candidature</a>
+  <nav class="legal-nav" aria-label="Pages légales">
+    <a href="mentions-legales.html">Mentions légales</a>
+    <a href="confidentialite.html">Confidentialité</a>
+    <a href="cgu.html">Conditions d'utilisation</a>
+    <a href="accessibilite.html">Accessibilité</a>
+  </nav>
+</header>
+<main id="contenu">
+<p class="banner todo" id="todo-banner" hidden>Version de pré-production : certaines informations de l'éditeur restent à compléter (champs en rouge).</p>
+
+<h1>Politique de confidentialité</h1>
+<p class="meta">Dernière mise à jour : <span data-l="maj"></span></p>
+
+<p><strong>En bref.</strong> Il n'y a ni compte, ni cookie, ni outil de mesure d'audience, ni publicité. Tout ce que vous saisissez (profil, CV, lettres, candidatures) reste dans votre navigateur et n'est jamais envoyé à l'éditeur. Quelques fonctions passent par un petit service intermédiaire qui ne conserve rien.</p>
+
+<h2>1. Responsable du traitement</h2>
+<p><span data-l="editeur.nom"></span>, <span data-l="editeur.adresse"></span>. Contact : <span data-l="editeur.email"></span>.</p>
+
+<h2>2. Données enregistrées dans votre navigateur</h2>
+<p>L'application enregistre vos contenus dans le stockage local de votre navigateur (<code>localStorage</code>) : nom, coordonnées, expériences, formations, compétences, lettres, annonces, suivi de candidatures, profils de recherche, préférence de thème. Ces données restent sur votre appareil, ne sont pas transmises à l'éditeur et ne sont pas accessibles depuis un autre appareil. Ce stockage est nécessaire au fonctionnement demandé : il ne nécessite pas de consentement au titre des règles sur les traceurs.</p>
+<p>Vous les contrôlez : bouton « Tout effacer », suppression d'une personne ou d'une candidature, « Sauvegarder » (fichier sur votre ordinateur) et « Restaurer ». Vider les données du site dans votre navigateur les supprime aussi.</p>
+
+<h2>3. Traitements côté serveur</h2>
+<table>
+  <thead><tr><th>Fonction</th><th>Données transmises</th><th>Destinataire</th><th>Conservation par l'éditeur</th></tr></thead>
+  <tbody>
+    <tr><td>Hébergement du site</td><td>Données techniques de connexion (adresse IP, navigateur, page demandée, date)</td><td>Cloudflare (hébergeur)</td><td>Aucune par l'éditeur ; journaux techniques éventuels selon Cloudflare</td></tr>
+    <tr><td>Lecture d'une annonce par son lien (<code>/api/annonce</code>)</td><td>Adresse (URL) de l'annonce saisie par l'utilisateur</td><td>Site de l'annonce, via le service de l'éditeur</td><td>Aucune</td></tr>
+    <tr><td>Recherche d'un lieu (<code>/api/lieu</code>)</td><td>Nom de commune saisi</td><td>API Adresse (data.gouv.fr)</td><td>Aucune</td></tr>
+    <tr><td>Recherche d'entreprises (<code>/api/entreprises</code>)</td><td>Secteur (codes d'activité), zone, taille</td><td>API Recherche d'entreprises (data.gouv.fr)</td><td>Aucune</td></tr>
+  </tbody>
+</table>
+<p>Ces services reçoivent uniquement les critères de recherche ou l'adresse de l'annonce, jamais votre nom, vos coordonnées ni le contenu de votre CV ou de vos lettres. Ils ne servent qu'à répondre à votre demande.</p>
+<p><strong>Finalités et bases légales.</strong> Fournir les fonctions demandées (intérêt légitime et exécution des conditions d'utilisation) ; assurer la sécurité et le bon fonctionnement du site (intérêt légitime).</p>
+
+<h2>4. Assistant IA (facultatif)</h2>
+<p>L'application n'appelle aucun service d'IA de sa propre initiative. Si vous utilisez l'assistant : soit vous copiez vous-même un message préparé par l'application dans votre compte Claude (Anthropic), soit, dans la version publiée sur claude.ai, la page demande à Claude avec votre compte et après votre accord. Les textes préparés ne contiennent ni votre nom, ni vos coordonnées, ni votre photo, ni vos liens ; ils comprennent l'annonce, vos expériences, vos compétences, votre « voix » et vos remarques. Leur traitement par Anthropic relève de vos conditions et de la politique de confidentialité d'Anthropic. Vous voyez le texte avant tout envoi.</p>
+
+<h2>5. Offres d'emploi France Travail (fonction prévue)</h2>
+<p>Une recherche d'offres s'appuyant sur les API de France Travail est prévue. Avant son activation, cette politique sera mise à jour. Les principes retenus : appels faits depuis le service de l'éditeur, sans conserver les offres au-delà de l'affichage, mention de la source, aucun envoi de données personnelles de l'utilisateur à France Travail.</p>
+
+<h2>6. Cookies, mesure d'audience, tiers</h2>
+<p>Aucun cookie n'est déposé. Aucune mesure d'audience, aucun pixel, aucune publicité. Les polices et bibliothèques sont hébergées sur le site lui-même : aucune ressource n'est chargée depuis un service tiers (pas de Google Fonts ni de CDN).</p>
+
+<h2>7. Transferts hors Union européenne</h2>
+<p>L'hébergeur Cloudflare, Inc. est établi aux États-Unis ; il s'appuie sur le Data Privacy Framework et sur des clauses contractuelles types. Aucune donnée de candidature n'étant transmise à l'éditeur, ce transfert ne concerne que les données techniques de connexion.</p>
+
+<h2>8. Sécurité</h2>
+<p>Connexion chiffrée (HTTPS), en-têtes de sécurité (politique de contenu restrictive, interdiction d'intégration dans un autre site), absence de ressources externes, validation des adresses demandées au service de lecture d'annonces (refus des adresses internes), délais et tailles limités.</p>
+
+<h2>9. Vos droits</h2>
+<p>Vous disposez des droits d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité (RGPD). L'éditeur ne détenant pas vos contenus, vous les exercez directement dans l'application (modifier, supprimer, sauvegarder). Pour toute question ou pour les données techniques de connexion : <span data-l="editeur.email"></span>. Vous pouvez aussi saisir la CNIL (<a href="https://www.cnil.fr/fr/plaintes" rel="noopener">cnil.fr/fr/plaintes</a>).</p>
+
+<h2>10. Mineurs</h2>
+<p>Le site s'adresse à des personnes en recherche d'emploi, de formation ou d'alternance, et n'est pas destiné aux enfants de moins de 15 ans.</p>
+
+<h2>11. Évolutions</h2>
+<p>Cette politique peut évoluer ; la date de mise à jour figure en haut de page.</p>
+
+</main>
+<footer class="site">
+  <p>Atelier Candidature, version de pré-production. Aucun cookie, aucun suivi, aucune donnée de candidature envoyée à l'éditeur.</p>
+  <p><a href="../">Retour à l'application</a></p>
+</footer>
+<script src="config.js"></script>
+<script src="legal.js"></script>
+</body>
+</html>
