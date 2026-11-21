@@ -359,12 +359,13 @@
     <div class="rail-tabs">
       <button class="rail-item" data-tab="profils"><span class="num">01</span>Mes profils<span class="status-dot" id="dot-profils"></span></button>
       <button class="rail-item" data-tab="recherche"><span class="num">02</span>Recherche<span class="status-dot" id="dot-recherche"></span></button>
-      <button class="rail-item is-active" data-tab="annonce"><span class="num">03</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
-      <button class="rail-item" data-tab="cv"><span class="num">04</span>CV<span class="status-dot" id="dot-cv"></span></button>
-      <button class="rail-item" data-tab="lettre"><span class="num">05</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
-      <button class="rail-item" data-tab="annexe"><span class="num">06</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
-      <button class="rail-item" data-tab="candidatures"><span class="num">07</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
-      <button class="rail-item" data-tab="entretien"><span class="num">08</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
+      <button class="rail-item" data-tab="freelance"><span class="num">03</span>Freelance<span class="status-dot" id="dot-freelance"></span></button>
+      <button class="rail-item is-active" data-tab="annonce"><span class="num">04</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
+      <button class="rail-item" data-tab="cv"><span class="num">05</span>CV<span class="status-dot" id="dot-cv"></span></button>
+      <button class="rail-item" data-tab="lettre"><span class="num">06</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
+      <button class="rail-item" data-tab="annexe"><span class="num">07</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
+      <button class="rail-item" data-tab="candidatures"><span class="num">08</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
+      <button class="rail-item" data-tab="entretien"><span class="num">09</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
     </div>
     <div class="rail-foot">Ta bibliothèque (expériences, compétences, lettres, candidatures) reste dans ce navigateur. Seuls le lien d'une annonce ou les critères d'une recherche d'entreprises transitent, jamais ton CV ni tes coordonnées.</div>
   </nav>
@@ -420,6 +421,56 @@
         </div>
         <div id="rech-results"></div>
         <button class="btn btn-ghost btn-sm" id="rech-more" type="button" style="display:none;margin-top:8px;">Voir plus d'entreprises</button>
+      </div>
+    </section>
+
+    <!-- PANEL FREELANCE -->
+    <section class="panel" id="panel-freelance">
+      <div class="panel-head">
+        <h2>Freelance : proposer mes services</h2>
+        <p>Décris ton offre de service, puis trouve les structures qui peuvent te confier des missions (ESN, cabinets, agences d'intérim, portage, organismes de formation, entreprises) et envoie-leur une lettre d'offre de service ciblée, à la place d'une lettre de motivation.</p>
+      </div>
+      <div style="max-width:980px;">
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">Mon offre de service</span>
+          <div id="fl-services" style="margin-top:8px;"></div>
+          <div class="toolbar-row" style="margin:6px 0 12px;"><button class="btn btn-ghost btn-sm" id="btn-fl-add" type="button">+ Ajouter une prestation</button></div>
+          <div class="field"><label for="fl-offre">Présentation en deux phrases</label><textarea id="fl-offre" style="min-height:64px;" placeholder="Qui tu es, ce que tu apportes, pour quels clients."></textarea>
+            <div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-ghost btn-sm" id="btn-fl-offre-gen" type="button">Générer d'après mes prestations</button></div></div>
+          <div class="row2">
+            <div class="field"><label for="fl-dispo">Disponibilité</label><input type="text" id="fl-dispo" placeholder="ex. dès janvier, 3 jours par semaine"></div>
+            <div class="field"><label for="fl-mode">Modalités</label><select id="fl-mode"><option>Télétravail ou sur site</option><option>Télétravail</option><option>Sur site</option><option>Hybride</option></select></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="fl-zone">Zone d'intervention</label><input type="text" id="fl-zone" placeholder="ex. Reims, Paris, France entière à distance"></div>
+            <div class="field"><label for="fl-tjm">Tarif indicatif (facultatif)</label><input type="text" id="fl-tjm" placeholder="ex. à partir de 450 € par jour">
+              <label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:4px;"><input type="checkbox" id="fl-showtjm"> L'indiquer dans les lettres</label></div>
+          </div>
+          <div class="field"><label>Références : missions à citer (tirées de tes expériences)</label><div id="fl-refs"></div>
+            <p class="hint" style="margin:4px 0 0;">Sans sélection, les deux expériences les plus proches de tes prestations sont citées.</p></div>
+          <div class="field"><label for="fl-import">Compléter avec un texte (plaquette, missions, références, services…)</label>
+            <textarea id="fl-import" style="min-height:90px;" placeholder="Colle un texte : l'atelier trie et organise les prestations, missions et références, et les ajoute à ta base."></textarea>
+            <div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-ghost btn-sm" id="btn-fl-import" type="button">Analyser et ajouter</button><span class="hint" id="fl-import-status"></span></div></div>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">Qui démarcher</span>
+          <div class="row2" style="margin-top:8px;">
+            <div class="field"><label for="fl-profil">Profil de référence</label><select id="fl-profil"></select></div>
+            <div class="field"><label for="fl-taille">Taille</label><select id="fl-taille"><option value="">Toutes</option><option value="tpe">Petites (moins de 10 salariés)</option><option value="pme">Moyennes (10 à 249)</option><option value="eti">Grandes (250 et plus)</option></select></div>
+          </div>
+          <div class="field"><label>Types de structures</label><div class="chips" id="fl-cibles"></div></div>
+          <div class="row2">
+            <div class="field"><label for="fl-lieu">Lieu</label>
+              <div style="display:flex;gap:8px;"><input type="text" id="fl-lieu" placeholder="ex. Reims"><button class="btn btn-sm" id="btn-fl-lieu" type="button">Chercher le lieu</button></div>
+              <div class="chips" id="fl-lieu-list" style="margin-top:6px;"></div></div>
+            <div class="field"><label for="fl-rayon">Rayon</label><select id="fl-rayon"><option value="30">30 km</option><option value="50">50 km</option><option value="100">Département</option><option value="France" selected>Toute la France</option></select></div>
+          </div>
+          <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-fl-go" type="button">Rechercher des structures</button></div>
+          <p class="hint" id="fl-status" style="margin:10px 0 0;"></p>
+          <p class="hint" style="margin:6px 0 0;">Mêmes sources publiques que l'onglet Recherche : seuls le type d'activité, la zone et la taille sont transmis.</p>
+        </div>
+        <div id="fl-results"></div>
+        <button class="btn btn-ghost btn-sm" id="fl-more" type="button" style="display:none;margin-top:8px;">Voir plus de structures</button>
       </div>
     </section>
 
@@ -1093,8 +1144,8 @@ var PHRASES_EN = {
 function defaultState(){
   return {
     profil: { nom:"", titre:"", email:"", tel:"", ville:"", lien:"", langues:"", atouts:[], photo:null,
-      voix:{ description:"", formuleFinale:"", eviter:"" } },
-    annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[], meta:{ lieu:"", contrat:"", salaire:"", date:"", secteur:"" }, emetteur:{ type:"", manual:false, raisons:[] }, clientFinal:"", spontanee:false },
+      voix:{ description:"", formuleFinale:"", eviter:"" }, freelance:{ services:[], offre:"", expIds:[], dispo:"", mode:"Télétravail ou sur site", zone:"", tjm:"", showTjm:false } },
+    annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[], meta:{ lieu:"", contrat:"", salaire:"", date:"", secteur:"" }, emetteur:{ type:"", manual:false, raisons:[] }, clientFinal:"", spontanee:false, service:false, cible:"" },
     library: { experiences:[], formations:[], competences:[], sections:[], lettresArchive:[], annexeItems:[] },
     cv: { lang:"fr", format:"standard", resume:"", selectedExp:[], selectedForm:[], autoMode:true },
     lettre: { lang:"fr", destinataire:"", ton:"formel", corps:null, corpsPrev:null, options:{}, remarques:[], motivations:[""], motivPrompts:[""], competencesChoisies:[], disponibilite:"", seed:1 },
@@ -1145,7 +1196,7 @@ function normPersonData(raw){
   raw = raw || {};
   var def = defaultState();
   var rp = raw.profil || {};
-  var profil = Object.assign({}, def.profil, rp, { voix: Object.assign({}, def.profil.voix, rp.voix) });
+  var profil = Object.assign({}, def.profil, rp, { voix: Object.assign({}, def.profil.voix, rp.voix), freelance: Object.assign({}, def.profil.freelance, rp.freelance) });
   delete profil.suisse; delete profil.suisseActif;
   if(!profil.atouts) profil.atouts = [];
   var library = Object.assign({}, def.library, raw.library);
@@ -1182,7 +1233,7 @@ function activateDossier(id){
 function dossierAutoTitle(d){
   var a = d.annonce || {};
   var t = [a.poste, a.entreprise].map(function(x){ return (x || "").trim(); }).filter(Boolean).join(" · ");
-  return (t || "Nouvelle candidature") + (a.spontanee ? " (spontanée)" : "");
+  return (t || "Nouvelle candidature") + (a.spontanee ? " (spontanée)" : "") + (a.service ? " (offre de service)" : "");
 }
 // Chaque candidature ouverte apparaît toute seule dans le suivi (statut « à envoyer ») et s'y met à jour.
 function syncCandidatureTracking(d){
@@ -1191,8 +1242,9 @@ function syncCandidatureTracking(d){
   var c = state.candidatures.find(function(x){ return x.id === d.candidatureId; });
   if(!c){
     if(!has) return;
-    c = { id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "brouillon", notes: "", versions: [], auto: true, lastSync: "", type: a.spontanee ? "spontanee" : "offre" };
-    if(a.spontanee){ var rel = new Date(); rel.setDate(rel.getDate() + 10); c.notes = "Candidature spontanée. Relance à prévoir vers le " + rel.toLocaleDateString("fr-FR") + "."; }
+    c = { id: uid(), poste: "", entreprise: "", lien: "", date: todayISO(), statut: "brouillon", notes: "", versions: [], auto: true, lastSync: "", type: a.service ? "service" : (a.spontanee ? "spontanee" : "offre") };
+    if(a.service){ var rel2 = new Date(); rel2.setDate(rel2.getDate() + 10); c.notes = "Offre de service. Relance à prévoir vers le " + rel2.toLocaleDateString("fr-FR") + "."; }
+    else if(a.spontanee){ var rel = new Date(); rel.setDate(rel.getDate() + 10); c.notes = "Candidature spontanée. Relance à prévoir vers le " + rel.toLocaleDateString("fr-FR") + "."; }
     state.candidatures.push(c);
     d.candidatureId = c.id;
   }
@@ -1232,11 +1284,12 @@ function persist(){
 
 /* ---------------- onglets & statut ---------------- */
 
-var TABS = ["profils","recherche","annonce","cv","lettre","annexe","candidatures","entretien"];
+var TABS = ["profils","recherche","freelance","annonce","cv","lettre","annexe","candidatures","entretien"];
 var activeTab = "annonce";
 
 function statusFor(tab){
   if(tab === "profils"){ return state.profils.length ? "ready" : "empty"; }
+  if(tab === "freelance"){ return flState().services.some(function(s){ return (s.titre || "").trim(); }) ? "ready" : "empty"; }
   if(tab === "recherche"){ return (state.rechercheResultats || []).length ? "ready" : "empty"; }
   if(tab === "annonce"){
     if(!state.annonce.texte.trim()) return "empty";
@@ -1284,6 +1337,7 @@ function switchTab(tab){
   if(tab === "candidatures" && typeof renderCandidaturesList === "function"){ renderCandidaturesList(); }
   if(tab === "profils" && typeof renderProfils === "function"){ renderProfils(); }
   if(tab === "recherche" && typeof rechProfilOptions === "function"){ rechProfilOptions(); renderRechResults(); }
+  if(tab === "freelance" && typeof renderFreelance === "function"){ renderFreelance(); }
   TABS.forEach(function(t){
     document.getElementById("panel-"+t).classList.toggle("active", t === tab);
     document.querySelector('.rail-item[data-tab="'+t+'"]').classList.toggle("is-active", t === tab);
@@ -2164,6 +2218,7 @@ function parseImportedCvLegacy(rawText){
 /* ---- import structuré : nettoyage markdown + détection de rubriques ---- */
 
 var IMPORT_SECTIONS = [
+  { key:"services", re:/^(services?|prestations?|offres? de services?|ce que je propose|interventions? propos[ée]es?|domaines? d['’]intervention)/ },
   { key:"profil",  re:/^(profil|resume|r[ée]sum[ée]|summary|a propos|à propos|presentation|présentation|objectif|accroche|about)/ },
   { key:"exp",     re:/^(exp[ée]riences?|parcours professionnel|emplois?|historique professionnel|work experience|experience|carri[èe]re|missions)/ },
   { key:"form",    re:/^(formations?|[ée]tudes?|dipl[ôo]mes?|parcours (acad[ée]mique|scolaire)|education|cursus|scolarit[ée])/ },
@@ -2375,6 +2430,7 @@ function parseImportedCv(rawText){
       else { out.skills = out.skills.concat(splitListItems(cl)); }
     }
     else if(s.key === "atouts"){ out.atouts = out.atouts.concat(splitListItems(content.filter(function(o){ return !o.blank; }))); }
+    else if(s.key === "services"){ out.services = (out.services || []).concat(content.filter(function(o){ return !o.blank; }).map(function(o){ return o.t; })); }
     else if(s.key === "langues"){ out.langues = (out.langues ? out.langues + ", " : "") + splitListItems(content.filter(function(o){ return !o.blank; })).join(", "); }
     else if(s.key === "profil"){ out.resume = (out.resume ? out.resume + " " : "") + content.filter(function(o){ return !o.blank; }).map(function(o){ return o.t; }).join(" "); }
     else {
@@ -2424,6 +2480,11 @@ function doImportCv(){
     addedForm++;
   });
   result.skills.forEach(function(s){ if(addSkillRaw(s)) addedSkills++; });
+  var addedServices = 0;
+  (result.services || []).forEach(function(t){
+    var fl = flState();
+    if(t && !fl.services.some(function(x){ return norm(x.titre) === norm(t); })){ fl.services.push({ id: uid(), titre: t.slice(0, 120), description: "" }); addedServices++; }
+  });
   var addedSections = 0;
   (result.sections || []).forEach(function(sec){
     if(state.library.sections.some(function(x){ return norm(x.titre) === norm(sec.titre); })) return;
@@ -2460,9 +2521,9 @@ function doImportCv(){
   fillText("langues", result.langues, "cv-langues", "langues", state.profil, "langues");
   fillText("resume", result.resume, "cv-resume", "résumé", state.cv, "resume");
 
-  if(addedExp || addedForm || addedSkills || addedSections || filledProfil.length){
+  if(addedExp || addedForm || addedSkills || addedSections || addedServices || filledProfil.length){
     ta.value = "";
-    statusEl.textContent = "Importé : " + addedExp + " expérience(s), " + addedForm + " formation(s), " + addedSkills + " compétence(s), " + addedSections + " autre(s) rubrique(s)" +
+    statusEl.textContent = "Importé : " + addedExp + " expérience(s), " + addedForm + " formation(s), " + addedSkills + " compétence(s), " + addedSections + " autre(s) rubrique(s)" + (addedServices ? ", " + addedServices + " prestation(s) freelance" : "") +
       (filledProfil.length ? ", profil pré-rempli (" + filledProfil.join(", ") + ")" : "") + " — vérifie et ajuste ci-dessous.";
   } else {
     statusEl.textContent = "Rien de nouveau détecté (peut-être déjà présent, ou pas de date reconnaissable comme « 2020 - 2022 »). Ajuste le texte ou complète à la main ci-dessous.";
@@ -3192,7 +3253,7 @@ function humanList(arr, en){
 }
 // retire les tics typographiques qui trahissent un texte généré
 function cleanLetterText(s){
-  return s.replace(/\s+[—–]\s+/g, ", ").replace(/[—–]/g, "-").replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/\s{2,}/g, " ").trim();
+  return s.replace(/(\d{4})\s+[—–]\s+/g, "$1 - ").replace(/\s+[—–]\s+/g, ", ").replace(/[—–]/g, "-").replace(/[“”]/g, '"').replace(/[‘’]/g, "'").replace(/\s{2,}/g, " ").trim();
 }
 
 // Ouvertures et clôtures quand l'annonce vient d'un intermédiaire (cabinet, agence d'intérim)
@@ -3268,6 +3329,8 @@ function pickProjects(kws){
     return parts[1] ? name + " (" + lowerFirst(parts[1].trim()) + ")" : name;
   });
 }
+
+function generateLettre(){ return state.annonce.service ? generateOffreServiceParagraphs() : generateLettreParagraphs(); }
 
 function generateLettreParagraphs(){
   var l = state.lettre, an = state.annonce, en = l.lang === "en";
@@ -3375,14 +3438,14 @@ function renderLettrePreview(){
   var poste = an.poste.trim();
   var entreprise = an.entreprise.trim();
   var edited = Array.isArray(l.corps) && l.corps.length;
-  var paragraphs = edited ? l.corps : generateLettreParagraphs();
+  var paragraphs = edited ? l.corps : generateLettre();
 
   var today = new Date();
   var dateStr = en
     ? MOIS_EN[today.getMonth()] + " " + today.getDate() + ", " + today.getFullYear()
     : today.getDate() + " " + ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"][today.getMonth()] + " " + today.getFullYear();
 
-  var objLabel = en ? "Subject: Application for the position of " : "Objet : Candidature au poste de ";
+  var objLabel = an.service ? (en ? "Subject: Proposal of services: " : "Objet : Proposition de services : ") : (en ? "Subject: Application for the position of " : "Objet : Candidature au poste de ");
   var attnLabel = en ? "Attention: " : "À l'attention de ";
 
   var html = "";
@@ -3413,7 +3476,7 @@ document.getElementById("lettre-texte").addEventListener("input", function(){
   wrap.addEventListener("focusout", function(e){
     if(!e.target.getAttribute || !e.target.getAttribute("data-lp")) return;
     var texts = Array.prototype.map.call(wrap.querySelectorAll("[data-lp]"), function(p){ return p.innerText.replace(/\s+/g, " ").trim(); }).filter(Boolean);
-    var current = Array.isArray(state.lettre.corps) ? state.lettre.corps : generateLettreParagraphs();
+    var current = Array.isArray(state.lettre.corps) ? state.lettre.corps : generateLettre();
     if(texts.join("\n") === current.join("\n")) return;
     state.lettre.corps = texts;
     persist(); renderLettrePreview();
@@ -3586,7 +3649,7 @@ function renderCandidaturesList(){
     block.className = "exp-block";
     block.innerHTML =
       '<div class="exp-block-head">' +
-        '<span class="tier-pill ' + meta.tier + '">' + esc(meta.label) + '</span>' + (c.type === "spontanee" ? '<span class="hint" style="margin-left:8px;">Candidature spontanée</span>' : '') +
+        '<span class="tier-pill ' + meta.tier + '">' + esc(meta.label) + '</span>' + (c.type === "spontanee" ? '<span class="hint" style="margin-left:8px;">Candidature spontanée</span>' : (c.type === "service" ? '<span class="hint" style="margin-left:8px;">Offre de service</span>' : '')) +
         '<button class="icon-btn" data-remove="' + c.id + '" title="Retirer" aria-label="Retirer">' + icon("close") + '</button>' +
       '</div>' +
       '<div class="row2">' +
@@ -4213,7 +4276,7 @@ var NAF_LABELS = { "62.01Z":"programmation informatique", "62.02A":"conseil en s
   "70.22Z":"conseil pour les affaires et la gestion", "73.11Z":"agences de publicité", "70.21Z":"conseil en relations publiques et communication", "73.12Z":"régie publicitaire de médias",
   "59.11A":"production de films pour la télévision", "59.11B":"production de films institutionnels et publicitaires", "74.10Z":"design et création spécialisés",
   "68.31Z":"agences immobilières", "68.20A":"location de logements", "68.32A":"administration d'immeubles", "78.10Z":"agences de placement",
-  "85.59A":"formation continue d'adultes", "85.59B":"autres enseignements", "82.11Z":"services administratifs de bureau", "69.20Z":"activités comptables", "82.20Z":"centres d'appels" };
+  "62.09Z":"autres activités informatiques", "78.20Z":"mise à disposition de personnel temporaire", "78.30Z":"autre mise à disposition de ressources humaines", "85.59A":"formation continue d'adultes", "85.59B":"autres enseignements", "82.11Z":"services administratifs de bureau", "69.20Z":"activités comptables", "82.20Z":"centres d'appels" };
 
 var rechPlace = null;     // lieu choisi : {label, lat, lon, dep}
 var rechLast = null;      // dernière recherche : {profilId, params, page}
@@ -4342,6 +4405,287 @@ function startSpontanee(res){
   applyProfilToDossier(pr.id, true);
   syncDossierUI(); persist();
   switchTab("lettre");
+}
+
+/* ===================== FREELANCE : offre de service et démarchage des intermédiaires ===================== */
+
+// Types de structures à démarcher : codes d'activité (NAF) pour la recherche d'entreprises.
+var FL_CIBLES = {
+  esn:       { label: "ESN / SSII", naf: ["62.01Z","62.02A","62.09Z"], intro: "intervenir sur les missions de vos clients" },
+  conseil:   { label: "Cabinets de conseil", naf: ["70.22Z","62.02A"], intro: "renforcer vos équipes sur des missions de conseil" },
+  interim:   { label: "Agences d'intérim et de mise à disposition", naf: ["78.20Z","78.30Z"], intro: "référencer mon profil pour des missions freelance" },
+  recrut:    { label: "Cabinets de recrutement", naf: ["78.10Z"], intro: "référencer mon profil freelance pour les besoins de vos clients" },
+  portage:   { label: "Portage et services RH", naf: ["78.30Z"], intro: "référencer mon profil pour des missions en portage ou en indépendant" },
+  formation: { label: "Organismes de formation", naf: ["85.59A","85.59B"], intro: "intervenir auprès de vos apprenants et de vos clients" },
+  agence:    { label: "Agences (communication, marketing, web)", naf: ["73.11Z","70.21Z","73.12Z","74.10Z"], intro: "renforcer vos équipes sur des projets ponctuels" },
+  direct:    { label: "Entreprises du secteur du profil", naf: [], intro: "intervenir en mission ponctuelle ou récurrente" }
+};
+// Cibles conseillées selon le domaine du profil
+var FL_CIBLES_PAR_DOMAINE = {
+  dev:["esn","conseil","portage"], ia:["esn","conseil","portage"], data:["esn","conseil","portage"], design:["agence","esn","portage"], projet:["conseil","esn","portage"],
+  comm:["agence","portage","conseil"], crea:["agence","portage","direct"], formation:["formation","portage","conseil"], rh:["recrut","conseil","portage"],
+  immo:["direct","conseil"], vente:["conseil","interim","portage"], admin:["interim","portage"], client:["interim","portage"]
+};
+
+function flState(){
+  var p = state.profil;
+  p.freelance = Object.assign({ services: [], offre: "", expIds: [], dispo: "", mode: "Télétravail ou sur site", zone: "", tjm: "", showTjm: false }, p.freelance);
+  if(!Array.isArray(p.freelance.services)) p.freelance.services = [];
+  if(!Array.isArray(p.freelance.expIds)) p.freelance.expIds = [];
+  return p.freelance;
+}
+
+var flCibles = {};      // cibles cochées {cle:true}
+var flPlace = null, flLast = null;
+state.flResultats = [];
+
+function renderFreelance(){
+  var fl = flState();
+  if(!document.getElementById("fl-services")) return;
+  // services
+  var sw = document.getElementById("fl-services"); sw.innerHTML = "";
+  if(!fl.services.length) sw.innerHTML = '<p class="empty-note">Ajoute les prestations que tu proposes (ex. « Conception d\'applications web », « Formation à l\'audiovisuel »), ou colle un texte plus bas.</p>';
+  fl.services.forEach(function(sv, i){
+    var d = document.createElement("div"); d.className = "exp-block";
+    d.innerHTML = '<div class="exp-block-head"><span class="eyebrow">Prestation ' + (i + 1) + '</span><button class="icon-btn" type="button" data-fl-del="' + i + '" aria-label="Retirer cette prestation" title="Retirer">' + icon("close") + '</button></div>' +
+      '<div class="field"><label>Intitulé</label><input type="text" data-fl-svc="titre" data-i="' + i + '" value="' + esc(sv.titre) + '"></div>' +
+      '<div class="field"><label>En une ou deux phrases : ce que tu livres, pour qui</label><textarea data-fl-svc="description" data-i="' + i + '" style="min-height:60px;">' + esc(sv.description || "") + '</textarea></div>';
+    sw.appendChild(d);
+  });
+  sw.querySelectorAll("[data-fl-svc]").forEach(function(el){
+    el.addEventListener("input", function(){ fl.services[+el.getAttribute("data-i")][el.getAttribute("data-fl-svc")] = el.value; persist(); });
+  });
+  sw.querySelectorAll("[data-fl-del]").forEach(function(b){ b.addEventListener("click", function(){ fl.services.splice(+b.getAttribute("data-fl-del"), 1); persist(); renderFreelance(); }); });
+  // champs simples
+  [["fl-dispo","dispo"],["fl-zone","zone"],["fl-tjm","tjm"],["fl-offre","offre"]].forEach(function(pair){ var el = document.getElementById(pair[0]); if(document.activeElement !== el) el.value = fl[pair[1]] || ""; });
+  document.getElementById("fl-mode").value = fl.mode || "Télétravail ou sur site";
+  document.getElementById("fl-showtjm").checked = !!fl.showTjm;
+  // références = expériences de la base
+  var rw = document.getElementById("fl-refs"); rw.innerHTML = "";
+  var exps = state.library.experiences.filter(function(e){ return e.poste || e.entreprise; });
+  if(!exps.length) rw.innerHTML = '<p class="empty-note">Aucune expérience dans la base : importe un CV (onglet CV) ou colle un texte plus bas.</p>';
+  exps.forEach(function(e){
+    var on = fl.expIds.indexOf(e.id) !== -1;
+    var lab = document.createElement("label"); lab.className = "hint"; lab.style.cssText = "display:flex;gap:6px;align-items:flex-start;margin-bottom:4px;";
+    lab.innerHTML = '<input type="checkbox" data-fl-ref="' + e.id + '"' + (on ? " checked" : "") + '> <span><strong>' + esc(e.poste || e.entreprise) + '</strong>' + (e.entreprise && e.poste ? ", " + esc(e.entreprise) : "") + (e.dates ? " (" + esc(e.dates) + ")" : "") + '</span>';
+    rw.appendChild(lab);
+  });
+  rw.querySelectorAll("[data-fl-ref]").forEach(function(cb){
+    cb.addEventListener("change", function(){
+      var id = cb.getAttribute("data-fl-ref");
+      fl.expIds = fl.expIds.filter(function(x){ return x !== id; }); if(cb.checked) fl.expIds.push(id);
+      persist();
+    });
+  });
+  // profil + cibles conseillées
+  var ps = document.getElementById("fl-profil"), cur = ps.value;
+  ps.innerHTML = '<option value="">Aucun profil précis</option>' + state.profils.map(function(p){ return '<option value="' + p.id + '">' + esc(p.nom) + '</option>'; }).join("");
+  if(cur && state.profils.some(function(p){ return p.id === cur; })) ps.value = cur;
+  renderFlCibles();
+  renderFlResults();
+}
+function flProfil(){ return state.profils.find(function(p){ return p.id === document.getElementById("fl-profil").value; }) || null; }
+function flRecommended(){
+  var pr = flProfil();
+  return (pr && FL_CIBLES_PAR_DOMAINE[pr.domaine]) || ["esn", "conseil", "portage"];
+}
+function renderFlCibles(){
+  var wrap = document.getElementById("fl-cibles"), rec = flRecommended();
+  wrap.innerHTML = "";
+  Object.keys(FL_CIBLES).forEach(function(k){
+    var on = !!flCibles[k], b = document.createElement("button");
+    b.type = "button"; b.className = "chip" + (on ? "" : " suggest"); b.setAttribute("aria-pressed", on ? "true" : "false");
+    b.textContent = (on ? "✓ " : "") + FL_CIBLES[k].label + (rec.indexOf(k) !== -1 ? " · conseillé" : "");
+    b.addEventListener("click", function(){ flCibles[k] = !flCibles[k]; renderFlCibles(); });
+    wrap.appendChild(b);
+  });
+}
+document.getElementById("fl-profil").addEventListener("change", function(){ flCibles = {}; flRecommended().forEach(function(k){ flCibles[k] = true; }); renderFlCibles(); });
+
+// saisies simples
+[["fl-dispo","dispo"],["fl-zone","zone"],["fl-tjm","tjm"],["fl-offre","offre"]].forEach(function(pair){
+  document.getElementById(pair[0]).addEventListener("input", function(){ flState()[pair[1]] = this.value; persist(); });
+});
+document.getElementById("fl-mode").addEventListener("change", function(){ flState().mode = this.value; persist(); });
+document.getElementById("fl-showtjm").addEventListener("change", function(){ flState().showTjm = this.checked; persist(); });
+document.getElementById("btn-fl-add").addEventListener("click", function(){ flState().services.push({ id: uid(), titre: "", description: "" }); persist(); renderFreelance(); });
+document.getElementById("btn-fl-offre-gen").addEventListener("click", function(){
+  var fl = flState(), t = (state.cv.titre || state.profil.titre || "").trim();
+  if(t && t === t.toUpperCase()) t = t.toLowerCase();
+  var names = fl.services.map(function(s){ return s.titre; }).filter(Boolean);
+  fl.offre = (t ? "Je suis " + lowerFirst(t) + ", en freelance. " : "Je travaille en freelance. ") + (names.length ? "Je propose : " + names.join(" ; ") + "." : "");
+  persist(); renderFreelance();
+});
+// Compléter avec un texte : même tri que l'import de CV, plus les rubriques « Services / Prestations »
+document.getElementById("btn-fl-import").addEventListener("click", function(){
+  var ta = document.getElementById("fl-import"), st = document.getElementById("fl-import-status");
+  if(!ta.value.trim()){ st.textContent = "Colle d'abord un texte."; return; }
+  document.getElementById("cv-import-text").value = ta.value;
+  doImportCv();
+  st.textContent = document.getElementById("cv-import-status").textContent || "Ajouté.";
+  ta.value = ""; persist(); renderFreelance();
+});
+
+/* ---- recherche des structures à démarcher ---- */
+function flFetch(url){
+  if(location.protocol === "file:" || (window.claude && typeof window.claude.use === "function")) return Promise.reject(new Error("offline"));
+  return fetch(url).then(function(r){ return r.json().then(function(d){ return d; }, function(){ throw new Error("noapi"); }); });
+}
+function flLieuSearch(){
+  var q = document.getElementById("fl-lieu").value.trim(), box = document.getElementById("fl-lieu-list"), st = document.getElementById("fl-status");
+  box.innerHTML = ""; if(q.length < 2){ st.textContent = "Écris le nom d'une commune."; return; }
+  st.textContent = "Recherche du lieu…";
+  flFetch("/api/lieu?q=" + encodeURIComponent(q)).then(function(d){
+    if(!d.ok || !(d.places || []).length){ st.textContent = "Aucune commune trouvée."; return; }
+    st.textContent = "Choisis la commune :";
+    d.places.forEach(function(pl){
+      var b = document.createElement("button"); b.type = "button"; b.className = "chip suggest"; b.textContent = pl.label + " (" + pl.postcode + ")";
+      b.addEventListener("click", function(){ flPlace = pl; document.getElementById("fl-lieu").value = pl.label; box.innerHTML = ""; st.textContent = "Lieu : " + pl.label + ", " + pl.context + "."; });
+      box.appendChild(b);
+    });
+    if(d.places.length === 1) box.firstChild.click();
+  }, function(){ st.textContent = rechOffline(); });
+}
+document.getElementById("btn-fl-lieu").addEventListener("click", flLieuSearch);
+document.getElementById("fl-lieu").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); flLieuSearch(); } });
+document.getElementById("fl-lieu").addEventListener("input", function(){ flPlace = null; });
+
+function flRun(page){
+  var st = document.getElementById("fl-status"), pr = flProfil();
+  var keys = Object.keys(flCibles).filter(function(k){ return flCibles[k]; });
+  if(!keys.length){ st.textContent = "Coche au moins un type de structure à démarcher."; return; }
+  var naf = [];
+  keys.forEach(function(k){
+    var codes = FL_CIBLES[k].naf;
+    if(k === "direct"){ var dom = pr && PROFIL_DOMAINES.find(function(d){ return d.key === pr.domaine; }); codes = (dom && dom.naf) || []; }
+    codes.forEach(function(c){ if(naf.indexOf(c) === -1) naf.push(c); });
+  });
+  if(!naf.length){ st.textContent = "Pour « Entreprises du secteur du profil », choisis un profil standard."; return; }
+  var rayon = document.getElementById("fl-rayon").value, taille = document.getElementById("fl-taille").value;
+  var qs = ["naf=" + encodeURIComponent(naf.slice(0, 8).join(",")), "page=" + (page || 1)];
+  if(taille) qs.push("taille=" + taille);
+  if(rayon !== "France"){
+    if(!flPlace){ st.textContent = "Choisis d'abord un lieu (bouton « Chercher le lieu »), ou mets « Toute la France »."; return; }
+    if(+rayon <= 50){ qs.push("lat=" + flPlace.lat, "lon=" + flPlace.lon, "radius=" + rayon); } else { qs.push("dep=" + encodeURIComponent(flPlace.dep)); }
+  }
+  var btn = document.getElementById("btn-fl-go"); btn.disabled = true; st.textContent = "Recherche en cours…";
+  flFetch("/api/entreprises?" + qs.join("&")).then(function(d){
+    btn.disabled = false;
+    if(!d.ok){ st.textContent = d.reason === "rate" ? "Trop de recherches d'un coup : réessaie dans une minute." : "La recherche n'a pas abouti (" + (d.reason || "erreur") + ")."; return; }
+    flLast = { page: d.page, totalPages: d.totalPages };
+    var cible = keys.length === 1 ? keys[0] : keys[0];
+    state.flResultats = (page > 1 ? state.flResultats : []).concat(d.results.map(function(r){ r._cibles = keys.slice(); r._profilId = pr ? pr.id : ""; return r; }));
+    st.textContent = d.total + " structure(s) active(s) correspondant à ces types" + (rayon === "France" ? "" : " autour de " + (flPlace ? flPlace.label : "")) + ". Une structure peut être classée dans un autre type que celui coché : vérifie avant d'écrire.";
+    renderFlResults();
+  }, function(){ btn.disabled = false; st.textContent = rechOffline(); });
+}
+document.getElementById("btn-fl-go").addEventListener("click", function(){ flRun(1); });
+document.getElementById("fl-more").addEventListener("click", function(){ flRun((flLast ? flLast.page : 1) + 1); });
+
+// Quel type de structure est cette entreprise ? d'après son code d'activité
+function flCibleDe(res){
+  var order = ["interim","recrut","portage","formation","agence","esn","conseil"];
+  var wanted = res._cibles || [];
+  for(var i = 0; i < order.length; i++){ var k = order[i]; if(wanted.indexOf(k) !== -1 && FL_CIBLES[k].naf.indexOf(res.naf) !== -1) return k; }
+  return wanted.indexOf("direct") !== -1 ? "direct" : (wanted[0] || "conseil");
+}
+
+function renderFlResults(){
+  var wrap = document.getElementById("fl-results"), ec = state.profil.ecartes || {};
+  var list = state.flResultats.filter(function(r){ return !ec[r.siren]; });
+  document.getElementById("fl-more").style.display = (flLast && flLast.page < flLast.totalPages && state.flResultats.length) ? "inline-flex" : "none";
+  if(!list.length){ wrap.innerHTML = ""; return; }
+  wrap.innerHTML = "";
+  list.forEach(function(r){
+    var nom = titleCaseName(r.nom), naf = NAF_LABELS[r.naf] || r.naf, ck = flCibleDe(r);
+    var b = document.createElement("div"); b.className = "exp-block";
+    b.innerHTML = '<div class="exp-block-head"><strong>' + esc(nom) + '</strong><span class="hint">' + esc(r.ville) + (r.cp ? " (" + esc(r.cp) + ")" : "") + '</span></div>' +
+      '<p class="hint" style="margin:0 0 8px;">' + esc(FL_CIBLES[ck].label) + ' · ' + esc(naf) + ' · effectif : ' + esc(r.effectif) + '</p>' +
+      '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-fl-lettre="' + r.siren + '">Lettre d\'offre de service</button>' +
+      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="https://duckduckgo.com/?q=' + encodeURIComponent(nom + " devenir prestataire freelance partenaire " + r.ville) + '">Chercher leur page prestataires</a>' +
+      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(r.fiche) + '">Fiche entreprise</a>' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-fl-ecarter="' + r.siren + '">Écarter</button></div>';
+    wrap.appendChild(b);
+  });
+  wrap.querySelectorAll("[data-fl-lettre]").forEach(function(btn){
+    btn.addEventListener("click", function(){ startOffreService(state.flResultats.find(function(r){ return r.siren === btn.getAttribute("data-fl-lettre"); })); });
+  });
+  wrap.querySelectorAll("[data-fl-ecarter]").forEach(function(btn){
+    btn.addEventListener("click", function(){ state.profil.ecartes = state.profil.ecartes || {}; state.profil.ecartes[btn.getAttribute("data-fl-ecarter")] = true; persist(); renderFlResults(); });
+  });
+}
+
+// Nouvelle « candidature » de type offre de service pour la structure choisie.
+function startOffreService(res){
+  var fl = flState();
+  if(!res) return;
+  if(!fl.services.some(function(s){ return (s.titre || "").trim(); })){
+    document.getElementById("fl-status").textContent = "Ajoute d'abord au moins une prestation dans « Mon offre de service ».";
+    return;
+  }
+  persist();
+  document.getElementById("btn-new-dossier").click();
+  var ck = flCibleDe(res), nom = titleCaseName(res.nom), naf = NAF_LABELS[res.naf] || "";
+  var main = fl.services.filter(function(s){ return (s.titre || "").trim(); })[0].titre;
+  anPoste.value = main; anEntreprise.value = nom; anUrl.value = res.fiche;
+  anTexte.value = "Offre de service à " + nom + " (" + FL_CIBLES[ck].label + "). Secteur : " + naf + ". Prestations : " + fl.services.map(function(s){ return s.titre; }).filter(Boolean).join(", ") + ".";
+  state.annonce.service = true; state.annonce.cible = ck;
+  state.annonce.meta = { lieu: res.ville + (res.cp ? " (" + res.cp + ")" : ""), contrat: "Freelance", salaire: "", date: "", secteur: naf };
+  state.annonce.emetteur = { type: "direct", manual: true, raisons: [] };
+  var pr = flProfil();
+  if(pr){ state.cv.profilId = pr.id; state.cv.profilManuel = true; }
+  reanalyzeAnnonce();
+  if(pr){ applyProfilToDossier(pr.id, false); }
+  state.lettre.disponibilite = "";
+  syncDossierUI(); persist();
+  switchTab("lettre");
+}
+
+/* ---- lettre d'offre de service (à la place de la lettre de motivation) ---- */
+function generateOffreServiceParagraphs(){
+  var l = state.lettre, an = state.annonce, fl = flState(), en = l.lang === "en";
+  var cible = FL_CIBLES[an.cible] || FL_CIBLES.conseil;
+  var nom = (an.entreprise || "").trim();
+  var titre = (state.cv.titre || state.profil.titre || "").trim();
+  if(titre && titre === titre.toUpperCase()) titre = titre.toLowerCase();
+  var svcs = fl.services.filter(function(s){ return (s.titre || "").trim(); });
+  var paras = [en ? "Dear Sir or Madam," : "Madame, Monsieur,"];
+
+  var who = titre ? (en ? "I am " + titre + " working as a freelancer" : "Je suis " + lowerFirst(titre) + ", en freelance") : (en ? "I work as a freelancer" : "Je travaille en freelance");
+  paras.push(en
+    ? who + ", and I would like to offer " + (nom ? nom + " " : "you ") + "my services to " + cible.intro + "."
+    : who + ", et je souhaite proposer mes services" + (nom ? " à " + nom : "") + " pour " + cible.intro + ".");
+
+  if(svcs.length){
+    var first = svcs[0];
+    paras.push((en ? "My services: " : "Mes interventions : ") + svcs.map(function(s){ return lowerFirst(s.titre.trim()); }).join(en ? "; " : " ; ") + "." + ((first.description || "").trim() ? " " + first.description.trim().replace(/\s+/g, " ") : ""));
+  }
+  // références : expériences cochées, sinon les deux plus proches des prestations
+  var refs = state.library.experiences.filter(function(e){ return fl.expIds.indexOf(e.id) !== -1; });
+  if(!refs.length){
+    var kw = svcs.map(function(s){ return { term: s.titre, count: 1, kind: "skill" }; });
+    refs = state.library.experiences.filter(function(e){ return e.poste || e.entreprise; }).map(function(e, i){ return { e: e, i: i, sc: scoreAgainstKeywords([e.poste, e.entreprise, expDetails(e)].join(" "), kw) }; })
+      .sort(function(a, b){ return (b.sc - a.sc) || (a.i - b.i); }).slice(0, 2).map(function(x){ return x.e; });
+  }
+  refs.slice(0, 3).forEach(function(e, i){
+    var facts = expDetails(e).split("\n").map(trimEnd).filter(Boolean).slice(0, 2).map(lowerFirst);
+    var s = en
+      ? (i === 0 ? "Recent reference: " : "Also: ") + (e.poste || "mission") + (e.entreprise ? " at " + e.entreprise : "") + (e.dates ? " (" + e.dates + ")" : "") + (facts.length ? ", " + facts.join("; ") + "." : ".")
+      : (i === 0 ? "Référence récente : " : "Autre référence : ") + (e.poste || "mission") + (e.entreprise ? " chez " + e.entreprise : "") + (e.dates ? " (" + e.dates + ")" : "") + (facts.length ? ", " + facts.join(" ; ") + "." : ".");
+    paras.push(s);
+  });
+  // modalités
+  var mod = [];
+  if((fl.dispo || "").trim()) mod.push((en ? "Availability: " : "Disponibilité : ") + fl.dispo.trim());
+  if((fl.mode || "").trim()) mod.push((en ? "Working mode: " : "Modalités : ") + fl.mode.trim().toLowerCase() + ((fl.zone || "").trim() ? (en ? ", " : ", ") + fl.zone.trim() : ""));
+  if(fl.showTjm && (fl.tjm || "").trim()) mod.push((en ? "Daily rate: " : "Tarif indicatif : ") + fl.tjm.trim());
+  if(mod.length) paras.push(mod.join(". ") + ".");
+  paras.push(en
+    ? "I can send my CV and detailed references, and I am available for a short call whenever suits you."
+    : (an.cible === "interim" || an.cible === "recrut" || an.cible === "portage"
+        ? "Je peux transmettre mon CV et des références détaillées pour que mon profil soit référencé, et je reste disponible pour un échange de vingt minutes."
+        : "Je peux envoyer mon CV et des références détaillées, et je reste disponible pour un échange de vingt minutes à votre convenance."));
+  return paras.map(cleanLetterText);
 }
 
 /* ===================== CANDIDATURES MULTIPLES : barre, bascule, sauvegarde locale ===================== */
@@ -4631,6 +4975,7 @@ function annonceForAI(){
   var em = state.annonce.emetteur || {};
   return { poste: scrubForAI(state.annonce.poste), entreprise: scrubForAI(state.annonce.entreprise),
     candidature_spontanee: !!state.annonce.spontanee,
+    offre_de_service_freelance: state.annonce.service ? { cible: (FL_CIBLES[state.annonce.cible] || {}).label || "", prestations: flState().services.map(function(s){ return { titre: scrubForAI(s.titre), description: scrubForAI(s.description) }; }), disponibilite: scrubForAI(flState().dispo), modalites: scrubForAI(flState().mode + " " + flState().zone), tarif: flState().showTjm ? scrubForAI(flState().tjm) : "" } : null,
     qui_publie: em.type ? (EMETTEUR_LABELS[em.type] || em.type) : "non déterminé",
     entreprise_finale: scrubForAI(state.annonce.clientFinal),
     lieu: scrubForAI((state.annonce.meta || {}).lieu), contrat: scrubForAI((state.annonce.meta || {}).contrat),
@@ -4729,7 +5074,7 @@ function addRemarque(){
 document.getElementById("btn-affiner-add").addEventListener("click", addRemarque);
 document.getElementById("affiner-input").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); addRemarque(); } });
 
-function lettreCurrentParagraphs(){ return Array.isArray(state.lettre.corps) && state.lettre.corps.length ? state.lettre.corps : generateLettreParagraphs(); }
+function lettreCurrentParagraphs(){ return Array.isArray(state.lettre.corps) && state.lettre.corps.length ? state.lettre.corps : generateLettre(); }
 
 document.getElementById("btn-affiner-ia").addEventListener("click", function(){
   var l = state.lettre, st = document.getElementById("affiner-status");
@@ -4760,7 +5105,7 @@ document.getElementById("btn-affiner-ia").addEventListener("click", function(){
     remarques: l.remarques || [],
     format_reponse: '{"paragraphs":["..."]}'
   };
-  var system = "Tu rédiges des lettres de motivation pour une personne précise, avec sa voix. 150 à 250 mots, sans formule d'appel ni signature (l'application les ajoute). Si candidature_spontanee est vrai, il n'y a pas d'annonce : écris une candidature spontanée (secteur et lieu de l'entreprise, profil visé), sans prétendre qu'un poste est ouvert. Adapte l'adresse au type d'émetteur (si cabinet ou intérim : on écrit au recruteur pour le compte de son client, sans prétendre connaître l'entreprise finale ; si recrutement direct : on s'adresse à l'entreprise ; si ESN : on valorise l'adaptabilité de missions seulement si les expériences le montrent). Structure : une accroche précise sur le poste, un ou deux paragraphes de preuves tirées des expériences fournies et reprenant naturellement les mots-clés de l'annonce que la personne maîtrise réellement, une phrase sur l'entreprise seulement si l'annonce en parle, une clôture courte (reprends la formule de fin fournie si elle existe, sinon reste sobre). Respecte la voix décrite et évite ce qui est listé à éviter. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
+  var system = "Tu rédiges des lettres de motivation pour une personne précise, avec sa voix. 150 à 250 mots, sans formule d'appel ni signature (l'application les ajoute). Si offre_de_service_freelance n'est pas nul, ce n'est pas une candidature : écris une lettre d'offre de service d'un indépendant à la structure ciblée (prestations, références tirées des expériences, modalités), sans parler de poste ni de candidature. Si candidature_spontanee est vrai, il n'y a pas d'annonce : écris une candidature spontanée (secteur et lieu de l'entreprise, profil visé), sans prétendre qu'un poste est ouvert. Adapte l'adresse au type d'émetteur (si cabinet ou intérim : on écrit au recruteur pour le compte de son client, sans prétendre connaître l'entreprise finale ; si recrutement direct : on s'adresse à l'entreprise ; si ESN : on valorise l'adaptabilité de missions seulement si les expériences le montrent). Structure : une accroche précise sur le poste, un ou deux paragraphes de preuves tirées des expériences fournies et reprenant naturellement les mots-clés de l'annonce que la personne maîtrise réellement, une phrase sur l'entreprise seulement si l'annonce en parle, une clôture courte (reprends la formule de fin fournie si elle existe, sinon reste sobre). Respecte la voix décrite et évite ce qui est listé à éviter. " + IA_STYLE_RULES + " Réponds uniquement par un objet JSON au format demandé.";
   {
     var btn = this; btn.disabled = true; st.setAttribute("data-busy", "1"); st.textContent = "Rédaction en cours…";
     iaAsk(system, user, "Annonce, expériences, voix et remarques (sans nom ni coordonnées).").then(function(out){
