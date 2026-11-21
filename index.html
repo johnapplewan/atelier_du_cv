@@ -210,6 +210,8 @@
   .cv-doc .cv-item-sub{ font-size:11.5px; color:#4B525C; margin:1px 0 4px; font-style:italic; }
   .cv-doc [contenteditable]:hover{ outline:1px dashed var(--accent,#888); outline-offset:2px; cursor:text; }
   .cv-doc [contenteditable]:focus{ outline:2px solid var(--accent,#888); outline-offset:2px; }
+  .ats-list{ margin:0 0 6px; padding-left:18px; font-size:12.5px; line-height:1.55; color:var(--ink-600); }
+  .ats-far{ color:var(--danger,#B3261E); font-weight:600; }
   .cv-doc .cv-sub{ font-weight:600; margin:8px 0 2px; }
   .cv-doc p{ margin:2px 0; }
   .cv-doc ul{ margin:4px 0 0; padding-left:16px; }
@@ -255,7 +257,6 @@
   .footnote{ font-size:11.5px; color:var(--ink-400); margin-top:14px; line-height:1.6; }
 
   .photo-thumb{ width:56px; height:70px; object-fit:cover; border-radius:5px; border:1px solid var(--border-strong); flex-shrink:0; }
-  #suisse-fields{ margin-top:2px; }
 
   .ref-panel{ border:1px solid var(--border); border-radius:8px; padding:10px 14px; background:var(--surface-2); }
   .ref-panel summary{ cursor:pointer; font-size:12.5px; font-weight:600; color:var(--ink-600); }
@@ -458,34 +459,14 @@
               <label>Photo (optionnelle)</label>
               <div id="prof-photo-thumb-wrap" style="margin-bottom:8px;"></div>
               <input type="file" id="prof-photo-input" accept="image/*" style="max-width:260px;">
-              <p class="hint">Utile surtout pour le format suisse. Redimensionnée automatiquement, elle reste dans ton navigateur.</p>
+              <p class="hint">Facultative. Redimensionnée automatiquement, elle reste dans ton navigateur et n'apparaît pas dans le CV anonymisé.</p>
             </div>
 
-            <div class="row2">
-              <div class="field">
-                <label>Format</label>
-                <div class="segmented" id="format-segmented">
-                  <button type="button" data-format="standard" class="active" aria-pressed="true">Standard</button>
-                  <button type="button" data-format="suisse" aria-pressed="false">Suisse</button>
-                </div>
-              </div>
-              <div class="field">
-                <label>Langue du CV</label>
-                <div class="segmented" id="lang-segmented">
-                  <button type="button" data-lang="fr" class="active" aria-pressed="true">Français</button>
-                  <button type="button" data-lang="en" aria-pressed="false">English</button>
-                </div>
-              </div>
-            </div>
-
-            <div id="suisse-fields" style="display:none;">
-              <div class="row2">
-                <div class="field"><label for="suisse-naissance">Date de naissance</label><input type="text" id="suisse-naissance" placeholder="jj/mm/aaaa"></div>
-                <div class="field"><label for="suisse-nationalite">Nationalité</label><input type="text" id="suisse-nationalite" placeholder="ex. Suisse"></div>
-              </div>
-              <div class="row2">
-                <div class="field"><label for="suisse-permis">Permis de travail</label><input type="text" id="suisse-permis" placeholder="ex. Permis B, non requis…"></div>
-                <div class="field"><label for="suisse-etat">État civil (optionnel)</label><input type="text" id="suisse-etat" placeholder="ex. Célibataire"></div>
+            <div class="field">
+              <label>Langue du CV</label>
+              <div class="segmented" id="lang-segmented">
+                <button type="button" data-lang="fr" class="active" aria-pressed="true">Français</button>
+                <button type="button" data-lang="en" aria-pressed="false">English</button>
               </div>
             </div>
           </div>
@@ -547,6 +528,15 @@
               <div class="gauge-label">Part des mots-clés de l'annonce retrouvés dans ta bibliothèque. <span id="ats-tier"></span></div>
             </div>
             <p class="footnote" id="ats-missing"></p>
+            <div id="ats-panel" style="display:none;margin-top:12px;border-top:1px dashed var(--border);padding-top:12px;">
+              <div class="toolbar-row">
+                <button class="btn btn-primary btn-sm" id="btn-ats-optimize" type="button" title="Applique les améliorations possibles à partir de ce que ta base contient déjà, sans rien inventer">Optimiser automatiquement</button>
+                <button class="btn btn-ghost btn-sm" id="btn-ats-plan" type="button" style="display:none;" title="Plan d'action au format Markdown, à donner à une IA">Plan d'action (.md)</button>
+                <button class="btn btn-ghost btn-sm" id="btn-ats-plan-copy" type="button">Copier le plan</button>
+              </div>
+              <p class="hint" id="ats-result" style="margin:8px 0 0;"></p>
+              <div id="ats-suggestions"></div>
+            </div>
           </div>
 
         </div>
@@ -554,8 +544,12 @@
         <div class="preview-frame">
           <div class="preview-toolbar">
             <span class="eyebrow">Aperçu</span>
-            <button class="btn btn-sm" id="btn-print-cv">Télécharger en PDF</button>
+            <span class="toolbar-row">
+              <button class="btn btn-sm" id="btn-print-cv">Télécharger en PDF</button>
+              <button class="btn btn-ghost btn-sm" id="btn-print-cv-anon" title="Sans nom, coordonnées, photo ni liens">PDF anonymisé</button>
+            </span>
           </div>
+          <label class="hint" style="display:flex;gap:6px;align-items:center;margin:0 0 8px;"><input type="checkbox" id="anon-mask-employers"> Anonymiser aussi les noms d'employeurs dans le PDF anonymisé</label>
           <div class="paper cv-doc" id="cv-preview"></div>
           <span class="download-status" id="cv-download-status"></span>
         </div>
@@ -1035,7 +1029,6 @@ var PHRASES_EN = {
 function defaultState(){
   return {
     profil: { nom:"", titre:"", email:"", tel:"", ville:"", lien:"", langues:"", atouts:[], photo:null,
-      suisseActif:false, suisse:{ dateNaissance:"", nationalite:"", permis:"", etatCivil:"" },
       voix:{ description:"", formuleFinale:"", eviter:"" } },
     annonce: { poste:"", entreprise:"", url:"", texte:"", keywords:[], meta:{ lieu:"", contrat:"", salaire:"", date:"" }, emetteur:{ type:"", manual:false, raisons:[] }, clientFinal:"" },
     library: { experiences:[], formations:[], competences:[], sections:[], lettresArchive:[], annexeItems:[] },
@@ -1087,7 +1080,8 @@ function normPersonData(raw){
   raw = raw || {};
   var def = defaultState();
   var rp = raw.profil || {};
-  var profil = Object.assign({}, def.profil, rp, { suisse: Object.assign({}, def.profil.suisse, rp.suisse), voix: Object.assign({}, def.profil.voix, rp.voix) });
+  var profil = Object.assign({}, def.profil, rp, { voix: Object.assign({}, def.profil.voix, rp.voix) });
+  delete profil.suisse; delete profil.suisseActif;
   if(!profil.atouts) profil.atouts = [];
   var library = Object.assign({}, def.library, raw.library);
   ["experiences","formations","competences","sections","lettresArchive","annexeItems"].forEach(function(k){ if(!Array.isArray(library[k])) library[k] = []; });
@@ -1309,7 +1303,7 @@ function pdfLibsReady(){
 
 // Nombre de pages maximum visé par document (le texte est resserré pour y tenir) :
 // la lettre tient sur une page, le CV sur deux.
-var PDF_MAX_PAGES = { "cv-preview": 2, "lettre-preview": 1 };
+var PDF_MAX_PAGES = { "cv-preview": 2, "cv-anon": 2, "lettre-preview": 1 };
 var PDF_CAPTURE_SCALE = 1.5;
 
 // Construit une copie du document à la largeur d'une feuille A4, hors écran, pour que la mise en page
@@ -1403,6 +1397,11 @@ function wireExportButton(btnId, statusId, getElements, filenameFn){
 wireExportButton("btn-print-cv", "cv-download-status",
   function(){ return [document.getElementById("cv-preview")]; },
   function(){ return fileSafe(state.profil.nom || "cv") + "-CV.pdf"; });
+
+var lastAnonRef = "";
+wireExportButton("btn-print-cv-anon", "cv-download-status",
+  function(){ var r = anonymizedCvElement(document.getElementById("anon-mask-employers").checked); lastAnonRef = r.ref; return [r.el]; },
+  function(){ return fileSafe(lastAnonRef || "cv-anonyme") + "-CV-anonyme.pdf"; });
 
 wireExportButton("btn-print-lettre", "lettre-download-status",
   function(){ return [document.getElementById("lettre-preview")]; },
@@ -1501,11 +1500,11 @@ function guessAnnonceMeta(text){
     if(!poste && (m = l.match(/^(?:intitul[ée] du poste|poste|offre(?: d['’]emploi)?|job title|titre)\s*:\s*(.{3,90})$/i))) poste = m[1].trim();
     if(!entreprise && (m = l.match(/^(?:entreprise|soci[ée]t[ée]|employeur|company)\s*:\s*(.{2,60})$/i))) entreprise = m[1].trim();
   }
-  if(!poste && lines.length && lines[0].length <= 90 && !/[.!?]$/.test(lines[0])){
-    poste = lines[0].replace(/^(offre d['’]emploi|offre|annonce)\s*[:\-–]\s*/i, "");
+  if(!poste && lines.length && lines[0].length <= 90 && !/[!?]$/.test(lines[0])){
+    poste = lines[0].replace(/\.$/, "").replace(/^(offre d['’]emploi|offre|annonce)\s*[:\-–]\s*/i, "");
     if((m = poste.match(/^(.{3,70}?)\s+(?:chez|[-–—@|])\s+([A-ZÀ-Ý][^|]{1,40})$/)) ){ poste = m[1].trim(); if(!entreprise) entreprise = m[2].trim(); }
   }
-  if(!entreprise && (m = (text || "").match(/(?:rejoindre|rejoignez|chez)\s+([A-ZÀ-Ý][\wÀ-ÿ&'’.-]+(?:\s+[A-ZÀ-Ý][\wÀ-ÿ&'’.-]+){0,3})/))) entreprise = m[1].trim();
+  if(!entreprise && (m = (text || "").match(/(?:rejoindre|rejoignez|chez)[ ]+([A-ZÀ-Ý][\wÀ-ÿ&'’-]+(?:[ ]+[A-ZÀ-Ý][\wÀ-ÿ&'’-]+){0,3})/))) entreprise = m[1].trim();
   return { poste: poste, entreprise: entreprise };
 }
 
@@ -1581,6 +1580,7 @@ function moveInSelection(key, id, dir){
 }
 
 window.onAnnonceChanged = function(){
+  ATS_LAST_LOG = null;
   if(state.cv.autoMode){ recomposerCV(); }
   renderExpList(); renderFormList(); renderSkillChips(); renderSkillSuggestions();
   renderCVPreview();
@@ -1599,17 +1599,6 @@ function cvFullText(){
   return norm(parts.join(" \n "));
 }
 
-function computeATS(){
-  var kws = state.annonce.keywords;
-  if(!kws || !kws.length) return { pct: null, missing: [] };
-  var full = cvFullText();
-  var missing = [], matched = 0;
-  kws.forEach(function(k){
-    if(countTerm(full, norm(k.term)) > 0){ matched++; } else { missing.push(k.term); }
-  });
-  return { pct: Math.round((matched / kws.length) * 100), missing: missing };
-}
-
 function atsTier(pct){
   if(pct === null) return null;
   if(pct >= 70) return "success";
@@ -1617,25 +1606,219 @@ function atsTier(pct){
   return "danger";
 }
 
+/* ---------------- score ATS, suggestions, optimisation automatique, plan d'action ---------------- */
+
+// Équivalences prudentes : si ton CV dit l'une, l'annonce peut dire l'autre (c'est le même savoir-faire).
+var ATS_SYNONYMS = [["ia","intelligence artificielle"],["rh","ressources humaines"],["seo","référencement naturel"],["crm","gestion de la relation client"],
+  ["javascript","js"],["ci/cd","intégration continue"],["llm","grands modèles de langage"],["gestion de projet","pilotage de projet"],
+  ["relation client","relation clients"],["community management","gestion des réseaux sociaux"],["analyse de données","data analyse"],["montage vidéo","montage"]];
+
+function variantsOf(term){
+  var t = term.toLowerCase(), out = [t];
+  out.push(t.slice(-1) === "s" ? t.slice(0, -1) : t + "s");
+  ATS_SYNONYMS.forEach(function(g){ if(g.indexOf(t) !== -1){ g.forEach(function(x){ if(out.indexOf(x) === -1) out.push(x); }); } });
+  return out;
+}
+function hasTerm(normText, term){
+  return variantsOf(term).some(function(v){ return countTerm(normText, norm(v)) > 0; });
+}
+// Tout ce que la base contient sur la personne (y compris ce qui n'est pas dans ce CV).
+function ownMaterialText(){
+  var lib = state.library, p = state.profil, parts = [p.langues, p.titre];
+  (p.atouts || []).forEach(function(a){ parts.push(a); });
+  lib.competences.forEach(function(c){ parts.push(c.label); });
+  lib.experiences.forEach(function(e){ parts.push(e.poste, e.entreprise, e.details); });
+  lib.formations.forEach(function(f){ parts.push(f.diplome, f.etablissement, f.details); });
+  (lib.sections || []).forEach(function(x){ parts.push(x.titre, x.texte); });
+  (lib.lettresArchive || []).forEach(function(x){ parts.push(x.texte); });
+  (lib.annexeItems || []).forEach(function(x){ parts.push(x.label, x.note); });
+  return norm(parts.join(" \n "));
+}
+function annonceLooksEnglish(){
+  var t = " " + norm(state.annonce.texte || "").slice(0, 3000) + " ";
+  var en = (t.match(/ (the|and|with|you|your|we|our|experience|team|will|skills) /g) || []).length;
+  var fr = (t.match(/ (le|la|les|des|et|avec|vous|votre|nous|notre|une|dans|pour) /g) || []).length;
+  return en > fr && en >= 6;
+}
+
+function atsAnalysis(){
+  var kws = state.annonce.keywords || [];
+  if(!kws.length) return null;
+  var full = cvFullText(), own = ownMaterialText();
+  var excluded = state.library.experiences.filter(function(e){ return (state.cv.excludedExp || []).indexOf(e.id) !== -1; })
+    .map(function(e){ return { e: e, text: norm([e.poste, e.entreprise, e.details].join(" ")) }; });
+  var found = [], missing = [];
+  kws.forEach(function(k){
+    if(hasTerm(full, k.term)){ found.push(k.term); return; }
+    var item = { term: k.term, kind: k.kind, count: k.count, action: "manual", detail: "", ids: [] };
+    var ex = excluded.filter(function(x){ return hasTerm(x.text, k.term); });
+    if(ex.length){ item.action = "include-exp"; item.ids = ex.map(function(x){ return x.e.id; }); item.detail = "Présent dans l'expérience « " + (ex[0].e.poste || ex[0].e.entreprise) + " », aujourd'hui hors de ce CV."; }
+    else if(hasTerm(own, k.term)){
+      if(k.kind === "skill"){ item.action = "add-skill"; item.detail = "Présent ailleurs dans ta base (lettres, rubriques, annexe) mais pas dans ce CV."; }
+      else { item.detail = "Mot fréquent de l'annonce, déjà évoqué dans ta base : reprends-le dans une réalisation si c'est pertinent."; }
+    }
+    else { item.detail = k.kind === "skill" ? "Absent de ta base. Si tu le maîtrises, ajoute-le (compétence ou réalisation qui le montre)." : "Terme fréquent de l'annonce, absent de ta base : vérifie s'il désigne une compétence ou un contexte du poste."; }
+    missing.push(item);
+  });
+  var notes = [];
+  var p = state.profil;
+  if(!(p.email || "").trim() || !(p.tel || "").trim()) notes.push({ action: "manual", text: "Renseigne ton email et ton téléphone : un CV sans coordonnées est écarté par beaucoup de filtres." });
+  if(!(state.cv.resume || "").trim()) notes.push({ action: "auto-resume", text: "Ajoute une accroche de 2 phrases qui reprend les mots-clés de l'annonce." });
+  var poste = (state.annonce.poste || "").trim();
+  if(poste && countTerm(norm([p.titre, state.cv.resume].join(" ")), norm(poste)) === 0 && !hasTerm(norm([p.titre, state.cv.resume].join(" ")), poste)) notes.push({ action: "manual", text: "L'intitulé visé (« " + poste + " ») n'apparaît ni dans ton titre ni dans l'accroche. Si c'est bien ton métier visé, reprends-le tel quel." });
+  if(annonceLooksEnglish() && state.cv.lang !== "en") notes.push({ action: "manual", text: "L'annonce est en anglais : passe le CV en English (boutons « Langue du CV »)." });
+  return { pct: Math.round((found.length / kws.length) * 100), found: found, missing: missing, notes: notes, total: kws.length };
+}
+
+function computeATS(){
+  var a = atsAnalysis();
+  if(!a) return { pct: null, missing: [] };
+  return { pct: a.pct, missing: a.missing.map(function(m){ return m.term; }) };
+}
+
+var ATS_FAR_THRESHOLD = 40;   // en dessous, après optimisation : poste trop éloigné du profil actuel
+var ATS_LAST_LOG = null;
+
 function renderATS(){
-  var ats = computeATS();
+  var a = atsAnalysis();
   var scoreEl = document.getElementById("ats-score");
   var tierEl = document.getElementById("ats-tier");
   var missingEl = document.getElementById("ats-missing");
-  if(ats.pct === null){
-    scoreEl.textContent = "—";
-    tierEl.innerHTML = "";
+  var panel = document.getElementById("ats-panel");
+  if(!a){
+    scoreEl.textContent = "—"; tierEl.innerHTML = "";
     missingEl.textContent = "Renseigne l'annonce (étape 01) pour calculer un score.";
-  } else {
-    scoreEl.textContent = ats.pct + "%";
-    var tier = atsTier(ats.pct);
-    var labelMap = { success: "bonne couverture", caution: "couverture partielle", danger: "couverture faible" };
-    tierEl.innerHTML = '<span class="tier-pill ' + tier + '">' + labelMap[tier] + '</span>';
-    missingEl.textContent = ats.missing.length
-      ? "Mots-clés absents de ta bibliothèque : " + ats.missing.slice(0, 8).join(", ") + (ats.missing.length > 8 ? "…" : "")
-      : "Tous les mots-clés détectés apparaissent dans ta bibliothèque.";
+    panel.style.display = "none";
+    return;
   }
+  panel.style.display = "block";
+  scoreEl.textContent = a.pct + "%";
+  var tier = atsTier(a.pct);
+  var labelMap = { success: "bonne couverture", caution: "couverture partielle", danger: "couverture faible" };
+  tierEl.innerHTML = '<span class="tier-pill ' + tier + '">' + labelMap[tier] + '</span>';
+  missingEl.textContent = a.missing.length
+    ? "Mots-clés absents du CV : " + a.missing.slice(0, 8).map(function(m){ return m.term; }).join(", ") + (a.missing.length > 8 ? "…" : "")
+    : "Tous les mots-clés détectés apparaissent dans le CV.";
+
+  var auto = a.missing.filter(function(m){ return m.action !== "manual"; });
+  var autoNotes = a.notes.filter(function(n){ return n.action === "auto-resume"; });
+  var manual = a.missing.filter(function(m){ return m.action === "manual"; });
+  var manualNotes = a.notes.filter(function(n){ return n.action === "manual"; });
+  var canAuto = auto.length + autoNotes.length > 0;
+  document.getElementById("btn-ats-optimize").disabled = !canAuto;
+  document.getElementById("btn-ats-plan").style.display = a.pct < 99 ? "inline-flex" : "none";
+
+  var html = "";
+  if(auto.length || autoNotes.length){
+    html += '<p class="eyebrow" style="margin:10px 0 4px;">Je peux le faire (bouton « Optimiser »)</p><ul class="ats-list">';
+    auto.forEach(function(m){ html += "<li><strong>" + esc(displayTerm(m.term)) + "</strong> : " + esc(m.detail) + "</li>"; });
+    autoNotes.forEach(function(n){ html += "<li>" + esc(n.text) + "</li>"; });
+    html += "</ul>";
+  }
+  if(manual.length || manualNotes.length){
+    html += '<p class="eyebrow" style="margin:10px 0 4px;">À toi de jouer</p><ul class="ats-list">';
+    manualNotes.forEach(function(n){ html += "<li>" + esc(n.text) + "</li>"; });
+    manual.forEach(function(m){ html += "<li><strong>" + esc(displayTerm(m.term)) + "</strong> : " + esc(m.detail) + "</li>"; });
+    html += "</ul>";
+  }
+  document.getElementById("ats-suggestions").innerHTML = html || '<p class="hint">Rien à améliorer côté mots-clés.</p>';
+
+  var res = document.getElementById("ats-result");
+  var far = a.pct < ATS_FAR_THRESHOLD && !canAuto;
+  var txt = "";
+  if(ATS_LAST_LOG){ txt += ATS_LAST_LOG.before + "% → " + a.pct + "% après optimisation. " + (ATS_LAST_LOG.done.length ? "Fait : " + ATS_LAST_LOG.done.join(" ; ") + "." : "Rien de plus à ajouter automatiquement."); }
+  if(far){ txt += (txt ? " " : "") + "Ce poste semble trop éloigné de ton profil actuel (" + a.missing.length + " mots-clés sur " + a.total + " non couverts). Le plan d'action liste ce qu'il faudrait faire évoluer pour l'atteindre."; }
+  res.textContent = txt;
+  res.className = far ? "hint ats-far" : "hint";
 }
+
+function atsOptimize(){
+  var a = atsAnalysis(); if(!a) return;
+  var done = [];
+  a.missing.forEach(function(m){
+    if(m.action === "include-exp"){
+      m.ids.forEach(function(id){
+        if((state.cv.excludedExp || []).indexOf(id) !== -1){
+          state.cv.excludedExp = state.cv.excludedExp.filter(function(x){ return x !== id; });
+          var e = state.library.experiences.find(function(x){ return x.id === id; });
+          done.push("expérience « " + (e && (e.poste || e.entreprise)) + " » remise dans le CV");
+        }
+      });
+    } else if(m.action === "add-skill"){
+      if(addSkillRaw(m.term)) done.push("compétence « " + displayTerm(m.term) + " » ajoutée");
+    }
+  });
+  var after = atsAnalysis();
+  if(after && ((after.notes || []).some(function(n){ return n.action === "auto-resume"; }) || after.found.length)){
+    var before = state.cv.resume;
+    document.getElementById("btn-resume-auto").click();
+    if(state.cv.resume !== before) done.push("accroche adaptée à l'annonce");
+  }
+  ATS_LAST_LOG = { before: a.pct, done: done };
+  renderSkillChips(); renderSkillSuggestions(); renderExpList(); renderCVPreview(); refreshCVStatus(); persist();
+}
+
+function atsPlanMarkdown(){
+  var a = atsAnalysis(); if(!a) return "";
+  var an = state.annonce, p = state.profil;
+  var tools = /^(excel|powerpoint|word|sql|python|javascript|react|node|html|css|java|php|photoshop|illustrator|indesign|figma|canva|n8n|github|cloudflare|supabase|vercel|docker|git|typescript|api|rag|mcp|llm|crm|erp|seo|sea|analytics|premiere|after effects)/i;
+  var soft = /management|leadership|autonomie|rigueur|organisation|polyvalence|travail d'équipe|esprit d'équipe|relation client|communication|négociation|pédagogie|animation/i;
+  var advice = function(m){
+    var t = m.term;
+    if(m.action === "manual" && tools.test(t)) return ["Suivre une formation courte ou une certification sur « " + t + " ».", "Réaliser un mini-projet montrable (dépôt public, démo, cas client) et l'ajouter à la base.", "Formuler ensuite une réalisation avec résultat chiffré pour le CV."];
+    if(soft.test(t)) return ["Choisir une situation vécue où « " + t + " » a compté (contexte, action, résultat).", "L'ajouter comme réalisation dans l'expérience concernée."];
+    if(m.kind === "skill") return ["Vérifier si tu pratiques déjà « " + t + " » sous un autre nom, sinon planifier un apprentissage ciblé.", "Ajouter une réalisation qui le démontre."];
+    return ["Vérifier ce que recouvre « " + t + " » dans l'annonce (compétence, contexte, secteur) et le relier à une expérience réelle si c'est le cas."];
+  };
+  var scrub = function(x){ return scrubForAI(x); };
+  var md = [];
+  md.push("# Plan d'action : " + (an.poste || "poste visé") + (an.entreprise ? " (" + an.entreprise + ")" : ""));
+  md.push("");
+  md.push("Score ATS actuel : **" + a.pct + "%** (" + a.found.length + " mots-clés sur " + a.total + " couverts). Objectif : 85% ou plus.");
+  md.push("");
+  md.push("## Contexte");
+  md.push("- Poste visé : " + (an.poste || "n/a") + (an.entreprise ? " chez " + an.entreprise : ""));
+  var meta = an.meta || {};
+  if(meta.lieu) md.push("- Lieu : " + meta.lieu);
+  if(meta.contrat) md.push("- Contrat : " + meta.contrat);
+  md.push("- Mots-clés de l'annonce : " + (an.keywords || []).map(function(k){ return k.term; }).join(", "));
+  md.push("");
+  md.push("## Déjà couvert");
+  md.push(a.found.length ? a.found.map(function(t){ return "- " + t; }).join("\n") : "- (rien pour l'instant)");
+  md.push("");
+  md.push("## Écarts à combler");
+  if(!a.missing.length) md.push("Aucun écart sur les mots-clés détectés.");
+  a.missing.forEach(function(m, i){
+    md.push("### " + (i + 1) + ". " + m.term);
+    md.push("- Demandé dans l'annonce" + (m.count > 1 ? " (" + m.count + " occurrences)" : "") + ".");
+    md.push("- État : " + (m.action === "manual" ? "absent de ma base." : "présent dans ma base, à intégrer au CV (peut être fait par l'atelier)."));
+    advice(m).forEach(function(l){ md.push("- [ ] " + l); });
+    md.push("");
+  });
+  if(a.notes.length){ md.push("## Autres points"); a.notes.forEach(function(n){ md.push("- [ ] " + n.text); }); md.push(""); }
+  md.push("## Mon profil actuel (sans coordonnées)");
+  state.library.experiences.forEach(function(e){ md.push("- " + scrub(e.poste) + (e.entreprise ? ", " + scrub(e.entreprise) : "") + (e.dates ? " (" + e.dates + ")" : "")); });
+  state.library.formations.forEach(function(f){ md.push("- Formation : " + scrub(f.diplome) + (f.etablissement ? ", " + scrub(f.etablissement) : "")); });
+  if(state.library.competences.length) md.push("- Compétences : " + state.library.competences.map(function(c){ return scrub(c.label); }).join(", "));
+  md.push("");
+  md.push("## Message à donner à une IA");
+  md.push("> Tu es coach de carrière. Je vise le poste « " + (an.poste || "…") + " ». Voici l'écart entre mon profil et l'annonce (sections « Déjà couvert » et « Écarts à combler » ci-dessus). Pour chaque écart, propose un plan sur 4 semaines : ressources gratuites ou peu coûteuses, un livrable concret à produire, et la façon honnête de le présenter sur mon CV. Classe les écarts par rapport gain/effort et dis-moi lesquels ne valent pas l'effort. N'invente aucune expérience : propose seulement ce que je peux réellement faire et prouver.");
+  return md.join("\n") + "\n";
+}
+
+document.addEventListener("click", function(e){
+  var t = e.target.closest && e.target.closest("button");
+  if(!t) return;
+  if(t.id === "btn-ats-optimize"){ atsOptimize(); }
+  if(t.id === "btn-ats-plan"){
+    var md = atsPlanMarkdown(); if(!md) return;
+    saveFileEverywhere(fileSafe((state.annonce.poste || "poste") + "-plan-action") + ".md", new Blob([md], { type: "text/markdown;charset=utf-8" }), "ats-result");
+  }
+  if(t.id === "btn-ats-plan-copy"){
+    var md2 = atsPlanMarkdown(); if(!md2) return;
+    try{ navigator.clipboard.writeText(md2).then(function(){ document.getElementById("ats-result").textContent = "Plan copié."; }); }catch(err){}
+  }
+});
 
 function renderExpList(){
   var wrap = document.getElementById("exp-list");
@@ -2387,16 +2570,19 @@ function initPreviewEditing(){
 }
 
 function renderCVPreview(){
+  var wrap = document.getElementById("cv-preview");
+  var html = cvHtml();
+  wrap.innerHTML = html || '<p class="empty-note">Remplis ton profil et ta bibliothèque à gauche : le CV se construit ici.</p>';
+  renderATS();
+}
+
+// HTML du CV d'après l'état courant ("" si rien à montrer). Sert à l'aperçu et au CV anonymisé.
+function cvHtml(){
   var p = state.profil, cv = state.cv;
   var L = CV_LABELS[cv.lang] || CV_LABELS.fr;
-  var wrap = document.getElementById("cv-preview");
 
   var hasAnyExp = state.library.experiences.some(function(e){ return e.poste || e.entreprise; });
-  if(!p.nom.trim() && !hasAnyExp){
-    wrap.innerHTML = '<p class="empty-note">Remplis ton profil et ta bibliothèque à gauche : le CV se construit ici.</p>';
-    renderATS();
-    return;
-  }
+  if(!p.nom.trim() && !hasAnyExp){ return ""; }
 
   var html = '<div style="display:flex;justify-content:space-between;gap:16px;">';
   html += '<div style="flex:1;min-width:0;">';
@@ -2404,10 +2590,6 @@ function renderCVPreview(){
   if(p.titre) html += '<p class="cv-title">' + esc(p.titre) + '</p>';
   var contacts = [p.email, p.tel, p.ville, p.lien].filter(Boolean).map(esc);
   if(contacts.length) html += '<p class="cv-contact">' + contacts.map(function(x){ return "<span>" + x + "</span>"; }).join("") + '</p>';
-  if(p.suisseActif){
-    var sw = [p.suisse.dateNaissance && ("Né(e) le " + p.suisse.dateNaissance), p.suisse.nationalite, p.suisse.permis, p.suisse.etatCivil].filter(Boolean).map(esc);
-    if(sw.length) html += '<p class="cv-contact">' + sw.map(function(x){ return "<span>" + x + "</span>"; }).join("") + '</p>';
-  }
   html += '</div>';
   if(p.photo){ html += '<img src="' + p.photo + '" alt="" style="width:72px;height:90px;object-fit:cover;border-radius:4px;border:1px solid #D6D0C0;flex-shrink:0;">'; }
   html += '</div>';
@@ -2456,8 +2638,44 @@ function renderCVPreview(){
 
   if(L.note) html += '<p class="footnote" style="margin-top:18px;font-style:italic;">' + esc(L.note) + '</p>';
 
-  wrap.innerHTML = html;
-  renderATS();
+  return html;
+}
+
+/* ---- CV anonymisé : sans nom, coordonnées, photo ni liens ; employeurs masqués en option ---- */
+function anonymizedCvElement(maskEmployers){
+  var realProfil = state.profil, realLib = state.library, realCv = state.cv;
+  var secrets = [realProfil.nom, realProfil.email, realProfil.tel, realProfil.ville, realProfil.lien].filter(Boolean);
+  (realProfil.nom || "").split(/\s+/).forEach(function(w){ if(w.length >= 3) secrets.push(w); });
+  var employers = [];
+  if(maskEmployers){ realLib.experiences.forEach(function(e){ if((e.entreprise || "").trim().length >= 3) employers.push(e.entreprise.trim()); }); }
+  var all = secrets.concat([]).sort(function(a, b){ return b.length - a.length; });
+  employers.sort(function(a, b){ return b.length - a.length; });
+  var clean = function(t){
+    t = String(t || "");
+    all.forEach(function(sv){ t = t.replace(new RegExp(escapeRegex(sv), "gi"), ""); });
+    employers.forEach(function(sv){ t = t.replace(new RegExp(escapeRegex(sv), "gi"), "l'entreprise"); });
+    return t.replace(/[\w.+-]+@[\w-]+\.[a-z]{2,}/gi, "").replace(/(?:\+?\d[\d\s.\-]{7,}\d)/g, function(m){ return /\d{4}\s*[-–]\s*\d{4}/.test(m) ? m : ""; })
+            .replace(/https?:\/\/\S+|www\.\S+|linkedin\.com\S*|github\.com\S*/gi, "").replace(/[ \t]{2,}/g, " ").replace(/\s+([,;.])/g, "$1").trim();
+  };
+  var ref = "Profil réf. " + String(Math.abs(djb2(String(state.currentPersonId) + "|" + (state.annonce.poste || "") + "|" + (realProfil.titre || "")))).slice(0, 6);
+  var cp = Object.assign({}, realProfil, { nom: ref, email: "", tel: "", ville: "Coordonnées communiquées sur demande", lien: "", photo: null, titre: clean(realProfil.titre), langues: clean(realProfil.langues), atouts: realProfil.atouts.map(clean) });
+  var cl = Object.assign({}, realLib, {
+    experiences: realLib.experiences.map(function(e){
+      var ov = realCv.expOverrides && realCv.expOverrides[e.id];
+      return Object.assign({}, e, { poste: clean(e.poste), entreprise: maskEmployers ? "Employeur confidentiel" : clean(e.entreprise), details: clean(typeof ov === "string" ? ov : e.details) });
+    }),
+    formations: realLib.formations.map(function(f){ return Object.assign({}, f, { diplome: clean(f.diplome), etablissement: clean(f.etablissement), details: clean(f.details) }); }),
+    sections: (realLib.sections || []).map(function(x){ return Object.assign({}, x, { titre: clean(x.titre), texte: clean(x.texte) }); })
+  });
+  var cc = Object.assign({}, realCv, { resume: clean(realCv.resume), expOverrides: {} });
+  var html;
+  state.profil = cp; state.library = cl; state.cv = cc;
+  try{ html = cvHtml(); } finally { state.profil = realProfil; state.library = realLib; state.cv = realCv; }
+  html = html.replace(/ contenteditable="true"/g, "").replace(/ spellcheck="false"/g, "").replace(/ data-edit="[^"]*"/g, "");
+  var el = document.createElement("div");
+  el.className = "paper cv-doc"; el.id = "cv-anon";
+  el.innerHTML = html;
+  return { el: el, ref: ref };
 }
 
 function initCVModule(){
@@ -2471,28 +2689,12 @@ function initCVModule(){
   resumeEl.value = state.cv.resume || "";
   resumeEl.addEventListener("input", function(){ state.cv.resume = resumeEl.value; renderCVPreview(); persist(); });
 
-  [["suisse-naissance", "dateNaissance"], ["suisse-nationalite", "nationalite"], ["suisse-permis", "permis"], ["suisse-etat", "etatCivil"]].forEach(function(pair){
-    var el = document.getElementById(pair[0]);
-    el.value = state.profil.suisse[pair[1]] || "";
-    el.addEventListener("input", function(){ state.profil.suisse[pair[1]] = el.value; renderCVPreview(); persist(); });
-  });
-
-  document.getElementById("format-segmented").addEventListener("click", function(e){
-    var btn = e.target.closest("button"); if(!btn) return;
-    state.cv.format = btn.getAttribute("data-format");
-    this.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b === btn); });
-    state.profil.suisseActif = state.cv.format === "suisse";
-    document.getElementById("suisse-fields").style.display = state.profil.suisseActif ? "block" : "none";
-    renderCVPreview(); persist();
-  });
   document.getElementById("lang-segmented").addEventListener("click", function(e){
     var btn = e.target.closest("button"); if(!btn) return;
     state.cv.lang = btn.getAttribute("data-lang");
     this.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b === btn); });
     renderCVPreview(); persist();
   });
-  document.querySelectorAll('#format-segmented button').forEach(function(b){ var on = b.getAttribute("data-format") === state.cv.format; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
-  document.getElementById("suisse-fields").style.display = (state.cv.format === "suisse") ? "block" : "none";
   document.querySelectorAll('#lang-segmented button').forEach(function(b){ var on = b.getAttribute("data-lang") === state.cv.lang; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
 
   document.getElementById("btn-add-atout").addEventListener("click", function(){
@@ -3616,15 +3818,14 @@ function renderDossierBar(){
 
 // Recharge toute l'interface depuis le dossier actif (champs, aperçus, suggestions).
 function syncDossierUI(){
+  ATS_LAST_LOG = null;
   anPoste.value = state.annonce.poste || "";
   anEntreprise.value = state.annonce.entreprise || "";
   anUrl.value = state.annonce.url || "";
   anTexte.value = state.annonce.texte || "";
   renderAnalyseCard();
   document.getElementById("cv-resume").value = state.cv.resume || "";
-  document.querySelectorAll('#format-segmented button').forEach(function(b){ var on = b.getAttribute("data-format") === state.cv.format; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
   document.querySelectorAll('#lang-segmented button').forEach(function(b){ var on = b.getAttribute("data-lang") === state.cv.lang; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
-  document.getElementById("suisse-fields").style.display = (state.cv.format === "suisse") ? "block" : "none";
   document.getElementById("l-destinataire").value = state.lettre.destinataire || "";
   document.getElementById("l-disponibilite").value = state.lettre.disponibilite || "";
   document.querySelectorAll('#tone-segmented button').forEach(function(b){ var on = b.getAttribute('data-tone') === state.lettre.ton; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
@@ -3658,7 +3859,7 @@ document.getElementById("btn-new-dossier").addEventListener("click", function(){
   persist();
   var cur = currentDossier(), d = makeDossier();
   // la nouvelle candidature part de la même base ; on reprend seulement les réglages de présentation
-  d.cv.lang = state.cv.lang; d.cv.format = state.cv.format; d.cv.resume = state.cv.resume;
+  d.cv.lang = state.cv.lang; d.cv.resume = state.cv.resume;
   d.lettre.lang = state.lettre.lang; d.lettre.ton = state.lettre.ton;
   state.dossiers.push(normDossier(d));
   activateDossier(d.id);
@@ -3704,9 +3905,6 @@ function renderPersonBar(){
 // Recharge tout ce qui dépend de la personne (profil, base, suivi) puis de la candidature active.
 function syncPersonUI(){
   ["nom", "titre", "email", "tel", "ville", "lien", "langues"].forEach(function(f){ document.getElementById("cv-" + f).value = state.profil[f] || ""; });
-  [["suisse-naissance", "dateNaissance"], ["suisse-nationalite", "nationalite"], ["suisse-permis", "permis"], ["suisse-etat", "etatCivil"]].forEach(function(pair){
-    document.getElementById(pair[0]).value = state.profil.suisse[pair[1]] || "";
-  });
   renderPhotoThumb();
   renderArchiveList(); renderReferencePanel();
   renderCandidaturesList();
