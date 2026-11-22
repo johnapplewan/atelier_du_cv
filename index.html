@@ -163,6 +163,7 @@
     body.menu-open .topbar{ flex-wrap:wrap; }
     body.menu-open .topbar-actions{ display:flex; flex:1 1 100%; flex-direction:column; align-items:stretch; gap:8px; padding:10px 0 4px; }
     body.menu-open .topbar-actions .btn, body.menu-open .topbar-actions .segmented{ width:100%; }
+    body.menu-open #btn-theme{ width:100%; justify-content:flex-start; gap:10px; padding:0 14px; }
     .topbar-status-row{ padding:0 14px; }
     .topbar-status-row .download-status{ min-height:0; margin:0; }
     #person-bar, #dossier-bar{ display:none; }
@@ -380,11 +381,7 @@
     </div>
     <button class="btn btn-sm mobile-only" id="btn-menu" type="button" aria-expanded="false" aria-controls="app-menu">Menu</button>
     <div class="topbar-actions" id="app-menu">
-      <div class="segmented" id="theme-segmented" role="group" aria-label="Thème de l'interface">
-        <button type="button" data-theme-choice="light" aria-pressed="false">Clair</button>
-        <button type="button" data-theme-choice="dark" aria-pressed="false">Sombre</button>
-        <button type="button" data-theme-choice="auto" class="active" aria-pressed="true">Auto</button>
-      </div>
+      <button class="icon-btn" id="btn-theme" type="button"><span id="theme-icon" aria-hidden="true"></span><span class="theme-label mobile-only" id="theme-label"></span></button>
       <button class="btn btn-ghost btn-sm" id="btn-ia-settings" title="Assistant IA facultatif : reformulation et lettre sur mesure">Assistant IA : <span id="ia-state">copier-coller</span></button>
       <button class="btn btn-ghost btn-sm" id="btn-reset" title="Effacer la bibliothèque et repartir de zéro">Tout effacer</button>
       <button class="btn btn-ghost btn-sm" id="btn-export-cv-lettre">CV + Lettre (PDF)</button>
@@ -1026,6 +1023,9 @@ var ICON_PATHS = {
   up: '<polyline points="18 15 12 9 6 15"></polyline>',
   down: '<polyline points="6 9 12 15 18 9"></polyline>',
   close: '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>',
+  sun: '<circle cx="12" cy="12" r="4"></circle><line x1="12" y1="2" x2="12" y2="4"></line><line x1="12" y1="20" x2="12" y2="22"></line><line x1="2" y1="12" x2="4" y2="12"></line><line x1="20" y1="12" x2="22" y2="12"></line><line x1="4.9" y1="4.9" x2="6.3" y2="6.3"></line><line x1="17.7" y1="17.7" x2="19.1" y2="19.1"></line><line x1="4.9" y1="19.1" x2="6.3" y2="17.7"></line><line x1="17.7" y1="6.3" x2="19.1" y2="4.9"></line>',
+  moon: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path>',
+  contrast: '<circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor"></path>',
   refresh: '<polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>'
 };
 function icon(name){
@@ -1757,21 +1757,23 @@ function applyTheme(choice){
   } else {
     document.documentElement.removeAttribute("data-theme");
   }
-  document.querySelectorAll("#theme-segmented button").forEach(function(b){
-    var on = b.getAttribute("data-theme-choice") === choice;
-    b.classList.toggle("active", on);
-    b.setAttribute("aria-pressed", on ? "true" : "false");
-  });
+  var names = { auto: "automatique", light: "clair", dark: "sombre" };
+  var next = { auto: "light", light: "dark", dark: "auto" }[choice];
+  var btn = document.getElementById("btn-theme");
+  if(btn){
+    var label = "Thème : " + names[choice] + ". Passer à " + names[next] + ".";
+    btn.setAttribute("aria-label", label); btn.setAttribute("title", label);
+    document.getElementById("theme-icon").innerHTML = icon(choice === "light" ? "sun" : (choice === "dark" ? "moon" : "contrast"));
+    document.getElementById("theme-label").textContent = "Thème : " + names[choice];
+  }
 }
 applyTheme(getThemeChoice());
-document.getElementById("theme-segmented").addEventListener("click", function(e){
-  var btn = e.target.closest("button[data-theme-choice]");
-  if(!btn) return;
-  var choice = btn.getAttribute("data-theme-choice");
+document.getElementById("btn-theme").addEventListener("click", function(){
+  var next = { auto: "light", light: "dark", dark: "auto" }[getThemeChoice()];
   try{
-    if(choice === "auto"){ localStorage.removeItem(THEME_KEY); } else { localStorage.setItem(THEME_KEY, choice); }
+    if(next === "auto"){ localStorage.removeItem(THEME_KEY); } else { localStorage.setItem(THEME_KEY, next); }
   }catch(err){}
-  applyTheme(choice);
+  applyTheme(next);
 });
 
 /* ===================== MODULE ANNONCE ===================== */

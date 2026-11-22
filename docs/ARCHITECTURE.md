@@ -73,7 +73,7 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 | 10 | **Candidatures** (`candidatures`) | Suivi | Une ligne par candidature (créée automatiquement), statut, notes, versions enregistrées, « Revenir à cette version » |
 | 11 | **Entretien** (`entretien`) | Entraînement | Questions générées d'après l'annonce, réponses, corrigé heuristique |
 
-**Barre haute** : marque, sélecteur de thème (Clair / Sombre / Auto), « Assistant IA : <mode> », « Tout effacer », « CV + Lettre (PDF) », « Télécharger le dossier complet (PDF) ».
+**Barre haute** : marque, bouton icône de thème (soleil, lune ou demi-cercle pour automatique ; un clic passe au suivant), « Assistant IA : <mode> », « Tout effacer », « CV + Lettre (PDF) », « Télécharger le dossier complet (PDF) ».
 **Barre Personne** : choisir, ajouter, renommer, supprimer une personne.
 **Barre Candidature** : choisir, nommer, nouvelle, dupliquer, supprimer, Sauvegarder (fichier .json) / Restaurer.
 **Pied de page** : liens vers les pages légales.
@@ -171,7 +171,7 @@ Sobre, éditorial, papier et encre, accent bleu nuit, laiton comme second accent
 
 Couleurs (clair → sombre) : `--bg`, `--surface`, `--surface-2`, `--border`, `--border-strong`, `--ink-900/600/400`, `--accent` `#2E4C82` (sombre `#8CA9DE`), `--accent-ink`, `--accent-soft`, `--on-accent`, `--brass`, `--brass-soft`, `--success`, `--caution`, `--danger` (+ variantes `-soft`), `--shadow`, `--radius: 10px`.
 Polices : `--font-display` Newsreader (titres), `--font-body` Public Sans (texte), `--font-mono` IBM Plex Mono (étiquettes, puces, chiffres).
-Thème : clair / sombre / auto (`prefers-color-scheme`, attribut `data-theme` sur `<html>`, préférence mémorisée).
+Thème : clair / sombre / auto, bouton icône `#btn-theme` qui fait défiler les trois (`prefers-color-scheme`, attribut `data-theme` sur `<html>`, préférence mémorisée).
 
 ### Composants CSS existants
 
@@ -204,7 +204,7 @@ Les `id` ci-dessous sont lus par le script. **Ne pas les renommer sans adapter l
 
 **Barre haute, sélecteurs personne/candidature, dialogues, rail, pied de page**
 
-`#ia-dialog`, `#ia-mode-line`, `#ia-skip`, `#ia-save`, `#ia-paste`, `#ia-paste-what`, `#ia-paste-prompt`, `#ia-paste-copy`, `#ia-paste-copied`, `#ia-paste-answer`, `#ia-paste-error`, `#ia-paste-cancel`, `#ia-paste-ok`, `#ia-confirm`, `#ia-confirm-what`, `#ia-confirm-text`, `#ia-confirm-no`, `#ia-confirm-yes`, `#app`, `#theme-segmented`, `#btn-ia-settings`, `#ia-state`, `#btn-reset`, `#btn-export-cv-lettre`, `#btn-export-all`, `#person-bar`, `#person-select`, `#btn-new-person`, `#btn-rename-person`, `#btn-del-person`, `#dossier-bar`, `#dossier-select`, `#dossier-title`, `#btn-new-dossier`, `#btn-dup-dossier`, `#btn-del-dossier`, `#btn-backup`, `#btn-restore`, `#restore-file`, `#export-cv-lettre-status`, `#export-all-status`, `#rail`, `#dot-base`, `#dot-profils`, `#dot-recherche`, `#dot-offres`, `#dot-freelance`, `#dot-annonce`, `#dot-cv`, `#dot-lettre`, `#dot-annexe`, `#dot-candidatures`, `#dot-entretien`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + c.id + '`, `#' + sec.id + '`, `#' + sec.id + '`, `#lettre-body`, `#'+it.id+'`, `#'+it.id+'`, `#'+it.id+'`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`
+`#ia-dialog`, `#ia-mode-line`, `#ia-skip`, `#ia-save`, `#ia-paste`, `#ia-paste-what`, `#ia-paste-prompt`, `#ia-paste-copy`, `#ia-paste-copied`, `#ia-paste-answer`, `#ia-paste-error`, `#ia-paste-cancel`, `#ia-paste-ok`, `#ia-confirm`, `#ia-confirm-what`, `#ia-confirm-text`, `#ia-confirm-no`, `#ia-confirm-yes`, `#app`, `#btn-theme`, `#theme-icon`, `#theme-label`, `#btn-ia-settings`, `#ia-state`, `#btn-reset`, `#btn-export-cv-lettre`, `#btn-export-all`, `#person-bar`, `#person-select`, `#btn-new-person`, `#btn-rename-person`, `#btn-del-person`, `#dossier-bar`, `#dossier-select`, `#dossier-title`, `#btn-new-dossier`, `#btn-dup-dossier`, `#btn-del-dossier`, `#btn-backup`, `#btn-restore`, `#restore-file`, `#export-cv-lettre-status`, `#export-all-status`, `#rail`, `#dot-base`, `#dot-profils`, `#dot-recherche`, `#dot-offres`, `#dot-freelance`, `#dot-annonce`, `#dot-cv`, `#dot-lettre`, `#dot-annexe`, `#dot-candidatures`, `#dot-entretien`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + c.id + '`, `#' + sec.id + '`, `#' + sec.id + '`, `#lettre-body`, `#'+it.id+'`, `#'+it.id+'`, `#'+it.id+'`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`
 
 **panel-base**
 
