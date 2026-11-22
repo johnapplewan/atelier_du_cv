@@ -5793,6 +5793,30 @@ function pqHtml(key, D){
   return '<div class="pq pq-' + m.key + (D.band && D.band !== "none" ? " pq-hasband" : "") + '" style="--accent:' + esc(hx) + ';--on:' + (lum > 0.6 ? "#111" : "#fff") + ';">' + (PQ_RENDER[m.key] || PQ_RENDER.t1)(D) + "</div>";
 }
 
+// Garde-fou anti-superposition : le contenu du haut est réduit (jamais en dessous de 55 %) pour rester au-dessus du bandeau.
+function pqFit(root){
+  if(!root) return;
+  (root.matches && root.matches(".pq") ? [root] : [].slice.call(root.querySelectorAll(".pq"))).forEach(function(pq){
+    var band = pq.querySelector(":scope > .pq-band"); if(!band || !pq.offsetHeight || pq.classList.contains("pq-t3")) return;
+    var main = pq.querySelector(":scope > .pq-main");
+    if(!main){
+      main = document.createElement("div"); main.className = "pq-main";
+      [].slice.call(pq.children).forEach(function(c){ if(!c.classList.contains("pq-band") && !c.classList.contains("pq-foot")) main.appendChild(c); });
+      pq.insertBefore(main, pq.firstChild);
+    }
+    main.style.transform = ""; main.style.width = "";
+    var top = main.offsetTop, avail = band.offsetTop - 22 - top, need = main.scrollHeight;
+    if(need > avail && avail > 0){
+      var lo = 0.55, hi = 1, k = lo;
+      for(var it = 0; it < 7; it++){        // recherche du plus grand facteur qui tient : élargir la boîte fait aussi remonter les lignes
+        var m = (lo + hi) / 2; main.style.width = (100 / m) + "%";
+        if(main.scrollHeight * m <= avail){ k = m; lo = m; } else hi = m;
+      }
+      main.style.transformOrigin = "top left"; main.style.transform = "scale(" + k + ")"; main.style.width = (100 / k) + "%";
+    }
+  });
+}
+
 /* ---- interface ---- */
 var PQ_SCHEMA = [
   { group: "Titre et présentation", fields: [
@@ -5838,7 +5862,7 @@ function renderPlaquette(){
     var D = pqData(true);
     b.innerHTML = '<div class="pq-thumb-in"><div class="pq-scale" style="transform:scale(.155);">' + pqHtml(m.key, D) + '</div></div><span class="pq-thumb-name">' + esc(m.nom) + "</span>";
     b.addEventListener("click", function(){ q.modele = m.key; q.accent = ""; persist(); renderPlaquette(); });
-    grid.appendChild(b);
+    grid.appendChild(b); pqFit(b);
   });
   // champs
   var form = document.getElementById("pq-form"), active = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute("data-pq");
@@ -5876,6 +5900,7 @@ function renderPlaquette(){
 function renderPlaquettePreview(){
   var q = pqState(), stage = document.getElementById("pq-stage"); if(!stage) return;
   stage.innerHTML = '<div class="pq-scale" id="pq-live" style="transform-origin:top left;">' + pqHtml(q.modele, pqData(false)) + "</div>";
+  pqFit(stage);
   fitPlaquette();
 }
 function fitPlaquette(){
@@ -5915,7 +5940,7 @@ document.getElementById("pq-form").addEventListener("change", function(e){
 });
 function refreshPqThumbs(){ /* les vignettes gardent le contenu de démonstration tant que le titre est vide : on les met à jour à la volée */
   var q = pqState(), D = pqData(true);
-  document.querySelectorAll("#pq-grid .pq-thumb").forEach(function(b, i){ b.querySelector(".pq-scale").innerHTML = pqHtml(PQ_MODELES[i].key, D); });
+  document.querySelectorAll("#pq-grid .pq-thumb").forEach(function(b, i){ b.querySelector(".pq-scale").innerHTML = pqHtml(PQ_MODELES[i].key, D); pqFit(b); });
 }
 document.getElementById("pq-accent").addEventListener("input", function(){ pqState().accent = this.value; persist(); renderPlaquettePreview(); });
 document.getElementById("pq-accent-reset").addEventListener("click", function(){ pqState().accent = ""; persist(); renderPlaquette(); });
@@ -5936,7 +5961,7 @@ document.getElementById("btn-pq-pdf").addEventListener("click", function(){
   clone.style.cssText = "position:fixed;left:-10000px;top:0;width:794px;height:1123px;";
   clone.innerHTML = pqHtml(q.modele, pqData(false));
   clone.querySelectorAll(".pq-ph, .pq-gap").forEach(function(n){ n.remove(); });
-  document.body.appendChild(clone);
+  document.body.appendChild(clone); pqFit(clone);
   st.textContent = "Génération du PDF…";
   window.html2canvas(clone.firstChild, { backgroundColor: null, scale: 2, useCORS: true, width: 794, height: 1123, windowWidth: 794 }).then(function(canvas){
     clone.remove();
