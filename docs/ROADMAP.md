@@ -5,7 +5,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 ## Fait
 
 - Base personnelle fusionnée à chaque import de CV, carte de la base, certifications, CV composé automatiquement selon le profil et l'annonce, astérisques des manques.
-- Profils de recherche (13 domaines) avec CV type, recherche d'entreprises (candidatures spontanées), onglet Freelance (offre de service, ciblage des intermédiaires, lettre d'offre de service), **plaquette freelance (10 modèles A4)**.
+- Profils de recherche (13 domaines) avec CV type, recherche d'entreprises (candidatures spontanées), onglet Freelance (offre de service, ciblage des intermédiaires, lettre d'offre de service), **plaquette freelance (10 modèles A4, plusieurs plaquettes, offres suggérées, accroches, suivi des envois et statistiques)**.
 - Lecture d'une annonce par son lien, analyse de l'émetteur (direct, cabinet, intérim, ESN), lettres RAPOS avec règles d'humanisation et contrôle de style, assistant IA par le compte Claude (sans clé API).
 - Score ATS avec suggestions, optimisation automatique, plan d'action Markdown ; CV anonymisé.
 - Suivi des candidatures avec relances, versions enregistrées, plusieurs personnes et plusieurs candidatures.

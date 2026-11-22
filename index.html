@@ -244,6 +244,16 @@
   .pq-det{ border:1px solid var(--border); border-radius:8px; padding:10px 14px; margin-bottom:10px; background:var(--surface-2); }
   .pq-det summary{ cursor:pointer; font-weight:600; font-size:13.5px; }
   input[type=color]{ width:44px; height:36px; padding:2px; border:1px solid var(--border-strong); border-radius:7px; background:var(--surface-2); }
+  .pq-opt{ display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1px solid var(--border); border-radius:8px; margin-bottom:8px; background:var(--surface-2); cursor:pointer; font-size:13.5px; }
+  .pq-opt.on{ border-color:var(--accent); box-shadow:0 0 0 1px var(--accent); }
+  .pq-opt small{ display:block; color:var(--ink-500,#6b6b6b); font-size:12.5px; margin-top:2px; }
+  .pq-opt input{ margin-top:3px; flex:none; }
+  .pq-table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  .pq-table th,.pq-table td{ padding:8px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top; }
+  .pq-table .best{ font-weight:700; color:var(--success); }
+  .pq-env{ display:grid; grid-template-columns:90px 1fr 150px 36px; gap:8px; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); font-size:13.5px; }
+  .pq-env small{ color:var(--ink-500,#6b6b6b); display:block; }
+  @media (max-width:700px){ .pq-env{ grid-template-columns:1fr 1fr; } }
   /* bandeau du bas (présentation, retours clients, références, questions) */
   .pq h1,.pq .pq-h{ text-wrap:balance; } .pq p{ text-wrap:pretty; } .pq{ -webkit-font-smoothing:antialiased; }
   .pq .pq-band{ position:absolute; left:56px; right:56px; bottom:104px; padding-top:20px; border-top:1px solid rgba(128,128,128,.38); }
@@ -557,13 +567,13 @@
       <button class="rail-item" data-tab="profils" data-group="prep"><span class="num">02</span>Mes profils<span class="status-dot" id="dot-profils"></span></button>
       <button class="rail-item" data-tab="recherche" data-group="chercher"><span class="num">03</span>Recherche<span class="status-dot" id="dot-recherche"></span></button>
       <button class="rail-item" data-tab="offres" data-group="chercher"><span class="num">04</span>Offres<span class="status-dot" id="dot-offres"></span></button>
-      <button class="rail-item" data-tab="freelance" data-group="chercher"><span class="num">05</span>Freelance<span class="status-dot" id="dot-freelance"></span></button>
-      <button class="rail-item" data-tab="plaquette" data-group="chercher"><span class="num">06</span>Plaquette<span class="status-dot" id="dot-plaquette"></span></button>
-      <button class="rail-item is-active" data-tab="annonce" data-group="candidater"><span class="num">07</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
-      <button class="rail-item" data-tab="cv" data-group="candidater"><span class="num">08</span>CV<span class="status-dot" id="dot-cv"></span></button>
-      <button class="rail-item" data-tab="lettre" data-group="candidater"><span class="num">09</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
-      <button class="rail-item" data-tab="annexe" data-group="candidater"><span class="num">10</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
-      <button class="rail-item" data-tab="candidatures" data-group="suivi"><span class="num">11</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
+      <button class="rail-item is-active" data-tab="annonce" data-group="candidater"><span class="num">05</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
+      <button class="rail-item" data-tab="cv" data-group="candidater"><span class="num">06</span>CV<span class="status-dot" id="dot-cv"></span></button>
+      <button class="rail-item" data-tab="lettre" data-group="candidater"><span class="num">07</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
+      <button class="rail-item" data-tab="annexe" data-group="candidater"><span class="num">08</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
+      <button class="rail-item" data-tab="candidatures" data-group="suivi"><span class="num">09</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
+      <button class="rail-item" data-tab="freelance" data-group="chercher"><span class="num">10</span>Freelance<span class="status-dot" id="dot-freelance"></span></button>
+      <button class="rail-item" data-tab="plaquette" data-group="chercher"><span class="num">11</span>Plaquette<span class="status-dot" id="dot-plaquette"></span></button>
       <button class="rail-item" data-tab="entretien" data-group="suivi"><span class="num">12</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
     </div>
     <div class="rail-foot">Ta bibliothèque (expériences, compétences, lettres, candidatures) reste dans ce navigateur. Seuls le lien d'une annonce ou les critères d'une recherche d'entreprises transitent, jamais ton CV ni tes coordonnées.</div>
@@ -742,6 +752,7 @@
       <div style="max-width:980px;">
         <div class="card" style="margin-bottom:16px;">
           <span class="eyebrow">Mon offre de service</span>
+          <div id="fl-suggest" style="margin-top:8px;"></div>
           <div id="fl-services" style="margin-top:8px;"></div>
           <div class="toolbar-row" style="margin:6px 0 12px;"><button class="btn btn-ghost btn-sm" id="btn-fl-add" type="button">+ Ajouter une prestation</button></div>
           <div class="field"><label for="fl-offre">Présentation en deux phrases</label><textarea id="fl-offre" style="min-height:64px;" placeholder="Qui tu es, ce que tu apportes, pour quels clients."></textarea>
@@ -792,6 +803,17 @@
       <div class="split">
         <div class="controls-col" id="pq-controls">
           <div class="card" style="margin-bottom:16px;">
+            <span class="eyebrow">Mes plaquettes</span>
+            <div class="row2" style="margin-top:8px;">
+              <div class="field"><label for="pq-select">Plaquette active</label><select id="pq-select"></select></div>
+              <div class="field"><label for="pq-nom">Nom (pour t'y retrouver)</label><input type="text" id="pq-nom" maxlength="60" placeholder="ex. PME, offre automatisation"></div>
+            </div>
+            <div class="toolbar-row"><button class="btn btn-sm" id="btn-pq-new" type="button">Nouvelle plaquette</button><button class="btn btn-ghost btn-sm" id="btn-pq-dup" type="button">Dupliquer</button><button class="btn btn-ghost btn-sm" id="btn-pq-del" type="button">Supprimer</button></div>
+            <p class="hint" style="margin:8px 0 0;">Une plaquette par positionnement (cible, offre, accroche) : note les envois plus bas pour voir celles qui fonctionnent.</p>
+          </div>
+          <div class="card" style="margin-bottom:16px;"><span class="eyebrow">Offres de cette plaquette</span><div id="pq-offres" style="margin-top:8px;"></div></div>
+          <div class="card" style="margin-bottom:16px;"><span class="eyebrow">Accroches et baselines</span><div id="pq-accroches" style="margin-top:8px;"></div></div>
+          <div class="card" style="margin-bottom:16px;">
             <span class="eyebrow">Modèle</span>
             <div id="pq-grid" style="margin-top:10px;"></div>
             <div class="toolbar-row" style="margin-top:12px;align-items:center;"><label class="hint" for="pq-accent">Couleur d'accent</label><input type="color" id="pq-accent" value="#E03A2F"><button class="btn btn-ghost btn-sm" id="pq-accent-reset" type="button">Couleur du modèle</button></div>
@@ -807,6 +829,7 @@
           <span class="download-status" id="pq-status"></span>
         </div>
       </div>
+      <div id="pq-suivi" style="max-width:980px;margin-top:16px;"></div>
     </section>
 
     <!-- PANEL ANNONCE -->
@@ -1590,7 +1613,7 @@ function persist(){
 
 /* ---------------- onglets & statut ---------------- */
 
-var TABS = ["base","profils","recherche","offres","freelance","plaquette","annonce","cv","lettre","annexe","candidatures","entretien"];
+var TABS = ["base","profils","recherche","offres","annonce","cv","lettre","annexe","candidatures","freelance","plaquette","entretien"];
 var activeTab = "annonce";
 
 function statusFor(tab){
@@ -4804,6 +4827,114 @@ var FL_CIBLES_PAR_DOMAINE = {
   immo:["direct","conseil"], vente:["conseil","interim","portage"], admin:["interim","portage"], client:["interim","portage"]
 };
 
+
+/* ===================== OFFRES COMMERCIALES SUGGÉRÉES ===================== */
+// [identifiant, intitulé, description (pour qui, quoi), accroche bénéfice, accroche problème puis solution, baseline]
+var FL_OFFRES = {
+  dev: [
+    ["dev-vitrine", "Site vitrine sur mesure", "Un site rapide, clair et simple à mettre à jour, livré clé en main pour les TPE et PME.", "Un site qui présente enfin votre activité comme elle le mérite.", "Votre site ne vous ressemble plus ? On le refait, proprement.", "Conçu, livré et expliqué : vous restez autonome pour le faire vivre."],
+    ["dev-app", "Application web métier", "Un outil sur mesure qui remplace vos tableurs et vos échanges de mails, du besoin à la mise en ligne.", "L'outil dont votre équipe a besoin, sans payer pour des fonctions inutiles.", "Vos tableurs vous ralentissent ? Un outil à votre mesure, en quelques semaines.", "Des livraisons par étapes, validées avec vous à chaque fois."],
+    ["dev-audit", "Audit et correction d'un site existant", "Diagnostic de vitesse, de sécurité et de référencement, puis corrections classées par priorité.", "Un site plus rapide, plus sûr, mieux placé dans les résultats.", "Votre site est lent ou ne rapporte rien ? Cherchons pourquoi.", "Un rapport écrit, des corrections chiffrées, aucune surprise."],
+    ["dev-maint", "Maintenance et évolutions", "Mises à jour, sauvegardes et petites évolutions chaque mois, pour que le site reste fiable.", "Un site qui reste en forme, sans que vous y pensiez.", "Plus personne ne s'occupe de votre site ? Je m'en charge, chaque mois.", "Un forfait mensuel clair, une réponse sous deux jours ouvrés."]
+  ],
+  ia: [
+    ["ia-auto", "Automatisation de vos tâches répétitives", "Je relie vos outils (formulaires, mails, tableurs, facturation) pour supprimer les saisies à la main.", "Récupérez des heures chaque semaine, sans changer d'outils.", "Les mêmes saisies chaque jour ? Une machine peut les faire.", "Chaque automatisation est documentée et reprise en main par vos équipes."],
+    ["ia-assist", "Assistant IA sur vos documents", "Un assistant qui répond à vos équipes à partir de vos procédures et de vos documents, sans exposer vos données.", "Vos procédures enfin accessibles en une question.", "Vos équipes cherchent la même information dix fois par jour ?", "Vos données restent chez vous, vos règles s'appliquent."],
+    ["ia-form", "Formation aux outils d'IA", "Ateliers pratiques pour que vos équipes utilisent l'IA au quotidien, à partir de cas tirés de leur travail.", "Vos équipes utilisent l'IA avec méthode et sans risque.", "Chacun teste l'IA dans son coin ? Donnez-leur une méthode commune.", "Des ateliers concrets, construits sur vos propres cas."]
+  ],
+  data: [
+    ["data-dash", "Tableau de bord de pilotage", "Vos indicateurs clés réunis sur une page, mis à jour automatiquement depuis vos outils.", "Vos chiffres clés lisibles en un coup d'œil.", "Vos chiffres sont dispersés dans dix fichiers ? Réunissons-les.", "Les indicateurs sont définis avec vous, pas imposés."],
+    ["data-clean", "Fiabilisation de vos données", "Nettoyage, doublons et formats unifiés dans vos fichiers clients, produits ou finances.", "Des données propres sur lesquelles décider.", "Des doublons, des erreurs, des formats qui se contredisent ? Je nettoie.", "Chaque correction est tracée et réversible."],
+    ["data-etude", "Analyse et étude sur mesure", "Une question précise, une analyse de vos données, des conclusions rédigées simplement.", "Une réponse chiffrée à la question que vous vous posez.", "Une décision à prendre et des données qui dorment ? Analysons-les.", "Des conclusions écrites sans jargon, avec les limites de l'analyse."]
+  ],
+  comm: [
+    ["comm-contenu", "Plan de contenu et rédaction", "Un calendrier éditorial et des textes prêts à publier, dans le ton de votre entreprise.", "Des contenus réguliers qui parlent comme vous.", "Pas le temps d'écrire ? Je m'en charge, dans votre ton.", "Chaque texte est relu avec vous avant publication."],
+    ["comm-reseaux", "Animation de vos réseaux sociaux", "Publications, réponses et suivi des résultats sur vos réseaux, chaque semaine.", "Des réseaux sociaux vivants, sans y passer vos soirées.", "Vos réseaux sont à l'arrêt depuis des mois ? On les relance.", "Un bilan simple chaque mois, avec ce qui a marché."],
+    ["comm-news", "Newsletter et e-mailing", "Conception et envoi de newsletters qui gardent le lien avec vos clients.", "Une newsletter que vos clients ouvrent vraiment.", "Vos clients vous oublient entre deux commandes ? Gardez le lien.", "Calendrier tenu, listes respectueuses du RGPD."]
+  ],
+  crea: [
+    ["crea-video", "Vidéo de présentation d'entreprise", "Tournage et montage d'une vidéo courte qui montre votre activité et vos équipes.", "Une vidéo qui montre votre entreprise telle qu'elle est.", "Difficile d'expliquer ce que vous faites en deux phrases ? Montrons-le.", "Du scénario au fichier final, avec deux tours de corrections."],
+    ["crea-montage", "Montage et post-production", "Montage, étalonnage et sous-titres de vos vidéos existantes.", "Vos vidéos prêtes à être publiées, propres et sous-titrées.", "Des rushes qui s'accumulent ? Je les monte.", "Délais annoncés dès le devis, formats adaptés à chaque plateforme."],
+    ["crea-photo", "Reportage photo d'activité", "Une série de photos de vos équipes, produits et lieux pour vos supports.", "Des photos qui valorisent vraiment votre travail.", "Votre site utilise encore des photos de banque d'images ? Passons au vrai.", "Droits d'usage clairs, sélection livrée sous une semaine."]
+  ],
+  design: [
+    ["des-ux", "Refonte d'interface et de parcours", "Je repense vos écrans et vos parcours pour que vos utilisateurs aillent au bout.", "Une interface que vos utilisateurs comprennent du premier coup.", "Vos utilisateurs abandonnent en cours de route ? Trouvons où.", "Chaque choix est justifié par un test ou un constat."],
+    ["des-proto", "Prototype cliquable", "Une maquette interactive pour tester une idée avant de la développer.", "Testez votre idée avant de payer pour la développer.", "Une idée, mais un doute sur ce qui marchera ? Essayons sur maquette.", "Un prototype testable en une à deux semaines."],
+    ["des-ds", "Charte et système de design", "Couleurs, typographies et composants réunis dans un guide simple à appliquer.", "Des supports qui se ressemblent enfin tous.", "Chaque support a son propre style ? Posons des règles communes.", "Un guide clair, utilisable par toute votre équipe."]
+  ],
+  projet: [
+    ["prj-pilot", "Pilotage de projet externalisé", "Planning, suivi des prestataires et reporting, pour tenir délais et budget.", "Un projet qui avance, un budget qui tient.", "Un projet qui dérape ? Je reprends le pilotage.", "Un point hebdomadaire écrit, des décisions tracées."],
+    ["prj-cdc", "Rédaction de cahier des charges", "Vos besoins traduits en un document clair, prêt à être envoyé à des prestataires.", "Un cahier des charges que les prestataires comprennent.", "Des devis impossibles à comparer ? Partez d'un besoin écrit.", "Vous gardez le document, quel que soit le prestataire choisi."],
+    ["prj-audit", "Audit d'organisation de projet", "Analyse de vos méthodes de travail et recommandations concrètes.", "Des méthodes plus simples, des réunions plus courtes.", "Trop de réunions, pas assez de résultats ? Regardons ce qui bloque.", "Des recommandations classées par effort et par gain."]
+  ],
+  formation: [
+    ["for-atelier", "Ateliers de formation sur mesure", "Des ateliers pratiques construits à partir des cas de vos équipes.", "Une formation qui change la façon de travailler dès la semaine suivante.", "Des formations génériques qui n'ont rien changé ? Partons de votre quotidien.", "Supports remis, évaluation en fin de session."],
+    ["for-support", "Création de supports pédagogiques", "Guides, fiches et exercices prêts à être utilisés par vos formateurs.", "Des supports clairs que vos formateurs utilisent vraiment.", "Vos supports datent de dix ans ? Reprenons-les.", "Livrés dans vos formats, modifiables par vos équipes."],
+    ["for-coach", "Accompagnement individuel", "Séances régulières pour progresser sur un sujet précis, à votre rythme.", "Un accompagnement qui part de votre situation.", "Seul face à un sujet difficile ? Avançons ensemble.", "Objectifs fixés dès la première séance, bilan à la fin."]
+  ],
+  rh: [
+    ["rh-recrut", "Recrutement ponctuel", "Rédaction de l'offre, présélection et entretiens pour un poste précis.", "Le bon profil, sans que vous y passiez vos semaines.", "Un poste ouvert depuis trop longtemps ? Je prends le relais.", "Une courte liste de candidats, chacun présenté par écrit."],
+    ["rh-onb", "Parcours d'intégration", "Un parcours simple pour les premières semaines de vos nouveaux salariés.", "Des nouveaux arrivants qui se sentent à leur place vite.", "Des départs dans les premiers mois ? Soignons l'arrivée.", "Un parcours documenté que vos managers appliquent seuls."]
+  ],
+  immo: [
+    ["imm-estim", "Estimation et conseil", "Une estimation argumentée d'un bien, d'après les ventes comparables.", "Un prix de vente que vous pouvez défendre.", "Un doute sur le bon prix ? Regardons les ventes réelles.", "Un dossier écrit avec les ventes comparables citées."],
+    ["imm-annonce", "Mise en valeur d'annonces", "Textes et photos retravaillés pour que vos biens se distinguent.", "Des annonces qui donnent envie de visiter.", "Des annonces qui ne génèrent pas de visites ? Reprenons-les.", "Textes exacts, sans promesse qu'on ne peut tenir."]
+  ],
+  vente: [
+    ["ven-prosp", "Prospection commerciale externalisée", "Recherche de prospects, premiers contacts et prise de rendez-vous pour votre équipe.", "Des rendez-vous qualifiés dans votre agenda.", "Pas le temps de prospecter ? Je m'en occupe.", "Un compte rendu hebdomadaire de chaque contact."],
+    ["ven-ao", "Réponse à appels d'offres", "Analyse du cahier des charges et rédaction d'une réponse claire.", "Une réponse qui répond à ce qui est demandé.", "Des appels d'offres que vous laissez passer ? Répondons-y.", "Relecture de conformité avant chaque envoi."]
+  ],
+  admin: [
+    ["adm-gest", "Gestion administrative à distance", "Courriers, classement, saisie et suivi de dossiers pour vous libérer du temps.", "Votre administratif à jour, sans y penser.", "Les papiers s'accumulent ? Je m'en charge.", "Un point hebdomadaire sur ce qui est fait et ce qui reste."],
+    ["adm-fact", "Suivi de facturation et relances", "Émission des factures et relances des impayés, avec un tableau de suivi.", "Des factures émises à l'heure, des paiements suivis.", "Des impayés qui traînent ? Relançons proprement.", "Un tableau de suivi partagé et à jour."]
+  ],
+  client: [
+    ["cli-sav", "Support client externalisé", "Réponses aux questions de vos clients par mail ou téléphone, dans votre ton.", "Des clients qui obtiennent une réponse rapide.", "Votre boîte de support déborde ? Je prends le relais.", "Réponses dans vos règles, avec un bilan mensuel."],
+    ["cli-proc", "Procédures de relation client", "Modèles de réponses et procédures pour traiter les demandes courantes.", "Des réponses cohérentes, quel que soit celui qui répond.", "Chacun répond à sa façon ? Mettons tout à plat.", "Un guide prêt à l'emploi pour toute l'équipe."]
+  ]
+};
+function flOfferBySid(sid){
+  var out = null;
+  Object.keys(FL_OFFRES).forEach(function(k){ FL_OFFRES[k].forEach(function(o){ if(o[0] === sid) out = { sid: o[0], titre: o[1], desc: o[2], a: o[3], p: o[4], b: o[5], domaine: k }; }); });
+  return out;
+}
+// Offres proposées d'après le positionnement : domaines des profils, puis éléments de la base (CV).
+function flSuggestions(){
+  var made = {}; state.profils.forEach(function(p){ made[p.domaine] = true; });
+  var doms = PROFIL_DOMAINES.filter(function(d){ return FL_OFFRES[d.key]; }).map(function(d){
+    var ev = profilEvidence(d);
+    return { key: d.key, label: d.label, score: ev.score + (made[d.key] ? 3 : 0) };
+  }).filter(function(x){ return x.score >= 2; }).sort(function(a, b){ return b.score - a.score; }).slice(0, 3);
+  var out = [];
+  doms.forEach(function(d, i){
+    FL_OFFRES[d.key].slice(0, i === 0 ? 4 : 2).forEach(function(o){ out.push({ sid: o[0], titre: o[1], desc: o[2], a: o[3], p: o[4], b: o[5], domaine: d.label }); });
+  });
+  return out;
+}
+function flAddSuggestion(o){
+  var fl = flState(), ex = fl.services.find(function(s){ return s.sid === o.sid; });
+  if(ex) return ex;
+  var sv = { id: uid(), sid: o.sid, titre: o.titre, description: o.desc };
+  fl.services.push(sv); persist(); return sv;
+}
+function flRemoveSuggestion(sid){ var fl = flState(); fl.services = fl.services.filter(function(s){ return s.sid !== sid; }); persist(); }
+function renderFlSuggest(){
+  var box = document.getElementById("fl-suggest"); if(!box) return;
+  var sg = flSuggestions(), fl = flState();
+  if(!sg.length){ box.innerHTML = '<p class="empty-note">Importe un CV ou crée un profil : des offres commerciales seront proposées d\'après ton positionnement.</p>'; return; }
+  box.innerHTML = '<div class="field"><label>Offres suggérées d\'après ton profil et ton CV : coche celles que tu vends</label>' + sg.map(function(o){
+    var on = fl.services.some(function(s){ return s.sid === o.sid; });
+    return '<label class="pq-opt' + (on ? " on" : "") + '"><input type="checkbox" data-fl-sug="' + o.sid + '"' + (on ? " checked" : "") + '><span><strong>' + esc(o.titre) + '</strong><small>' + esc(o.domaine) + " · " + esc(o.desc) + "</small></span></label>";
+  }).join("") + '<p class="hint">Tu peux aussi ajouter tes propres prestations plus bas. Les suggestions se recalculent quand ta base ou tes profils changent.</p></div>';
+  box.querySelectorAll("[data-fl-sug]").forEach(function(cb){
+    cb.addEventListener("change", function(){
+      var sid = cb.getAttribute("data-fl-sug"), o = sg.find(function(x){ return x.sid === sid; });
+      if(cb.checked) flAddSuggestion(o); else flRemoveSuggestion(sid);
+      pqProp = null; renderFreelance();
+    });
+  });
+}
+
 function flState(){
   var p = state.profil;
   p.freelance = Object.assign({ services: [], offre: "", expIds: [], dispo: "", mode: "Télétravail ou sur site", zone: "", tjm: "", showTjm: false }, p.freelance);
@@ -4858,6 +4989,7 @@ function renderFreelance(){
   var ps = document.getElementById("fl-profil"), cur = ps.value;
   ps.innerHTML = '<option value="">Aucun profil précis</option>' + state.profils.map(function(p){ return '<option value="' + p.id + '">' + esc(p.nom) + '</option>'; }).join("");
   if(cur && state.profils.some(function(p){ return p.id === cur; })) ps.value = cur;
+  renderFlSuggest();
   renderFlCibles();
   renderFlResults();
 }
@@ -5642,20 +5774,36 @@ var PQ_DEMO = {
   faq: [{ q: "Combien de temps ça prend ?", r: "Réponse courte et chiffrée." }, { q: "Comment se passe la mission ?", r: "Réponse courte sur le déroulé." }, { q: "Et si je veux ajuster ?", r: "Réponse courte sur les modifications." }]
 };
 
-function pqState(){
+function pqPlaquettes(){
   var fl = flState();
+  if(!Array.isArray(fl.plaquettes)) fl.plaquettes = [];
+  if(fl.plaquette && !fl.plaquettes.length) fl.plaquettes.push({ id: uid(), nom: "Plaquette 1", data: fl.plaquette, envois: [] });   // reprise de l'ancienne plaquette unique
+  delete fl.plaquette;
+  if(!fl.plaquettes.length) fl.plaquettes.push({ id: uid(), nom: "Plaquette 1", data: {}, envois: [] });
+  fl.plaquettes.forEach(function(x){ if(!Array.isArray(x.envois)) x.envois = []; if(!x.data || typeof x.data !== "object") x.data = {}; if(!x.nom) x.nom = "Plaquette"; });
+  fl.services.forEach(function(sv){ if(!sv.id) sv.id = uid(); });
+  if(!fl.plaquettes.some(function(x){ return x.id === fl.plaquetteId; })) fl.plaquetteId = fl.plaquettes[0].id;
+  return fl.plaquettes;
+}
+function pqCurrent(){ var l = pqPlaquettes(), id = flState().plaquetteId; return l.find(function(x){ return x.id === id; }); }
+function pqNormData(q){
   var d = { modele: "t1", accent: "", kicker: "", titre: "", accroche: "", etapes: [], encadres: [], chiffres: [], temoignage: { texte: "", auteur: "" },
     avantApres: { avantTitre: "", avantTexte: "", avantNote: "", apresTitre: "", apresTexte: "", apresNote: "" }, delai: "", tarif: "", cta: "Parlons de votre projet", images: [],
-    band: "presentation", portrait: "", presentation: { role: "", texte: "", mode: "both", photo: true }, presChiffres: [], avis: [], refs: { clients: "", garanties: "" }, faq: [] };
-  if(!fl.plaquette) fl.plaquette = d;                // même objet à chaque appel : les gestionnaires peuvent le garder
-  var q = fl.plaquette;
+    band: "presentation", portrait: "", presentation: { role: "", texte: "", mode: "both", photo: true }, presChiffres: [], avis: [], refs: { clients: "", garanties: "" }, faq: [], offreIds: [], angle: "" };
   Object.keys(d).forEach(function(k){ if(q[k] === undefined) q[k] = d[k]; });
   q.temoignage = Object.assign({ texte: "", auteur: "" }, q.temoignage);
   q.avantApres = Object.assign({ avantTitre: "", avantTexte: "", avantNote: "", apresTitre: "", apresTexte: "", apresNote: "" }, q.avantApres);
   q.presentation = Object.assign({ role: "", texte: "", mode: "both", photo: true }, q.presentation);
   q.refs = Object.assign({ clients: "", garanties: "" }, q.refs);
-  ["etapes", "encadres", "chiffres", "images", "presChiffres", "avis", "faq"].forEach(function(k){ if(!Array.isArray(q[k])) q[k] = []; });
+  ["etapes", "encadres", "chiffres", "images", "presChiffres", "avis", "faq", "offreIds"].forEach(function(k){ if(!Array.isArray(q[k])) q[k] = []; });
   return q;
+}
+function pqState(){ return pqNormData(pqCurrent().data); }       // même objet à chaque appel : les gestionnaires peuvent le garder
+// Prestations retenues pour la plaquette active (vide = toutes)
+function pqSelectedServices(){
+  var fl = flState(), q = pqState();
+  var sel = q.offreIds.length ? fl.services.filter(function(sv){ return q.offreIds.indexOf(sv.id) !== -1; }) : fl.services;
+  return sel.filter(function(sv){ return (sv.titre || "").trim(); });
 }
 
 // Données de rendu : contenu de la personne, sinon rien (les blocs absents sont omis ou signalés par une étoile à l'écran)
@@ -5663,7 +5811,7 @@ function pqData(useDemo){
   var q = pqState(), fl = flState(), p = state.profil;
   var d = {
     kicker: q.kicker, titre: q.titre, accroche: q.accroche,
-    services: fl.services.filter(function(s){ return (s.titre || "").trim(); }).slice(0, 4).map(function(s){ return { titre: s.titre, desc: s.description || "" }; }),
+    services: pqSelectedServices().slice(0, 4).map(function(s){ return { titre: s.titre, desc: s.description || "" }; }),
     etapes: q.etapes.filter(function(e){ return e.titre || e.texte; }), encadres: q.encadres.filter(function(e){ return e.titre || e.texte; }),
     chiffres: q.chiffres.filter(function(c){ return c.valeur; }), temoignage: q.temoignage, avantApres: q.avantApres,
     delai: q.delai, tarif: q.tarif, cta: q.cta,
@@ -5855,6 +6003,7 @@ function pqListEditor(title, key, max, cols){
 function renderPlaquette(){
   var panel = document.getElementById("pq-controls"); if(!panel) return;
   var q = pqState();
+  renderPqList(); renderPqOffres(); renderPqAccroches(); renderPqSuivi();
   // grille des modèles
   var grid = document.getElementById("pq-grid"); grid.innerHTML = "";
   PQ_MODELES.forEach(function(m){
@@ -5967,8 +6116,191 @@ document.getElementById("btn-pq-pdf").addEventListener("click", function(){
     clone.remove();
     var doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
     doc.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight());
-    saveFileEverywhere(fileSafe((state.profil.nom || "plaquette") + "-plaquette") + ".pdf", doc.output("blob"), "pq-status");
+    saveFileEverywhere(fileSafe((state.profil.nom || "plaquette") + "-" + (pqCurrent().nom || "plaquette")) + ".pdf", doc.output("blob"), "pq-status");
   }, function(){ clone.remove(); st.textContent = "La génération du PDF a échoué."; });
+});
+
+
+/* ---- plusieurs plaquettes, accroches, envois et statistiques ---- */
+var pqProp = null;   // propositions d'accroches du moment {accroches:[{angle,txt}], baselines:[], a, b}
+var PQ_STATUTS = { envoyee: "Envoyée", reponse: "Réponse reçue", rdv: "Rendez-vous obtenu", mission: "Mission signée", refus: "Refus", silence: "Sans réponse" };
+var PQ_CANAUX = ["E-mail", "LinkedIn", "En main propre", "Salon ou événement", "Recommandation", "Autre"];
+var PQ_ANGLES = ["Bénéfice", "Problème puis solution", "Interlocuteur unique"];
+
+function renderPqList(){
+  var sel = document.getElementById("pq-select"), nom = document.getElementById("pq-nom"); if(!sel) return;
+  var l = pqPlaquettes(), cur = pqCurrent();
+  sel.innerHTML = l.map(function(x){ return '<option value="' + x.id + '"' + (x.id === cur.id ? " selected" : "") + ">" + esc(x.nom) + " (" + x.envois.length + " envoi" + (x.envois.length > 1 ? "s" : "") + ")</option>"; }).join("");
+  if(document.activeElement !== nom) nom.value = cur.nom;
+  document.getElementById("btn-pq-del").disabled = l.length <= 1;
+}
+function renderPqOffres(){
+  var box = document.getElementById("pq-offres"); if(!box) return;
+  var fl = flState(), q = pqState();
+  var all = fl.services.filter(function(sv){ return (sv.titre || "").trim(); }), selAll = !q.offreIds.length;
+  var rows = all.map(function(sv){
+    var on = selAll || q.offreIds.indexOf(sv.id) !== -1;
+    return '<label class="pq-opt' + (on ? " on" : "") + '"><input type="checkbox" data-pq-off="' + sv.id + '"' + (on ? " checked" : "") + "><span><strong>" + esc(sv.titre) + "</strong>" + (sv.description ? "<small>" + esc(sv.description) + "</small>" : "") + "</span></label>";
+  }).join("");
+  var sg = flSuggestions().filter(function(o){ return !fl.services.some(function(sv){ return sv.sid === o.sid; }); }).slice(0, 5);
+  box.innerHTML = '<div class="field"><label>Prestations de cette plaquette (quatre au plus s\'affichent)</label>' + (rows || '<p class="empty-note">Aucune prestation : coche une suggestion ci-dessous ou ajoute-en dans l\'onglet Freelance.</p>') + "</div>" +
+    (sg.length ? '<div class="field"><label>Suggestions d\'après ton profil et ton CV</label>' + sg.map(function(o){ return '<label class="pq-opt"><input type="checkbox" data-pq-sug="' + o.sid + '"><span><strong>' + esc(o.titre) + "</strong><small>" + esc(o.desc) + "</small></span></label>"; }).join("") + "</div>" : "") +
+    '<button class="btn btn-ghost btn-sm" type="button" id="btn-pq-gofl">Gérer toutes mes prestations</button>';
+}
+function pqSplitTitle(t){ return t.replace(/^(.{12,}?[,?:]) (?=.{10})/, "$1\n"); }
+function pqComputePropos(){
+  var sv = pqSelectedServices(), q = pqState(), fl = flState();
+  var cat = sv.map(function(x){ return { s: x, o: x.sid ? flOfferBySid(x.sid) : null }; });
+  var low = function(t){ return t ? t.charAt(0).toLowerCase() + t.slice(1) : t; }, acc = [];
+  if(cat.length){
+    var f = cat[0], sd = cat[1] || cat[0];
+    acc.push({ angle: PQ_ANGLES[0], txt: f.o ? f.o.a : f.s.titre + ", sans les mauvaises surprises." });
+    acc.push({ angle: PQ_ANGLES[1], txt: sd.o ? sd.o.p : "Un projet bloqué ? " + sd.s.titre + ", avec un seul interlocuteur." });
+    var tt = sv.slice(0, 2).map(function(x){ return low(x.titre); });
+    acc.push({ angle: PQ_ANGLES[2], txt: tt.length > 1 ? "Un seul interlocuteur pour " + tt.slice(0, -1).join(", ") + " et " + tt[tt.length - 1] + "." : sv[0].titre + " : du besoin à la livraison, avec un seul interlocuteur." });
+  }
+  var bl = [];
+  cat.forEach(function(c){ if(c.o && bl.indexOf(c.o.b) === -1) bl.push(c.o.b); });
+  bl = bl.slice(0, 2);
+  if(cat.length) bl.push("Devis écrit, livrables clairs, un point à chaque étape.");
+  if(q.delai) bl.push(/[.!?]$/.test(q.delai) ? q.delai : q.delai + "."); else if(fl.dispo) bl.push("Disponible : " + fl.dispo + ".");
+  if(fl.zone) bl.push("Intervention : " + fl.zone + ".");
+  pqProp = { accroches: acc, baselines: bl.slice(0, 5), a: 0, b: 0 };
+}
+function renderPqAccroches(){
+  var box = document.getElementById("pq-accroches"); if(!box) return;
+  if(!pqProp) pqComputePropos();
+  if(!pqProp.accroches.length){ box.innerHTML = '<p class="empty-note">Coche au moins une offre : trois accroches et des baselines seront proposées.</p>'; return; }
+  var opt = function(name, i, txt, tag, on){ return '<label class="pq-opt' + (on ? " on" : "") + '"><input type="radio" name="' + name + '" value="' + i + '"' + (on ? " checked" : "") + "><span><strong>" + esc(txt) + "</strong>" + (tag ? "<small>" + esc(tag) + "</small>" : "") + "</span></label>"; };
+  box.innerHTML = '<div class="field"><label>Accroche : le titre de la plaquette</label>' + pqProp.accroches.map(function(x, i){ return opt("pq-acc", i, x.txt, x.angle, i === pqProp.a); }).join("") + "</div>" +
+    '<div class="field"><label>Baseline : la phrase qui rassure, sous le titre</label>' + pqProp.baselines.map(function(x, i){ return opt("pq-base", i, x, "", i === pqProp.b); }).join("") + "</div>" +
+    '<div class="toolbar-row"><button class="btn btn-sm btn-primary" type="button" id="btn-pq-apply">Appliquer à la plaquette</button><button class="btn btn-ghost btn-sm" type="button" id="btn-pq-regen">Recalculer</button><button class="btn btn-ghost btn-sm" type="button" id="btn-pq-ia">Affiner avec l\'IA</button><span class="hint" id="pq-prop-status"></span></div>' +
+    '<p class="hint" style="margin:6px 0 0;">Les accroches s\'appuient sur les offres cochées : rien n\'est promis qui ne soit dans ton offre, aucun chiffre n\'est inventé.</p>';
+}
+function pqPropAI(){
+  var sv = pqSelectedServices(), st = document.getElementById("pq-prop-status"); if(!sv.length) return;
+  var system = "Tu écris pour un freelance français qui démarche des entreprises. À partir de ses offres, propose 3 accroches (titres de 8 à 14 mots, trois angles différents dans cet ordre : bénéfice, problème puis solution, interlocuteur unique) et 4 baselines (une phrase de 8 à 16 mots qui rassure un prospect). Vouvoie le prospect. Phrases concrètes, sans superlatif, sans chiffre inventé, sans formule creuse (« solutions innovantes », « accompagnement sur mesure »), sans contraste « non pas X mais Y », sans tiret long. Réponds par un objet JSON : {\"accroches\":[\"…\"],\"baselines\":[\"…\"]}.";
+  st.textContent = "En cours…";
+  iaAsk(system, { offres: sv.map(function(x){ return { titre: scrubForAI(x.titre), description: scrubForAI(x.description) }; }), metier: scrubForAI(state.cv.titre || state.profil.titre || ""), disponibilite: scrubForAI(flState().dispo || "") },
+    "Les intitulés de tes offres (sans ton nom ni tes coordonnées) servent à écrire des accroches.").then(function(r){
+      var ac = (r.accroches || []).slice(0, 3).map(function(t, i){ return { angle: (PQ_ANGLES[i] || "Autre") + " (IA)", txt: String(t) }; });
+      var bl = (r.baselines || []).slice(0, 5).map(String);
+      if(!ac.length) throw new Error("réponse vide");
+      pqProp = { accroches: ac, baselines: bl.length ? bl : pqProp.baselines, a: 0, b: 0 }; renderPqAccroches();
+    }).catch(function(e){ var el = document.getElementById("pq-prop-status"); if(el) el.textContent = (e && e.message === "annulé") ? "" : "L'IA n'a pas répondu : " + ((e && e.message) || "erreur") + "."; });
+}
+
+// ---- envois, retours, statistiques
+function pqStats(env){
+  var n = env.length, rep = 0, rdv = 0, mis = 0;
+  env.forEach(function(e){
+    if(["reponse", "rdv", "mission", "refus"].indexOf(e.statut) !== -1) rep++;
+    if(e.statut === "rdv" || e.statut === "mission") rdv++;
+    if(e.statut === "mission") mis++;
+  });
+  return { n: n, rep: rep, rdv: rdv, mis: mis, pRep: n ? rep / n : 0, pRdv: n ? rdv / n : 0, pMis: n ? mis / n : 0 };
+}
+function pqPct(x){ return Math.round(x * 100) + " %"; }
+function pqOfferTitles(pl){
+  var fl = flState(), ids = (pl.data && pl.data.offreIds) || [];
+  return fl.services.filter(function(sv){ return (sv.titre || "").trim() && (!ids.length || ids.indexOf(sv.id) !== -1); }).slice(0, 4).map(function(sv){ return sv.titre; });
+}
+function pqInsights(){
+  var MIN = 3, pls = pqPlaquettes(), out = [], rows = [];
+  pls.forEach(function(pl){ pl.envois.forEach(function(e){ rows.push({ e: e, p: pl }); }); });
+  var rank = function(l){ return l.slice().sort(function(a, b){ return b.s.pRdv - a.s.pRdv || b.s.pRep - a.s.pRep || b.s.n - a.s.n; }); };
+  var group = function(keyFn){
+    var g = {};
+    rows.forEach(function(r){ [].concat(keyFn(r)).forEach(function(k){ if(k) (g[k] = g[k] || []).push(r.e); }); });
+    return Object.keys(g).map(function(k){ return { k: k, s: pqStats(g[k]) }; }).filter(function(x){ return x.s.n >= MIN; });
+  };
+  var line = function(x){ return x.k + " : " + pqPct(x.s.pRdv) + " de rendez-vous, " + pqPct(x.s.pRep) + " de réponses, sur " + x.s.n + " envois"; };
+  var byPl = rank(pls.map(function(pl){ return { k: pl.nom, p: pl, s: pqStats(pl.envois) }; }).filter(function(x){ return x.s.n >= MIN; }));
+  if(!byPl.length){ out.push("Pas encore assez d'envois pour comparer : note au moins " + MIN + " envois sur une plaquette."); return out; }
+  var best = byPl[0], bd = best.p.data || {};
+  out.push("Plaquette qui convertit le mieux : « " + best.k + " » (" + line({ k: "", s: best.s }).replace(/^ : /, "") + ").");
+  if(bd.angle) out.push("Son accroche suit l'angle « " + bd.angle.replace(" (IA)", "") + " »" + (pqOfferTitles(best.p).length ? " et met en avant : " + pqOfferTitles(best.p).join(", ") : "") + ".");
+  if(byPl.length > 1){ var worst = byPl[byPl.length - 1]; if(worst.s.pRdv < best.s.pRdv) out.push("« " + worst.k + " » convertit moins (" + pqPct(worst.s.pRdv) + " de rendez-vous) : compare le modèle, l'accroche et les offres retenues avec la meilleure."); }
+  var byType = rank(group(function(r){ return (FL_CIBLES[r.e.type] || {}).label || (r.e.type === "autre" ? "Autre type de structure" : ""); }));
+  if(byType.length){ out.push("Structure la plus réceptive : " + line(byType[0]) + "."); if(byType.length > 1 && byType[byType.length - 1].s.pRdv < byType[0].s.pRdv) out.push("La moins réceptive : " + line(byType[byType.length - 1]) + "."); }
+  var byCan = rank(group(function(r){ return r.e.canal; }));
+  if(byCan.length > 1) out.push("Canal le plus efficace : " + line(byCan[0]) + ".");
+  var byOffer = rank(group(function(r){ return pqOfferTitles(r.p); }));
+  if(byOffer.length > 1){ out.push("Offre associée aux meilleurs retours : " + line(byOffer[0]) + "."); var wo = byOffer[byOffer.length - 1]; if(wo.s.pRdv < byOffer[0].s.pRdv) out.push("Offre à retravailler ou à retirer : " + line(wo) + "."); }
+  var other = PQ_ANGLES.filter(function(a){ return !bd.angle || bd.angle.indexOf(a) === -1; })[0];
+  out.push("Prochain test : duplique « " + best.k + " », ne change que l'accroche (essaie l'angle « " + other + " ») et envoie-la à au moins 5 structures" + (byType.length ? " de type « " + byType[0].k + " »" : "") + ".");
+  return out;
+}
+function renderPqSuivi(){
+  var box = document.getElementById("pq-suivi"); if(!box) return;
+  var cur = pqCurrent(), today = new Date().toISOString().slice(0, 10), st = pqStats(cur.envois);
+  var optS = function(v){ return Object.keys(PQ_STATUTS).map(function(k){ return '<option value="' + k + '"' + (k === v ? " selected" : "") + ">" + PQ_STATUTS[k] + "</option>"; }).join(""); };
+  var list = cur.envois.slice().sort(function(a, b){ return (b.date || "").localeCompare(a.date || ""); }).map(function(e){
+    var days = Math.floor((Date.now() - new Date(e.date).getTime()) / 86400000), relance = e.statut === "envoyee" && days >= 10;
+    return '<div class="pq-env"><span>' + esc(e.date || "") + '</span><span><strong>' + esc(e.dest || "Sans nom") + '</strong><small>' + esc((FL_CIBLES[e.type] || {}).label || (e.type === "autre" ? "Autre" : "")) + (e.canal ? " · " + esc(e.canal) : "") + (e.note ? " · " + esc(e.note) : "") + (relance ? ' · <b>à relancer (' + days + " jours)</b>" : "") + '</small></span><select data-pqe-statut="' + e.id + '" aria-label="Statut">' + optS(e.statut) + '</select><button class="icon-btn" type="button" data-pqe-del="' + e.id + '" aria-label="Retirer cet envoi" title="Retirer">' + icon("close") + "</button></div>";
+  }).join("");
+  var rows = pqPlaquettes().map(function(pl){ var s = pqStats(pl.envois); return { pl: pl, s: s }; });
+  var bestId = ""; var ok = rows.filter(function(r){ return r.s.n >= 3; }).sort(function(a, b){ return b.s.pRdv - a.s.pRdv || b.s.pRep - a.s.pRep; }); if(ok.length) bestId = ok[0].pl.id;
+  box.innerHTML = '<div class="card" style="margin-bottom:16px;"><span class="eyebrow">Envois et retours : ' + esc(cur.nom) + "</span>" +
+    '<p class="hint" style="margin:6px 0 10px;">Note chaque envoi de cette plaquette, puis mets à jour la réponse. ' + (st.n ? st.n + " envoi" + (st.n > 1 ? "s" : "") + " · réponses " + pqPct(st.pRep) + " · rendez-vous " + pqPct(st.pRdv) + " · missions " + st.mis + "." : "") + "</p>" +
+    '<div class="row2"><div class="field"><label for="pqe-dest">Destinataire (entreprise ou contact)</label><input type="text" id="pqe-dest" maxlength="80"></div><div class="field"><label for="pqe-type">Type de structure</label><select id="pqe-type">' + Object.keys(FL_CIBLES).map(function(k){ return '<option value="' + k + '">' + esc(FL_CIBLES[k].label) + "</option>"; }).join("") + '<option value="autre">Autre</option></select></div></div>' +
+    '<div class="row2"><div class="field"><label for="pqe-canal">Canal</label><select id="pqe-canal">' + PQ_CANAUX.map(function(c){ return "<option>" + c + "</option>"; }).join("") + '</select></div><div class="field"><label for="pqe-date">Date d\'envoi</label><input type="date" id="pqe-date" value="' + today + '"></div></div>' +
+    '<div class="field"><label for="pqe-note">Remarque (facultatif)</label><input type="text" id="pqe-note" maxlength="120"></div>' +
+    '<div class="toolbar-row" style="margin-bottom:8px;"><button class="btn btn-sm btn-primary" type="button" id="btn-pqe-add">Ajouter l\'envoi</button></div>' + (list || '<p class="empty-note">Aucun envoi noté pour cette plaquette.</p>') + "</div>" +
+    '<div class="card"><span class="eyebrow">Ce qui fonctionne</span>' +
+    '<div style="overflow:auto;margin-top:8px;"><table class="pq-table"><thead><tr><th>Plaquette</th><th>Modèle</th><th>Accroche</th><th>Envois</th><th>Réponses</th><th>RDV</th><th>Missions</th></tr></thead><tbody>' +
+    rows.map(function(r){ var d = r.pl.data || {}, m = PQ_MODELES.find(function(x){ return x.key === d.modele; }) || PQ_MODELES[0];
+      return "<tr" + (r.pl.id === bestId ? ' class="best"' : "") + "><td>" + esc(r.pl.nom) + (r.pl.id === bestId ? " ★" : "") + "</td><td>" + esc(m.nom) + "</td><td>" + esc((d.angle || "").replace(" (IA)", "") || "…") + "</td><td>" + r.s.n + "</td><td>" + (r.s.n ? pqPct(r.s.pRep) : "…") + "</td><td>" + (r.s.n ? pqPct(r.s.pRdv) : "…") + "</td><td>" + r.s.mis + "</td></tr>"; }).join("") + "</tbody></table></div>" +
+    '<ul style="margin:12px 0 0;padding-left:18px;font-size:13.5px;line-height:1.5;">' + pqInsights().map(function(t){ return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>" +
+    '<p class="hint" style="margin:8px 0 0;">Les comparaisons demandent au moins 3 envois par plaquette ; avec peu d\'envois, ce sont des indications, pas des preuves. Les statistiques restent dans ce navigateur.</p></div>';
+}
+
+document.getElementById("pq-select").addEventListener("change", function(){ flState().plaquetteId = this.value; pqProp = null; persist(); renderPlaquette(); });
+document.getElementById("pq-nom").addEventListener("input", function(){ pqCurrent().nom = this.value || "Plaquette"; persist(); var o = document.querySelector('#pq-select option[value="' + pqCurrent().id + '"]'); if(o){ var c = pqCurrent(); o.textContent = c.nom + " (" + c.envois.length + " envoi" + (c.envois.length > 1 ? "s" : "") + ")"; } });
+document.getElementById("btn-pq-new").addEventListener("click", function(){ var l = pqPlaquettes(), n = { id: uid(), nom: "Plaquette " + (l.length + 1), data: {}, envois: [] }; l.push(n); flState().plaquetteId = n.id; pqProp = null; persist(); renderPlaquette(); });
+document.getElementById("btn-pq-dup").addEventListener("click", function(){ var l = pqPlaquettes(), c = pqCurrent(), n = { id: uid(), nom: c.nom + " (copie)", data: JSON.parse(JSON.stringify(c.data)), envois: [] }; l.push(n); flState().plaquetteId = n.id; pqProp = null; persist(); renderPlaquette(); });
+document.getElementById("btn-pq-del").addEventListener("click", function(){
+  var l = pqPlaquettes(), c = pqCurrent(); if(l.length <= 1) return;
+  if(!window.confirm("Supprimer « " + c.nom + " » et ses " + c.envois.length + " envoi(s) notés ?")) return;
+  flState().plaquettes = l.filter(function(x){ return x.id !== c.id; }); flState().plaquetteId = flState().plaquettes[0].id; pqProp = null; persist(); renderPlaquette();
+});
+document.getElementById("pq-controls").addEventListener("change", function(e){
+  var t = e.target, fl = flState(), q = pqState();
+  if(t.getAttribute("data-pq-off")){
+    var ids = [].slice.call(document.querySelectorAll("[data-pq-off]")).filter(function(x){ return x.checked; }).map(function(x){ return x.getAttribute("data-pq-off"); });
+    var total = document.querySelectorAll("[data-pq-off]").length;
+    q.offreIds = ids.length === total ? [] : (ids.length ? ids : ["-"]); pqProp = null; persist(); renderPlaquette();
+  } else if(t.getAttribute("data-pq-sug") && t.checked){
+    var o = flSuggestions().find(function(x){ return x.sid === t.getAttribute("data-pq-sug"); }); if(!o) return;
+    var sv = flAddSuggestion(o); if(q.offreIds.length && q.offreIds[0] !== "-") q.offreIds.push(sv.id); else if(q.offreIds[0] === "-") q.offreIds = [sv.id];
+    pqProp = null; persist(); renderPlaquette();
+  } else if(t.name === "pq-acc" || t.name === "pq-base"){
+    if(t.name === "pq-acc") pqProp.a = +t.value; else pqProp.b = +t.value; renderPqAccroches();
+  }
+});
+document.getElementById("pq-controls").addEventListener("click", function(e){
+  var b = e.target.closest("button"); if(!b) return;
+  if(b.id === "btn-pq-gofl") switchTab("freelance");
+  else if(b.id === "btn-pq-regen"){ pqProp = null; renderPqAccroches(); }
+  else if(b.id === "btn-pq-ia") pqPropAI();
+  else if(b.id === "btn-pq-apply"){
+    var q = pqState(), ac = pqProp.accroches[pqProp.a], bl = pqProp.baselines[pqProp.b];
+    if(ac){ q.titre = pqSplitTitle(ac.txt); q.angle = ac.angle; }
+    if(bl) q.accroche = bl;
+    persist(); renderPlaquette();
+  }
+});
+document.getElementById("pq-suivi").addEventListener("click", function(e){
+  var b = e.target.closest("button"); if(!b) return;
+  var cur = pqCurrent();
+  if(b.id === "btn-pqe-add"){
+    cur.envois.push({ id: uid(), date: document.getElementById("pqe-date").value || new Date().toISOString().slice(0, 10), dest: document.getElementById("pqe-dest").value.trim(), type: document.getElementById("pqe-type").value, canal: document.getElementById("pqe-canal").value, note: document.getElementById("pqe-note").value.trim(), statut: "envoyee" });
+    persist(); renderPlaquette();
+  } else if(b.getAttribute("data-pqe-del")){ cur.envois = cur.envois.filter(function(x){ return x.id !== b.getAttribute("data-pqe-del"); }); persist(); renderPlaquette(); }
+});
+document.getElementById("pq-suivi").addEventListener("change", function(e){
+  var t = e.target; if(!t.getAttribute("data-pqe-statut")) return;
+  var en = pqCurrent().envois.find(function(x){ return x.id === t.getAttribute("data-pqe-statut"); }); if(en){ en.statut = t.value; persist(); renderPqSuivi(); }
 });
 
 /* ===================== CANDIDATURES MULTIPLES : barre, bascule, sauvegarde locale ===================== */
