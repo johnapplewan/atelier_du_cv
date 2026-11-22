@@ -24,7 +24,7 @@ Principes de conception à conserver :
 | Élément | Rôle |
 |---|---|
 | `index.html` | **Toute l'application** : HTML des écrans, CSS (`<style>`), JavaScript (`<script>`, sans framework ni build). |
-| `vendor/` | `fonts.css` + `fonts/*.woff2` (Newsreader, Public Sans, IBM Plex Mono, latin et latin-ext), `html2canvas.min.js`, `jspdf.umd.min.js` (génération PDF). |
+| `vendor/` | `fonts.css` + `fonts/*.woff2` (Newsreader, Public Sans, IBM Plex Mono, Space Grotesk, Bebas Neue ; latin et latin-ext), `html2canvas.min.js`, `jspdf.umd.min.js` (génération PDF). |
 | `functions/api/*.js` | Cloudflare Pages Functions (côté serveur, voir §7). |
 | `prompts.js` | Méthodes d'écriture données à l'assistant IA (lettre RAPOS, règles d'humanisation, reformulation du CV). Chargé avant le script principal. Référence lisible : `docs/METHODE-LETTRE-RAPOS.md`. |
 | `legal/` | Pages légales statiques : mentions légales, confidentialité, CGU, accessibilité (`config.js` = identité de l'éditeur à compléter, `legal.css` = style propre). |
@@ -66,12 +66,13 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 | 03 | **Recherche** (`recherche`) | Entreprises à démarcher (candidatures spontanées) | Profil, lieu (recherche de commune), rayon, taille, résultats avec « Candidature spontanée », lien page recrutement, fiche, écarter |
 | 04 | **Offres** (`offres`) | Offres d'emploi France Travail | Profil, mots-clés, lieu, rayon, contrat, période, correspondance avec la base, « Candidater avec cette offre ». **Accès API en attente côté France Travail** : l'onglet affiche « non activée » tant que l'accès n'est pas accordé |
 | 05 | **Freelance** (`freelance`) | Offre de service et démarchage des intermédiaires | Prestations, disponibilité, modalités, tarif facultatif, références (cases parmi les expériences), import de texte, types de structures (ESN, conseil, intérim, recrutement, portage, formation, agences, entreprises du secteur), recherche, « Lettre d'offre de service » |
-| 06 | **Annonce** (`annonce`) | Saisir ou récupérer l'annonce | Champ lien + « Récupérer l'annonce », poste, entreprise, texte, mots-clés détectés, encadré d'analyse (qui publie : direct / cabinet / intérim / ESN, entreprise finale, lieu, contrat, rémunération, profil utilisé) |
-| 07 | **CV** (`cv`) | CV de la candidature en cours | Identité (nom, contacts, photo, langue FR/EN, accroche), **composition** (cases par élément, manques `*`), score ATS + suggestions + optimisation + plan d'action, **aperçu éditable**, PDF et PDF anonymisé |
-| 08 | **Lettre** (`lettre`) | Lettre de motivation / spontanée / offre de service | Destinataire, langue, ton, affinage (boutons rapides + remarques + « Réécrire avec Claude »), voix de la personne, texte modifiable, aperçu éditable, PDF |
-| 09 | **Annexe** (`annexe`) | Contenus complémentaires par catégorie de métier | Grille de catégories, suggestions, éléments, aperçu, PDF |
-| 10 | **Candidatures** (`candidatures`) | Suivi | Une ligne par candidature (créée automatiquement), statut, notes, versions enregistrées, « Revenir à cette version » |
-| 11 | **Entretien** (`entretien`) | Entraînement | Questions générées d'après l'annonce, réponses, corrigé heuristique |
+| 06 | **Plaquette** (`plaquette`) | Plaquette freelance d'une page A4 | Dix modèles à choisir (Nuit, Terre, Affiche, Cartes, Étapes, Chiffres, Programme, Citation, Avant/après, Studio), couleur d'accent, contenu (titre, présentation, étapes, encadrés, chiffres, témoignage, avant/après, tarif, appel à l'action), trois images, aperçu à l'échelle, PDF pleine page |
+| 07 | **Annonce** (`annonce`) | Saisir ou récupérer l'annonce | Champ lien + « Récupérer l'annonce », poste, entreprise, texte, mots-clés détectés, encadré d'analyse (qui publie : direct / cabinet / intérim / ESN, entreprise finale, lieu, contrat, rémunération, profil utilisé) |
+| 08 | **CV** (`cv`) | CV de la candidature en cours | Identité (nom, contacts, photo, langue FR/EN, accroche), **composition** (cases par élément, manques `*`), score ATS + suggestions + optimisation + plan d'action, **aperçu éditable**, PDF et PDF anonymisé |
+| 09 | **Lettre** (`lettre`) | Lettre de motivation / spontanée / offre de service | Destinataire, langue, ton, affinage (boutons rapides + remarques + « Réécrire avec Claude »), voix de la personne, texte modifiable, aperçu éditable, PDF |
+| 10 | **Annexe** (`annexe`) | Contenus complémentaires par catégorie de métier | Grille de catégories, suggestions, éléments, aperçu, PDF |
+| 11 | **Candidatures** (`candidatures`) | Suivi | Une ligne par candidature (créée automatiquement), statut, notes, versions enregistrées, « Revenir à cette version » |
+| 12 | **Entretien** (`entretien`) | Entraînement | Questions générées d'après l'annonce, réponses, corrigé heuristique |
 
 **Barre haute** : marque, bouton icône de thème (soleil, lune ou demi-cercle pour automatique ; un clic passe au suivant), « Assistant IA : <mode> », « Tout effacer », « CV + Lettre (PDF) », « Télécharger le dossier complet (PDF) ».
 **Barre Personne** : choisir, ajouter, renommer, supprimer une personne.
@@ -146,6 +147,7 @@ Dossier (une candidature en cours) = { id, titre, titreAuto, candidatureId,
 | Anonymisation | `anonymizedCvElement`, `scrubForAI` | Retire nom, contacts, photo, liens ; options pour masquer employeurs et établissements. |
 | Export PDF | `buildPdfFromSections`, `fitPdfClone`, `addCanvasAsPages` | Recompose le document hors écran à largeur A4, resserre pour tenir en 2 pages (CV) / 1 page (lettre), coupe entre deux blocs, retire astérisques et zones éditables. |
 | Assistant IA | `iaAsk`, `iaReformulerCV`, `btn-affiner-ia` | Message sans nom ni coordonnées ni noms d'employeurs ; mode direct (version claude.ai) ou copier-coller ; règles de `prompts.js` envoyées à chaque demande ; réponse `{paragraphs, remarques}`. |
+| Plaquette | `PQ_MODELES`, `PQ_RENDER`, `pqData`, `pqHtml`, `renderPlaquette`, `btn-pq-pdf` | Un gabarit HTML/CSS par modèle (`.pq-t1` à `.pq-t10`, 794 × 1123 px), rempli avec la base de la personne : prestations de l'onglet Freelance, présentation, tarif, contacts du profil. Un bloc vide est omis ; à l'écran, une étoile rouge (`.pq-gap`) et un texte pâle (`.pq-ph`) le signalent, retirés du PDF. PDF = capture pleine page A4. |
 | Contrôle de style | `styleReport`, `renderStyleCheck` | Port JavaScript de l'analyseur d'humanisation : formules typiques, contrastes, tirets, rythme, débuts répétés, triades, paragraphes uniformes ; score estimé /100, longueur 150 à 250 mots, noms d'employeurs cités ; bouton « Corriger ces points avec Claude ». |
 
 ---
@@ -181,7 +183,7 @@ Thème : clair / sombre / auto, bouton icône `#btn-theme` qui fait défiler les
 
 ### Navigation mobile (≤ 860 px)
 
-- **Barre du bas** (`#bottom-nav`) : 4 groupes, Préparer (Ma base, Mes profils), Chercher (Recherche, Offres, Freelance), Candidater (Annonce, CV, Lettre, Annexe), Suivi (Candidatures, Entretien). Pastille sur Suivi quand une relance est due.
+- **Barre du bas** (`#bottom-nav`) : 4 groupes, Préparer (Ma base, Mes profils), Chercher (Recherche, Offres, Freelance, Plaquette), Candidater (Annonce, CV, Lettre, Annexe), Suivi (Candidatures, Entretien). Pastille sur Suivi quand une relance est due.
 - **Bande d'onglets du haut** (`#rail`, collante) : n'affiche que les onglets du groupe actif (`body[data-group]`, attribut `data-group` sur chaque `.rail-item`). Le dernier onglet visité de chaque groupe est mémorisé (`lastTabByGroup`).
 - **Bouton Menu** (`#btn-menu`) : déplie les réglages d'interface, les barres Personne et Candidature, les exports (`body.menu-open`). Le titre de la candidature en cours s'affiche sous la marque (`#mobile-title`).
 - **Réglages / Aperçu** : sur les écrans à deux colonnes (`.panel-doc` : Ma base, CV, Lettre, Annexe), une bascule `.mobile-switch` montre une colonne à la fois (`data-view`).

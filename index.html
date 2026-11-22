@@ -212,6 +212,93 @@
   .step .n{ width:22px; height:22px; border-radius:50%; border:1.5px solid var(--border-strong); display:inline-flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; }
   .step.done .n{ background:var(--success); border-color:var(--success); color:#fff; }
   .step.done button{ text-decoration:line-through; opacity:.7; }
+
+  /* ---------- Plaquette freelance : 10 modèles A4 (794 x 1123 px) ---------- */
+  .pq{ position:relative; width:794px; height:1123px; overflow:hidden; box-sizing:border-box; padding:52px 56px 0; font-family:var(--font-body); --h:70px; color:#14161a; background:#F4F0E7; text-align:left; }
+  .pq *{ box-sizing:border-box; }
+  .pq h1,.pq h3,.pq p,.pq ol,.pq figure,.pq blockquote{ margin:0; padding:0; color:inherit; }
+  .pq h3{ font-family:var(--font-body); }
+  .pq .pq-kicker{ font-size:12px; letter-spacing:.13em; text-transform:uppercase; font-weight:700; margin-bottom:24px; }
+  .pq .pq-h{ font-size:var(--h); line-height:1.03; margin-bottom:22px; font-weight:700; letter-spacing:-.02em; }
+  .pq .pq-bar{ width:26px; height:5px; background:var(--accent); margin:0 0 24px; border-radius:2px; }
+  .pq .pq-intro{ font-size:19.5px; line-height:1.5; margin-bottom:28px; max-width:670px; }
+  .pq h3{ font-size:22px; line-height:1.2; font-weight:700; }
+  .pq .pq-foot{ position:absolute; left:56px; right:56px; bottom:34px; border-top:1px solid rgba(0,0,0,.16); padding-top:16px; display:flex; justify-content:space-between; align-items:center; gap:16px; font-size:13px; }
+  .pq .pq-cta{ background:var(--accent); color:var(--on,#fff); padding:7px 14px; font-weight:600; border-radius:3px; white-space:nowrap; }
+  .pq .pq-ph{ opacity:.3; }
+  .pq .pq-gap{ color:#C0392B; font-weight:700; cursor:help; }
+  .pq .pq-gapnote{ font-size:13px; margin:14px 0; }
+  .pq .acc{ color:var(--accent); }
+  .pq .pq-imgph{ position:relative; background:#e4ded1; }
+  .pq .pq-imgph::after{ content:""; position:absolute; left:0; right:0; top:0; bottom:0; background:var(--accent); opacity:.22; }
+  .pq-scale{ width:794px; height:1123px; transform-origin:top left; }
+  #pq-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(132px,1fr)); gap:10px; }
+  .pq-thumb{ border:2px solid var(--border); border-radius:8px; background:var(--surface-2); padding:6px; cursor:pointer; text-align:center; font:inherit; color:var(--ink-900); }
+  .pq-thumb:hover{ border-color:var(--accent); }
+  .pq-thumb.on{ border-color:var(--accent); box-shadow:0 0 0 2px var(--accent); }
+  .pq-thumb-in{ width:123px; height:174px; overflow:hidden; margin:0 auto 6px; position:relative; pointer-events:none; }
+  .pq-thumb-in .pq-scale{ position:absolute; left:0; top:0; }
+  .pq-thumb-name{ font-size:12.5px; font-weight:600; }
+  #pq-stage{ position:relative; width:100%; overflow:hidden; border:1px solid var(--border); border-radius:6px; box-shadow:var(--shadow); background:#fff; }
+  #pq-stage .pq-scale{ position:absolute; left:0; top:0; }
+  .pq-det{ border:1px solid var(--border); border-radius:8px; padding:10px 14px; margin-bottom:10px; background:var(--surface-2); }
+  .pq-det summary{ cursor:pointer; font-weight:600; font-size:13.5px; }
+  input[type=color]{ width:44px; height:36px; padding:2px; border:1px solid var(--border-strong); border-radius:7px; background:var(--surface-2); }
+  /* t1 Nuit */
+  .pq-t1{ background:#1f1f1f; color:#fff; --h:68px; }
+  .pq-t1 .pq-kicker{ color:var(--accent); } .pq-t1 .pq-h{ font-family:'Space Grotesk',var(--font-body); }
+  .pq-t1 .pq-intro{ color:#e6e6e6; } .pq-t1 .pq-foot{ border-top-color:#444; }
+  .pq-t1-body{ display:flex; gap:40px; margin-top:18px; }
+  .pq-t1 .pq-ol{ flex:1; list-style:none; } .pq-t1 .pq-ol li{ display:flex; gap:16px; padding:18px 0; border-bottom:1px solid #444; } .pq-t1 .pq-ol .num{ color:var(--accent); font-weight:700; font-size:14px; padding-top:3px; }
+  .pq-t1 .pq-ol p{ margin-top:6px; font-size:17px; line-height:1.45; color:#d6d6d6; }
+  .pq-t1 .pq-aside{ width:190px; text-align:center; font-size:14px; color:#fff; } .pq-t1 .pq-arrow{ width:84px; height:84px; color:var(--accent); display:block; margin:0 auto 10px; }
+  /* t2 Terre */
+  .pq-t2{ background:#F5EFE4; --h:76px; } .pq-t2 .pq-h{ font-family:'Newsreader',Georgia,serif; letter-spacing:-.01em; font-weight:700; }
+  .pq-t2-body{ display:grid; grid-template-columns:1fr 330px; gap:38px; margin-top:4px; }
+  .pq-t2 .pq-item{ padding:16px 0; border-top:1px solid #d8d0c0; } .pq-t2 .pq-item p{ margin-top:6px; font-size:17px; line-height:1.45; }
+  .pq-t2 .pq-arch{ width:330px; height:440px; object-fit:cover; border-radius:165px 165px 0 0; display:block; } .pq-t2 .pq-cap{ font-size:13px; margin-top:10px; text-align:center; }
+  /* t3 Affiche */
+  .pq-t3{ background:#2a2a2a; color:#fff; padding:0; --h:100px; }
+  .pq-bgimg{ position:absolute; left:0; right:0; top:0; bottom:0; background:linear-gradient(160deg,#4a4a4a,#1a1a1a) center/cover no-repeat; }
+  .pq-veil{ position:absolute; left:0; right:0; top:0; bottom:0; background:linear-gradient(180deg,rgba(0,0,0,.05) 25%,rgba(0,0,0,.88) 78%); }
+  .pq-t3-in{ position:absolute; left:56px; right:56px; bottom:34px; }
+  .pq-t3 .pq-h{ font-family:'Bebas Neue',Impact,sans-serif; text-transform:uppercase; font-weight:400; letter-spacing:.01em; line-height:.95; } .pq-t3 .pq-intro{ color:#f0f0f0; }
+  .pq-t3-row{ display:flex; justify-content:space-between; gap:24px; margin-bottom:24px; align-items:flex-end; font-size:13px; font-weight:700; }
+  .pq-t3 .pq-quote-s{ border-left:2px solid #fff; padding-left:18px; font-weight:400; font-size:17px; max-width:330px; } .pq-t3 .pq-quote-s cite{ display:block; font-size:12px; margin-top:8px; font-style:normal; opacity:.8; }
+  .pq-t3 .pq-foot{ position:static; border-top-color:rgba(255,255,255,.3); }
+  /* t4 Cartes */
+  .pq-t4{ background:#F2EFE7; --h:68px; } .pq-t4 .pq-h,.pq-t5 .pq-h,.pq-t6 .pq-h,.pq-t7 .pq-h{ font-family:'Space Grotesk',var(--font-body); }
+  .pq-cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:30px; }
+  .pq-card{ border:1px solid #b9b3a5; padding:20px 18px; } .pq-card small{ display:block; font-size:12px; letter-spacing:.08em; margin-bottom:14px; } .pq-card p{ margin-top:12px; font-size:17px; line-height:1.45; }
+  .pq-sec{ font-size:12px; letter-spacing:.12em; font-weight:700; text-transform:uppercase; margin:30px 0 12px; }
+  .pq-gal{ display:grid; grid-template-columns:repeat(3,1fr); gap:30px; } .pq-gal img{ width:100%; height:130px; object-fit:cover; display:block; } .pq-gal figcaption{ font-size:13px; margin-top:8px; }
+  /* t5 Étapes */
+  .pq-t5{ background:#F2EFE7; --h:72px; }
+  .pq-steps3{ display:grid; grid-template-columns:repeat(3,1fr); gap:30px; margin-bottom:36px; } .pq-ic{ width:42px; height:42px; display:block; margin-bottom:18px; color:#111; } .pq-steps3 h3{ margin-bottom:10px; } .pq-steps3 p{ font-size:17px; line-height:1.45; }
+  .pq-boxes{ display:grid; grid-template-columns:1fr 1fr; gap:30px; } .pq-box{ background:#F4E9DA; padding:26px; } .pq-box small{ display:block; font-size:12px; letter-spacing:.1em; font-weight:700; margin-bottom:10px; } .pq-box h3{ font-size:28px; margin-bottom:12px; } .pq-box p{ font-size:17px; line-height:1.5; }
+  /* t6 Chiffres */
+  .pq-t6{ background:#F2EFE7; --h:70px; }
+  .pq-kpis{ display:grid; grid-template-columns:repeat(3,1fr); gap:26px; margin-bottom:34px; } .pq-kpis > div{ border-top:2px solid #111; padding-top:14px; }
+  .pq-num{ font-family:'Space Grotesk',var(--font-body); font-weight:700; font-size:68px; line-height:1; color:var(--accent); margin-bottom:10px; } .pq-kpis h3{ margin-bottom:8px; } .pq-kpis p{ font-size:17px; line-height:1.45; }
+  .pq-cols3{ display:grid; grid-template-columns:repeat(3,1fr); } .pq-cols3 > div{ padding:0 22px; border-left:1px solid #c9c3b5; } .pq-cols3 > div:first-child{ padding-left:0; border-left:0; } .pq-cols3 p{ margin-top:10px; font-size:17px; line-height:1.45; }
+  /* t7 Programme */
+  .pq-t7{ background:#F4EFE5; --h:76px; }
+  .pq-ol2{ list-style:none; } .pq-ol2 li{ display:flex; gap:16px; padding:18px 0; border-top:1px solid #d6cfc0; } .pq-ol2 .num{ font-weight:700; font-size:14px; padding-top:7px; color:var(--accent); } .pq-ol2 h3{ font-size:27px; margin-bottom:8px; } .pq-ol2 p{ font-size:18px; line-height:1.45; }
+  .pq-cards3{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:26px; } .pq-card2{ background:#EEE8DC; padding:20px; } .pq-card2 p{ margin-top:10px; font-size:17px; line-height:1.45; }
+  /* t8 Citation */
+  .pq-t8{ background:#F3EFE6; --h:70px; } .pq-t8 .pq-h{ font-family:'Newsreader',Georgia,serif; }
+  .pq-bigq{ font-family:'Newsreader',Georgia,serif; font-size:42px; line-height:1.18; border-left:4px solid var(--accent); padding:4px 0 4px 24px; margin-bottom:16px; } .pq-by{ font-size:14px; margin-bottom:34px; }
+  .pq-t8-body{ display:grid; grid-template-columns:1fr 270px; gap:40px; } .pq-t8 .pq-item{ margin-bottom:18px; } .pq-t8 .pq-item p{ margin-top:6px; font-size:17px; line-height:1.45; }
+  .pq-photo{ width:270px; height:340px; object-fit:cover; border-radius:4px; display:block; }
+  /* t9 Avant / après */
+  .pq-t9{ background:#F4EFE5; --h:68px; } .pq-t9 .pq-h{ font-family:'Newsreader',Georgia,serif; }
+  .pq-ba{ display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-bottom:30px; } .pq-b1,.pq-b2{ padding:26px; } .pq-b1{ background:#EEE8DC; } .pq-b2{ background:#202020; color:#fff; }
+  .pq-ba small{ display:block; font-size:12px; letter-spacing:.1em; font-weight:700; margin-bottom:10px; } .pq-ba h3{ font-size:23px; margin-bottom:14px; } .pq-ba p{ font-size:17px; line-height:1.45; margin-bottom:14px; } .pq-ba em{ font-size:13px; font-style:normal; opacity:.85; }
+  .pq-t9-bot{ display:grid; grid-template-columns:1fr 280px; gap:40px; } .pq-t9-bot p{ margin-top:10px; font-size:16px; line-height:1.5; } .pq-tarif{ border-left:2px solid #111; padding-left:22px; } .pq-tarif small{ display:block; font-size:12px; letter-spacing:.1em; font-weight:700; margin-bottom:8px; } .pq-tarif strong{ font-size:30px; line-height:1.15; display:block; }
+  /* t10 Studio */
+  .pq-t10{ background:#F3F0E8; --h:104px; } .pq-t10 .pq-h{ font-family:'Bebas Neue',Impact,sans-serif; text-transform:uppercase; font-weight:400; line-height:.92; letter-spacing:.005em; }
+  .pq-strip{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-bottom:30px; } .pq-sq{ width:100%; height:122px; object-fit:cover; display:block; }
+  .pq-four{ display:grid; grid-template-columns:repeat(4,1fr); gap:18px; margin-bottom:22px; } .pq-four .n{ border-top:2px solid var(--accent); padding-top:8px; font-weight:700; margin-bottom:8px; } .pq-four h3{ margin-bottom:8px; } .pq-four p{ font-size:16px; line-height:1.45; } .pq-meta{ font-size:14px; }
   .panel{ display:none; }
   .panel.active{ display:block; }
   /* Rendu hors-écran temporaire d'un onglet non actif le temps d'une capture PDF (html2canvas a besoin
@@ -436,12 +523,13 @@
       <button class="rail-item" data-tab="recherche" data-group="chercher"><span class="num">03</span>Recherche<span class="status-dot" id="dot-recherche"></span></button>
       <button class="rail-item" data-tab="offres" data-group="chercher"><span class="num">04</span>Offres<span class="status-dot" id="dot-offres"></span></button>
       <button class="rail-item" data-tab="freelance" data-group="chercher"><span class="num">05</span>Freelance<span class="status-dot" id="dot-freelance"></span></button>
-      <button class="rail-item is-active" data-tab="annonce" data-group="candidater"><span class="num">06</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
-      <button class="rail-item" data-tab="cv" data-group="candidater"><span class="num">07</span>CV<span class="status-dot" id="dot-cv"></span></button>
-      <button class="rail-item" data-tab="lettre" data-group="candidater"><span class="num">08</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
-      <button class="rail-item" data-tab="annexe" data-group="candidater"><span class="num">09</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
-      <button class="rail-item" data-tab="candidatures" data-group="suivi"><span class="num">10</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
-      <button class="rail-item" data-tab="entretien" data-group="suivi"><span class="num">11</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
+      <button class="rail-item" data-tab="plaquette" data-group="chercher"><span class="num">06</span>Plaquette<span class="status-dot" id="dot-plaquette"></span></button>
+      <button class="rail-item is-active" data-tab="annonce" data-group="candidater"><span class="num">07</span>Annonce<span class="status-dot" id="dot-annonce"></span></button>
+      <button class="rail-item" data-tab="cv" data-group="candidater"><span class="num">08</span>CV<span class="status-dot" id="dot-cv"></span></button>
+      <button class="rail-item" data-tab="lettre" data-group="candidater"><span class="num">09</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
+      <button class="rail-item" data-tab="annexe" data-group="candidater"><span class="num">10</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
+      <button class="rail-item" data-tab="candidatures" data-group="suivi"><span class="num">11</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
+      <button class="rail-item" data-tab="entretien" data-group="suivi"><span class="num">12</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
     </div>
     <div class="rail-foot">Ta bibliothèque (expériences, compétences, lettres, candidatures) reste dans ce navigateur. Seuls le lien d'une annonce ou les critères d'une recherche d'entreprises transitent, jamais ton CV ni tes coordonnées.</div>
   </nav>
@@ -657,6 +745,32 @@
         </div>
         <div id="fl-results"></div>
         <button class="btn btn-ghost btn-sm" id="fl-more" type="button" style="display:none;margin-top:8px;">Voir plus de structures</button>
+      </div>
+    </section>
+
+    <!-- PANEL PLAQUETTE -->
+    <section class="panel panel-doc" id="panel-plaquette">
+      <div class="panel-head">
+        <h2>Plaquette freelance</h2>
+        <p>Une page A4 qui présente ton offre : choisis un modèle parmi dix, complète le contenu, ajoute tes images, télécharge le PDF. Les prestations viennent de l'onglet Freelance ; rien n'est inventé, les blocs vides sont omis.</p>
+      </div>
+      <div class="split">
+        <div class="controls-col" id="pq-controls">
+          <div class="card" style="margin-bottom:16px;">
+            <span class="eyebrow">Modèle</span>
+            <div id="pq-grid" style="margin-top:10px;"></div>
+            <div class="toolbar-row" style="margin-top:12px;align-items:center;"><label class="hint" for="pq-accent">Couleur d'accent</label><input type="color" id="pq-accent" value="#E03A2F"><button class="btn btn-ghost btn-sm" id="pq-accent-reset" type="button">Couleur du modèle</button></div>
+          </div>
+          <div class="card">
+            <div class="toolbar-row" style="margin-bottom:12px;"><button class="btn btn-sm" id="btn-pq-fill" type="button">Pré-remplir d'après mon offre</button></div>
+            <div id="pq-form"></div>
+          </div>
+        </div>
+        <div class="preview-frame">
+          <div class="preview-toolbar"><span class="eyebrow">Aperçu A4</span><button class="btn btn-sm btn-primary" id="btn-pq-pdf" type="button">Télécharger la plaquette (PDF)</button></div>
+          <div id="pq-stage"></div>
+          <span class="download-status" id="pq-status"></span>
+        </div>
       </div>
     </section>
 
@@ -1441,13 +1555,14 @@ function persist(){
 
 /* ---------------- onglets & statut ---------------- */
 
-var TABS = ["base","profils","recherche","offres","freelance","annonce","cv","lettre","annexe","candidatures","entretien"];
+var TABS = ["base","profils","recherche","offres","freelance","plaquette","annonce","cv","lettre","annexe","candidatures","entretien"];
 var activeTab = "annonce";
 
 function statusFor(tab){
   if(tab === "base"){ var L = state.library; return (L.experiences.length || L.formations.length || L.competences.length) ? "ready" : "empty"; }
   if(tab === "profils"){ return state.profils.length ? "ready" : "empty"; }
   if(tab === "offres"){ return (state.offresResultats || []).length ? "ready" : "empty"; }
+  if(tab === "plaquette"){ return (typeof pqState === "function" && (pqState().titre || "").trim()) ? "ready" : "empty"; }
   if(tab === "freelance"){ return flState().services.some(function(s){ return (s.titre || "").trim(); }) ? "ready" : "empty"; }
   if(tab === "recherche"){ return (state.rechercheResultats || []).length ? "ready" : "empty"; }
   if(tab === "annonce"){
@@ -1502,6 +1617,7 @@ function switchTab(tab){
   if(tab === "profils" && typeof renderProfils === "function"){ renderProfils(); }
   if(tab === "recherche" && typeof rechProfilOptions === "function"){ rechProfilOptions(); renderRechResults(); }
   if(tab === "freelance" && typeof renderFreelance === "function"){ renderFreelance(); }
+  if(tab === "plaquette" && typeof renderPlaquette === "function"){ renderPlaquette(); }
   if(tab === "offres" && typeof offProfilOptions === "function"){ offProfilOptions(); renderOffResults(); }
   TABS.forEach(function(t){
     document.getElementById("panel-"+t).classList.toggle("active", t === tab);
@@ -5459,6 +5575,291 @@ function renderProfilCvBox(pr, box){
     });
   });
 }
+
+/* ===================== PLAQUETTE FREELANCE : 10 modèles, une page A4 ===================== */
+
+var PQ_MODELES = [
+  { key:"t1",  nom:"Nuit",       desc:"Fond sombre, liste numérotée",    accent:"#C6F135" },
+  { key:"t2",  nom:"Terre",      desc:"Serif chaleureux, image en arche", accent:"#C8643C" },
+  { key:"t3",  nom:"Affiche",    desc:"Photo plein cadre, titre en capitales", accent:"#F1E3B8" },
+  { key:"t4",  nom:"Cartes",     desc:"Trois cartes et réalisations",    accent:"#E03A2F" },
+  { key:"t5",  nom:"Étapes",     desc:"Trois étapes et deux encadrés",   accent:"#E03A2F" },
+  { key:"t6",  nom:"Chiffres",   desc:"Trois chiffres clés en grand",    accent:"#E03A2F" },
+  { key:"t7",  nom:"Programme",  desc:"Déroulé numéroté et trois cartes", accent:"#E03A2F" },
+  { key:"t8",  nom:"Citation",   desc:"Témoignage client en vedette",    accent:"#E03A2F" },
+  { key:"t9",  nom:"Avant / après", desc:"Comparaison et tarif",         accent:"#E03A2F" },
+  { key:"t10", nom:"Studio",     desc:"Capitales, images et quatre étapes", accent:"#E03A2F" }
+];
+
+var PQ_DEMO = {
+  kicker: "VOTRE MÉTIER · VOTRE SPÉCIALITÉ", titre: "Votre promesse,\nen une phrase", accroche: "Deux phrases qui disent à qui vous vous adressez et ce que vous livrez, sans jargon.",
+  services: [{ titre: "Première prestation", desc: "Ce que vous livrez, en une phrase claire." }, { titre: "Deuxième prestation", desc: "Ce que vous livrez, en une phrase claire." }, { titre: "Troisième prestation", desc: "Ce que vous livrez, en une phrase claire." }],
+  etapes: [{ label: "CADRAGE", titre: "Comprendre", texte: "On clarifie le besoin et les priorités." }, { label: "RÉALISATION", titre: "Produire", texte: "Vous validez à chaque jalon." }, { label: "LIVRAISON", titre: "Livrer", texte: "Fichiers, documentation et suivi." }, { label: "SUIVI", titre: "Ajuster", texte: "Un point après livraison." }],
+  encadres: [{ label: "MODALITÉS", titre: "Souple", texte: "Sur site ou à distance." }, { label: "ENGAGEMENT", titre: "Clair", texte: "Devis, délais et livrables écrits." }],
+  chiffres: [{ valeur: "[12]", libelle: "Missions", texte: "Réalisées pour des PME." }, { valeur: "[5 j]", libelle: "Délai moyen", texte: "Du brief à la première version." }, { valeur: "[98 %]", libelle: "Clients satisfaits", texte: "Retours après mission." }],
+  temoignage: { texte: "Une phrase de témoignage client, courte et concrète.", auteur: "Prénom Nom, Entreprise" },
+  avantApres: { avantTitre: "Avant", avantTexte: "Un texte ou une situation générique.", avantNote: "Flou, sans raison d'agir.", apresTitre: "Après", apresTexte: "La même chose, orientée bénéfice client.", apresNote: "Concret et tourné vers l'action." },
+  delai: "Réponse sous 24 h", tarif: "", cta: "Parlons de votre projet", contact: { nom: "Prénom Nom", email: "email", tel: "téléphone", lien: "" }, images: []
+};
+
+function pqState(){
+  var fl = flState();
+  var d = { modele: "t1", accent: "", kicker: "", titre: "", accroche: "", etapes: [], encadres: [], chiffres: [], temoignage: { texte: "", auteur: "" },
+    avantApres: { avantTitre: "", avantTexte: "", avantNote: "", apresTitre: "", apresTexte: "", apresNote: "" }, delai: "", tarif: "", cta: "Parlons de votre projet", images: [] };
+  if(!fl.plaquette) fl.plaquette = d;                // même objet à chaque appel : les gestionnaires peuvent le garder
+  var q = fl.plaquette;
+  Object.keys(d).forEach(function(k){ if(q[k] === undefined) q[k] = d[k]; });
+  q.temoignage = Object.assign({ texte: "", auteur: "" }, q.temoignage);
+  q.avantApres = Object.assign({ avantTitre: "", avantTexte: "", avantNote: "", apresTitre: "", apresTexte: "", apresNote: "" }, q.avantApres);
+  ["etapes", "encadres", "chiffres", "images"].forEach(function(k){ if(!Array.isArray(q[k])) q[k] = []; });
+  return q;
+}
+
+// Données de rendu : contenu de la personne, sinon rien (les blocs absents sont omis ou signalés par une étoile à l'écran)
+function pqData(useDemo){
+  var q = pqState(), fl = flState(), p = state.profil;
+  var d = {
+    kicker: q.kicker, titre: q.titre, accroche: q.accroche,
+    services: fl.services.filter(function(s){ return (s.titre || "").trim(); }).slice(0, 4).map(function(s){ return { titre: s.titre, desc: s.description || "" }; }),
+    etapes: q.etapes.filter(function(e){ return e.titre || e.texte; }), encadres: q.encadres.filter(function(e){ return e.titre || e.texte; }),
+    chiffres: q.chiffres.filter(function(c){ return c.valeur; }), temoignage: q.temoignage, avantApres: q.avantApres,
+    delai: q.delai, tarif: q.tarif, cta: q.cta,
+    contact: { nom: p.nom, email: p.email, tel: p.tel, lien: p.lien }, images: q.images
+  };
+  if(useDemo && !(d.titre || "").trim()){ var demo = JSON.parse(JSON.stringify(PQ_DEMO)); demo.images = q.images; return demo; }
+  return d;
+}
+
+function pqEsc(t){ return esc(t || "").replace(/\n/g, "<br>"); }
+function pqHead(D, extra){
+  var raw = (D.titre || "").trim();
+  if(!raw) return '<h1 class="pq-h pq-ph">Votre promesse en une phrase</h1>';
+  var lines = raw.split("\n"), n = raw.length;
+  var k = n > 70 ? 0.62 : (n > 50 ? 0.74 : (n > 36 ? 0.86 : 1));
+  var html = lines.map(function(l, i){ return (extra === "accLast" && i === lines.length - 1 && lines.length > 1) ? '<span class="acc">' + esc(l) + "</span>" : esc(l); }).join("<br>");
+  return '<h1 class="pq-h" style="font-size:calc(var(--h) * ' + k + ');">' + html + "</h1>";
+}
+function pqKick(D){ return D.kicker ? '<div class="pq-kicker">' + esc(D.kicker) + "</div>" : '<div class="pq-kicker pq-ph">VOTRE MÉTIER · SPÉCIALITÉ</div>'; }
+function pqIntro(D){ return D.accroche ? '<p class="pq-intro">' + pqEsc(D.accroche) + "</p>" : '<p class="pq-intro pq-ph">Deux phrases : à qui vous vous adressez, ce que vous livrez.</p>'; }
+function pqFoot(D){
+  var c = D.contact || {}, parts = [c.email, c.tel, c.lien].filter(Boolean).map(esc).join(" · ");
+  return '<div class="pq-foot"><span class="pq-contact">' + (c.nom ? "<b>" + esc(c.nom) + "</b>" : "") + (c.nom && parts ? " · " : "") + parts + '</span>' + (D.cta ? '<span class="pq-cta">' + esc(D.cta) + "</span>" : "") + "</div>";
+}
+function pqImg(D, i, cls){
+  var src = D.images && D.images[i];
+  return src ? '<img class="' + cls + '" alt="" src="' + src + '">' : '<div class="' + cls + ' pq-imgph" aria-hidden="true"></div>';
+}
+function pqServices(D, n){ var s = D.services.slice(0, n || 4); return s.length ? s : [{ titre: "Ajoute tes prestations", desc: "", ph: true }]; }
+function pqSteps(D, n){ var s = D.etapes.length ? D.etapes : D.services.map(function(x){ return { label: "", titre: x.titre, texte: x.desc }; }); return s.slice(0, n || 4); }
+function pqArrow(){ return '<svg class="pq-arrow" viewBox="0 0 80 80" aria-hidden="true"><path d="M12 68 L66 14 M30 14 H66 V50" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="square"/></svg>'; }
+function pqStar(cond, text){ return cond ? '<p class="pq-gap pq-gapnote">* ' + esc(text) + "</p>" : ""; }
+
+var PQ_RENDER = {
+  t1: function(D){
+    var sv = pqServices(D, 4);
+    return pqKick(D) + pqHead(D, "accLast") + pqIntro(D) +
+      '<div class="pq-t1-body"><ol class="pq-ol">' + sv.map(function(s, i){ return '<li><span class="num">' + String(i + 1).padStart(2, "0") + '</span><div><h3>' + esc(s.titre) + "</h3>" + (s.desc ? "<p>" + pqEsc(s.desc) + "</p>" : "") + "</div></li>"; }).join("") + "</ol>" +
+      '<aside class="pq-aside">' + pqArrow() + (D.delai ? '<div class="acc">' + esc(D.delai) + "</div>" : "") + (D.tarif ? "<div>" + esc(D.tarif) + "</div>" : "") + "</aside></div>" + pqFoot(D);
+  },
+  t2: function(D){
+    var sv = pqServices(D, 3);
+    return pqKick(D) + pqHead(D) + '<div class="pq-bar"></div><div class="pq-t2-body"><div class="pq-col">' + pqIntro(D) +
+      sv.map(function(s){ return '<div class="pq-item"><h3>' + esc(s.titre) + "</h3>" + (s.desc ? "<p>" + pqEsc(s.desc) + "</p>" : "") + "</div>"; }).join("") + '</div><div class="pq-col pq-right">' + pqImg(D, 0, "pq-arch") + '<div class="pq-cap">' + esc([D.delai, D.tarif].filter(Boolean).join(" · ")) + "</div></div></div>" + pqFoot(D);
+  },
+  t3: function(D){
+    var bg = D.images && D.images[0];
+    var sv = D.services.map(function(s){ return esc(s.titre); }).join(" · ");
+    return '<div class="pq-bgimg"' + (bg ? ' style="background-image:url(' + bg + ')"' : "") + '></div><div class="pq-veil"></div><div class="pq-t3-in">' + pqKick(D) + pqHead(D) + pqIntro(D) +
+      '<div class="pq-t3-row">' + (D.temoignage && D.temoignage.texte ? '<blockquote class="pq-quote-s">« ' + esc(D.temoignage.texte) + " »<cite>" + esc(D.temoignage.auteur || "") + "</cite></blockquote>" : pqStar(true, "Ajoute un témoignage client (facultatif).")) + '<div class="pq-t3-srv">' + sv + "</div></div>" + pqFoot(D) + "</div>";
+  },
+  t4: function(D){
+    var st = pqSteps(D, 3), imgs = (D.images || []).filter(Boolean);
+    return pqKick(D) + pqHead(D) + '<div class="pq-bar"></div>' + pqIntro(D) +
+      '<div class="pq-cards">' + st.map(function(s){ return '<div class="pq-card">' + (s.label ? '<small>' + esc(s.label) + "</small>" : "") + "<h3>" + esc(s.titre || "") + "</h3><p>" + pqEsc(s.texte || "") + "</p></div>"; }).join("") + "</div>" +
+      (imgs.length ? '<div class="pq-sec">RÉALISATIONS RÉCENTES</div><div class="pq-gal">' + imgs.slice(0, 3).map(function(im, i){ return '<figure><img alt="" src="' + im + '"><figcaption>' + esc((D.services[i] && D.services[i].titre) || "") + "</figcaption></figure>"; }).join("") + "</div>" : "") + pqFoot(D);
+  },
+  t5: function(D){
+    var st = pqSteps(D, 3), en = D.encadres.slice(0, 2);
+    var ic = ['<circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="20" cy="20" r="5" fill="currentColor"/>', '<rect x="6" y="6" width="28" height="28" rx="4" fill="none" stroke="currentColor" stroke-width="3"/><path d="M12 22 L18 28 L29 13" fill="none" stroke="currentColor" stroke-width="3"/>', '<path d="M8 30 L20 8 L32 30 Z" fill="none" stroke="currentColor" stroke-width="3"/>'];
+    return pqKick(D) + pqHead(D) + '<div class="pq-bar"></div>' + pqIntro(D) +
+      '<div class="pq-steps3">' + st.map(function(s, i){ return '<div><svg viewBox="0 0 40 40" class="pq-ic" aria-hidden="true">' + ic[i % 3] + "</svg><h3>" + (i + 1) + ". " + esc(s.titre || "") + "</h3><p>" + pqEsc(s.texte || "") + "</p></div>"; }).join("") + "</div>" +
+      '<div class="pq-boxes">' + (en.length ? en.map(function(e){ return '<div class="pq-box">' + (e.label ? "<small>" + esc(e.label) + "</small>" : "") + "<h3>" + esc(e.titre || "") + "</h3><p>" + pqEsc(e.texte || "") + "</p></div>"; }).join("") : pqStar(true, "Ajoute jusqu'à deux encadrés (modalités, engagement…).")) + "</div>" + pqFoot(D);
+  },
+  t6: function(D){
+    var ch = D.chiffres.slice(0, 3), sv = pqServices(D, 3);
+    return pqKick(D) + pqHead(D) + '<div class="pq-bar"></div>' + pqIntro(D) +
+      '<div class="pq-kpis">' + (ch.length ? ch.map(function(c){ return '<div><div class="pq-num">' + esc(c.valeur) + "</div><h3>" + esc(c.libelle || "") + "</h3><p>" + pqEsc(c.texte || "") + "</p></div>"; }).join("") : pqStar(true, "Ajoute tes chiffres réels (volume, délai, satisfaction) ; aucun n'est inventé.")) + "</div>" +
+      '<div class="pq-cols3">' + sv.map(function(s){ return "<div><h3>" + esc(s.titre) + "</h3>" + (s.desc ? "<p>" + pqEsc(s.desc) + "</p>" : "") + "</div>"; }).join("") + "</div>" + pqFoot(D);
+  },
+  t7: function(D){
+    var st = pqSteps(D, 3), sv = pqServices(D, 3);
+    return pqKick(D) + pqHead(D) + '<div class="pq-bar"></div>' + pqIntro(D) + '<div class="pq-sec">PROGRAMME TYPE EN ' + st.length + ' ÉTAPES</div>' +
+      '<ol class="pq-ol2">' + st.map(function(s, i){ return '<li><span class="num">' + String(i + 1).padStart(2, "0") + '</span><div><h3>' + esc(s.titre || "") + "</h3><p>" + pqEsc(s.texte || "") + "</p></div></li>"; }).join("") + "</ol>" +
+      '<div class="pq-cards3">' + sv.map(function(s){ return '<div class="pq-card2"><h3>' + esc(s.titre) + "</h3>" + (s.desc ? "<p>" + pqEsc(s.desc) + "</p>" : "") + "</div>"; }).join("") + "</div>" + pqFoot(D);
+  },
+  t8: function(D){
+    var sv = pqServices(D, 2), t = D.temoignage || {};
+    return pqKick(D) + pqHead(D) + '<div class="pq-bar"></div>' +
+      (t.texte ? '<blockquote class="pq-bigq">« ' + esc(t.texte) + ' »</blockquote><div class="pq-by">' + esc(t.auteur || "") + "</div>" : '<div class="pq-bigq pq-ph">« Une citation client, courte et concrète. »</div>' + pqStar(true, "Ajoute un témoignage client réel.")) +
+      '<div class="pq-t8-body"><div class="pq-col">' + pqIntro(D) + sv.map(function(s){ return '<div class="pq-item"><h3>' + esc(s.titre) + "</h3>" + (s.desc ? "<p>" + pqEsc(s.desc) + "</p>" : "") + "</div>"; }).join("") + "</div>" + pqImg(D, 0, "pq-photo") + "</div>" + pqFoot(D);
+  },
+  t9: function(D){
+    var a = D.avantApres || {}, has = a.avantTexte || a.apresTexte;
+    return pqKick(D) + pqHead(D) + '<div class="pq-bar"></div>' + pqIntro(D) +
+      (has ? '<div class="pq-ba"><div class="pq-b1"><small>AVANT</small><h3>' + esc(a.avantTitre || "") + "</h3><p>« " + pqEsc(a.avantTexte || "") + " »</p><em>" + esc(a.avantNote || "") + '</em></div><div class="pq-b2"><small class="acc">APRÈS</small><h3>' + esc(a.apresTitre || "") + "</h3><p>« " + pqEsc(a.apresTexte || "") + " »</p><em>" + esc(a.apresNote || "") + "</em></div></div>" : pqStar(true, "Ajoute un exemple avant / après de ton travail.")) +
+      '<div class="pq-t9-bot"><div><h3>Prestations</h3><p>' + esc(D.services.map(function(s){ return s.titre; }).join(", ")) + '.</p></div>' + (D.tarif ? '<div class="pq-tarif"><small>TARIF INDICATIF</small><strong>' + esc(D.tarif) + "</strong></div>" : "") + "</div>" + pqFoot(D);
+  },
+  t10: function(D){
+    var st = pqSteps(D, 4), imgs = D.images || [];
+    return pqKick(D) + pqHead(D) + '<div class="pq-bar"></div>' + pqIntro(D) +
+      '<div class="pq-strip">' + [0, 1, 2].map(function(i){ return pqImg(D, i, "pq-sq"); }).join("") + "</div>" +
+      '<div class="pq-four">' + st.map(function(s, i){ return '<div><div class="n">' + String(i + 1).padStart(2, "0") + "</div><h3>" + esc(s.titre || "") + "</h3><p>" + pqEsc(s.texte || "") + "</p></div>"; }).join("") + "</div>" +
+      '<div class="pq-meta">' + (D.delai ? "<b>" + esc(D.delai) + "</b> · " : "") + esc(D.services.map(function(s){ return s.titre; }).join(" · ")) + "</div>" + pqFoot(D);
+  }
+};
+
+function pqHtml(key, D){
+  var m = PQ_MODELES.find(function(x){ return x.key === key; }) || PQ_MODELES[0];
+  var q = pqState(), accent = q.accent || m.accent;
+  var hx = /^#[0-9a-f]{6}$/i.test(accent) ? accent : "#E03A2F", lum = (0.299 * parseInt(hx.substr(1, 2), 16) + 0.587 * parseInt(hx.substr(3, 2), 16) + 0.114 * parseInt(hx.substr(5, 2), 16)) / 255;
+  return '<div class="pq pq-' + m.key + '" style="--accent:' + esc(hx) + ';--on:' + (lum > 0.6 ? "#111" : "#fff") + ';">' + (PQ_RENDER[m.key] || PQ_RENDER.t1)(D) + "</div>";
+}
+
+/* ---- interface ---- */
+var PQ_SCHEMA = [
+  { group: "Titre et présentation", fields: [
+    { k: "kicker", label: "Ligne de métier (en petites capitales)", ph: "ex. DÉVELOPPEUR WEB · AUTOMATISATION", path: "kicker" },
+    { k: "titre", label: "Titre d'accroche (retour à la ligne possible)", ph: "ex. Votre site,\nsans les mauvaises surprises", path: "titre", area: true },
+    { k: "accroche", label: "Présentation en deux phrases", ph: "À qui vous vous adressez et ce que vous livrez.", path: "accroche", area: true },
+    { k: "delai", label: "Délai ou promesse courte (facultatif)", ph: "ex. Réponse sous 24 h", path: "delai" },
+    { k: "tarif", label: "Tarif indicatif (facultatif)", ph: "ex. à partir de 450 € par jour", path: "tarif" },
+    { k: "cta", label: "Phrase d'appel en bas de page", ph: "Parlons de votre projet", path: "cta" } ] },
+  { group: "Témoignage client (facultatif, réel)", fields: [
+    { k: "t_texte", label: "Citation", path: "temoignage.texte", area: true }, { k: "t_auteur", label: "Auteur et entreprise", path: "temoignage.auteur" } ] },
+  { group: "Avant / après (facultatif)", fields: [
+    { k: "a1", label: "Avant : titre", path: "avantApres.avantTitre" }, { k: "a2", label: "Avant : exemple", path: "avantApres.avantTexte", area: true }, { k: "a3", label: "Avant : remarque", path: "avantApres.avantNote" },
+    { k: "b1", label: "Après : titre", path: "avantApres.apresTitre" }, { k: "b2", label: "Après : exemple", path: "avantApres.apresTexte", area: true }, { k: "b3", label: "Après : remarque", path: "avantApres.apresNote" } ] }
+];
+function pqGet(path){ var o = pqState(); path.split(".").forEach(function(p){ o = o && o[p]; }); return o || ""; }
+function pqSet(path, v){ var o = pqState(), ps = path.split("."); for(var i = 0; i < ps.length - 1; i++) o = o[ps[i]]; o[ps[ps.length - 1]] = v; }
+
+function pqListEditor(title, key, max, cols){
+  var q = pqState();
+  var rows = q[key].map(function(it, i){
+    return '<div class="exp-block"><div class="exp-block-head"><span class="eyebrow">' + title + " " + (i + 1) + '</span><button class="icon-btn" type="button" data-pq-del="' + key + ":" + i + '" aria-label="Retirer" title="Retirer">' + icon("close") + "</button></div>" +
+      cols.map(function(c){ return '<div class="field"><label>' + c.label + '</label><input type="text" data-pq-list="' + key + ":" + i + ":" + c.k + '" value="' + esc(it[c.k] || "") + '"></div>'; }).join("") + "</div>";
+  }).join("");
+  return '<div class="field"><label>' + title + "s (facultatif)</label>" + rows + (q[key].length < max ? '<button class="btn btn-ghost btn-sm" type="button" data-pq-add="' + key + '">+ Ajouter</button>' : "") + "</div>";
+}
+
+function renderPlaquette(){
+  var panel = document.getElementById("pq-controls"); if(!panel) return;
+  var q = pqState();
+  // grille des modèles
+  var grid = document.getElementById("pq-grid"); grid.innerHTML = "";
+  PQ_MODELES.forEach(function(m){
+    var b = document.createElement("button"); b.type = "button"; b.className = "pq-thumb" + (q.modele === m.key ? " on" : ""); b.setAttribute("aria-pressed", q.modele === m.key ? "true" : "false"); b.setAttribute("aria-label", "Modèle " + m.nom + " : " + m.desc);
+    var D = pqData(true);
+    b.innerHTML = '<div class="pq-thumb-in"><div class="pq-scale" style="transform:scale(.155);">' + pqHtml(m.key, D) + '</div></div><span class="pq-thumb-name">' + esc(m.nom) + "</span>";
+    b.addEventListener("click", function(){ q.modele = m.key; q.accent = ""; persist(); renderPlaquette(); });
+    grid.appendChild(b);
+  });
+  // champs
+  var form = document.getElementById("pq-form"), active = document.activeElement && document.activeElement.getAttribute && document.activeElement.getAttribute("data-pq");
+  var html = "";
+  PQ_SCHEMA.forEach(function(g, gi){
+    html += '<details class="pq-det"' + (gi === 0 ? " open" : "") + "><summary>" + esc(g.group) + '</summary><div style="margin-top:10px;">' + g.fields.map(function(f){
+      return '<div class="field"><label for="pqf-' + f.k + '">' + esc(f.label) + "</label>" + (f.area ? '<textarea id="pqf-' + f.k + '" data-pq="' + f.path + '" placeholder="' + esc(f.ph || "") + '" style="min-height:64px;">' + esc(pqGet(f.path)) + "</textarea>" : '<input type="text" id="pqf-' + f.k + '" data-pq="' + f.path + '" placeholder="' + esc(f.ph || "") + '" value="' + esc(pqGet(f.path)) + '">') + "</div>";
+    }).join("") + "</div></details>";
+  });
+  html += '<details class="pq-det"><summary>Étapes, encadrés, chiffres</summary><div style="margin-top:10px;">' +
+    pqListEditor("Étape", "etapes", 4, [{ k: "label", label: "Petit libellé (ex. CADRAGE)" }, { k: "titre", label: "Titre" }, { k: "texte", label: "Texte" }]) +
+    pqListEditor("Encadré", "encadres", 2, [{ k: "label", label: "Petit libellé" }, { k: "titre", label: "Titre" }, { k: "texte", label: "Texte" }]) +
+    pqListEditor("Chiffre", "chiffres", 3, [{ k: "valeur", label: "Valeur réelle (ex. 12 clients)" }, { k: "libelle", label: "Libellé" }, { k: "texte", label: "Précision" }]) +
+    '<p class="hint">Rien n\'est inventé : tout bloc laissé vide est omis du PDF, signalé par une étoile à l\'écran.</p></div></details>';
+  html += '<details class="pq-det"><summary>Images (3 au plus)</summary><div style="margin-top:10px;">' + [0, 1, 2].map(function(i){
+    var has = q.images[i];
+    return '<div class="field"><label>Image ' + (i + 1) + '</label>' + (has ? '<img src="' + has + '" alt="" style="height:54px;border-radius:6px;display:block;margin-bottom:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pq-img-del="' + i + '">Retirer</button>' : '<input type="file" accept="image/*" data-pq-img="' + i + '">') + "</div>";
+  }).join("") + '<p class="hint">Tes images restent dans ton navigateur ; elles sont réduites automatiquement. Utilise des images dont tu détiens les droits.</p></div></details>';
+  var keepOpen = {}; form.querySelectorAll("details").forEach(function(d, i){ keepOpen[i] = d.open; });
+  form.innerHTML = html;
+  form.querySelectorAll("details").forEach(function(d, i){ if(i in keepOpen) d.open = keepOpen[i]; });
+  document.getElementById("pq-accent").value = /^#[0-9a-f]{6}$/i.test(q.accent) ? q.accent : (PQ_MODELES.find(function(m){ return m.key === q.modele; }) || PQ_MODELES[0]).accent;
+  if(active){ var el = form.querySelector('[data-pq="' + active + '"]'); if(el) el.focus(); }
+  renderPlaquettePreview();
+}
+
+function renderPlaquettePreview(){
+  var q = pqState(), stage = document.getElementById("pq-stage"); if(!stage) return;
+  stage.innerHTML = '<div class="pq-scale" id="pq-live" style="transform-origin:top left;">' + pqHtml(q.modele, pqData(false)) + "</div>";
+  fitPlaquette();
+}
+function fitPlaquette(){
+  var stage = document.getElementById("pq-stage"), live = document.getElementById("pq-live"); if(!stage || !live) return;
+  var w = stage.clientWidth || 360, s = Math.min(1, w / 794);
+  live.style.transform = "scale(" + s + ")"; stage.style.height = Math.round(1123 * s) + "px";
+}
+window.addEventListener("resize", fitPlaquette);
+
+// délégation : saisies, listes, images
+document.getElementById("pq-form").addEventListener("input", function(e){
+  var t = e.target, q = pqState();
+  if(t.getAttribute("data-pq")){ pqSet(t.getAttribute("data-pq"), t.value); persist(); renderPlaquettePreview(); refreshPqThumbs(); }
+  else if(t.getAttribute("data-pq-list")){ var p = t.getAttribute("data-pq-list").split(":"); q[p[0]][+p[1]][p[2]] = t.value; persist(); renderPlaquettePreview(); }
+});
+document.getElementById("pq-form").addEventListener("click", function(e){
+  var b = e.target.closest("button"); if(!b) return;
+  var q = pqState();
+  if(b.getAttribute("data-pq-add")){ q[b.getAttribute("data-pq-add")].push({}); persist(); renderPlaquette(); }
+  else if(b.getAttribute("data-pq-del")){ var p = b.getAttribute("data-pq-del").split(":"); q[p[0]].splice(+p[1], 1); persist(); renderPlaquette(); }
+  else if(b.getAttribute("data-pq-img-del")){ q.images[+b.getAttribute("data-pq-img-del")] = ""; q.images = q.images.filter(function(x, i, a){ return x || i < a.length - 1; }); persist(); renderPlaquette(); }
+});
+document.getElementById("pq-form").addEventListener("change", function(e){
+  var t = e.target; if(!t.getAttribute("data-pq-img")) return;
+  var f = t.files && t.files[0]; if(!f) return;
+  var i = +t.getAttribute("data-pq-img"), r = new FileReader();
+  r.onload = function(ev){
+    var img = new Image();
+    img.onload = function(){
+      var W = Math.min(1000, img.width), sc = W / img.width, c = document.createElement("canvas"); c.width = W; c.height = Math.round(img.height * sc);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      var q = pqState(); q.images[i] = c.toDataURL("image/jpeg", 0.8); persist(); renderPlaquette();
+    };
+    img.src = ev.target.result;
+  };
+  r.readAsDataURL(f);
+});
+function refreshPqThumbs(){ /* les vignettes gardent le contenu de démonstration tant que le titre est vide : on les met à jour à la volée */
+  var q = pqState(), D = pqData(true);
+  document.querySelectorAll("#pq-grid .pq-thumb").forEach(function(b, i){ b.querySelector(".pq-scale").innerHTML = pqHtml(PQ_MODELES[i].key, D); });
+}
+document.getElementById("pq-accent").addEventListener("input", function(){ pqState().accent = this.value; persist(); renderPlaquettePreview(); });
+document.getElementById("pq-accent-reset").addEventListener("click", function(){ pqState().accent = ""; persist(); renderPlaquette(); });
+document.getElementById("btn-pq-fill").addEventListener("click", function(){
+  var q = pqState(), fl = flState(), t = (state.cv.titre || state.profil.titre || "").trim();
+  if(!q.kicker && t) q.kicker = t.toUpperCase();
+  if(!q.titre && fl.services.length && fl.services[0].titre) q.titre = fl.services[0].titre;
+  if(!q.accroche && fl.offre) q.accroche = fl.offre;
+  if(!q.delai && fl.dispo) q.delai = "Disponible : " + fl.dispo;
+  if(!q.tarif && fl.tjm) q.tarif = fl.tjm;
+  persist(); renderPlaquette();
+});
+document.getElementById("btn-pq-pdf").addEventListener("click", function(){
+  var st = document.getElementById("pq-status");
+  if(!pdfLibsReady()){ st.textContent = "Les bibliothèques PDF chargent encore : réessaie."; return; }
+  var q = pqState(), clone = document.createElement("div");
+  clone.style.cssText = "position:fixed;left:-10000px;top:0;width:794px;height:1123px;";
+  clone.innerHTML = pqHtml(q.modele, pqData(false));
+  clone.querySelectorAll(".pq-ph, .pq-gap").forEach(function(n){ n.remove(); });
+  document.body.appendChild(clone);
+  st.textContent = "Génération du PDF…";
+  window.html2canvas(clone.firstChild, { backgroundColor: null, scale: 2, useCORS: true, width: 794, height: 1123, windowWidth: 794 }).then(function(canvas){
+    clone.remove();
+    var doc = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
+    doc.addImage(canvas.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, doc.internal.pageSize.getWidth(), doc.internal.pageSize.getHeight());
+    saveFileEverywhere(fileSafe((state.profil.nom || "plaquette") + "-plaquette") + ".pdf", doc.output("blob"), "pq-status");
+  }, function(){ clone.remove(); st.textContent = "La génération du PDF a échoué."; });
+});
 
 /* ===================== CANDIDATURES MULTIPLES : barre, bascule, sauvegarde locale ===================== */
 
