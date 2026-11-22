@@ -73,10 +73,11 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 | 10 | **Candidatures** (`candidatures`) | Suivi | Une ligne par candidature (créée automatiquement), statut, notes, versions enregistrées, « Revenir à cette version » |
 | 11 | **Entretien** (`entretien`) | Entraînement | Questions générées d'après l'annonce, réponses, corrigé heuristique |
 
-**Barre haute** : marque, sélecteur de thème (Clair / Sombre / Auto), « Assistant IA : <mode> », « Tout effacer », « CV + Lettre (PDF) », « Télécharger le dossier complet (PDF) ».
+**Barre haute** : marque, bouton icône de thème (soleil, lune ou demi-cercle pour automatique ; un clic passe au suivant), « Assistant IA : <mode> », « Tout effacer », « CV + Lettre (PDF) », « Télécharger le dossier complet (PDF) ».
 **Barre Personne** : choisir, ajouter, renommer, supprimer une personne.
 **Barre Candidature** : choisir, nommer, nouvelle, dupliquer, supprimer, Sauvegarder (fichier .json) / Restaurer.
 **Pied de page** : liens vers les pages légales.
+**Bandeau d'accueil** (`#home-strip`, en haut du contenu) : « Premiers pas » (importer un CV, créer un profil, préparer une candidature ; masquable, mémorisé par personne) et alerte « N relances à faire » (« Voir », « Plus tard »). À l'ouverture, une base vide ouvre directement « Ma base ».
 
 ### Parcours principaux
 
@@ -171,15 +172,24 @@ Sobre, éditorial, papier et encre, accent bleu nuit, laiton comme second accent
 
 Couleurs (clair → sombre) : `--bg`, `--surface`, `--surface-2`, `--border`, `--border-strong`, `--ink-900/600/400`, `--accent` `#2E4C82` (sombre `#8CA9DE`), `--accent-ink`, `--accent-soft`, `--on-accent`, `--brass`, `--brass-soft`, `--success`, `--caution`, `--danger` (+ variantes `-soft`), `--shadow`, `--radius: 10px`.
 Polices : `--font-display` Newsreader (titres), `--font-body` Public Sans (texte), `--font-mono` IBM Plex Mono (étiquettes, puces, chiffres).
-Thème : clair / sombre / auto (`prefers-color-scheme`, attribut `data-theme` sur `<html>`, préférence mémorisée).
+Thème : clair / sombre / auto, bouton icône `#btn-theme` qui fait défiler les trois (`prefers-color-scheme`, attribut `data-theme` sur `<html>`, préférence mémorisée).
 
 ### Composants CSS existants
 
 `.app` (grille : barre haute, barre personne, barre candidature, rail + contenu), `.topbar`, `.dossier-bar` (barres Personne / Candidature), `.rail` / `.rail-item` / `.status-dot`, `.workspace`, `.panel` / `.panel-head`, `.split` / `.controls-col` / `.preview-frame` / `.preview-toolbar` (colonne de réglages + aperçu), `.card`, `.exp-block` / `.exp-block-head` (bloc d'édition d'un élément), `.field` / `.row2`, `.btn` (`-primary`, `-ghost`, `-sm`), `.icon-btn`, `.chip` / `.chips` (étiquettes ; `.suggest` = pointillé), `.segmented` (bascule), `.tier-pill` (`success`/`caution`/`danger`), `.gauge-wrap` / `.gauge-num` (score ATS), `.ats-list`, `.eyebrow`, `.hint`, `.empty-note`, `.toolbar-row`, `.download-status`, `.cat-card` / `.category-grid` (annexe), `.ref-panel`, `.app-footer`, documents : `.paper` + `.cv-doc` / `.lettre-doc` / `.annexe-doc` (voir contrainte PDF ci-dessous).
 
+
+### Navigation mobile (≤ 860 px)
+
+- **Barre du bas** (`#bottom-nav`) : 4 groupes, Préparer (Ma base, Mes profils), Chercher (Recherche, Offres, Freelance), Candidater (Annonce, CV, Lettre, Annexe), Suivi (Candidatures, Entretien). Pastille sur Suivi quand une relance est due.
+- **Bande d'onglets du haut** (`#rail`, collante) : n'affiche que les onglets du groupe actif (`body[data-group]`, attribut `data-group` sur chaque `.rail-item`). Le dernier onglet visité de chaque groupe est mémorisé (`lastTabByGroup`).
+- **Bouton Menu** (`#btn-menu`) : déplie les réglages d'interface, les barres Personne et Candidature, les exports (`body.menu-open`). Le titre de la candidature en cours s'affiche sous la marque (`#mobile-title`).
+- **Réglages / Aperçu** : sur les écrans à deux colonnes (`.panel-doc` : Ma base, CV, Lettre, Annexe), une bascule `.mobile-switch` montre une colonne à la fois (`data-view`).
+- Champs à 16 px (évite le zoom iOS), cibles tactiles d'au moins 44 px, `viewport-fit=cover` et marge de sécurité en bas (`env(safe-area-inset-bottom)`).
+
 ### Responsive et accessibilité (état)
 
-Points de rupture : 960 px, 860 px (le rail devient une rangée d'onglets défilante), 520 px. `prefers-reduced-motion` respecté. Contrastes vérifiés AA (clair et sombre). Boutons-icônes avec nom accessible, pastilles d'état avec alternative, lien d'évitement sur les pages légales. Non fait : audit RGAA complet, PDF non balisés, éditeurs `contenteditable` non testés avec tous les lecteurs d'écran.
+Points de rupture : 960 px, 860 px (navigation mobile, voir ci-dessus), 520 px. `prefers-reduced-motion` respecté. Contrastes vérifiés AA (clair et sombre). Boutons-icônes avec nom accessible, pastilles d'état avec alternative, lien d'évitement sur les pages légales. Non fait : audit RGAA complet, PDF non balisés, éditeurs `contenteditable` non testés avec tous les lecteurs d'écran.
 
 ### Contrainte forte : les documents (CV, lettre) et le PDF
 
@@ -195,7 +205,7 @@ Les `id` ci-dessous sont lus par le script. **Ne pas les renommer sans adapter l
 
 **Barre haute, sélecteurs personne/candidature, dialogues, rail, pied de page**
 
-`#ia-dialog`, `#ia-mode-line`, `#ia-skip`, `#ia-save`, `#ia-paste`, `#ia-paste-what`, `#ia-paste-prompt`, `#ia-paste-copy`, `#ia-paste-copied`, `#ia-paste-answer`, `#ia-paste-error`, `#ia-paste-cancel`, `#ia-paste-ok`, `#ia-confirm`, `#ia-confirm-what`, `#ia-confirm-text`, `#ia-confirm-no`, `#ia-confirm-yes`, `#app`, `#theme-segmented`, `#btn-ia-settings`, `#ia-state`, `#btn-reset`, `#btn-export-cv-lettre`, `#btn-export-all`, `#person-bar`, `#person-select`, `#btn-new-person`, `#btn-rename-person`, `#btn-del-person`, `#dossier-bar`, `#dossier-select`, `#dossier-title`, `#btn-new-dossier`, `#btn-dup-dossier`, `#btn-del-dossier`, `#btn-backup`, `#btn-restore`, `#restore-file`, `#export-cv-lettre-status`, `#export-all-status`, `#rail`, `#dot-base`, `#dot-profils`, `#dot-recherche`, `#dot-offres`, `#dot-freelance`, `#dot-annonce`, `#dot-cv`, `#dot-lettre`, `#dot-annexe`, `#dot-candidatures`, `#dot-entretien`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + c.id + '`, `#' + sec.id + '`, `#' + sec.id + '`, `#lettre-body`, `#'+it.id+'`, `#'+it.id+'`, `#'+it.id+'`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`
+`#ia-dialog`, `#ia-mode-line`, `#ia-skip`, `#ia-save`, `#ia-paste`, `#ia-paste-what`, `#ia-paste-prompt`, `#ia-paste-copy`, `#ia-paste-copied`, `#ia-paste-answer`, `#ia-paste-error`, `#ia-paste-cancel`, `#ia-paste-ok`, `#ia-confirm`, `#ia-confirm-what`, `#ia-confirm-text`, `#ia-confirm-no`, `#ia-confirm-yes`, `#app`, `#btn-theme`, `#theme-icon`, `#theme-label`, `#btn-ia-settings`, `#ia-state`, `#btn-reset`, `#btn-export-cv-lettre`, `#btn-export-all`, `#person-bar`, `#person-select`, `#btn-new-person`, `#btn-rename-person`, `#btn-del-person`, `#dossier-bar`, `#dossier-select`, `#dossier-title`, `#btn-new-dossier`, `#btn-dup-dossier`, `#btn-del-dossier`, `#btn-backup`, `#btn-restore`, `#restore-file`, `#export-cv-lettre-status`, `#export-all-status`, `#rail`, `#dot-base`, `#dot-profils`, `#dot-recherche`, `#dot-offres`, `#dot-freelance`, `#dot-annonce`, `#dot-cv`, `#dot-lettre`, `#dot-annexe`, `#dot-candidatures`, `#dot-entretien`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + c.id + '`, `#' + sec.id + '`, `#' + sec.id + '`, `#lettre-body`, `#'+it.id+'`, `#'+it.id+'`, `#'+it.id+'`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`
 
 **panel-base**
 
