@@ -244,6 +244,41 @@
   .pq-det{ border:1px solid var(--border); border-radius:8px; padding:10px 14px; margin-bottom:10px; background:var(--surface-2); }
   .pq-det summary{ cursor:pointer; font-weight:600; font-size:13.5px; }
   input[type=color]{ width:44px; height:36px; padding:2px; border:1px solid var(--border-strong); border-radius:7px; background:var(--surface-2); }
+  /* bandeau du bas (présentation, retours clients, références, questions) */
+  .pq h1,.pq .pq-h{ text-wrap:balance; } .pq p{ text-wrap:pretty; } .pq{ -webkit-font-smoothing:antialiased; }
+  .pq .pq-band{ position:absolute; left:56px; right:56px; bottom:104px; padding-top:20px; border-top:1px solid rgba(128,128,128,.38); }
+  .pq .pq-band-label{ font-size:11px; letter-spacing:.15em; font-weight:700; text-transform:uppercase; margin-bottom:14px; opacity:.72; }
+  .pq .pq-pres{ display:flex; gap:24px; align-items:flex-start; }
+  .pq .pq-pres-photo{ width:104px; height:104px; border-radius:26px; object-fit:cover; flex:none; display:block; }
+  .pq .pq-pres-txt{ flex:1; min-width:0; }
+  .pq .pq-pres-txt b{ display:block; font-size:24px; line-height:1.1; letter-spacing:-.015em; }
+  .pq .pq-pres-txt .role{ font-size:13px; opacity:.7; margin:4px 0 10px; letter-spacing:.01em; }
+  .pq .pq-pres-txt p{ font-size:15.5px; line-height:1.5; }
+  .pq .pq-pres-kpi{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:16px; }
+  .pq .pq-pres-kpi strong{ display:block; font-family:'Space Grotesk',var(--font-body); font-size:34px; line-height:1; letter-spacing:-.025em; color:var(--accent); margin-bottom:6px; }
+  .pq .pq-pres-kpi span{ font-size:13px; line-height:1.35; opacity:.85; display:block; }
+  .pq .pq-avis{ display:grid; gap:28px; }
+  .pq .pq-avis > div{ border-left:2px solid var(--accent); padding-left:16px; }
+  .pq .pq-avis p{ font-size:14.5px; line-height:1.5; margin-bottom:10px; }
+  .pq .pq-avis cite{ display:block; font-style:normal; font-size:12.5px; font-weight:700; letter-spacing:.01em; }
+  .pq .pq-refs-names{ font-size:22px; font-weight:700; letter-spacing:-.01em; line-height:1.35; margin-bottom:18px; }
+  .pq .pq-refs-names i{ font-style:normal; color:var(--accent); padding:0 .35em; }
+  .pq .pq-chips{ display:flex; flex-wrap:wrap; gap:8px; }
+  .pq .pq-chip{ border:1px solid rgba(128,128,128,.5); border-radius:999px; padding:7px 15px; font-size:13.5px; font-weight:600; }
+  .pq .pq-faq{ display:grid; grid-template-columns:repeat(3,1fr); gap:26px; }
+  .pq .pq-faq b{ display:block; font-size:15px; line-height:1.3; margin-bottom:6px; }
+  .pq .pq-faq p{ font-size:14px; line-height:1.5; opacity:.9; }
+  .pq-t3 .pq-band{ position:static; margin-bottom:20px; border-top-color:rgba(255,255,255,.3); }
+  /* ajustements quand un bandeau occupe le bas de page : chaque modèle remplit sa zone haute (52 → ~740 px) */
+  .pq-hasband.pq-t1 .pq-t1-body{ margin-top:34px; } .pq-hasband.pq-t1 .pq-ol li{ padding:30px 0; } .pq-hasband.pq-t1 .pq-ol h3{ font-size:26px; } .pq-hasband.pq-t1 .pq-ol p{ font-size:18px; margin-top:8px; }
+  .pq-hasband.pq-t2 .pq-arch{ height:360px; } .pq-hasband.pq-t2 .pq-item{ padding:14px 0; }
+  .pq-hasband.pq-t4 .pq-card{ min-height:300px; padding:26px 22px; } .pq-hasband.pq-t4 .pq-card h3{ font-size:26px; } .pq-hasband.pq-t4 .pq-gal{ margin-top:0; }
+  .pq-hasband.pq-t5 .pq-steps3{ margin-bottom:52px; } .pq-hasband.pq-t5 .pq-ic{ width:52px; height:52px; margin-bottom:24px; } .pq-hasband.pq-t5 .pq-steps3 h3{ font-size:25px; } .pq-hasband.pq-t5 .pq-box{ padding:30px; }
+  .pq-hasband.pq-t6 .pq-kpis{ margin-bottom:48px; } .pq-hasband.pq-t6 .pq-num{ font-size:84px; margin-bottom:14px; } .pq-hasband.pq-t6 .pq-cols3 h3{ font-size:24px; }
+  .pq-hasband.pq-t7{ --h:62px; } .pq-hasband.pq-t7 .pq-intro{ margin-bottom:16px; } .pq-hasband.pq-t7 .pq-sec{ margin:14px 0 4px; } .pq-hasband.pq-t7 .pq-ol2 li{ padding:10px 0; } .pq-hasband.pq-t7 .pq-ol2 h3{ font-size:22px; margin-bottom:4px; } .pq-hasband.pq-t7 .pq-ol2 p{ font-size:16px; } .pq-hasband.pq-t7 .pq-ol2 .num{ padding-top:4px; } .pq-hasband.pq-t7 .pq-cards3{ margin-top:14px; gap:16px; } .pq-hasband.pq-t7 .pq-card2{ padding:14px; } .pq-hasband.pq-t7 .pq-card2 h3{ font-size:18px; } .pq-hasband.pq-t7 .pq-card2 p{ font-size:14.5px; margin-top:6px; }
+  .pq-hasband.pq-t8 .pq-bigq{ font-size:46px; margin-bottom:20px; } .pq-hasband.pq-t8 .pq-photo{ height:300px; }
+  .pq-hasband.pq-t9 .pq-b1,.pq-hasband.pq-t9 .pq-b2{ padding:34px; min-height:300px; } .pq-hasband.pq-t9 .pq-ba h3{ font-size:27px; } .pq-hasband.pq-t9 .pq-ba{ margin-bottom:40px; }
+  .pq-hasband.pq-t10{ --h:92px; } .pq-hasband.pq-t10 .pq-sq{ height:92px; } .pq-hasband.pq-t10 .pq-strip{ margin-bottom:20px; } .pq-hasband.pq-t10 .pq-four{ margin-bottom:0; } .pq-hasband.pq-t10 .pq-four h3{ font-size:19px; } .pq-hasband.pq-t10 .pq-four p{ font-size:14.5px; } .pq-hasband.pq-t10 .pq-meta{ display:none; } .pq-hasband.pq-t10 .pq-intro{ margin-bottom:20px; }
   /* t1 Nuit */
   .pq-t1{ background:#1f1f1f; color:#fff; --h:68px; }
   .pq-t1 .pq-kicker{ color:var(--accent); } .pq-t1 .pq-h{ font-family:'Space Grotesk',var(--font-body); }
@@ -5599,19 +5634,27 @@ var PQ_DEMO = {
   chiffres: [{ valeur: "[12]", libelle: "Missions", texte: "Réalisées pour des PME." }, { valeur: "[5 j]", libelle: "Délai moyen", texte: "Du brief à la première version." }, { valeur: "[98 %]", libelle: "Clients satisfaits", texte: "Retours après mission." }],
   temoignage: { texte: "Une phrase de témoignage client, courte et concrète.", auteur: "Prénom Nom, Entreprise" },
   avantApres: { avantTitre: "Avant", avantTexte: "Un texte ou une situation générique.", avantNote: "Flou, sans raison d'agir.", apresTitre: "Après", apresTexte: "La même chose, orientée bénéfice client.", apresNote: "Concret et tourné vers l'action." },
-  delai: "Réponse sous 24 h", tarif: "", cta: "Parlons de votre projet", contact: { nom: "Prénom Nom", email: "email", tel: "téléphone", lien: "" }, images: []
+  delai: "Réponse sous 24 h", tarif: "", cta: "Parlons de votre projet", contact: { nom: "Prénom Nom", email: "email", tel: "téléphone", lien: "" }, images: [], portrait: "", band: "presentation",
+  presentation: { role: "Votre métier", texte: "Quelques lignes sur votre parcours, votre manière de travailler et ce que vos clients retiennent.", mode: "both", photo: true },
+  presChiffres: [{ valeur: "[8 ans]", libelle: "d'expérience" }, { valeur: "[40]", libelle: "missions livrées" }, { valeur: "[24 h]", libelle: "délai de réponse" }],
+  avis: [{ texte: "Un retour client court et concret sur le résultat obtenu.", auteur: "Prénom Nom, Entreprise" }, { texte: "Un deuxième retour, sur la méthode et la fiabilité.", auteur: "Prénom Nom, Entreprise" }, { texte: "Un troisième, sur la communication et les délais.", auteur: "Prénom Nom, Entreprise" }],
+  refs: { clients: "Client A, Client B, Client C, Client D", garanties: "SIRET renseigné\nAssurance RC Pro\nDevis et contrat écrits\nFacture sous 30 jours" },
+  faq: [{ q: "Combien de temps ça prend ?", r: "Réponse courte et chiffrée." }, { q: "Comment se passe la mission ?", r: "Réponse courte sur le déroulé." }, { q: "Et si je veux ajuster ?", r: "Réponse courte sur les modifications." }]
 };
 
 function pqState(){
   var fl = flState();
   var d = { modele: "t1", accent: "", kicker: "", titre: "", accroche: "", etapes: [], encadres: [], chiffres: [], temoignage: { texte: "", auteur: "" },
-    avantApres: { avantTitre: "", avantTexte: "", avantNote: "", apresTitre: "", apresTexte: "", apresNote: "" }, delai: "", tarif: "", cta: "Parlons de votre projet", images: [] };
+    avantApres: { avantTitre: "", avantTexte: "", avantNote: "", apresTitre: "", apresTexte: "", apresNote: "" }, delai: "", tarif: "", cta: "Parlons de votre projet", images: [],
+    band: "presentation", portrait: "", presentation: { role: "", texte: "", mode: "both", photo: true }, presChiffres: [], avis: [], refs: { clients: "", garanties: "" }, faq: [] };
   if(!fl.plaquette) fl.plaquette = d;                // même objet à chaque appel : les gestionnaires peuvent le garder
   var q = fl.plaquette;
   Object.keys(d).forEach(function(k){ if(q[k] === undefined) q[k] = d[k]; });
   q.temoignage = Object.assign({ texte: "", auteur: "" }, q.temoignage);
   q.avantApres = Object.assign({ avantTitre: "", avantTexte: "", avantNote: "", apresTitre: "", apresTexte: "", apresNote: "" }, q.avantApres);
-  ["etapes", "encadres", "chiffres", "images"].forEach(function(k){ if(!Array.isArray(q[k])) q[k] = []; });
+  q.presentation = Object.assign({ role: "", texte: "", mode: "both", photo: true }, q.presentation);
+  q.refs = Object.assign({ clients: "", garanties: "" }, q.refs);
+  ["etapes", "encadres", "chiffres", "images", "presChiffres", "avis", "faq"].forEach(function(k){ if(!Array.isArray(q[k])) q[k] = []; });
   return q;
 }
 
@@ -5624,9 +5667,10 @@ function pqData(useDemo){
     etapes: q.etapes.filter(function(e){ return e.titre || e.texte; }), encadres: q.encadres.filter(function(e){ return e.titre || e.texte; }),
     chiffres: q.chiffres.filter(function(c){ return c.valeur; }), temoignage: q.temoignage, avantApres: q.avantApres,
     delai: q.delai, tarif: q.tarif, cta: q.cta,
-    contact: { nom: p.nom, email: p.email, tel: p.tel, lien: p.lien }, images: q.images
+    contact: { nom: p.nom, email: p.email, tel: p.tel, lien: p.lien }, images: q.images,
+    band: q.band, portrait: q.portrait, presentation: q.presentation, presChiffres: q.presChiffres.filter(function(c){ return c.valeur; }), avis: q.avis.filter(function(a){ return a.texte; }), refs: q.refs, faq: q.faq.filter(function(f){ return f.q; })
   };
-  if(useDemo && !(d.titre || "").trim()){ var demo = JSON.parse(JSON.stringify(PQ_DEMO)); demo.images = q.images; return demo; }
+  if(useDemo && !(d.titre || "").trim()){ var demo = JSON.parse(JSON.stringify(PQ_DEMO)); demo.images = q.images; demo.portrait = q.portrait; demo.band = q.band; demo.presentation = Object.assign({}, demo.presentation, { mode: q.presentation.mode, photo: q.presentation.photo }); demo.contact = { nom: p.nom || demo.contact.nom, email: p.email || demo.contact.email, tel: p.tel || demo.contact.tel, lien: p.lien }; return demo; }
   return d;
 }
 
@@ -5641,9 +5685,33 @@ function pqHead(D, extra){
 }
 function pqKick(D){ return D.kicker ? '<div class="pq-kicker">' + esc(D.kicker) + "</div>" : '<div class="pq-kicker pq-ph">VOTRE MÉTIER · SPÉCIALITÉ</div>'; }
 function pqIntro(D){ return D.accroche ? '<p class="pq-intro">' + pqEsc(D.accroche) + "</p>" : '<p class="pq-intro pq-ph">Deux phrases : à qui vous vous adressez, ce que vous livrez.</p>'; }
+function pqBand(D){
+  var b = D.band; if(!b || b === "none") return "";
+  var lab = function(t){ return '<div class="pq-band-label">' + t + "</div>"; }, h = "";
+  if(b === "presentation"){
+    var P = D.presentation || {}, c = D.contact || {}, mode = P.mode || "both", showT = mode !== "chiffres", showK = mode !== "texte";
+    var photo = P.photo !== false ? (D.portrait ? '<img class="pq-pres-photo" alt="" src="' + D.portrait + '">' : '<div class="pq-pres-photo pq-imgph" aria-hidden="true"></div>') : "";
+    var txt = '<div class="pq-pres-txt"><b>' + esc(c.nom || "Prénom Nom") + "</b>" + (P.role ? '<div class="role">' + esc(P.role) + "</div>" : "") +
+      (showT ? (P.texte ? "<p>" + pqEsc(P.texte) + "</p>" : '<p class="pq-ph">Quelques lignes sur votre parcours et votre façon de travailler.</p>') : "") + "</div>";
+    var k = (D.presChiffres || []).slice(0, 3);
+    h = lab("Qui je suis") + '<div class="pq-pres">' + photo + txt + "</div>" +
+      (showK ? (k.length ? '<div class="pq-pres-kpi">' + k.map(function(x){ return "<div><strong>" + esc(x.valeur) + "</strong><span>" + esc(x.libelle || "") + "</span></div>"; }).join("") + "</div>" : pqStar(true, "Ajoute tes chiffres réels (années, missions, délai) ; aucun n'est inventé.")) : "");
+  } else if(b === "avis"){
+    var a = (D.avis || []).slice(0, 3);
+    h = lab("Ils m'ont fait confiance") + (a.length ? '<div class="pq-avis" style="grid-template-columns:repeat(' + a.length + ',1fr);">' + a.map(function(x){ return "<div><p>« " + pqEsc(x.texte) + " »</p><cite>" + esc(x.auteur || "") + "</cite></div>"; }).join("") + "</div>" : pqStar(true, "Ajoute jusqu'à trois retours clients réels, avec leur accord."));
+  } else if(b === "refs"){
+    var R = D.refs || {}, names = (R.clients || "").split(/[,\n]/).map(function(x){ return x.trim(); }).filter(Boolean).slice(0, 6), gs = (R.garanties || "").split("\n").map(function(x){ return x.trim(); }).filter(Boolean).slice(0, 4);
+    h = lab("Références et garanties") + (names.length ? '<div class="pq-refs-names">' + names.map(esc).join("<i>/</i>") + "</div>" : pqStar(true, "Ajoute les clients que tu peux citer.")) +
+      (gs.length ? '<div class="pq-chips">' + gs.map(function(x){ return '<span class="pq-chip">' + esc(x) + "</span>"; }).join("") + "</div>" : "");
+  } else if(b === "faq"){
+    var f = (D.faq || []).slice(0, 3);
+    h = lab("Questions fréquentes") + (f.length ? '<div class="pq-faq">' + f.map(function(x){ return "<div><b>" + esc(x.q) + "</b><p>" + pqEsc(x.r || "") + "</p></div>"; }).join("") + "</div>" : pqStar(true, "Ajoute trois questions que tes clients posent."));
+  }
+  return '<div class="pq-band">' + h + "</div>";
+}
 function pqFoot(D){
   var c = D.contact || {}, parts = [c.email, c.tel, c.lien].filter(Boolean).map(esc).join(" · ");
-  return '<div class="pq-foot"><span class="pq-contact">' + (c.nom ? "<b>" + esc(c.nom) + "</b>" : "") + (c.nom && parts ? " · " : "") + parts + '</span>' + (D.cta ? '<span class="pq-cta">' + esc(D.cta) + "</span>" : "") + "</div>";
+  return pqBand(D) + '<div class="pq-foot"><span class="pq-contact">' + (c.nom ? "<b>" + esc(c.nom) + "</b>" : "") + (c.nom && parts ? " · " : "") + parts + '</span>' + (D.cta ? '<span class="pq-cta">' + esc(D.cta) + "</span>" : "") + "</div>";
 }
 function pqImg(D, i, cls){
   var src = D.images && D.images[i];
@@ -5673,7 +5741,7 @@ var PQ_RENDER = {
       '<div class="pq-t3-row">' + (D.temoignage && D.temoignage.texte ? '<blockquote class="pq-quote-s">« ' + esc(D.temoignage.texte) + " »<cite>" + esc(D.temoignage.auteur || "") + "</cite></blockquote>" : pqStar(true, "Ajoute un témoignage client (facultatif).")) + '<div class="pq-t3-srv">' + sv + "</div></div>" + pqFoot(D) + "</div>";
   },
   t4: function(D){
-    var st = pqSteps(D, 3), imgs = (D.images || []).filter(Boolean);
+    var st = pqSteps(D, 3), imgs = (D.images || []).slice(0, 3).filter(Boolean);
     return pqKick(D) + pqHead(D) + '<div class="pq-bar"></div>' + pqIntro(D) +
       '<div class="pq-cards">' + st.map(function(s){ return '<div class="pq-card">' + (s.label ? '<small>' + esc(s.label) + "</small>" : "") + "<h3>" + esc(s.titre || "") + "</h3><p>" + pqEsc(s.texte || "") + "</p></div>"; }).join("") + "</div>" +
       (imgs.length ? '<div class="pq-sec">RÉALISATIONS RÉCENTES</div><div class="pq-gal">' + imgs.slice(0, 3).map(function(im, i){ return '<figure><img alt="" src="' + im + '"><figcaption>' + esc((D.services[i] && D.services[i].titre) || "") + "</figcaption></figure>"; }).join("") + "</div>" : "") + pqFoot(D);
@@ -5722,7 +5790,7 @@ function pqHtml(key, D){
   var m = PQ_MODELES.find(function(x){ return x.key === key; }) || PQ_MODELES[0];
   var q = pqState(), accent = q.accent || m.accent;
   var hx = /^#[0-9a-f]{6}$/i.test(accent) ? accent : "#E03A2F", lum = (0.299 * parseInt(hx.substr(1, 2), 16) + 0.587 * parseInt(hx.substr(3, 2), 16) + 0.114 * parseInt(hx.substr(5, 2), 16)) / 255;
-  return '<div class="pq pq-' + m.key + '" style="--accent:' + esc(hx) + ';--on:' + (lum > 0.6 ? "#111" : "#fff") + ';">' + (PQ_RENDER[m.key] || PQ_RENDER.t1)(D) + "</div>";
+  return '<div class="pq pq-' + m.key + (D.band && D.band !== "none" ? " pq-hasband" : "") + '" style="--accent:' + esc(hx) + ';--on:' + (lum > 0.6 ? "#111" : "#fff") + ';">' + (PQ_RENDER[m.key] || PQ_RENDER.t1)(D) + "</div>";
 }
 
 /* ---- interface ---- */
@@ -5734,6 +5802,14 @@ var PQ_SCHEMA = [
     { k: "delai", label: "Délai ou promesse courte (facultatif)", ph: "ex. Réponse sous 24 h", path: "delai" },
     { k: "tarif", label: "Tarif indicatif (facultatif)", ph: "ex. à partir de 450 € par jour", path: "tarif" },
     { k: "cta", label: "Phrase d'appel en bas de page", ph: "Parlons de votre projet", path: "cta" } ] },
+  { group: "Bandeau du bas", fields: [
+    { k: "band", label: "Contenu du bandeau", path: "band", sel: [["presentation", "Ma présentation (photo, texte, chiffres)"], ["avis", "Trois retours clients"], ["refs", "Références et garanties"], ["faq", "Trois questions fréquentes"], ["none", "Aucun bandeau"]] },
+    { k: "p_role", label: "Présentation : fonction (sous le nom)", ph: "ex. Développeur web indépendant", path: "presentation.role", max: 60 },
+    { k: "p_texte", label: "Présentation : texte (240 caractères au plus)", ph: "Parcours, façon de travailler, ce qui vous distingue.", path: "presentation.texte", area: true, max: 240 },
+    { k: "p_mode", label: "Présentation : afficher", path: "presentation.mode", sel: [["both", "Le texte et les chiffres"], ["texte", "Le texte seul"], ["chiffres", "Les chiffres seuls"]] },
+    { k: "p_photo", label: "Présentation : emplacement de ma photo", path: "presentation.photo", chk: true },
+    { k: "r_clients", label: "Références : clients citables (séparés par une virgule)", ph: "ex. Mairie de X, Société Y", path: "refs.clients", max: 120 },
+    { k: "r_gar", label: "Garanties : une par ligne, quatre au plus", ph: "Assurance RC Pro\nDevis et contrat écrits", path: "refs.garanties", area: true, max: 160 } ] },
   { group: "Témoignage client (facultatif, réel)", fields: [
     { k: "t_texte", label: "Citation", path: "temoignage.texte", area: true }, { k: "t_auteur", label: "Auteur et entreprise", path: "temoignage.auteur" } ] },
   { group: "Avant / après (facultatif)", fields: [
@@ -5747,7 +5823,7 @@ function pqListEditor(title, key, max, cols){
   var q = pqState();
   var rows = q[key].map(function(it, i){
     return '<div class="exp-block"><div class="exp-block-head"><span class="eyebrow">' + title + " " + (i + 1) + '</span><button class="icon-btn" type="button" data-pq-del="' + key + ":" + i + '" aria-label="Retirer" title="Retirer">' + icon("close") + "</button></div>" +
-      cols.map(function(c){ return '<div class="field"><label>' + c.label + '</label><input type="text" data-pq-list="' + key + ":" + i + ":" + c.k + '" value="' + esc(it[c.k] || "") + '"></div>'; }).join("") + "</div>";
+      cols.map(function(c){ return '<div class="field"><label>' + c.label + '</label><input type="text"' + (c.max ? ' maxlength="' + c.max + '"' : "") + ' data-pq-list="' + key + ":" + i + ":" + c.k + '" value="' + esc(it[c.k] || "") + '"></div>'; }).join("") + "</div>";
   }).join("");
   return '<div class="field"><label>' + title + "s (facultatif)</label>" + rows + (q[key].length < max ? '<button class="btn btn-ghost btn-sm" type="button" data-pq-add="' + key + '">+ Ajouter</button>' : "") + "</div>";
 }
@@ -5769,7 +5845,10 @@ function renderPlaquette(){
   var html = "";
   PQ_SCHEMA.forEach(function(g, gi){
     html += '<details class="pq-det"' + (gi === 0 ? " open" : "") + "><summary>" + esc(g.group) + '</summary><div style="margin-top:10px;">' + g.fields.map(function(f){
-      return '<div class="field"><label for="pqf-' + f.k + '">' + esc(f.label) + "</label>" + (f.area ? '<textarea id="pqf-' + f.k + '" data-pq="' + f.path + '" placeholder="' + esc(f.ph || "") + '" style="min-height:64px;">' + esc(pqGet(f.path)) + "</textarea>" : '<input type="text" id="pqf-' + f.k + '" data-pq="' + f.path + '" placeholder="' + esc(f.ph || "") + '" value="' + esc(pqGet(f.path)) + '">') + "</div>";
+      if(f.chk) return '<div class="field"><label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" data-pq="' + f.path + '"' + (pqState().presentation.photo !== false ? " checked" : "") + "> " + esc(f.label) + "</label></div>";
+      if(f.sel) return '<div class="field"><label for="pqf-' + f.k + '">' + esc(f.label) + '</label><select id="pqf-' + f.k + '" data-pq="' + f.path + '">' + f.sel.map(function(o){ return '<option value="' + o[0] + '"' + (pqGet(f.path) === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") + "</select></div>";
+      var mx = f.max ? ' maxlength="' + f.max + '"' : "";
+      return '<div class="field"><label for="pqf-' + f.k + '">' + esc(f.label) + "</label>" + (f.area ? '<textarea id="pqf-' + f.k + '" data-pq="' + f.path + '"' + mx + ' placeholder="' + esc(f.ph || "") + '" style="min-height:64px;">' + esc(pqGet(f.path)) + "</textarea>" : '<input type="text" id="pqf-' + f.k + '" data-pq="' + f.path + '"' + mx + ' placeholder="' + esc(f.ph || "") + '" value="' + esc(pqGet(f.path)) + '">') + "</div>";
     }).join("") + "</div></details>";
   });
   html += '<details class="pq-det"><summary>Étapes, encadrés, chiffres</summary><div style="margin-top:10px;">' +
@@ -5777,10 +5856,15 @@ function renderPlaquette(){
     pqListEditor("Encadré", "encadres", 2, [{ k: "label", label: "Petit libellé" }, { k: "titre", label: "Titre" }, { k: "texte", label: "Texte" }]) +
     pqListEditor("Chiffre", "chiffres", 3, [{ k: "valeur", label: "Valeur réelle (ex. 12 clients)" }, { k: "libelle", label: "Libellé" }, { k: "texte", label: "Précision" }]) +
     '<p class="hint">Rien n\'est inventé : tout bloc laissé vide est omis du PDF, signalé par une étoile à l\'écran.</p></div></details>';
-  html += '<details class="pq-det"><summary>Images (3 au plus)</summary><div style="margin-top:10px;">' + [0, 1, 2].map(function(i){
+  html += '<details class="pq-det"><summary>Contenu du bandeau : chiffres, retours, questions</summary><div style="margin-top:10px;">' +
+    pqListEditor("Chiffre de présentation", "presChiffres", 3, [{ k: "valeur", label: "Valeur réelle (ex. 8 ans)", max: 12 }, { k: "libelle", label: "Libellé", max: 32 }]) +
+    pqListEditor("Retour client", "avis", 3, [{ k: "texte", label: "Citation (150 caractères au plus)", max: 150 }, { k: "auteur", label: "Prénom, fonction, entreprise", max: 50 }]) +
+    pqListEditor("Question", "faq", 3, [{ k: "q", label: "Question", max: 60 }, { k: "r", label: "Réponse courte", max: 110 }]) +
+    '<p class="hint">Retours clients : uniquement des retours réels, publiés avec l\'accord de la personne.</p></div></details>';
+  html += '<details class="pq-det"><summary>Images</summary><div style="margin-top:10px;">' + [0, 1, 2].map(function(i){
     var has = q.images[i];
     return '<div class="field"><label>Image ' + (i + 1) + '</label>' + (has ? '<img src="' + has + '" alt="" style="height:54px;border-radius:6px;display:block;margin-bottom:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pq-img-del="' + i + '">Retirer</button>' : '<input type="file" accept="image/*" data-pq-img="' + i + '">') + "</div>";
-  }).join("") + '<p class="hint">Tes images restent dans ton navigateur ; elles sont réduites automatiquement. Utilise des images dont tu détiens les droits.</p></div></details>';
+  }).join("") + '<div class="field"><label>Ma photo (bandeau de présentation)</label>' + (q.portrait ? '<img src="' + q.portrait + '" alt="" style="height:54px;border-radius:12px;display:block;margin-bottom:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pq-img-del="portrait">Retirer</button>' : '<input type="file" accept="image/*" data-pq-img="portrait">') + '</div><p class="hint">Tes images restent dans ton navigateur ; elles sont réduites automatiquement. Utilise des images dont tu détiens les droits.</p></div></details>';
   var keepOpen = {}; form.querySelectorAll("details").forEach(function(d, i){ keepOpen[i] = d.open; });
   form.innerHTML = html;
   form.querySelectorAll("details").forEach(function(d, i){ if(i in keepOpen) d.open = keepOpen[i]; });
@@ -5804,7 +5888,7 @@ window.addEventListener("resize", fitPlaquette);
 // délégation : saisies, listes, images
 document.getElementById("pq-form").addEventListener("input", function(e){
   var t = e.target, q = pqState();
-  if(t.getAttribute("data-pq")){ pqSet(t.getAttribute("data-pq"), t.value); persist(); renderPlaquettePreview(); refreshPqThumbs(); }
+  if(t.getAttribute("data-pq")){ pqSet(t.getAttribute("data-pq"), t.type === "checkbox" ? t.checked : t.value); persist(); renderPlaquettePreview(); refreshPqThumbs(); }
   else if(t.getAttribute("data-pq-list")){ var p = t.getAttribute("data-pq-list").split(":"); q[p[0]][+p[1]][p[2]] = t.value; persist(); renderPlaquettePreview(); }
 });
 document.getElementById("pq-form").addEventListener("click", function(e){
@@ -5812,18 +5896,18 @@ document.getElementById("pq-form").addEventListener("click", function(e){
   var q = pqState();
   if(b.getAttribute("data-pq-add")){ q[b.getAttribute("data-pq-add")].push({}); persist(); renderPlaquette(); }
   else if(b.getAttribute("data-pq-del")){ var p = b.getAttribute("data-pq-del").split(":"); q[p[0]].splice(+p[1], 1); persist(); renderPlaquette(); }
-  else if(b.getAttribute("data-pq-img-del")){ q.images[+b.getAttribute("data-pq-img-del")] = ""; q.images = q.images.filter(function(x, i, a){ return x || i < a.length - 1; }); persist(); renderPlaquette(); }
+  else if(b.getAttribute("data-pq-img-del")){ var k = b.getAttribute("data-pq-img-del"); if(k === "portrait") q.portrait = ""; else { q.images[+k] = ""; while(q.images.length && !q.images[q.images.length - 1]) q.images.pop(); } persist(); renderPlaquette(); }
 });
 document.getElementById("pq-form").addEventListener("change", function(e){
   var t = e.target; if(!t.getAttribute("data-pq-img")) return;
   var f = t.files && t.files[0]; if(!f) return;
-  var i = +t.getAttribute("data-pq-img"), r = new FileReader();
+  var i = t.getAttribute("data-pq-img"), r = new FileReader();
   r.onload = function(ev){
     var img = new Image();
     img.onload = function(){
-      var W = Math.min(1000, img.width), sc = W / img.width, c = document.createElement("canvas"); c.width = W; c.height = Math.round(img.height * sc);
+      var W = Math.min(i === "portrait" ? 500 : 1000, img.width), sc = W / img.width, c = document.createElement("canvas"); c.width = W; c.height = Math.round(img.height * sc);
       c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      var q = pqState(); q.images[i] = c.toDataURL("image/jpeg", 0.8); persist(); renderPlaquette();
+      var q = pqState(), url = c.toDataURL("image/jpeg", 0.8); if(i === "portrait") q.portrait = url; else { i = +i; while(q.images.length < i) q.images.push(""); q.images[i] = url; } persist(); renderPlaquette();
     };
     img.src = ev.target.result;
   };
@@ -5838,6 +5922,7 @@ document.getElementById("pq-accent-reset").addEventListener("click", function(){
 document.getElementById("btn-pq-fill").addEventListener("click", function(){
   var q = pqState(), fl = flState(), t = (state.cv.titre || state.profil.titre || "").trim();
   if(!q.kicker && t) q.kicker = t.toUpperCase();
+  if(!q.presentation.role && t) q.presentation.role = t;
   if(!q.titre && fl.services.length && fl.services[0].titre) q.titre = fl.services[0].titre;
   if(!q.accroche && fl.offre) q.accroche = fl.offre;
   if(!q.delai && fl.dispo) q.delai = "Disponible : " + fl.dispo;

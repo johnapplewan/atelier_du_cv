@@ -25,7 +25,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 
 1. Catégories de compétences modifiables à la main.
 2. Préparation à l'entretien d'après l'annonce et le CV.
-3. Plaquette : images libres de droits proposées, modèles supplémentaires, version deux pages.
+3. Plaquette : images libres de droits proposées, modèles supplémentaires, version deux pages, bandeaux supplémentaires (zone d'intervention, appel découverte, QR vers un portfolio, certifications).
 4. Documents PDF balisés (accessibilité), audit RGAA.
 5. Découper `index.html` (CSS, modules JavaScript) avant la refonte du design.
 
