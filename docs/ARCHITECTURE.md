@@ -1,7 +1,7 @@
 # Atelier Candidature : fonctionnement, fonctions et architecture
 
 Document de passation pour retravailler le design (front, UX, UI) hors de la conversation de développement.
-État du code : branche `claude/new-session-6jo73r`, fichier principal `index.html` (≈ 7 300 lignes).
+État du code : branche `claude/new-session-6jo73r`, fichier principal `app/index.html` (≈ 7 300 lignes).
 Ce document, `docs/ROADMAP.md`, `docs/OFFRES-ET-TARIFS.md`, `docs/PAGES-SAAS.md` et `docs/MARKETING.md` sont **tenus à jour à chaque modification** de pages, de fonctions, de données, de tarifs ou de textes (voir `CLAUDE.md`) : toute information ajoutée, modifiée ou retirée dans le code l'est aussi ici.
 
 ---
@@ -24,9 +24,9 @@ Principes de conception à conserver :
 
 | Élément | Rôle |
 |---|---|
-| `index.html` | **Toute l'application** : HTML des écrans, CSS (`<style>`), JavaScript (`<script>`, sans framework ni build). |
+| `app/index.html` | **Toute l'application** : HTML des écrans, CSS (`<style>`), JavaScript (`<script>`, sans framework ni build). Routée sous `/app/` ; ses ressources sont référencées en relatif (`../vendor/`, `../prompts.js`, `../legal/`, `../assets/`), les fonctions serveur en absolu (`/api/...`). |
 | `vendor/` | `fonts.css` + `fonts/*.woff2` (Newsreader, Public Sans, IBM Plex Mono, Space Grotesk, Bebas Neue ; latin et latin-ext), `html2canvas.min.js`, `jspdf.umd.min.js` (génération PDF). |
-| `presentation/index.html` | **Landing page** publique (trois audiences, fonctionnalités, confidentialité, tarifs, FAQ). Routée sous `/presentation/`. |
+| `index.html` (racine) | **Landing page** publique (quatre audiences, fonctionnalités, confidentialité, tarifs, FAQ). Routée sous `/`. |
 | `tarifs/index.html` | **Page tarifs** publique : quatre formules, tableau comparatif, FAQ, mention « gratuit pendant la bêta ». Routée sous `/tarifs/`. |
 | `saas/*.html` | **Maquettes SaaS non routées** (19 pages : connexion, inscription, vérifications, compte, abonnement, paiement…). `noindex`. Voir `docs/PAGES-SAAS.md`. |
 | `site/site.css`, `site/site.js` | Feuille de style et script **communs** à la landing, aux tarifs et aux maquettes SaaS (menu, onglets « Pour qui », bascule mensuel/annuel). |
@@ -43,13 +43,13 @@ Principes de conception à conserver :
 
 - **CSP** (`_headers`) : `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'`. Aucune ressource externe (CDN, polices distantes, analytics) ne doit être ajoutée. Le JavaScript est inline : si on le sort dans des fichiers, garder `'self'`.
 - **Pas de framework ni de build** aujourd'hui. Un redesign peut introduire un build, mais l'ensemble doit rester servable en statique sur Cloudflare Pages.
-- **Une version publiée comme artefact claude.ai** existe (même `index.html` + `vendor/`) ; elle ne peut pas appeler `/api/*` (la lecture d'annonce par lien, la recherche d'entreprises et d'offres n'y fonctionnent pas, un message l'indique).
+- **Une version publiée comme artefact claude.ai** existe (même `app/index.html` + `vendor/`) ; elle ne peut pas appeler `/api/*` (la lecture d'annonce par lien, la recherche d'entreprises et d'offres n'y fonctionnent pas, un message l'indique).
 - Le HTML est **en grande partie généré en JavaScript** (`innerHTML` dans les fonctions `render…`). Les classes CSS et les `id` listés en §8 et §9 sont donc un **contrat** entre le style et le code.
 
 ### Flux de données
 
 ```
-Navigateur (localStorage)  ←→  index.html (état + moteurs de composition)
+Navigateur (localStorage)  ←→  app/index.html (état + moteurs de composition)
         │                              │
         │                              ├─ /api/annonce     → page d'une offre (lecture par lien)
         │                              ├─ /api/lieu        → API Adresse (communes)
@@ -327,7 +327,7 @@ Les identifiants des éléments générés en JavaScript (listes d'expériences,
 L'application est statique : n'importe quel serveur de fichiers suffit pour tout sauf `/api/*`.
 
 ```bash
-python3 -m http.server 8080      # puis http://localhost:8080
+python3 -m http.server 8080      # landing : http://localhost:8080/ · application : http://localhost:8080/app/
 ```
 
 Pour les routes `/api/*`, utiliser `npx wrangler pages dev .` (Cloudflare) ou déployer sur Cloudflare Pages. Les variables `FT_*` ne sont nécessaires que pour `/api/offres`.
@@ -338,7 +338,7 @@ Tests : scripts Playwright ad hoc utilisés pendant le développement (non versi
 
 ## 11. Index des fonctions JavaScript
 
-Numéros de ligne omis (ils changent) : chercher le nom dans `index.html`. Regroupées par module, dans l'ordre du fichier.
+Numéros de ligne omis (ils changent) : chercher le nom dans `app/index.html`. Regroupées par module, dans l'ordre du fichier.
 
 **SOCLE PARTAGÉ**
 
@@ -438,33 +438,33 @@ Numéros de ligne omis (ils changent) : chercher le nom dans `index.html`. Regro
 - Les listes de mots (domaines, catégories de compétences, détection d'émetteur) sont en dur dans le script ; elles gagneraient à être externalisées en JSON.
 - Les listes d'offres commerciales (`FL_OFFRES`), les formulations converties au tutoiement (`pqTu`) et la banque d'images (`PQ_PHOTOS`) sont en dur dans le script ; à externaliser en JSON (et en dossier d'assets indexé) pour qu'un non-développeur puisse les enrichir.
 - Les modèles de plaquette dépendent de dimensions en pixels (794 × 1123) et de plusieurs règles `.pq-hasband` par modèle : toute refonte doit conserver la capture pleine page A4 et le garde-fou `pqFit`.
-- Les pages publiques et les maquettes SaaS sont écrites à la main : la barre de navigation et le pied de page sont dupliqués dans chaque fichier de `presentation/`, `tarifs/` et `saas/`. Une refonte devra les factoriser (composants ou gabarit).
+- Les pages publiques et les maquettes SaaS sont écrites à la main : la barre de navigation et le pied de page sont dupliqués dans chaque fichier de `index.html` (racine), `tarifs/` et `saas/`. Une refonte devra les factoriser (composants ou gabarit).
 - L'onboarding complet à concevoir avant le SaaS est décrit dans `docs/ROADMAP.md`.
 
 ---
 
 ## 13. Site public et pages SaaS (hors application)
 
-L'application reste servie à la racine (`/`, fichier `index.html`). Les pages ci-dessous sont **indépendantes de l'application** : elles ne lisent ni n'écrivent aucune donnée, utilisent `vendor/fonts.css` et `site/site.css`, et respectent la même CSP (aucune ressource externe).
+La **landing est à la racine** (`/`, fichier `index.html`) et l'**application sous `/app/`** (fichier `app/index.html`). Les pages ci-dessous sont **indépendantes de l'application** : elles ne lisent ni n'écrivent aucune donnée, utilisent `vendor/fonts.css` et `site/site.css`, et respectent la même CSP (aucune ressource externe).
 
 ### Pages routées
 
 | Page | Fichier | URL | Rôle |
 |---|---|---|---|
-| Landing | `presentation/index.html` | `/presentation/` | Présenter l'atelier à trois audiences (étudiants, recherche d'emploi, freelances) et amener vers l'application |
+| Landing | `index.html` | `/` | Présenter l'atelier à quatre audiences (étudiants, recherche d'emploi, salariés en transition, freelances) et amener vers l'application |
 | Tarifs | `tarifs/index.html` | `/tarifs/` | Quatre formules, comparatif, FAQ ; indique que tout est gratuit pendant la bêta |
 
-**Sections de la landing** (ordre) : en-tête collant, héros (titre, sous-titre, deux boutons, capture, mention de bêta), bandeau de quatre preuves vérifiables, problème (« Candidater, c'est réécrire »), trois étapes, **Pour qui** (trois volets en onglets : Étudiants, Recherche d'emploi, Freelances ; tous visibles sans JavaScript), fonctionnalités (six cartes), confidentialité (section sombre), aperçu des tarifs, FAQ (8 questions, `<details>`), appel final, pied de page. Données structurées JSON-LD `SoftwareApplication`.
+**Sections de la landing** (ordre) : en-tête collant, héros (titre, sous-titre, deux boutons, capture, mention de bêta), bandeau de quatre preuves vérifiables, problème (« Candidater, c'est réécrire »), trois étapes, **Pour qui** (quatre volets en onglets : Étudiants, Recherche d'emploi, Salariés en transition, Freelances ; tous visibles sans JavaScript), fonctionnalités (six cartes), confidentialité (section sombre), aperçu des tarifs, FAQ (8 questions, `<details>`), appel final, pied de page. Données structurées JSON-LD `SoftwareApplication`.
 
 **Sections de la page tarifs** : en-tête avec bandeau « Rien n'est facturé aujourd'hui », quatre cartes de formule (la carte Freelance a une bascule par mois / par an), « Quelle formule pour toi ? », tableau comparatif accessible, FAQ (8 questions). JSON-LD `Product` avec quatre offres.
 
-**Contrat HTML / JavaScript** (`site/site.js`) : `.nav` + `.menu-btn` (menu mobile), `[data-tabs]` avec `[role=tab]` / `.pane` (onglets, flèches du clavier, repli sans JavaScript via `.noscript-panes`), `[data-billing]` avec `button[data-mode]` et `[data-price-fl]` (bascule mensuel / annuel). Les ancres `#fonctions`, `#pour-qui`, `#faq`, `#etudiants`, `#emploi`, `#freelance`, `#quelle-formule`, `#gratuit`, `#etudiant` sont utilisées par la navigation et les liens entre pages.
+**Contrat HTML / JavaScript** (`site/site.js`) : `.nav` + `.menu-btn` (menu mobile), `[data-tabs]` avec `[role=tab]` / `.pane` (onglets, flèches du clavier, repli sans JavaScript via `.noscript-panes`), `[data-billing]` avec `button[data-mode]` et `[data-price-fl]` (bascule mensuel / annuel). Les ancres `#fonctions`, `#pour-qui`, `#faq`, `#etudiants`, `#emploi`, `#transition`, `#freelance`, `#quelle-formule`, `#gratuit`, `#etudiant` sont utilisées par la navigation et les liens entre pages.
 
 **Design** : jetons dans `site/site.css` (`--bg`, `--brand` `#2E4C82`, `--brass`, polices Newsreader, Public Sans, IBM Plex Mono), composants `.nav`, `.btn`, `.card`, `.plan`, `.compare`, `.faq`, `.shot`, `.ticks`, `.proofbar`. Les captures sont dans `assets/landing/` et utilisent des données fictives (mention affichée sous chaque capture).
 
 **Référencement** : `sitemap.xml` liste la landing et les tarifs ; `robots.txt` interdit `/saas/` et `/api/` ; `_headers` ajoute `X-Robots-Tag: noindex` sur `/saas/*`.
 
-**Passage de la landing à la racine** (décision à prendre, voir `docs/MARKETING.md`) : déplacer l'application sous `/app/`, placer la landing en `/index.html`, mettre à jour les liens « Ouvrir l'atelier » (`../` devient `../app/`), le sitemap et les mentions légales.
+**Organisation des URL** : `/` landing, `/tarifs/` tarifs, `/app/` application, `/legal/...` pages légales, `/saas/` maquettes non routées, `/api/...` fonctions serveur. Les données enregistrées gardent la même origine, donc la même clé `localStorage` ; les chemins d'images `assets/...` d'anciennes plaquettes sont réécrits en `../assets/...` par `pqNormData`. Les pages légales renvoient vers `../app/` (« Retour à l'application »). Pour un test local, servir le dépôt et ouvrir `/` (landing) puis `/app/`.
 
 ### Maquettes SaaS non routées
 

@@ -14,8 +14,8 @@
 </head><body>
 <a class="skip" href="#contenu">Aller au contenu</a>
 <div class="mock-banner" role="note"><b>Maquette non routée.</b> Page prévue pour la version SaaS&nbsp;: elle n'est pas reliée à l'application et n'enregistre rien.</div>
-<header class="nav"><div class="wrap"><a class="brand" href="../presentation/"><span class="brand-mark" aria-hidden="true">§</span>Atelier Candidature</a>
-  <nav class="nav-links" aria-label="Navigation"><a href="connexion.html">Connexion</a><a href="inscription.html">Créer un compte</a><a href="aide.html">Aide</a><a class="btn btn-primary btn-sm" href="../">Ouvrir l'atelier</a></nav></div></header>
+<header class="nav"><div class="wrap"><a class="brand" href="../"><span class="brand-mark" aria-hidden="true">§</span>Atelier Candidature</a>
+  <nav class="nav-links" aria-label="Navigation"><a href="connexion.html">Connexion</a><a href="inscription.html">Créer un compte</a><a href="aide.html">Aide</a><a class="btn btn-primary btn-sm" href="../app/">Ouvrir l'atelier</a></nav></div></header>
 <main id="contenu" class="auth"><div class="panel"><h1>Vérification du SIRET</h1><p class="sub">La formule Freelance est ouverte à tous, avec un numéro SIRET vérifié à l'inscription.</p>
 <form onsubmit="return false"><div class="field"><label for="s-siret">Numéro SIRET (14 chiffres)</label><input id="s-siret" name="s-siret" type="text" placeholder="12345678901234" inputmode="numeric" maxlength="17"><span class="hint">Tu le trouves sur ton avis de situation ou sur ton extrait Kbis.</span></div><button class="btn btn-primary btn-block" type="submit">Vérifier</button></form>
 <div class="state ok" style="margin-top:18px;"><div><strong>Structure trouvée</strong><br>Camille Martin, entrepreneur individuel<br>12 rue Exemple, 69000 Lyon<br>Activité&nbsp;: conseil en relations publiques et communication (70.21Z)<br>Statut&nbsp;: actif</div></div>
@@ -24,10 +24,10 @@
 <div class="state warn">Cet établissement est fermé&nbsp;: saisis le SIRET de ton établissement actif.</div><aside class="mock-note" aria-label="Notes pour la refonte"><b>Notes pour la refonte.</b><ul style="margin:8px 0 0;padding-left:18px;"><li><b>Contrôles</b>&nbsp;: 14 chiffres, clé de Luhn, puis interrogation de l'annuaire des entreprises (la fonction serveur `/api/entreprises` existe déjà pour la recherche).</li><li><b>États à prévoir</b>&nbsp;: format invalide, introuvable, établissement fermé, entreprise non diffusible, service indisponible.</li><li><b>À trancher</b>&nbsp;: conservation du numéro (il sert à rattacher la structure et alimente la signature des e-mails), nom affiché pour confirmation.</li></ul></aside></div></main>
 <footer role="contentinfo"><div class="wrap">
   <div class="cols">
-    <div><a class="brand" href="../presentation/"><span class="brand-mark" aria-hidden="true">§</span>Atelier Candidature</a>
+    <div><a class="brand" href="../"><span class="brand-mark" aria-hidden="true">§</span>Atelier Candidature</a>
       <p style="margin-top:12px;max-width:26em;">Une base, tous tes documents de candidature. Version bêta gratuite, sans cookie ni suivi.</p></div>
-    <div><h4>Produit</h4><ul><li><a href="../presentation/#fonctions">Fonctionnalités</a></li><li><a href="../presentation/#pour-qui">Pour qui</a></li><li><a href="../tarifs/">Tarifs</a></li><li><a href="../presentation/#faq">Questions fréquentes</a></li></ul></div>
-    <div><h4>Application</h4><ul><li><a href="../">Ouvrir l'atelier</a></li><li><a href="../tarifs/#quelle-formule">Quelle formule choisir&nbsp;?</a></li></ul></div>
+    <div><h4>Produit</h4><ul><li><a href="../#fonctions">Fonctionnalités</a></li><li><a href="../#pour-qui">Pour qui</a></li><li><a href="../tarifs/">Tarifs</a></li><li><a href="../#faq">Questions fréquentes</a></li></ul></div>
+    <div><h4>Application</h4><ul><li><a href="../app/">Ouvrir l'atelier</a></li><li><a href="../tarifs/#quelle-formule">Quelle formule choisir&nbsp;?</a></li></ul></div>
     <div><h4>Informations légales</h4><ul><li><a href="../legal/mentions-legales.html">Mentions légales</a></li><li><a href="../legal/confidentialite.html">Confidentialité</a></li><li><a href="../legal/cgu.html">Conditions d'utilisation</a></li><li><a href="../legal/accessibilite.html">Accessibilité</a></li></ul></div>
   </div>
   <p class="legal">Version bêta&nbsp;: toutes les fonctions sont gratuites et aucune donnée personnelle n'est transmise à un serveur. Les captures d'écran de ce site utilisent des données fictives.</p>

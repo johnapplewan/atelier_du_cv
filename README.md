@@ -12,8 +12,9 @@ aucun cookie, aucun outil de mesure.
 
 | Élément | Rôle |
 |---|---|
-| `index.html` | L'application (tout le HTML, le CSS et le JavaScript) |
-| `presentation/`, `tarifs/` | Landing page et page tarifs (publiques) |
+| `index.html` | Landing page (racine du site) |
+| `app/index.html` | L'application (tout le HTML, le CSS et le JavaScript), servie sous `/app/` |
+| `tarifs/` | Page tarifs (publique) |
 | `saas/` | Maquettes de pages pour la version SaaS (non routées, `noindex`) |
 | `site/`, `assets/` | Style et script communs des pages publiques ; captures (`assets/landing/`) et banque d'images de la plaquette (`assets/plaquette/`) |
 | `functions/` | Fonctions serveur Cloudflare Pages |
@@ -24,7 +25,7 @@ La documentation est tenue à jour à chaque modification (voir `CLAUDE.md`).
 
 ## Déploiement
 
-Le site est 100 % statique (`index.html`, `presentation/`, `tarifs/`), aucun build n'est nécessaire.
+Le site est 100 % statique (`index.html`, `app/`, `tarifs/`), aucun build n'est nécessaire.
 
 **Cloudflare Pages (recommandé) :**
 1. Cloudflare Dashboard → Workers & Pages → Create → Pages → Connect to Git.
@@ -35,7 +36,7 @@ Le site est 100 % statique (`index.html`, `presentation/`, `tarifs/`), aucun bui
 Un sous-domaine personnalisé (ex. un sous-domaine de johnapple.fr) se configure ensuite dans
 l'onglet *Custom domains* du projet Pages.
 
-**En local :** ouvrir `index.html` dans un navigateur, ou `npx serve .`.
+**En local :** ouvrir `app/index.html` dans un navigateur (l'application) ou `index.html` (la landing), ou `npx serve .` puis `/` et `/app/`.
 
 ## Lecture automatique d'une annonce par son lien
 

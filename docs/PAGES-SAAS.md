@@ -2,7 +2,7 @@
 
 Les pages ci-dessous sont des **maquettes statiques non routées** (dossier `saas/`) : elles ne sont pas reliées à l'application, n'enregistrent rien et portent `noindex`. Elles servent à prévoir la refonte du front-end et la version SaaS. Chaque page indique ses états à prévoir et ses points à trancher.
 
-Les pages publiques (`presentation/`, `tarifs/`) sont routées : voir `docs/ARCHITECTURE.md`, section 13. Les formules et leurs conditions sont définies dans `docs/OFFRES-ET-TARIFS.md`.
+Les pages publiques (`/` landing, `tarifs/`) sont routées : voir `docs/ARCHITECTURE.md`, section 13. Les formules et leurs conditions sont définies dans `docs/OFFRES-ET-TARIFS.md`.
 
 Ouvrir `saas/index.html` pour la liste navigable.
 
@@ -53,6 +53,7 @@ Ouvrir `saas/index.html` pour la liste navigable.
 - Rôle : Créer un compte et choisir une formule
 - Enchaînement : Gratuit et Demandeur d'emploi vont à la vérification de l'e-mail ; Étudiant ajoute la vérification du justificatif ; Freelance ajoute la vérification du SIRET ; le paiement vient en dernier quand il sera ouvert.
 - Message d'aide dynamique : la zone bleue change selon la formule choisie (Gratuit, Étudiant, Demandeur d'emploi, Freelance).
+- Formules : la formule Demandeur d'emploi couvre aussi les salariés en transition, au même tarif.
 - États à prévoir : e-mail déjà utilisé, mot de passe trop faible, consentements non cochés.
 - Données : e-mail, mot de passe, formule. Aucune donnée de CV.
 

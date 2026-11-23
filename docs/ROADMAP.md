@@ -9,7 +9,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 - Lecture d'une annonce par son lien, analyse de l'émetteur (direct, cabinet, intérim, ESN), lettres RAPOS avec règles d'humanisation et contrôle de style, assistant IA par le compte Claude (sans clé API).
 - Score ATS avec suggestions, optimisation automatique, plan d'action Markdown ; CV anonymisé.
 - Suivi des candidatures avec relances, versions enregistrées, plusieurs personnes et plusieurs candidatures.
-- Landing page (`presentation/`), page tarifs (`tarifs/`) avec quatre formules et mention « gratuit pendant la bêta », 19 maquettes SaaS non routées (`saas/`), documentation des offres et du positionnement.
+- Landing page à la racine (`/`), application sous `/app/`, page tarifs (`tarifs/`) avec quatre formules et mention « gratuit pendant la bêta », 19 maquettes SaaS non routées (`saas/`), documentation des offres et du positionnement.
 - E-mail d'envoi (cinq types, signature freelance, bonnes pratiques), fiche de préparation à l'entretien, banque d'images de la plaquette.
 - Mobile (navigation par groupes), thème par bouton icône, accueil (premiers pas, alerte des relances).
 - Pages légales, polices et bibliothèques auto-hébergées, en-têtes de sécurité, documentation (`ARCHITECTURE.md`, `METHODE-LETTRE-RAPOS.md`).
@@ -40,7 +40,6 @@ Les maquettes `saas/` et `docs/OFFRES-ET-TARIFS.md` cadrent le périmètre ; il 
 - vérification du SIRET et conservation du numéro ;
 - prestataire de paiement, facturation, conditions générales de vente ;
 - comptes, synchronisation entre appareils, reprise des données locales ;
-- passage de la landing à la racine du site.
 
 ## Notes pour plus tard
 

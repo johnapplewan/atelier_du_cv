@@ -1,6 +1,6 @@
 # Positionnement, messages et règles éditoriales
 
-Fiche projet à réutiliser pour toute page publique, tout e-mail ou tout contenu de lancement. Les textes de `presentation/index.html` et `tarifs/index.html` en découlent.
+Fiche projet à réutiliser pour toute page publique, tout e-mail ou tout contenu de lancement. Les textes de `index.html` (racine) et `tarifs/index.html` en découlent.
 
 ## Produit
 
@@ -8,7 +8,7 @@ Atelier Candidature : un outil de candidature **local-first** (les données rest
 
 ## Positionnement
 
-Pour les personnes qui candidatent souvent (étudiants, personnes en recherche d'emploi, freelances), **l'atelier part de leur parcours et compose chaque document pour chaque annonce, sans rien inventer, sans compte et sans envoyer leurs données ailleurs.** À la différence d'un modèle de CV qu'on remplit à la main ou d'un générateur de texte qui invente, la base est unique et les manques sont signalés.
+Pour les personnes qui candidatent souvent (étudiants, personnes en recherche d'emploi, salariés en transition, freelances), **l'atelier part de leur parcours et compose chaque document pour chaque annonce, sans rien inventer, sans compte et sans envoyer leurs données ailleurs.** À la différence d'un modèle de CV qu'on remplit à la main ou d'un générateur de texte qui invente, la base est unique et les manques sont signalés.
 
 ## Audiences
 
@@ -16,6 +16,7 @@ Pour les personnes qui candidatent souvent (étudiants, personnes en recherche d
 |---|---|---|---|---|
 | Étudiants et alternants | Peu d'expérience, besoin d'un premier CV, de stages, d'alternance | Un premier CV avec ce qu'on a déjà ; niveau honnête par métier ; manques signalés | Profils « accessible sans expérience », astérisques de manque, candidatures spontanées, fiche d'entretien | Étudiant, 10 € par an |
 | Recherche d'emploi | Plusieurs candidatures par semaine, CV à adapter à chaque annonce | Dix candidatures sans dix CV à refaire | Score de correspondance, CV au format ATS, lettre avec contrôle de style, suivi et relances à 10 jours, e-mail d'envoi | Demandeur d'emploi, 20 € par an |
+| Salariés en transition | Salariés qui préparent un autre métier, avec des années d'expérience mais pas dans le métier visé | Changer de métier sans repartir de zéro | Un profil par métier visé avec niveau honnête (« déjà exercé », « accessible sans expérience », « à renforcer »), CV qui remet l'utile devant, CV anonymisé, candidatures spontanées | Demandeur d'emploi, 20 € par an (même formule, même tarif) |
 | Freelances | Démarcher des clients et des intermédiaires | Une offre claire, une plaquette A4, un e-mail qui se lit | Offres suggérées, accroches, 10 modèles de plaquette, suivi des envois et statistiques, signature avec SIRET | Freelance, 10 € par mois ou 79 € par an |
 
 ## Messages clés
@@ -37,12 +38,11 @@ Pour les personnes qui candidatent souvent (étudiants, personnes en recherche d
 
 ## Parcours de conversion
 
-Landing (`presentation/`) → application (`/`) : un seul appel à l'action principal, « Ouvrir l'atelier ». Page tarifs (`tarifs/`) → application. Aucune capture d'e-mail pendant la bêta (la maquette `saas/liste-attente.html` existe pour plus tard). Aucun outil de mesure : l'efficacité se lit à la main (retours directs) tant que la politique de confidentialité l'impose.
+Landing (`/`) → application (`/app/`) : un seul appel à l'action principal, « Ouvrir l'atelier ». Page tarifs (`tarifs/`) → application. Aucune capture d'e-mail pendant la bêta (la maquette `saas/liste-attente.html` existe pour plus tard). Aucun outil de mesure : l'efficacité se lit à la main (retours directs) tant que la politique de confidentialité l'impose.
 
 ## Prochaines étapes de lancement
 
 1. Compléter `legal/config.js` et faire relire les pages légales.
 2. Choisir l'URL définitive et mettre à jour `sitemap.xml`, les balises canoniques et Open Graph.
 3. Remplacer les données fictives des captures par de vrais cas autorisés (avec accord écrit) quand il y en aura.
-4. Décider si la landing devient la racine du site (`/`) et l'application passe sous `/app/` (voir `docs/ARCHITECTURE.md`, section 13).
-5. Ajouter des preuves publiables : retours d'utilisateurs de la bêta, avec leur accord.
+4. Ajouter des preuves publiables : retours d'utilisateurs de la bêta, avec leur accord.

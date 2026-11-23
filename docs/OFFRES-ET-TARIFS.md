@@ -1,6 +1,6 @@
 # Offres et tarifs
 
-Source de vérité des formules. La page `tarifs/index.html`, la section « Tarifs » de `presentation/index.html` et les maquettes `saas/inscription.html`, `saas/abonnement.html` et `saas/paiement.html` doivent rester alignées sur ce document.
+Source de vérité des formules. La page `tarifs/index.html`, la section « Tarifs » de `index.html` (landing, à la racine) et les maquettes `saas/inscription.html`, `saas/abonnement.html` et `saas/paiement.html` doivent rester alignées sur ce document.
 
 ## Statut actuel : bêta gratuite
 
@@ -12,10 +12,10 @@ Pendant la bêta, **les quatre formules sont gratuites** : aucune carte bancaire
 |---|---|---|---|---|
 | **Gratuit** | 0 € | Aucune condition | **1** | Non |
 | **Étudiant** | 10 € par an | Sur justificatif d'inscription (certificat de scolarité, carte d'étudiant), à renouveler chaque année | Illimités | Non |
-| **Demandeur d'emploi** | 20 € par an | Ouverte à tous, sans justificatif | Illimités | Non |
+| **Demandeur d'emploi** | 20 € par an | Ouverte à tous, sans justificatif : demandeurs d'emploi **et salariés en transition** (même formule, même tarif) | Illimités | Non |
 | **Freelance** | 10 € par mois ou **79 € par an** (soit 6,58 € par mois, 41 € de moins qu'au mois) | Ouverte à tous ; **SIRET vérifié à l'inscription** (sert à rattacher la structure) | Illimités | Oui |
 
-Les formules Étudiant et Demandeur d'emploi donnent **exactement les mêmes options** ; seuls l'accès et le prix changent.
+Les formules Étudiant et Demandeur d'emploi donnent **exactement les mêmes options** ; seuls l'accès et le prix changent. Les **salariés en transition** (quatrième audience) utilisent la formule Demandeur d'emploi, au même tarif : aucune formule distincte.
 
 ## Matrice des fonctions
 
@@ -66,8 +66,8 @@ Hypothèses retenues faute d'indication : tout ce qui n'est pas lié au freelanc
 
 | Information | Fichiers |
 |---|---|
-| Prix et conditions | `tarifs/index.html` (cartes, tableau, FAQ), `presentation/index.html` (section Tarifs, panneaux « Pour qui »), `saas/inscription.html`, `saas/abonnement.html`, `saas/paiement.html` |
+| Prix et conditions | `tarifs/index.html` (cartes, tableau, FAQ), `index.html` (landing : section Tarifs, panneaux « Pour qui »), `saas/inscription.html`, `saas/abonnement.html`, `saas/paiement.html` |
 | Matrice des fonctions | `tarifs/index.html` (tableau comparatif) |
-| Message « gratuit pendant la bêta » | `tarifs/index.html`, `presentation/index.html`, `saas/inscription.html`, `saas/abonnement.html`, `saas/liste-attente.html`, JSON-LD des deux pages |
+| Message « gratuit pendant la bêta » | `tarifs/index.html`, `index.html` (landing), `saas/inscription.html`, `saas/abonnement.html`, `saas/liste-attente.html`, JSON-LD des deux pages |
 
 Toute modification d'un prix ou d'une fonction se fait ici d'abord, puis dans les fichiers de ce tableau.
