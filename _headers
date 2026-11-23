@@ -7,3 +7,9 @@
   Strict-Transport-Security: max-age=31536000; includeSubDomains
 /vendor/*
   Cache-Control: public, max-age=604800
+/assets/*
+  Cache-Control: public, max-age=604800
+/site/*
+  Cache-Control: public, max-age=86400
+/saas/*
+  X-Robots-Tag: noindex, nofollow

@@ -2,6 +2,7 @@
 
 Document de passation pour retravailler le design (front, UX, UI) hors de la conversation de développement.
 État du code : branche `claude/new-session-6jo73r`, fichier principal `index.html` (≈ 7 300 lignes).
+Ce document, `docs/ROADMAP.md`, `docs/OFFRES-ET-TARIFS.md`, `docs/PAGES-SAAS.md` et `docs/MARKETING.md` sont **tenus à jour à chaque modification** de pages, de fonctions, de données, de tarifs ou de textes (voir `CLAUDE.md`) : toute information ajoutée, modifiée ou retirée dans le code l'est aussi ici.
 
 ---
 
@@ -25,6 +26,11 @@ Principes de conception à conserver :
 |---|---|
 | `index.html` | **Toute l'application** : HTML des écrans, CSS (`<style>`), JavaScript (`<script>`, sans framework ni build). |
 | `vendor/` | `fonts.css` + `fonts/*.woff2` (Newsreader, Public Sans, IBM Plex Mono, Space Grotesk, Bebas Neue ; latin et latin-ext), `html2canvas.min.js`, `jspdf.umd.min.js` (génération PDF). |
+| `presentation/index.html` | **Landing page** publique (trois audiences, fonctionnalités, confidentialité, tarifs, FAQ). Routée sous `/presentation/`. |
+| `tarifs/index.html` | **Page tarifs** publique : quatre formules, tableau comparatif, FAQ, mention « gratuit pendant la bêta ». Routée sous `/tarifs/`. |
+| `saas/*.html` | **Maquettes SaaS non routées** (19 pages : connexion, inscription, vérifications, compte, abonnement, paiement…). `noindex`. Voir `docs/PAGES-SAAS.md`. |
+| `site/site.css`, `site/site.js` | Feuille de style et script **communs** à la landing, aux tarifs et aux maquettes SaaS (menu, onglets « Pour qui », bascule mensuel/annuel). |
+| `assets/landing/` | Captures d'écran de l'application (données fictives) utilisées par la landing, en WebP. |
 | `assets/plaquette/` | Banque d'images de la plaquette (JPEG, servis tels quels) ; `README.md` du dossier : nommage, formats, règles. Liste des fichiers proposés dans l'application : `PQ_PHOTOS` (`index.html`). |
 | `functions/api/*.js` | Cloudflare Pages Functions (côté serveur, voir §7). |
 | `prompts.js` | Méthodes d'écriture données à l'assistant IA (lettre RAPOS, règles d'humanisation, reformulation du CV). Chargé avant le script principal. Référence lisible : `docs/METHODE-LETTRE-RAPOS.md`. |
@@ -79,7 +85,7 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 **Barre haute** : marque, bouton icône de thème (soleil, lune ou demi-cercle pour automatique ; un clic passe au suivant), « Assistant IA : <mode> », « Tout effacer », « CV + Lettre (PDF) », « Télécharger le dossier complet (PDF) ».
 **Barre Personne** : choisir, ajouter, renommer, supprimer une personne.
 **Barre Candidature** : choisir, nommer, nouvelle, dupliquer, supprimer, Sauvegarder (fichier .json) / Restaurer.
-**Pied de page** : liens vers les pages légales.
+**Pied de page** : liens vers la présentation, les tarifs et les pages légales.
 **Bandeau d'accueil** (`#home-strip`, en haut du contenu) : « Premiers pas » (importer un CV, créer un profil, préparer une candidature ; masquable, mémorisé par personne) et alerte « N relances à faire » (« Voir », « Plus tard »). À l'ouverture, une base vide ouvre directement « Ma base ».
 
 ### Parcours principaux
@@ -432,4 +438,58 @@ Numéros de ligne omis (ils changent) : chercher le nom dans `index.html`. Regro
 - Les listes de mots (domaines, catégories de compétences, détection d'émetteur) sont en dur dans le script ; elles gagneraient à être externalisées en JSON.
 - Les listes d'offres commerciales (`FL_OFFRES`), les formulations converties au tutoiement (`pqTu`) et la banque d'images (`PQ_PHOTOS`) sont en dur dans le script ; à externaliser en JSON (et en dossier d'assets indexé) pour qu'un non-développeur puisse les enrichir.
 - Les modèles de plaquette dépendent de dimensions en pixels (794 × 1123) et de plusieurs règles `.pq-hasband` par modèle : toute refonte doit conserver la capture pleine page A4 et le garde-fou `pqFit`.
+- Les pages publiques et les maquettes SaaS sont écrites à la main : la barre de navigation et le pied de page sont dupliqués dans chaque fichier de `presentation/`, `tarifs/` et `saas/`. Une refonte devra les factoriser (composants ou gabarit).
 - L'onboarding complet à concevoir avant le SaaS est décrit dans `docs/ROADMAP.md`.
+
+---
+
+## 13. Site public et pages SaaS (hors application)
+
+L'application reste servie à la racine (`/`, fichier `index.html`). Les pages ci-dessous sont **indépendantes de l'application** : elles ne lisent ni n'écrivent aucune donnée, utilisent `vendor/fonts.css` et `site/site.css`, et respectent la même CSP (aucune ressource externe).
+
+### Pages routées
+
+| Page | Fichier | URL | Rôle |
+|---|---|---|---|
+| Landing | `presentation/index.html` | `/presentation/` | Présenter l'atelier à trois audiences (étudiants, recherche d'emploi, freelances) et amener vers l'application |
+| Tarifs | `tarifs/index.html` | `/tarifs/` | Quatre formules, comparatif, FAQ ; indique que tout est gratuit pendant la bêta |
+
+**Sections de la landing** (ordre) : en-tête collant, héros (titre, sous-titre, deux boutons, capture, mention de bêta), bandeau de quatre preuves vérifiables, problème (« Candidater, c'est réécrire »), trois étapes, **Pour qui** (trois volets en onglets : Étudiants, Recherche d'emploi, Freelances ; tous visibles sans JavaScript), fonctionnalités (six cartes), confidentialité (section sombre), aperçu des tarifs, FAQ (8 questions, `<details>`), appel final, pied de page. Données structurées JSON-LD `SoftwareApplication`.
+
+**Sections de la page tarifs** : en-tête avec bandeau « Rien n'est facturé aujourd'hui », quatre cartes de formule (la carte Freelance a une bascule par mois / par an), « Quelle formule pour toi ? », tableau comparatif accessible, FAQ (8 questions). JSON-LD `Product` avec quatre offres.
+
+**Contrat HTML / JavaScript** (`site/site.js`) : `.nav` + `.menu-btn` (menu mobile), `[data-tabs]` avec `[role=tab]` / `.pane` (onglets, flèches du clavier, repli sans JavaScript via `.noscript-panes`), `[data-billing]` avec `button[data-mode]` et `[data-price-fl]` (bascule mensuel / annuel). Les ancres `#fonctions`, `#pour-qui`, `#faq`, `#etudiants`, `#emploi`, `#freelance`, `#quelle-formule`, `#gratuit`, `#etudiant` sont utilisées par la navigation et les liens entre pages.
+
+**Design** : jetons dans `site/site.css` (`--bg`, `--brand` `#2E4C82`, `--brass`, polices Newsreader, Public Sans, IBM Plex Mono), composants `.nav`, `.btn`, `.card`, `.plan`, `.compare`, `.faq`, `.shot`, `.ticks`, `.proofbar`. Les captures sont dans `assets/landing/` et utilisent des données fictives (mention affichée sous chaque capture).
+
+**Référencement** : `sitemap.xml` liste la landing et les tarifs ; `robots.txt` interdit `/saas/` et `/api/` ; `_headers` ajoute `X-Robots-Tag: noindex` sur `/saas/*`.
+
+**Passage de la landing à la racine** (décision à prendre, voir `docs/MARKETING.md`) : déplacer l'application sous `/app/`, placer la landing en `/index.html`, mettre à jour les liens « Ouvrir l'atelier » (`../` devient `../app/`), le sitemap et les mentions légales.
+
+### Maquettes SaaS non routées
+
+Toutes portent `noindex`, un bandeau « Maquette non routée » et un bloc « Notes pour la refonte » (états à prévoir, points à trancher). Index navigable : `saas/index.html`. Détail complet : `docs/PAGES-SAAS.md`.
+
+| Page | Fichier | URL prévue | Accès |
+|---|---|---|---|
+| Connexion | `saas/connexion.html` | `/connexion` | Public |
+| Inscription | `saas/inscription.html` | `/inscription` | Public |
+| Vérification de l'e-mail | `saas/verification-email.html` | `/inscription/verification-email` | Public (compte créé) |
+| Mot de passe oublié | `saas/mot-de-passe-oublie.html` | `/mot-de-passe-oublie` | Public |
+| Nouveau mot de passe | `saas/nouveau-mot-de-passe.html` | `/mot-de-passe/nouveau` | Public avec jeton |
+| Justificatif étudiant | `saas/verification-etudiant.html` | `/inscription/etudiant` | Connecté, formule Étudiant |
+| Vérification du SIRET | `saas/verification-siret.html` | `/inscription/siret` | Connecté, formule Freelance |
+| Bienvenue (onboarding) | `saas/bienvenue.html` | `/bienvenue` | Connecté, premier passage |
+| Reprise des données locales | `saas/migration-donnees.html` | `/migration` | Connecté |
+| Mon compte | `saas/compte.html` | `/compte` | Connecté |
+| Abonnement | `saas/abonnement.html` | `/abonnement` | Connecté |
+| Paiement | `saas/paiement.html` | `/abonnement/paiement` | Connecté |
+| Factures | `saas/factures.html` | `/abonnement/factures` | Connecté |
+| Mes données | `saas/donnees.html` | `/compte/donnees` | Connecté |
+| Aide et contact | `saas/aide.html` | `/aide` | Public |
+| Conditions générales de vente | `saas/cgv.html` | `/cgv` | Public |
+| Liste d'attente | `saas/liste-attente.html` | `/liste-attente` | Public |
+| Page introuvable | `saas/erreur-404.html` | `/404` | Public |
+| Maintenance | `saas/maintenance.html` | `/maintenance` | Public |
+
+Les formules, leurs conditions (justificatif étudiant, SIRET vérifié) et la matrice des fonctions sont dans `docs/OFFRES-ET-TARIFS.md`.

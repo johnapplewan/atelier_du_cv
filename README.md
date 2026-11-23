@@ -4,13 +4,27 @@ Outil d'aide à la candidature : annonce, CV (bibliothèque + recomposition ATS)
 motivation, annexe, suivi des candidatures et entraînement à l'entretien.
 
 Tout fonctionne côté navigateur : bibliothèque, préférences et suivi des candidatures sont
-stockés dans `localStorage`, rien n'est envoyé à un serveur. Les seules requêtes externes sont
-le chargement de polices (Google Fonts) et de deux bibliothèques techniques publiques
-(html2canvas, jsPDF) utilisées pour générer les PDF — aucune donnée saisie ne leur est transmise.
+stockés dans `localStorage`, rien n'est envoyé à un serveur. Les polices et les bibliothèques
+PDF (html2canvas, jsPDF) sont hébergées avec le site (`vendor/`) : aucune ressource externe,
+aucun cookie, aucun outil de mesure.
+
+## Contenu du dépôt
+
+| Élément | Rôle |
+|---|---|
+| `index.html` | L'application (tout le HTML, le CSS et le JavaScript) |
+| `presentation/`, `tarifs/` | Landing page et page tarifs (publiques) |
+| `saas/` | Maquettes de pages pour la version SaaS (non routées, `noindex`) |
+| `site/`, `assets/` | Style et script communs des pages publiques ; captures (`assets/landing/`) et banque d'images de la plaquette (`assets/plaquette/`) |
+| `functions/` | Fonctions serveur Cloudflare Pages |
+| `legal/` | Pages légales |
+| `docs/` | Documentation : `ARCHITECTURE.md` (référence complète), `ROADMAP.md`, `OFFRES-ET-TARIFS.md`, `PAGES-SAAS.md`, `MARKETING.md`, `METHODE-LETTRE-RAPOS.md` |
+
+La documentation est tenue à jour à chaque modification (voir `CLAUDE.md`).
 
 ## Déploiement
 
-Le site est 100 % statique (`index.html`), aucun build n'est nécessaire.
+Le site est 100 % statique (`index.html`, `presentation/`, `tarifs/`), aucun build n'est nécessaire.
 
 **Cloudflare Pages (recommandé) :**
 1. Cloudflare Dashboard → Workers & Pages → Create → Pages → Connect to Git.

@@ -9,6 +9,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 - Lecture d'une annonce par son lien, analyse de l'émetteur (direct, cabinet, intérim, ESN), lettres RAPOS avec règles d'humanisation et contrôle de style, assistant IA par le compte Claude (sans clé API).
 - Score ATS avec suggestions, optimisation automatique, plan d'action Markdown ; CV anonymisé.
 - Suivi des candidatures avec relances, versions enregistrées, plusieurs personnes et plusieurs candidatures.
+- Landing page (`presentation/`), page tarifs (`tarifs/`) avec quatre formules et mention « gratuit pendant la bêta », 19 maquettes SaaS non routées (`saas/`), documentation des offres et du positionnement.
 - E-mail d'envoi (cinq types, signature freelance, bonnes pratiques), fiche de préparation à l'entretien, banque d'images de la plaquette.
 - Mobile (navigation par groupes), thème par bouton icône, accueil (premiers pas, alerte des relances).
 - Pages légales, polices et bibliothèques auto-hébergées, en-têtes de sécurité, documentation (`ARCHITECTURE.md`, `METHODE-LETTRE-RAPOS.md`).
@@ -29,6 +30,17 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 3. Plaquette : images libres de droits proposées, modèles supplémentaires, version deux pages, bandeaux supplémentaires (zone d'intervention, appel découverte, QR vers un portfolio, certifications).
 4. Documents PDF balisés (accessibilité), audit RGAA.
 5. Découper `index.html` (CSS, modules JavaScript) avant la refonte du design.
+
+## Version SaaS : à décider et à construire
+
+Les maquettes `saas/` et `docs/OFFRES-ET-TARIFS.md` cadrent le périmètre ; il reste à trancher (liste complète dans `docs/OFFRES-ET-TARIFS.md`) :
+
+- prix TTC ou HT, règles de changement de formule, de résiliation, de remboursement ;
+- vérification du justificatif étudiant (manuelle ou automatique, conservation) ;
+- vérification du SIRET et conservation du numéro ;
+- prestataire de paiement, facturation, conditions générales de vente ;
+- comptes, synchronisation entre appareils, reprise des données locales ;
+- passage de la landing à la racine du site.
 
 ## Notes pour plus tard
 
