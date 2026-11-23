@@ -9,6 +9,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 - Lecture d'une annonce par son lien, analyse de l'émetteur (direct, cabinet, intérim, ESN), lettres RAPOS avec règles d'humanisation et contrôle de style, assistant IA par le compte Claude (sans clé API).
 - Score ATS avec suggestions, optimisation automatique, plan d'action Markdown ; CV anonymisé.
 - Suivi des candidatures avec relances, versions enregistrées, plusieurs personnes et plusieurs candidatures.
+- E-mail d'envoi (cinq types, signature freelance, bonnes pratiques), fiche de préparation à l'entretien, banque d'images de la plaquette.
 - Mobile (navigation par groupes), thème par bouton icône, accueil (premiers pas, alerte des relances).
 - Pages légales, polices et bibliothèques auto-hébergées, en-têtes de sécurité, documentation (`ARCHITECTURE.md`, `METHODE-LETTRE-RAPOS.md`).
 
@@ -24,7 +25,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 ## À faire ensuite (backlog)
 
 1. Catégories de compétences modifiables à la main.
-2. Préparation à l'entretien d'après l'annonce et le CV.
+2. Entretien : simulation orale chronométrée avec corrigé par l'IA, suivi des entretiens passés.
 3. Plaquette : images libres de droits proposées, modèles supplémentaires, version deux pages, bandeaux supplémentaires (zone d'intervention, appel découverte, QR vers un portfolio, certifications).
 4. Documents PDF balisés (accessibilité), audit RGAA.
 5. Découper `index.html` (CSS, modules JavaScript) avant la refonte du design.
