@@ -382,3 +382,4 @@ Numéros de ligne omis (ils changent) : chercher le nom dans `index.html`. Regro
 - Registre : `data.tu` (tutoiement) ; `pqTu()` convertit les phrases du catalogue (liste fermée de formulations).
 - E-mail : `emBuild()` (gabarits par type d'envoi), `emSignature()`, `emKeywords()` (mots de l'annonce confirmés par la base), `emAI()` ; réglages dans `profil.emailCfg`.
 - Banque d'images : dossier `assets/plaquette/` (voir son README), liste `PQ_PHOTOS` dans `index.html`, sélecteur « Photos proposées pour ce modèle ».
+- Photo du bandeau : `q.portrait` (plaquette), sinon `profil.photo` (CV), sinon portrait d'exemple `PQ_PORTRAIT_PH` (écran seulement, classe `pq-ph-photo`, retiré à l'export avec le texte aligné à gauche).

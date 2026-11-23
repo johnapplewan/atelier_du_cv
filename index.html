@@ -5816,6 +5816,8 @@ var PQ_PHOTOS = [
   { id: "t4-set2", nom: "Série B · réunion et équipe", modeles: ["t4"], imgs: ["assets/plaquette/t4-4.jpg", "assets/plaquette/t4-5.jpg", "assets/plaquette/t4-6.jpg"] }
 ];
 
+var PQ_PORTRAIT_PH = "assets/plaquette/p-a.jpg";   // portrait d'exemple : affiché à l'écran seulement, retiré à l'export
+
 var PQ_MODELES = [
   { key:"t1",  nom:"Nuit",       desc:"Fond sombre, liste numérotée",    accent:"#C6F135" },
   { key:"t2",  nom:"Terre",      desc:"Serif chaleureux, image en arche", accent:"#C8643C" },
@@ -5887,9 +5889,9 @@ function pqData(useDemo){
     chiffres: q.chiffres.filter(function(c){ return c.valeur; }), temoignage: q.temoignage, avantApres: q.avantApres,
     delai: q.delai, tarif: q.tarif, cta: q.cta,
     contact: { nom: p.nom, email: p.email, tel: p.tel, lien: p.lien }, images: q.images,
-    band: q.band, portrait: q.portrait, presentation: q.presentation, presChiffres: q.presChiffres.filter(function(c){ return c.valeur; }), avis: q.avis.filter(function(a){ return a.texte; }), refs: q.refs, faq: q.faq.filter(function(f){ return f.q; })
+    band: q.band, portrait: q.portrait || state.profil.photo || "", presentation: q.presentation, presChiffres: q.presChiffres.filter(function(c){ return c.valeur; }), avis: q.avis.filter(function(a){ return a.texte; }), refs: q.refs, faq: q.faq.filter(function(f){ return f.q; })
   };
-  if(useDemo && !(d.titre || "").trim()){ var demo = JSON.parse(JSON.stringify(PQ_DEMO)); demo.images = q.images; demo.portrait = q.portrait; demo.band = q.band; demo.presentation = Object.assign({}, demo.presentation, { mode: q.presentation.mode, photo: q.presentation.photo }); demo.contact = { nom: p.nom || demo.contact.nom, email: p.email || demo.contact.email, tel: p.tel || demo.contact.tel, lien: p.lien }; return demo; }
+  if(useDemo && !(d.titre || "").trim()){ var demo = JSON.parse(JSON.stringify(PQ_DEMO)); demo.images = q.images; demo.portrait = q.portrait || state.profil.photo || ""; demo.band = q.band; demo.presentation = Object.assign({}, demo.presentation, { mode: q.presentation.mode, photo: q.presentation.photo }); demo.contact = { nom: p.nom || demo.contact.nom, email: p.email || demo.contact.email, tel: p.tel || demo.contact.tel, lien: p.lien }; return demo; }
   return d;
 }
 
@@ -5909,12 +5911,13 @@ function pqBand(D){
   var lab = function(t){ return '<div class="pq-band-label">' + t + "</div>"; }, h = "";
   if(b === "presentation"){
     var P = D.presentation || {}, c = D.contact || {}, mode = P.mode || "both", showT = mode !== "chiffres", showK = mode !== "texte";
-    var photo = P.photo !== false ? (D.portrait ? '<img class="pq-pres-photo" alt="" src="' + D.portrait + '">' : '<div class="pq-pres-photo pq-imgph" aria-hidden="true"></div>') : "";
+    var photo = P.photo !== false ? (D.portrait ? '<img class="pq-pres-photo" alt="" src="' + D.portrait + '">' : '<img class="pq-pres-photo pq-ph-photo" alt="" data-pq-placeholder="1" src="' + PQ_PORTRAIT_PH + '" onerror="this.removeAttribute(\'src\');this.className=\'pq-pres-photo pq-imgph pq-ph-photo\';">') : "";
+    var phNote = (P.photo !== false && !D.portrait) ? pqStar(true, "Photo d'exemple, jamais exportée : ajoute la tienne (CV ou onglet Plaquette). Sans photo, le bandeau s'exporte sans cadre.") : "";
     var txt = '<div class="pq-pres-txt"><b>' + esc(c.nom || "Prénom Nom") + "</b>" + (P.role ? '<div class="role">' + esc(P.role) + "</div>" : "") +
       (showT ? (P.texte ? "<p>" + pqEsc(P.texte) + "</p>" : '<p class="pq-ph">Quelques lignes sur votre parcours et votre façon de travailler.</p>') : "") + "</div>";
     var k = (D.presChiffres || []).slice(0, 3);
     h = lab("Qui je suis") + '<div class="pq-pres">' + photo + txt + "</div>" +
-      (showK ? (k.length ? '<div class="pq-pres-kpi">' + k.map(function(x){ return "<div><strong>" + esc(x.valeur) + "</strong><span>" + esc(x.libelle || "") + "</span></div>"; }).join("") + "</div>" : pqStar(true, "Ajoute tes chiffres réels (années, missions, délai) ; aucun n'est inventé.")) : "");
+      phNote + (showK ? (k.length ? '<div class="pq-pres-kpi">' + k.map(function(x){ return "<div><strong>" + esc(x.valeur) + "</strong><span>" + esc(x.libelle || "") + "</span></div>"; }).join("") + "</div>" : pqStar(true, "Ajoute tes chiffres réels (années, missions, délai) ; aucun n'est inventé.")) : "");
   } else if(b === "avis"){
     var a = (D.avis || []).slice(0, 3);
     h = lab("Ils m'ont fait confiance") + (a.length ? '<div class="pq-avis" style="grid-template-columns:repeat(' + a.length + ',1fr);">' + a.map(function(x){ return "<div><p>« " + pqEsc(x.texte) + " »</p><cite>" + esc(x.auteur || "") + "</cite></div>"; }).join("") + "</div>" : pqStar(true, "Ajoute jusqu'à trois retours clients réels, avec leur accord."));
@@ -6051,6 +6054,7 @@ var PQ_SCHEMA = [
     { k: "p_texte", label: "Présentation : texte (240 caractères au plus)", ph: "Parcours, façon de travailler, ce qui vous distingue.", path: "presentation.texte", area: true, max: 240 },
     { k: "p_mode", label: "Présentation : afficher", path: "presentation.mode", sel: [["both", "Le texte et les chiffres"], ["texte", "Le texte seul"], ["chiffres", "Les chiffres seuls"]] },
     { k: "p_photo", label: "Présentation : emplacement de ma photo", path: "presentation.photo", chk: true },
+    { k: "p_photo_note", note: true },
     { k: "r_clients", label: "Références : clients citables (séparés par une virgule)", ph: "ex. Mairie de X, Société Y", path: "refs.clients", max: 120 },
     { k: "r_gar", label: "Garanties : une par ligne, quatre au plus", ph: "Assurance RC Pro\nDevis et contrat écrits", path: "refs.garanties", area: true, max: 160 } ] },
   { group: "Témoignage client (facultatif, réel)", fields: [
@@ -6089,6 +6093,10 @@ function renderPlaquette(){
   var html = "";
   PQ_SCHEMA.forEach(function(g, gi){
     html += '<details class="pq-det"' + (gi === 0 ? " open" : "") + "><summary>" + esc(g.group) + '</summary><div style="margin-top:10px;">' + g.fields.map(function(f){
+      if(f.note){
+        var has = q.portrait || state.profil.photo;
+        return (q.presentation.photo !== false && q.band === "presentation") ? '<div class="field"><p class="hint" style="margin:0;">' + (has ? (q.portrait ? "Photo de la plaquette utilisée." : "Photo de ton CV utilisée.") : "Aucune photo pour l'instant : une photo d'exemple s'affiche à l'écran mais n'est jamais exportée.") + ' <button class="btn btn-ghost btn-sm" type="button" data-pq-goto-photo="1">' + (has ? "Changer la photo" : "Ajouter ma photo") + "</button></p></div>" : "";
+      }
       if(f.chk) return '<div class="field"><label style="display:flex;gap:8px;align-items:center;"><input type="checkbox" data-pq="' + f.path + '"' + (pqState().presentation.photo !== false ? " checked" : "") + "> " + esc(f.label) + "</label></div>";
       if(f.sel) return '<div class="field"><label for="pqf-' + f.k + '">' + esc(f.label) + '</label><select id="pqf-' + f.k + '" data-pq="' + f.path + '">' + f.sel.map(function(o){ return '<option value="' + o[0] + '"' + (pqGet(f.path) === o[0] ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") + "</select></div>";
       var mx = f.max ? ' maxlength="' + f.max + '"' : "";
@@ -6108,7 +6116,7 @@ function renderPlaquette(){
   html += '<details class="pq-det"><summary>Images</summary><div style="margin-top:10px;">' + [0, 1, 2].map(function(i){
     var has = q.images[i];
     return '<div class="field"><label>Image ' + (i + 1) + '</label>' + (has ? '<img src="' + has + '" alt="" style="height:54px;border-radius:6px;display:block;margin-bottom:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pq-img-del="' + i + '">Retirer</button>' : '<input type="file" accept="image/*" data-pq-img="' + i + '">') + "</div>";
-  }).join("") + '<div class="field"><label>Ma photo (bandeau de présentation)</label>' + (q.portrait ? '<img src="' + q.portrait + '" alt="" style="height:54px;border-radius:12px;display:block;margin-bottom:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pq-img-del="portrait">Retirer</button>' : '<input type="file" accept="image/*" data-pq-img="portrait">') + '</div>' + (function(){
+  }).join("") + '<div class="field"><label>Ma photo (bandeau « Qui je suis »)</label>' + (q.portrait ? '<img src="' + q.portrait + '" alt="" style="height:54px;border-radius:12px;display:block;margin-bottom:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pq-img-del="portrait">Retirer</button>' : (state.profil.photo ? '<div style="display:flex;gap:10px;align-items:center;margin-bottom:6px;"><img src="' + state.profil.photo + '" alt="" style="height:54px;border-radius:12px;"><span class="hint">Photo de ton CV, utilisée par défaut. Tu peux en choisir une autre pour la plaquette :</span></div>' : '<p class="hint" style="margin:0 0 6px;">Aucune photo : le bandeau montre une photo d\'exemple à l\'écran, jamais exportée. Ajoute la tienne :</p>') + '<input type="file" accept="image/*" data-pq-img="portrait" id="pq-portrait-input">') + '</div>' + (function(){
     var ph = PQ_PHOTOS.filter(function(x){ return x.modeles.indexOf(q.modele) !== -1; });
     return ph.length ? '<div class="field"><label>Photos proposées pour ce modèle (remplacent l\'image 1)</label><div style="display:flex;gap:8px;flex-wrap:wrap;">' + ph.map(function(x){ return '<button type="button" class="pq-thumb" style="padding:4px;width:88px;" data-pq-photo="' + x.id + '" aria-label="Utiliser la photo ' + esc(x.nom) + '"><img src="' + x.imgs[0] + '" alt="" style="width:100%;height:96px;object-fit:cover;border-radius:6px;display:block;"><span class="pq-thumb-name">' + esc(x.nom) + "</span></button>"; }).join("") + "</div></div>" : "";
   })() + '<p class="hint">Tes images restent dans ton navigateur ; elles sont réduites automatiquement. Utilise des images dont tu détiens les droits.</p></div></details>';
@@ -6142,7 +6150,10 @@ document.getElementById("pq-form").addEventListener("input", function(e){
 document.getElementById("pq-form").addEventListener("click", function(e){
   var b = e.target.closest("button"); if(!b) return;
   var q = pqState();
-  if(b.getAttribute("data-pq-photo")){ var ph = PQ_PHOTOS.find(function(x){ return x.id === b.getAttribute("data-pq-photo"); }); if(ph){ q.images = ph.imgs.slice(); persist(); renderPlaquette(); } }
+  if(b.getAttribute("data-pq-goto-photo")){
+    var dets = document.querySelectorAll("#pq-form details"); dets.forEach(function(d){ if(/^Images/.test(d.querySelector("summary").textContent)) d.open = true; });
+    var inp = document.getElementById("pq-portrait-input"); if(inp){ inp.scrollIntoView({ block: "center" }); inp.focus(); }
+  } else if(b.getAttribute("data-pq-photo")){ var ph = PQ_PHOTOS.find(function(x){ return x.id === b.getAttribute("data-pq-photo"); }); if(ph){ q.images = ph.imgs.slice(); persist(); renderPlaquette(); } }
   else if(b.getAttribute("data-pq-add")){ q[b.getAttribute("data-pq-add")].push({}); persist(); renderPlaquette(); }
   else if(b.getAttribute("data-pq-del")){ var p = b.getAttribute("data-pq-del").split(":"); q[p[0]].splice(+p[1], 1); persist(); renderPlaquette(); }
   else if(b.getAttribute("data-pq-img-del")){ var k = b.getAttribute("data-pq-img-del"); if(k === "portrait") q.portrait = ""; else { q.images[+k] = ""; while(q.images.length && !q.images[q.images.length - 1]) q.images.pop(); } persist(); renderPlaquette(); }
@@ -6184,7 +6195,7 @@ document.getElementById("btn-pq-pdf").addEventListener("click", function(){
   var q = pqState(), clone = document.createElement("div");
   clone.style.cssText = "position:fixed;left:-10000px;top:0;width:794px;height:1123px;";
   clone.innerHTML = pqHtml(q.modele, pqData(false));
-  clone.querySelectorAll(".pq-ph, .pq-gap").forEach(function(n){ n.remove(); });
+  clone.querySelectorAll(".pq-ph, .pq-gap, .pq-ph-photo, [data-pq-placeholder]").forEach(function(n){ n.remove(); });
   document.body.appendChild(clone); pqFit(clone);
   st.textContent = "Génération du PDF…";
   window.html2canvas(clone.firstChild, { backgroundColor: null, scale: 2, useCORS: true, width: 794, height: 1123, windowWidth: 794 }).then(function(canvas){
