@@ -159,7 +159,7 @@ Ouvrir `saas/index.html` pour la liste navigable.
 - Fichier : `saas/cgv.html` · URL prévue : `/cgv` · Accès : Public
 - Rôle : Conditions de vente des formules payantes
 - Liens : référencée par l'inscription et le paiement ; complète `legal/cgu.html` et `legal/mentions-legales.html`.
-- À trancher : TVA et prix TTC, droit de rétractation pour un service numérique, remboursement, changement de formule, médiation de la consommation.
+- À trancher : TVA et prix TTC, droit de rétractation pour un service numérique, remboursement, changement de formule, médiation de la consommation ; section sur l'accès gratuit aux offres, exigée par la licence de l'API France Travail si un accès est un jour accordé (voir `docs/FRANCE-TRAVAIL.md`).
 
 ### Liste d'attente
 
