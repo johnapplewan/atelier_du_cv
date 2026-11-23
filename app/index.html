@@ -719,7 +719,12 @@
         <p>Cherche les offres publiées sur France Travail pour ton profil, près de chez toi. Un clic prépare la candidature : annonce, mots-clés, CV et lettre sur mesure.</p>
       </div>
       <div style="max-width:980px;">
-        <div class="card" style="margin-bottom:16px;">
+        <div class="card" id="off-unavailable" style="margin-bottom:16px;">
+          <span class="eyebrow">Recherche d'offres indisponible pour le moment</span>
+          <p style="margin:10px 0 14px;">L'accès à l'API d'offres d'emploi de France Travail n'est pas accordé à ce stade. Tu peux quand même candidater : colle le lien ou le texte de l'annonce qui t'intéresse, l'atelier compose le CV et la lettre.</p>
+          <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-off-to-annonce" type="button">Coller une annonce</button><button class="btn btn-ghost btn-sm" id="btn-off-to-recherche" type="button">Chercher des entreprises à démarcher</button></div>
+        </div>
+        <div class="card" id="off-form-card" style="margin-bottom:16px;">
           <div class="row2">
             <div class="field"><label for="off-profil">Profil de recherche</label><select id="off-profil"></select></div>
             <div class="field"><label for="off-q">Mots-clés</label><input type="text" id="off-q" placeholder="ex. développeur web, chargé de communication"></div>
@@ -1732,7 +1737,7 @@ function switchTab(tab){
   if(tab === "plaquette" && typeof renderPlaquette === "function"){ renderPlaquette(); }
   if(tab === "email" && typeof renderEmail === "function"){ renderEmail(); }
   if(tab === "entretien" && typeof renderEntretienFiche === "function"){ renderEntretienFiche(); }
-  if(tab === "offres" && typeof offProfilOptions === "function"){ offProfilOptions(); renderOffResults(); }
+  if(tab === "offres" && typeof offProfilOptions === "function"){ renderOffAvailability(); offProfilOptions(); renderOffResults(); }
   TABS.forEach(function(t){
     document.getElementById("panel-"+t).classList.toggle("active", t === tab);
     document.querySelector('.rail-item[data-tab="'+t+'"]').classList.toggle("is-active", t === tab);
@@ -4302,6 +4307,8 @@ function renderEntretienCorrige(){
   wrap.innerHTML = html;
 }
 
+document.getElementById("btn-off-to-annonce").addEventListener("click", function(){ switchTab("annonce"); });
+document.getElementById("btn-off-to-recherche").addEventListener("click", function(){ switchTab("recherche"); });
 document.getElementById("btn-generer-questions").addEventListener("click", genererQuestionsEntretien);
 document.getElementById("btn-voir-corrige").addEventListener("click", renderEntretienCorrige);
 
@@ -4389,6 +4396,7 @@ function fetchAnnonce(){
     anPoste.value = d.title || anPoste.value;
     anEntreprise.value = d.company || anEntreprise.value;
     anTexte.value = d.description || anTexte.value;
+    state.annonce.source = "";   // annonce relue par lien : plus d'origine API
     var m = state.annonce.meta = state.annonce.meta || {};
     m.lieu = d.location || m.lieu || "";
     m.contrat = (d.contract || "").split(", ").map(function(c){ return CONTRAT_FR[c] || c; }).filter(Boolean).join(", ") || m.contrat || "";
@@ -5254,6 +5262,18 @@ function generateOffreServiceParagraphs(){
 }
 
 /* ===================== OFFRES D'EMPLOI (France Travail) ===================== */
+
+// L'accès à l'API Offres d'emploi n'est pas accordé à ce stade (docs/FRANCE-TRAVAIL.md) : le formulaire est masqué et l'onglet renvoie vers l'onglet Annonce.
+// Repasser à true quand l'accès sera accordé.
+var OFFRES_API_ACTIVE = false;
+// Condition de la licence : l'API ne sert à aucun entraînement ni affinage d'un modèle d'IA. Le contenu d'une offre issue de l'API n'est donc jamais envoyé à l'assistant IA.
+var IA_OFFRE_API_MSG = "Cette annonce vient de l'API France Travail : son contenu n'est jamais envoyé à l'IA (condition de la licence). Colle le texte d'une annonce d'une autre source pour utiliser l'assistant.";
+function offreVientDeLAPI(){ return !!(state.annonce && state.annonce.source === "france-travail"); }
+function renderOffAvailability(){
+  var form = document.getElementById("off-form-card"), note = document.getElementById("off-unavailable"); if(!form || !note) return;
+  form.style.display = OFFRES_API_ACTIVE ? "" : "none";
+  note.style.display = OFFRES_API_ACTIVE ? "none" : "";
+}
 
 var offPlace = null, offLast = null;
 state.offresResultats = [];
@@ -6570,6 +6590,7 @@ function renderEmail(){
   });
 })();
 function emAI(){
+  if(offreVientDeLAPI()){ var e0 = document.getElementById("em-status"); if(e0) e0.textContent = IA_OFFRE_API_MSG; return; }
   var r = emBuild(), st = document.getElementById("em-status"), c = emCfg(), A = state.annonce;
   var system = "Tu rédiges l'e-mail d'accompagnement d'une candidature ou d'une offre de service en France, destiné à un recruteur ou à un décideur. Objectif : retenir l'attention en restant professionnel. Règles : 80 à 120 mots ; vouvoiement ; première phrase centrée sur le destinataire ; une preuve concrète tirée des données ; un seul appel à l'action (échange de 15 minutes) ; mentionne les pièces jointes ; pas de « je me permets », « n'hésitez pas », « je suis très motivé » ; pas de superlatif ; pas de tiret long ; pas de contraste « non pas X mais Y » ; n'écris ni la formule de politesse finale ni la signature. Propose aussi 3 objets de 60 caractères au plus. Réponds par un objet JSON : {\"objets\":[\"…\"],\"corps\":\"…\"}.";
   st.textContent = "En cours…";
@@ -7016,6 +7037,7 @@ function relevantExperiences(max){
   return exps.slice(0, max || 5);
 }
 function annonceForAI(){
+  if(offreVientDeLAPI()) return { contenu_de_l_offre_non_transmis: true };   // licence France Travail : rien de l'offre ne part vers l'IA
   var em = state.annonce.emetteur || {};
   return { poste: scrubForAI(state.annonce.poste), entreprise: scrubForAI(state.annonce.entreprise),
     candidature_spontanee: !!state.annonce.spontanee,
@@ -7029,6 +7051,7 @@ function annonceForAI(){
 /* ---- CV : reformulation des réalisations pour l'annonce ---- */
 function iaReformulerCV(){
   var st = document.getElementById("ia-cv-status");
+  if(offreVientDeLAPI()){ st.textContent = IA_OFFRE_API_MSG; return; }
   if(!state.annonce.texte.trim()){ st.textContent = "Colle d'abord le texte de l'annonce."; return; }
   var exps = relevantExperiences(5);
   if(!exps.length){ st.textContent = "Aucune expérience dans la base."; return; }
@@ -7122,6 +7145,7 @@ function lettreCurrentParagraphs(){ return Array.isArray(state.lettre.corps) && 
 
 document.getElementById("btn-affiner-ia").addEventListener("click", function(){
   var l = state.lettre, st = document.getElementById("affiner-status");
+  if(offreVientDeLAPI()){ st.textContent = IA_OFFRE_API_MSG; return; }
   document.getElementById("affiner-input").value && addRemarque();
   var before = lettreCurrentParagraphs();
   var finishLocal = function(){

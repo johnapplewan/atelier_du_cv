@@ -1,5 +1,12 @@
 # France Travail : accès à l'API « Offres d'emploi »
 
+## Décision en cours
+
+**Option B retenue** : on se passe de l'API pour l'instant. Mesures en place dans l'application :
+
+- `OFFRES_API_ACTIVE = false` (`app/index.html`) : le formulaire de recherche de l'onglet **Offres** est masqué ; un avis explique la situation et propose « Coller une annonce » (onglet Annonce) et la recherche d'entreprises. Repasser la constante à `true` quand un accès sera accordé.
+- **Aucun envoi à l'IA du contenu d'une offre issue de l'API** (condition n° 2) : une annonce créée depuis l'API porte `annonce.source = "france-travail"` ; `offreVientDeLAPI()` bloque alors la reformulation du CV, la réécriture de la lettre par Claude et l'e-mail amélioré par l'IA (message `IA_OFFRE_API_MSG`), et `annonceForAI()` ne renvoie plus rien de l'offre. Relire une annonce par son lien (`fetchAnnonce`) remet la source à vide.
+
 ## État
 
 **Accès refusé à ce stade** (incident INC2791790, « Accès Offres Refusé », élément « API Gateway – Rechercher des offres », code de résolution « Conseil et accompagnement »). France Travail applique une **mesure conservatoire** : les demandes d'accès à l'API Recherche d'offres sont soumises à validation de ses responsables métiers. Le support a clôturé la demande « dans sa configuration actuelle ».
@@ -49,6 +56,60 @@ Licence : https://francetravail.io/produits-partages/documentation/conditions-du
 >
 > Cordialement,
 
+## Comment faire passer la prochaine demande
+
+France Travail a posé des conditions de fond (voir plus haut). Le dossier de redépôt doit y répondre point par point, avec des preuves.
+
+### 1. Démontrer une audience ou une stratégie de diffusion crédible
+
+Le site n'a aucun outil de mesure (principe du produit) : l'audience se prouve autrement.
+
+- Mettre le site en ligne sur son adresse définitive (landing, tarifs, pages légales complétées avec `legal/config.js`).
+- Chiffrer la diffusion avec des moyens compatibles avec la confidentialité : nombre d'inscrits à la liste d'attente (`saas/liste-attente.html`), nombre de personnes ayant répondu à un questionnaire, retours écrits de bêta-testeurs (avec accord).
+- Nouer des partenariats de diffusion et obtenir des **lettres d'intention** : écoles et universités (services d'insertion), missions locales, associations d'aide à l'emploi, Cap emploi, structures d'accompagnement de freelances et de reconversion.
+- Rédiger un **plan de diffusion** daté (canaux, cibles, calendrier sur 6 mois) : relais d'associations, réseaux étudiants, contenus publics, référencement.
+
+### 2. Montrer la complémentarité avec France Travail
+
+Argumenter ce que l'outil fait **en plus** : base personnelle unique, CV et lettre composés pour chaque annonce, score de correspondance, suivi et relances, outils freelance. La candidature se fait toujours sur la source de l'offre.
+
+### 3. Garantir par écrit et dans le produit la gratuité de l'accès aux offres
+
+- Ajouter dans les conditions de vente (`saas/cgv.html`, section « Accès aux offres d'emploi » déjà prévue dans la maquette) et, **au moment du redépôt** (pas avant : aucune offre n'est proposée aujourd'hui), sur la page tarifs un **engagement public** : la recherche d'offres et la candidature restent gratuites, sans compte et sans CV obligatoire, dans toutes les formules.
+- Ne jamais réserver l'accès aux offres, ni le rapprochement avec le parcours, à un compte ou à un tarif.
+- Le rapprochement entre le parcours et les offres reste **local** (dans le navigateur) ; aucune donnée de CV ni historique de recherche n'est stocké côté serveur.
+
+### 4. Respecter la licence dans le produit (déjà en place, à garder)
+
+- Offres affichées **le temps de la recherche, non conservées**, avec mention de la source et lien vers l'offre d'origine.
+- **Aucun usage pour l'IA** : garde-fou `offreVientDeLAPI()` ; engagement à ne jamais entraîner, affiner ni maintenir un modèle avec les offres.
+- Mentions et politique de confidentialité à jour (`legal/`).
+
+### 5. Préparer le dossier
+
+- Une adresse de contact professionnelle et l'identité de l'éditeur renseignée.
+- Une **démonstration** : adresse de test et courte vidéo du parcours (recherche locale, ouverture de l'offre sur la source).
+- Un texte de demande court, factuel, qui reprend les cinq conditions et indique où chacune est respectée (utiliser le brouillon plus haut et le tableau d'analyse).
+- Un calendrier réaliste : redéposer après quelques semaines de diffusion mesurable, en répondant dans l'incident ou par une nouvelle demande selon ce que permet le portail.
+
+### À éviter
+
+Annoncer des offres France Travail avant accord ; afficher un prix, un compte ou un envoi de CV comme préalable à la recherche d'offres ; stocker ou republier les offres ; envoyer un texte d'offre à une IA.
+
+## Autres sources d'offres possibles
+
+À vérifier une par une (conditions, licence, usage par une IA, obligation d'affichage, stockage interdit) avant tout choix. Informations issues de recherches web, non vérifiées auprès des fournisseurs.
+
+| Source | Ce que c'est | Intérêt | Points à vérifier |
+|---|---|---|---|
+| [La bonne alternance](https://www.data.gouv.fr/dataservices/api-la-bonne-alternance) | API publique et gratuite d'opportunités d'alternance en France, alimentée par La bonne alternance et ses sites partenaires | Très adaptée à la cible **étudiants et alternants** | Conditions d'accès et d'usage, quotas, mentions obligatoires |
+| [Offres d'emploi diffusées à France Travail (jeu de données)](https://data.gouv.fr/en/datasets/offres-demploi-diffusees-a-france-travail) | Données brutes publiées sur data.gouv.fr, mises à jour chaque trimestre | Statistiques et cartographie des métiers, pas une recherche en direct | Licence, fraîcheur des données |
+| [Adzuna](https://developer.adzuna.com/overview) | API d'agrégation d'annonces ; clé gratuite immédiate ; pays par code (France probablement `fr`) | Recherche en direct | Les [conditions](https://developer.adzuna.com/docs/terms_of_service) prévoient une période d'essai de 14 jours pour un usage commercial ; limites de requêtes non publiées ; contact avec les fournisseurs d'annonces interdit |
+| [Jooble](https://jooble.jooble.org/api/about) | API REST (POST, clé personnelle) sur demande via un formulaire | Recherche en direct, large couverture | Quotas et durée de vie de la clé non confirmés ; une clé par pays ; conditions d'usage |
+| [Careerjet](https://www.careerjet.im/partners/api) | API partenaire (clé par site éditeur, authentification Basic) | Recherche en direct, localisation française | Contrat partenaire, limites de requêtes, mentions obligatoires |
+
+Pistes non confirmées : offres de l'emploi public et de l'insertion (existence d'une API non établie), ainsi que les grands sites d'emploi (aucune API publique repérée ; ne pas récupérer leurs pages automatiquement). Pour chaque source, vérifier en particulier : l'interdiction éventuelle d'utiliser les contenus avec une IA, l'obligation de renvoyer vers la source, l'interdiction de conserver les offres, et la compatibilité avec une application sans compte ni serveur de stockage.
+
 ## Fichiers concernés
 
-`functions/api/offres.js`, `functions/api/ft-diagnostic.js` (inactif sans `FT_DIAG`), onglet **Offres** de `app/index.html` (module « OFFRES D'EMPLOI (France Travail) »), `legal/confidentialite.html` (section 5) et `legal/mentions-legales.html` (attribution), `README.md` (variables `FT_*`).
+`functions/api/offres.js`, `functions/api/ft-diagnostic.js` (inactif sans `FT_DIAG`), onglet **Offres** de `app/index.html` (module « OFFRES D'EMPLOI (France Travail) » : `OFFRES_API_ACTIVE`, `offreVientDeLAPI`, `renderOffAvailability`, `IA_OFFRE_API_MSG` ; garde-fous dans `annonceForAI`, `iaReformulerCV`, l'affinage de la lettre et `emAI`), `legal/confidentialite.html` (section 5) et `legal/mentions-legales.html` (attribution), `README.md` (variables `FT_*`).

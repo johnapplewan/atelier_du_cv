@@ -71,7 +71,7 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 | 01 | **Ma base** (`base`) | Constituer et fusionner la base de la personne | Import de CV (nom du CV + texte, case « remplacer »), listes modifiables expériences / formations / rubriques / compétences / certifications, liste des CV importés, **carte de la base** (SVG radial + détail par branche, mise en évidence par profil) |
 | 02 | **Mes profils** (`profils`) | Créer des profils de recherche et leur CV type | Profils proposés d'après la base (niveau : déjà exercé / base suffisante / accessible sans expérience / pas assez d'éléments), « Viser un autre métier », éditeur par profil (titre visé, lieu, rayon, contrats, mots-clés, accroche, ton, à compléter, import de texte, **CV type** avec aperçu, ajustements, PDF) |
 | 03 | **Recherche** (`recherche`) | Entreprises à démarcher (candidatures spontanées) | Profil, lieu (recherche de commune), rayon, taille, résultats avec « Candidature spontanée », lien page recrutement, fiche, écarter |
-| 04 | **Offres** (`offres`) | Offres d'emploi France Travail | Profil, mots-clés, lieu, rayon, contrat, période, correspondance avec la base, « Candidater avec cette offre ». **Accès API refusé par France Travail à ce stade** (voir `docs/FRANCE-TRAVAIL.md`) : l'onglet affiche « non activée » |
+| 04 | **Offres** (`offres`) | Offres d'emploi France Travail | Profil, mots-clés, lieu, rayon, contrat, période, correspondance avec la base, « Candidater avec cette offre ». **Accès API refusé par France Travail à ce stade** (voir `docs/FRANCE-TRAVAIL.md`) : `OFFRES_API_ACTIVE = false`, le formulaire est masqué et un avis propose « Coller une annonce » et la recherche d'entreprises ; le contenu d'une offre issue de l'API n'est jamais envoyé à l'IA (`offreVientDeLAPI`) |
 | 05 | **Annonce** (`annonce`) | Saisir ou récupérer l'annonce | Champ lien + « Récupérer l'annonce », poste, entreprise, texte, mots-clés détectés, encadré d'analyse (qui publie : direct / cabinet / intérim / ESN, entreprise finale, lieu, contrat, rémunération, profil utilisé) |
 | 06 | **CV** (`cv`) | CV de la candidature en cours | Identité (nom, contacts, photo, langue FR/EN, accroche), **composition** (cases par élément, manques `*`), score ATS + suggestions + optimisation + plan d'action, **aperçu éditable**, PDF et PDF anonymisé |
 | 07 | **Lettre** (`lettre`) | Lettre de motivation / spontanée / offre de service | Destinataire, langue, ton, affinage (boutons rapides + remarques + « Réécrire avec Claude »), voix de la personne, texte modifiable, aperçu éditable, PDF |
@@ -264,7 +264,7 @@ Les `id` ci-dessous sont lus par le script. **Ne pas les renommer sans adapter l
 
 **panel-offres**
 
-`#panel-offres`, `#off-profil`, `#off-q`, `#off-exp-note`, `#off-lieu`, `#btn-off-lieu`, `#off-lieu-list`, `#off-dist`, `#off-contrat`, `#off-depuis`, `#btn-off-go`, `#off-status`, `#off-results`, `#off-more`, `#off-attrib`
+`#panel-offres`, `#off-unavailable`, `#btn-off-to-annonce`, `#btn-off-to-recherche`, `#off-form-card`, `#off-profil`, `#off-q`, `#off-exp-note`, `#off-lieu`, `#btn-off-lieu`, `#off-lieu-list`, `#off-dist`, `#off-contrat`, `#off-depuis`, `#btn-off-go`, `#off-status`, `#off-results`, `#off-more`, `#off-attrib`
 
 **panel-annonce**
 
@@ -390,7 +390,7 @@ Numéros de ligne omis (ils changent) : chercher le nom dans `app/index.html`. R
 
 **OFFRES D'EMPLOI (France Travail)**
 
-`offProfilOptions`, `offCurrentProfil`, `offLoadProfil`, `offLieuSearch`, `offRun`, `offMatch`, `renderOffResults`, `startFromOffre`
+`offreVientDeLAPI`, `renderOffAvailability`, `offProfilOptions`, `offCurrentProfil`, `offLoadProfil`, `offLieuSearch`, `offRun`, `offMatch`, `renderOffResults`, `startFromOffre`
 
 **MA BASE : fusion de CV, catégories, certifications, carte**
 
