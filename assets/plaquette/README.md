@@ -10,7 +10,7 @@ Dépose ici les photos générées ou prises pour la plaquette freelance.
 |---|---|---|
 | `t2-a.jpg`, `t2-b.jpg`, `t2-c.jpg` | Modèle 2 (Terre), image en arche | 3:4 portrait |
 | `t3-a.jpg`, `t3-b.jpg`, `t3-c.jpg` | Modèle 3 (Affiche), plein cadre | 3:4 portrait |
-| `t4-a1.jpg` à `t4-a3.jpg`, `t4-b1.jpg` à `t4-b3.jpg` | Modèle 4 (Cartes), galerie : un jeu de trois | 16:10 |
+| `t4-1.jpg` à `t4-5.jpg` (numérotées), regroupées par trois dans `PQ_PHOTOS` | Modèle 4 (Cartes), galerie : un jeu de trois | 16:10 |
 | `t8-a.jpg`, `t8-b.jpg`, `t8-c.jpg` | Modèle 8 (Citation) | 4:5 portrait |
 | `t10-a1.jpg` à `t10-a3.jpg`, `t10-b1.jpg` à `t10-b3.jpg` | Modèle 10 (Studio), bande : un jeu de trois | 16:9 |
 | `p-a.jpg`, `p-b.jpg` | Portrait du bandeau « Qui je suis » | 1:1 carré |
