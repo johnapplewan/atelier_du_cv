@@ -50,6 +50,10 @@ Hypothèses retenues faute d'indication : tout ce qui n'est pas lié au freelanc
 - **Freelance** : vérification du SIRET à l'inscription (maquette `saas/verification-siret.html`) : 14 chiffres, clé de Luhn, interrogation de l'annuaire des entreprises (la fonction serveur `functions/api/entreprises.js` existe déjà pour la recherche).
 - **Retour au Gratuit** : une seule fiche de profil reste active ; la personne choisit laquelle garder.
 
+## Contrainte liée à l'API France Travail
+
+Si un accès à l'API Offres d'emploi est un jour accordé, la licence interdit toute rétribution, directe ou indirecte (compte imposé, paiement, collecte de données en amont) en contrepartie de l'accès aux offres et de la candidature. **Règle de conception pour le SaaS** : la recherche d'offres reste gratuite, sans compte et sans CV obligatoire, dans toutes les formules ; les formules payantes ne portent que sur les outils de composition. Détail et historique : `docs/FRANCE-TRAVAIL.md`.
+
 ## Points à trancher
 
 1. Prix TTC ou HT, TVA, affichage des prix.

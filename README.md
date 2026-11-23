@@ -61,7 +61,7 @@ robots (LinkedIn, Indeed…) ne peuvent pas être lus : on colle alors le texte 
 
 ## Offres France Travail (API « Offres d'emploi »)
 
-`functions/api/offres.js` interroge l'API France Travail. Les identifiants ne sont jamais dans le code : ils se définissent dans
+**État : accès refusé par France Travail à ce stade** (voir `docs/FRANCE-TRAVAIL.md`). `functions/api/offres.js` interroge l'API France Travail. Les identifiants ne sont jamais dans le code : ils se définissent dans
 Cloudflare → Workers & Pages → projet → Settings → Variables and Secrets (type « Secret » pour les deux premiers), puis redéployer :
 
 | Variable | Rôle |

@@ -35,6 +35,7 @@ Pour les personnes qui candidatent souvent (étudiants, personnes en recherche d
 - Éviter les contrastes « ce n'est pas X, c'est Y », les listes de négations, les formules toutes faites (« libérez le potentiel », « solution innovante »).
 - Le mot « bêta » et le prix prévu apparaissent ensemble partout où un prix est montré.
 - Les prix et les conditions viennent de `docs/OFFRES-ET-TARIFS.md`.
+- Ne pas annoncer de recherche d'offres France Travail tant que l'accès n'est pas accordé (`docs/FRANCE-TRAVAIL.md`) ; ne jamais présenter l'accès aux offres comme une fonction réservée à un compte ou à un tarif.
 
 ## Parcours de conversion
 

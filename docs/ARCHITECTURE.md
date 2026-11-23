@@ -2,7 +2,7 @@
 
 Document de passation pour retravailler le design (front, UX, UI) hors de la conversation de développement.
 État du code : branche `claude/new-session-6jo73r`, fichier principal `app/index.html` (≈ 7 300 lignes).
-Ce document, `docs/ROADMAP.md`, `docs/OFFRES-ET-TARIFS.md`, `docs/PAGES-SAAS.md` et `docs/MARKETING.md` sont **tenus à jour à chaque modification** de pages, de fonctions, de données, de tarifs ou de textes (voir `CLAUDE.md`) : toute information ajoutée, modifiée ou retirée dans le code l'est aussi ici.
+Ce document, `docs/ROADMAP.md`, `docs/OFFRES-ET-TARIFS.md`, `docs/PAGES-SAAS.md`, `docs/MARKETING.md` et `docs/FRANCE-TRAVAIL.md` sont **tenus à jour à chaque modification** de pages, de fonctions, de données, de tarifs ou de textes (voir `CLAUDE.md`) : toute information ajoutée, modifiée ou retirée dans le code l'est aussi ici.
 
 ---
 
@@ -54,7 +54,7 @@ Navigateur (localStorage)  ←→  app/index.html (état + moteurs de compositio
         │                              ├─ /api/annonce     → page d'une offre (lecture par lien)
         │                              ├─ /api/lieu        → API Adresse (communes)
         │                              ├─ /api/entreprises → API Recherche d'entreprises (data.gouv.fr)
-        │                              └─ /api/offres      → API Offres d'emploi de France Travail (accès en attente)
+        │                              └─ /api/offres      → API Offres d'emploi de France Travail (accès refusé à ce stade, voir `docs/FRANCE-TRAVAIL.md`)
         └─ Assistant IA (facultatif) : copier-coller vers claude.ai, ou envoi direct dans la version claude.ai
 ```
 
@@ -71,7 +71,7 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 | 01 | **Ma base** (`base`) | Constituer et fusionner la base de la personne | Import de CV (nom du CV + texte, case « remplacer »), listes modifiables expériences / formations / rubriques / compétences / certifications, liste des CV importés, **carte de la base** (SVG radial + détail par branche, mise en évidence par profil) |
 | 02 | **Mes profils** (`profils`) | Créer des profils de recherche et leur CV type | Profils proposés d'après la base (niveau : déjà exercé / base suffisante / accessible sans expérience / pas assez d'éléments), « Viser un autre métier », éditeur par profil (titre visé, lieu, rayon, contrats, mots-clés, accroche, ton, à compléter, import de texte, **CV type** avec aperçu, ajustements, PDF) |
 | 03 | **Recherche** (`recherche`) | Entreprises à démarcher (candidatures spontanées) | Profil, lieu (recherche de commune), rayon, taille, résultats avec « Candidature spontanée », lien page recrutement, fiche, écarter |
-| 04 | **Offres** (`offres`) | Offres d'emploi France Travail | Profil, mots-clés, lieu, rayon, contrat, période, correspondance avec la base, « Candidater avec cette offre ». **Accès API en attente côté France Travail** : l'onglet affiche « non activée » tant que l'accès n'est pas accordé |
+| 04 | **Offres** (`offres`) | Offres d'emploi France Travail | Profil, mots-clés, lieu, rayon, contrat, période, correspondance avec la base, « Candidater avec cette offre ». **Accès API refusé par France Travail à ce stade** (voir `docs/FRANCE-TRAVAIL.md`) : l'onglet affiche « non activée » |
 | 05 | **Annonce** (`annonce`) | Saisir ou récupérer l'annonce | Champ lien + « Récupérer l'annonce », poste, entreprise, texte, mots-clés détectés, encadré d'analyse (qui publie : direct / cabinet / intérim / ESN, entreprise finale, lieu, contrat, rémunération, profil utilisé) |
 | 06 | **CV** (`cv`) | CV de la candidature en cours | Identité (nom, contacts, photo, langue FR/EN, accroche), **composition** (cases par élément, manques `*`), score ATS + suggestions + optimisation + plan d'action, **aperçu éditable**, PDF et PDF anonymisé |
 | 07 | **Lettre** (`lettre`) | Lettre de motivation / spontanée / offre de service | Destinataire, langue, ton, affinage (boutons rapides + remarques + « Réécrire avec Claude »), voix de la personne, texte modifiable, aperçu éditable, PDF |
@@ -92,7 +92,7 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 
 1. **Première utilisation** : Ma base → importer un ou plusieurs CV → Mes profils → créer un profil → Annonce (coller un lien ou un texte) → CV → Lettre → PDF.
 2. **Candidature spontanée** : Recherche → choisir un profil et un lieu → résultats → « Candidature spontanée » → CV + lettre générés → suivi créé avec relance à 10 jours.
-3. **Offre France Travail** (quand l'accès sera accordé) : Offres → résultats → « Candidater avec cette offre » → CV et lettre sur mesure.
+3. **Offre France Travail** (parcours inactif : accès à l'API refusé à ce stade, voir `docs/FRANCE-TRAVAIL.md`) : Offres → résultats → « Candidater avec cette offre » → CV et lettre sur mesure.
 4. **Freelance** : Freelance → décrire l'offre → choisir les types de structures → résultats → « Lettre d'offre de service ».
 5. **Offre de service complète (freelance)** : Freelance (cocher des offres suggérées ou saisir les siennes) → Plaquette (choisir les offres, appliquer une accroche et une baseline, modèle, bandeau, images) → PDF → E-mail (type « Offre de service », CV + plaquette) → noter l'envoi dans Plaquette, puis lire ce qui fonctionne et dupliquer la meilleure plaquette pour tester une variante.
 6. **Entretien obtenu** : Entretien → fiche de préparation (présentation, questions à poser, vigilance) → après l'entretien, E-mail type « Remerciement ».

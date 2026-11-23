@@ -11,6 +11,7 @@
 | une page SaaS (ajout, retrait, état, point à trancher) | `docs/PAGES-SAAS.md`, `saas/index.html` et le tableau de la section 13 de `docs/ARCHITECTURE.md` |
 | un message, une audience, une règle éditoriale | `docs/MARKETING.md` |
 | une étape faite, en attente ou à venir | `docs/ROADMAP.md` |
+| l'accès à l'API France Travail ou une autre source d'offres | `docs/FRANCE-TRAVAIL.md`, `README.md`, ligne de l'onglet Offres dans `docs/ARCHITECTURE.md` |
 | le fonctionnement général, le déploiement | `README.md` |
 
 **Quand une information est retirée du code, la retirer exactement de la même façon dans la documentation** (ligne de tableau, identifiant, fonction, page, mention). Ne pas laisser de description d'une fonctionnalité qui n'existe plus.
