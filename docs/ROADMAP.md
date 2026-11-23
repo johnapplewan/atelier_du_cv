@@ -9,7 +9,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 - Lecture d'une annonce par son lien, analyse de l'émetteur (direct, cabinet, intérim, ESN), lettres RAPOS avec règles d'humanisation et contrôle de style, assistant IA par le compte Claude (sans clé API).
 - Score ATS avec suggestions, optimisation automatique, plan d'action Markdown ; CV anonymisé.
 - Suivi des candidatures avec relances, versions enregistrées, plusieurs personnes et plusieurs candidatures.
-- Landing page à la racine (`/`), application sous `/app/`, page tarifs (`tarifs/`) avec quatre formules et mention « gratuit pendant la bêta », 19 maquettes SaaS non routées (`saas/`), documentation des offres et du positionnement.
+- Landing page à la racine (`/`), application sous `/app/`, page « Gratuit pour le moment » (`tarifs/`), sans prix, 13 maquettes SaaS non routées (`saas/`), documentation des offres et du positionnement.
 - E-mail d'envoi (cinq types, signature freelance, bonnes pratiques), fiche de préparation à l'entretien, banque d'images de la plaquette.
 - Mobile (navigation par groupes), thème par bouton icône, accueil (premiers pas, alerte des relances).
 - Pages légales, polices et bibliothèques auto-hébergées, en-têtes de sécurité, documentation (`ARCHITECTURE.md`, `METHODE-LETTRE-RAPOS.md`).
@@ -19,6 +19,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 | Sujet | Attente | Prochaine action |
 |---|---|---|
 | Offres d'emploi France Travail | **Accès refusé** (incident INC2791790, mesure conservatoire) ; option B retenue : formulaire masqué, aucun envoi d'offre à l'IA | Redéposer après diffusion avec le dossier décrit dans `docs/FRANCE-TRAVAIL.md` ; écrire à La bonne alternance (usage non lucratif exigé) et à Adzuna (tester la France, demander la licence) : brouillons dans `docs/FRANCE-TRAVAIL.md` |
+| Sources d'offres de remplacement | Clés ajoutées dans le projet : `BONNE_ALTERNANCE_KEY`, `APP_ID`/`APP_KEY` (Adzuna, 25 appels), `AUTORISATION_KEY` (TheirStack, 200 crédits) | Activer `SOURCES_DIAG`, lancer chaque test une fois (`/api/sources-diag`), puis brancher la source retenue ; LoopCV écartée (pas d'offres via l'API) |
 | La Bonne Boîte | Habilitation (scope accordé, API répond « 403 Invalid scope ») ; même fournisseur que l'API Offres | Vérifier ses conditions avant toute nouvelle demande |
 | ROME 4.0 | Noms de scopes à confirmer sur l'application | Affiner les profils avec les métiers et compétences du référentiel |
 | Identité de l'éditeur | À renseigner dans `legal/config.js` | Relecture juridique des pages légales |
@@ -31,15 +32,14 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 4. Documents PDF balisés (accessibilité), audit RGAA.
 5. Découper `index.html` (CSS, modules JavaScript) avant la refonte du design.
 
-## Version SaaS : à décider et à construire
+## Modèle économique : gratuit pour le moment
 
-Les maquettes `saas/` et `docs/OFFRES-ET-TARIFS.md` cadrent le périmètre ; il reste à trancher (liste complète dans `docs/OFFRES-ET-TARIFS.md`) :
+Décision : aucun prix ni formule (voir `docs/OFFRES-ET-TARIFS.md`). Il reste à trancher :
 
-- prix TTC ou HT, règles de changement de formule, de résiliation, de remboursement ;
-- vérification du justificatif étudiant (manuelle ou automatique, conservation) ;
-- vérification du SIRET et conservation du numéro ;
-- prestataire de paiement, facturation, conditions générales de vente ;
-- comptes, synchronisation entre appareils, reprise des données locales ;
+- le financement de l'IA au-delà du copier-coller (clé personnelle facultative, plafond, financement par des tiers) ;
+- la structure juridique si un financement apparaît ;
+- les comptes et la synchronisation entre appareils, si on les ouvre : qui finance l'hébergement ;
+- l'abandon ou la reprise des maquettes payantes (retirées, récupérables dans l'historique git).
 
 ## Notes pour plus tard
 

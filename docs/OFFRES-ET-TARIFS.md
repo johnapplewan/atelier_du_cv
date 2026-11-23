@@ -1,77 +1,60 @@
-# Offres et tarifs
+# Gratuité, offres et coût de l'IA
 
-Source de vérité des formules. La page `tarifs/index.html`, la section « Tarifs » de `index.html` (landing, à la racine) et les maquettes `saas/inscription.html`, `saas/abonnement.html` et `saas/paiement.html` doivent rester alignées sur ce document.
+Source de vérité du modèle économique. La page `tarifs/index.html`, la section « Gratuit » de `index.html` (landing, à la racine), les maquettes `saas/` et les textes de `docs/MARKETING.md` doivent rester alignés sur ce document.
 
-## Statut actuel : bêta gratuite
+## Décision actuelle : gratuit pour le moment
 
-Pendant la bêta, **les quatre formules sont gratuites** : aucune carte bancaire, aucun compte. Les prix ci-dessous sont les prix prévus à la fin de la bêta ; ils peuvent évoluer. Les pages publiques l'indiquent partout où un prix apparaît (badge « Gratuit pendant la bêta », bandeau en tête de la page tarifs).
+- **Aucun prix, aucune formule, aucun paiement** n'est affiché ni prévu à cette date. Toutes les fonctions sont ouvertes à tout le monde, sans compte et sans carte bancaire. Les pages publiques disent « Gratuit pour le moment » et rien d'autre sur ce sujet.
+- **Pourquoi** : rester dans un cadre **non commercial** pour pouvoir utiliser des sources d'offres dont la licence exclut les usages lucratifs ou la facturation de l'accès (La bonne alternance, France Travail ; voir `docs/FRANCE-TRAVAIL.md`), et ne pas avoir à payer l'IA de tout le monde.
+- Les anciennes formules payantes et leurs maquettes (abonnement, paiement, factures, justificatif étudiant, vérification du SIRET, conditions de vente) ont été **retirées** ; elles restent consultables dans l'historique git (commit `7e6c84f` et précédents) et résumées en fin de document.
 
-## Les quatre formules
+## Qui paie l'IA ?
 
-| Formule | Prix prévu | Accès | Profils de recherche | Fonctions freelance |
-|---|---|---|---|---|
-| **Gratuit** | 0 € | Aucune condition | **1** | Non |
-| **Étudiant** | 10 € par an | Sur justificatif d'inscription (certificat de scolarité, carte d'étudiant), à renouveler chaque année | Illimités | Non |
-| **Demandeur d'emploi** | 20 € par an | Ouverte à tous, sans justificatif : demandeurs d'emploi **et salariés en transition** (même formule, même tarif) | Illimités | Non |
-| **Freelance** | 10 € par mois ou **79 € par an** (soit 6,58 € par mois, 41 € de moins qu'au mois) | Ouverte à tous ; **SIRET vérifié à l'inscription** (sert à rattacher la structure) | Illimités | Oui |
+**Aujourd'hui, personne côté éditeur : l'atelier n'appelle aucune IA à ses frais.** Le code n'a aucune clé d'API ni appel serveur vers un modèle. L'assistant d'écriture (`iaAsk`) fonctionne de deux façons, toutes deux à la charge de la personne :
 
-Les formules Étudiant et Demandeur d'emploi donnent **exactement les mêmes options** ; seuls l'accès et le prix changent. Les **salariés en transition** (quatrième audience) utilisent la formule Demandeur d'emploi, au même tarif : aucune formule distincte.
+- **Direct** : uniquement quand la page est ouverte dans claude.ai (fonction `window.claude`), avec le compte Claude de la personne ;
+- **Copier-coller** : le message est copié vers claude.ai, la réponse est collée dans l'atelier.
 
-## Matrice des fonctions
+Les fonctions de base (CV, lettre, e-mail, plaquette, suivi) n'utilisent aucune IA. Les pages publiques l'expliquent (« Personne ne paie la consommation des autres »).
 
-| Fonction | Gratuit | Étudiant | Demandeur d'emploi | Freelance |
-|---|---|---|---|---|
-| Profils de recherche | 1 | Illimités | Illimités | Illimités |
-| Base personnelle et import de CV | oui | oui | oui | oui |
-| CV composé selon l'annonce, PDF | oui | oui | oui | oui |
-| Score de correspondance (ATS) et plan d'action | oui | oui | oui | oui |
-| Lettre, contrôle de style, PDF | oui | oui | oui | oui |
-| CV anonymisé | oui | oui | oui | oui |
-| Recherche d'entreprises (candidatures spontanées) | oui | oui | oui | oui |
-| Suivi des candidatures et relances | oui | oui | oui | oui |
-| E-mail d'envoi (offre, spontanée, relance, remerciement) | oui | oui | oui | oui |
-| Fiche de préparation à l'entretien | oui | oui | oui | oui |
-| Assistant IA par le compte Claude (facultatif) | oui | oui | oui | oui |
-| Sauvegarde et restauration par fichier | oui | oui | oui | oui |
-| Offres commerciales suggérées | non | non | non | oui |
-| Accroches et baselines | non | non | non | oui |
-| Plaquettes A4 (10 modèles, plusieurs plaquettes) | non | non | non | oui |
-| Suivi des envois et statistiques de plaquettes | non | non | non | oui |
-| Démarchage des intermédiaires, lettre d'offre de service | non | non | non | oui |
-| E-mail d'offre de service, signature avec SIRET | non | non | non | oui |
-| Compte et synchronisation entre appareils | à venir | à venir | à venir | à venir |
+**Limite à anticiper** : en SaaS sur un domaine propre, le mode direct (`window.claude`) n'existera plus ; il restera le copier-coller.
 
-Hypothèses retenues faute d'indication : tout ce qui n'est pas lié au freelance est ouvert à toutes les formules ; seule la limite à un profil distingue le Gratuit. À confirmer (voir « Points à trancher »).
+## Options pour l'IA si on veut plus, sans devenir commercial ni payer pour tous
 
-## Règles d'accès
+| Option | Principe | Coût pour l'éditeur | Remarques |
+|---|---|---|---|
+| **A. Statu quo** (recommandé) | Copier-coller vers claude.ai, direct dans claude.ai | Nul | Un peu moins fluide hors claude.ai |
+| **B. Clé personnelle (BYOK)** | La personne saisit sa propre clé d'API, stockée dans son navigateur, appels depuis le navigateur | Nul | Contredit « aucune clé d'API dans l'application » et demande d'ouvrir `connect-src` de la CSP (`_headers`) vers le fournisseur ; réservé aux utilisateurs avancés ; à présenter comme facultatif |
+| **C. Quota gratuit plafonné** | L'éditeur finance un petit nombre d'actions par personne et par mois, avec un plafond mensuel global qui coupe le service | Borné par le plafond | Demande un serveur, un compte ou un identifiant pour compter, et un modèle économique ; contraire à « sans compte » |
+| **D. Modèle local dans le navigateur** | Petit modèle exécuté sur l'appareil (WebGPU) | Nul | Gros téléchargement, qualité limitée ; piste à long terme |
+| **E. Financement non lucratif** | Association, mécénat, partenaires (écoles, collectivités), dons | Pris en charge par des tiers | Question juridique (définition de « non lucratif » selon chaque licence) à faire valider ; ne résout rien sans structure |
+| **F. IA payante en option** | Formule payante pour l'IA seulement | Couvert par les revenus | **À éviter** tant qu'on dépend de sources d'offres exigeant un usage non lucratif (voir `docs/FRANCE-TRAVAIL.md`) |
 
-- **Étudiant** : justificatif examiné (maquette `saas/verification-etudiant.html`). Pendant la vérification, la personne reste sur la formule Gratuit.
-- **Demandeur d'emploi** : aucune démarche.
-- **Freelance** : vérification du SIRET à l'inscription (maquette `saas/verification-siret.html`) : 14 chiffres, clé de Luhn, interrogation de l'annuaire des entreprises (la fonction serveur `functions/api/entreprises.js` existe déjà pour la recherche).
-- **Retour au Gratuit** : une seule fiche de profil reste active ; la personne choisit laquelle garder.
-
-## Contrainte liée à l'API France Travail
-
-Si un accès à l'API Offres d'emploi est un jour accordé, la licence interdit toute rétribution, directe ou indirecte (compte imposé, paiement, collecte de données en amont) en contrepartie de l'accès aux offres et de la candidature. **Règle de conception pour le SaaS** : la recherche d'offres reste gratuite, sans compte et sans CV obligatoire, dans toutes les formules ; les formules payantes ne portent que sur les outils de composition. Détail et historique : `docs/FRANCE-TRAVAIL.md`.
+**Recommandation** : A maintenant ; B plus tard si la demande existe ; ne jamais financer l'IA des utilisateurs sans plafond. **Séparer deux choses** : l'accès aux offres et aux outils de base (gratuit, sans compte, sans condition) et l'assistant d'écriture (à la charge de la personne).
 
 ## Points à trancher
 
-1. Prix TTC ou HT, TVA, affichage des prix.
-2. Règles de changement de formule, de résiliation, de remboursement et de prorata ; droit de rétractation pour un service numérique.
-3. Justificatif étudiant : formats acceptés, vérification manuelle ou automatique, durée de conservation du fichier, délai de réponse.
-4. SIRET : conservation du numéro (il rattache la structure et alimente la signature des e-mails), données affichées à la confirmation.
-5. Le Gratuit doit-il inclure certaines fonctions seulement en lecture (par exemple une plaquette) ?
-6. Existe-t-il d'autres limites par formule (nombre de candidatures, de PDF, de recherches d'entreprises) ?
-7. Les fonctions de synchronisation entre appareils sont-elles réservées aux formules payantes ?
-8. Prestataire de paiement, facturation, numérotation.
-9. Remise ou période d'essai à la fin de la bêta pour les personnes inscrites pendant la bêta.
+1. Option B (clé personnelle) : l'ouvre-t-on, et sous quelle forme (réglage, avertissement sur la CSP) ?
+2. Structure juridique si un financement apparaît (association, mécénat, partenariats).
+3. Si les comptes arrivent (synchronisation entre appareils), rester gratuit : qui finance l'hébergement ?
+4. Wording public à garder tant qu'aucune décision n'est prise : « Gratuit pour le moment ».
 
-## Où chaque information est utilisée
+## Historique : hypothèse de quatre formules (retirée)
+
+Pour mémoire, l'hypothèse étudiée puis écartée :
+
+| Formule | Prix prévu | Accès |
+|---|---|---|
+| Gratuit | 0 € | 1 profil de recherche |
+| Étudiant | 10 € par an | Justificatif d'inscription |
+| Demandeur d'emploi (et salariés en transition) | 20 € par an | Sans justificatif |
+| Freelance | 10 € par mois ou 79 € par an | SIRET vérifié à l'inscription |
+
+Ces formules, la matrice de fonctions et les maquettes de paiement sont retirées du site et du dépôt. Elles pourront être reprises depuis l'historique si la décision change, après vérification des licences des sources d'offres.
+
+## Où cette décision est utilisée
 
 | Information | Fichiers |
 |---|---|
-| Prix et conditions | `tarifs/index.html` (cartes, tableau, FAQ), `index.html` (landing : section Tarifs, panneaux « Pour qui »), `saas/inscription.html`, `saas/abonnement.html`, `saas/paiement.html` |
-| Matrice des fonctions | `tarifs/index.html` (tableau comparatif) |
-| Message « gratuit pendant la bêta » | `tarifs/index.html`, `index.html` (landing), `saas/inscription.html`, `saas/abonnement.html`, `saas/liste-attente.html`, JSON-LD des deux pages |
-
-Toute modification d'un prix ou d'une fonction se fait ici d'abord, puis dans les fichiers de ce tableau.
+| « Gratuit pour le moment », explication du coût de l'IA | `tarifs/index.html`, `index.html` (landing : badge, section « Gratuit », FAQ, microtextes), JSON-LD des deux pages (`price: 0`) |
+| Inscription sans prix (situation seulement) | `saas/inscription.html`, `saas/liste-attente.html` |

@@ -2,7 +2,7 @@
 
 Document de passation pour retravailler le design (front, UX, UI) hors de la conversation de développement.
 État du code : branche `claude/new-session-6jo73r`, fichier principal `app/index.html` (≈ 7 300 lignes).
-Ce document, `docs/ROADMAP.md`, `docs/OFFRES-ET-TARIFS.md`, `docs/PAGES-SAAS.md`, `docs/MARKETING.md` et `docs/FRANCE-TRAVAIL.md` sont **tenus à jour à chaque modification** de pages, de fonctions, de données, de tarifs ou de textes (voir `CLAUDE.md`) : toute information ajoutée, modifiée ou retirée dans le code l'est aussi ici.
+Ce document, `docs/ROADMAP.md`, `docs/OFFRES-ET-TARIFS.md`, `docs/PAGES-SAAS.md`, `docs/MARKETING.md` et `docs/FRANCE-TRAVAIL.md` sont **tenus à jour à chaque modification** de pages, de fonctions, de données, de modèle économique ou de textes (voir `CLAUDE.md`) : toute information ajoutée, modifiée ou retirée dans le code l'est aussi ici.
 
 ---
 
@@ -26,10 +26,10 @@ Principes de conception à conserver :
 |---|---|
 | `app/index.html` | **Toute l'application** : HTML des écrans, CSS (`<style>`), JavaScript (`<script>`, sans framework ni build). Routée sous `/app/` ; ses ressources sont référencées en relatif (`../vendor/`, `../prompts.js`, `../legal/`, `../assets/`), les fonctions serveur en absolu (`/api/...`). |
 | `vendor/` | `fonts.css` + `fonts/*.woff2` (Newsreader, Public Sans, IBM Plex Mono, Space Grotesk, Bebas Neue ; latin et latin-ext), `html2canvas.min.js`, `jspdf.umd.min.js` (génération PDF). |
-| `index.html` (racine) | **Landing page** publique (quatre audiences, fonctionnalités, confidentialité, tarifs, FAQ). Routée sous `/`. |
-| `tarifs/index.html` | **Page tarifs** publique : quatre formules, tableau comparatif, FAQ, mention « gratuit pendant la bêta ». Routée sous `/tarifs/`. |
-| `saas/*.html` | **Maquettes SaaS non routées** (19 pages : connexion, inscription, vérifications, compte, abonnement, paiement…). `noindex`. Voir `docs/PAGES-SAAS.md`. |
-| `site/site.css`, `site/site.js` | Feuille de style et script **communs** à la landing, aux tarifs et aux maquettes SaaS (menu, onglets « Pour qui », bascule mensuel/annuel). |
+| `index.html` (racine) | **Landing page** publique (quatre audiences, fonctionnalités, confidentialité, section « Gratuit », FAQ). Routée sous `/`. |
+| `tarifs/index.html` | **Page « Gratuit pour le moment »** (adresse historique `/tarifs/`) : ce qui est inclus, comment l'IA est prise en charge, FAQ. Aucun prix. |
+| `saas/*.html` | **Maquettes SaaS non routées** (13 pages : connexion, inscription, vérification de l'e-mail, mot de passe, bienvenue, reprise des données, compte, données, aide…). `noindex`. Voir `docs/PAGES-SAAS.md`. |
+| `site/site.css`, `site/site.js` | Feuille de style et script **communs** à la landing, aux tarifs et aux maquettes SaaS (menu, onglets « Pour qui »). |
 | `assets/landing/` | Captures d'écran de l'application (données fictives) utilisées par la landing, en WebP. |
 | `assets/plaquette/` | Banque d'images de la plaquette (JPEG, servis tels quels) ; `README.md` du dossier : nommage, formats, règles. Liste des fichiers proposés dans l'application : `PQ_PHOTOS` (`index.html`). |
 | `functions/api/*.js` | Cloudflare Pages Functions (côté serveur, voir §7). |
@@ -85,7 +85,7 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 **Barre haute** : marque, bouton icône de thème (soleil, lune ou demi-cercle pour automatique ; un clic passe au suivant), « Assistant IA : <mode> », « Tout effacer », « CV + Lettre (PDF) », « Télécharger le dossier complet (PDF) ».
 **Barre Personne** : choisir, ajouter, renommer, supprimer une personne.
 **Barre Candidature** : choisir, nommer, nouvelle, dupliquer, supprimer, Sauvegarder (fichier .json) / Restaurer.
-**Pied de page** : liens vers la présentation, les tarifs et les pages légales.
+**Pied de page** : liens vers la présentation, la page « Gratuit » (`/tarifs/`) et les pages légales.
 **Bandeau d'accueil** (`#home-strip`, en haut du contenu) : « Premiers pas » (importer un CV, créer un profil, préparer une candidature ; masquable, mémorisé par personne) et alerte « N relances à faire » (« Voir », « Plus tard »). À l'ouverture, une base vide ouvre directement « Ma base ».
 
 ### Parcours principaux
@@ -202,6 +202,7 @@ Dossier (une candidature en cours) = { id, titre, titreAuto, candidatureId,
 | `/api/entreprises` | `naf`, `lat`/`lon`/`radius` ou `dep`, `taille`, `page` | 20 entreprises actives (nom, activité, effectif, ville, fiche) | Secteur, zone, taille (API Recherche d'entreprises) |
 | `/api/offres` | `q`, `commune`, `distance`, `contrat`, `experience`, `depuis`, `page` | 20 offres normalisées | Critères de recherche (API France Travail ; variables `FT_CLIENT_ID`, `FT_CLIENT_SECRET`, `FT_SCOPE` facultatif) |
 | `/api/ft-diagnostic` | `probe`, `scope`, `path` | Diagnostic des accès France Travail ; **inactif** tant que la variable `FT_DIAG` n'existe pas (à supprimer du dépôt si inutile) | — |
+| `/api/sources-diag` | `source` (`lba`, `adzuna`, `theirstack`), `confirm=1` | Résumé d'**un seul** appel de test (statut, comptages, quelques champs) ; sans `confirm=1`, décrit l'appel sans le faire ; **inactif** tant que `SOURCES_DIAG` n'est pas `1` ; ne renvoie jamais de clé (à supprimer après les tests) | Variables `BONNE_ALTERNANCE_KEY`, `APP_ID`, `APP_KEY`, `AUTORISATION_KEY` ; voir `docs/FRANCE-TRAVAIL.md` |
 
 ---
 
@@ -452,15 +453,15 @@ La **landing est à la racine** (`/`, fichier `index.html`) et l'**application s
 | Page | Fichier | URL | Rôle |
 |---|---|---|---|
 | Landing | `index.html` | `/` | Présenter l'atelier à quatre audiences (étudiants, recherche d'emploi, salariés en transition, freelances) et amener vers l'application |
-| Tarifs | `tarifs/index.html` | `/tarifs/` | Quatre formules, comparatif, FAQ ; indique que tout est gratuit pendant la bêta |
+| Gratuit | `tarifs/index.html` | `/tarifs/` | Dit que tout est gratuit pour le moment, liste ce qui est inclus, explique que l'IA passe par le compte de la personne ; aucun prix |
 
-**Sections de la landing** (ordre) : en-tête collant, héros (titre, sous-titre, deux boutons, capture, mention de bêta), bandeau de quatre preuves vérifiables, problème (« Candidater, c'est réécrire »), trois étapes, **Pour qui** (quatre volets en onglets : Étudiants, Recherche d'emploi, Salariés en transition, Freelances ; tous visibles sans JavaScript), fonctionnalités (six cartes), confidentialité (section sombre), aperçu des tarifs, FAQ (8 questions, `<details>`), appel final, pied de page. Données structurées JSON-LD `SoftwareApplication`.
+**Sections de la landing** (ordre) : en-tête collant, héros (titre, sous-titre, deux boutons, capture, mention « Gratuit pour le moment »), bandeau de quatre preuves vérifiables, problème (« Candidater, c'est réécrire »), trois étapes, **Pour qui** (quatre volets en onglets : Étudiants, Recherche d'emploi, Salariés en transition, Freelances ; tous visibles sans JavaScript), fonctionnalités (six cartes), confidentialité (section sombre), section « Gratuit », FAQ (8 questions, `<details>`), appel final, pied de page. Données structurées JSON-LD `SoftwareApplication`.
 
-**Sections de la page tarifs** : en-tête avec bandeau « Rien n'est facturé aujourd'hui », quatre cartes de formule (la carte Freelance a une bascule par mois / par an), « Quelle formule pour toi ? », tableau comparatif accessible, FAQ (8 questions). JSON-LD `Product` avec quatre offres.
+**Sections de la page « Gratuit »** : en-tête et bandeau « Aucun tarif n'est affiché ni prévu à cette date », « Tout est ouvert » (deux cartes : pour tout le monde, pour les freelances en plus), « Et l'IA ? » (trois cartes : facultatif, ton compte pas le nôtre, tu vois ce qui part), FAQ (6 questions), appel final. JSON-LD `Product` avec une offre à 0 €.
 
-**Contrat HTML / JavaScript** (`site/site.js`) : `.nav` + `.menu-btn` (menu mobile), `[data-tabs]` avec `[role=tab]` / `.pane` (onglets, flèches du clavier, repli sans JavaScript via `.noscript-panes`), `[data-billing]` avec `button[data-mode]` et `[data-price-fl]` (bascule mensuel / annuel). Les ancres `#fonctions`, `#pour-qui`, `#faq`, `#etudiants`, `#emploi`, `#transition`, `#freelance`, `#quelle-formule`, `#gratuit`, `#etudiant` sont utilisées par la navigation et les liens entre pages.
+**Contrat HTML / JavaScript** (`site/site.js`) : `.nav` + `.menu-btn` (menu mobile), `[data-tabs]` avec `[role=tab]` / `.pane` (onglets, flèches du clavier, repli sans JavaScript via `.noscript-panes`). Les ancres `#fonctions`, `#pour-qui`, `#faq`, `#etudiants`, `#emploi`, `#transition`, `#freelance` sont utilisées par la navigation et les liens entre pages.
 
-**Design** : jetons dans `site/site.css` (`--bg`, `--brand` `#2E4C82`, `--brass`, polices Newsreader, Public Sans, IBM Plex Mono), composants `.nav`, `.btn`, `.card`, `.plan`, `.compare`, `.faq`, `.shot`, `.ticks`, `.proofbar`. Les captures sont dans `assets/landing/` et utilisent des données fictives (mention affichée sous chaque capture).
+**Design** : jetons dans `site/site.css` (`--bg`, `--brand` `#2E4C82`, `--brass`, polices Newsreader, Public Sans, IBM Plex Mono), composants `.nav`, `.btn`, `.card`, `.callout`, `.faq`, `.shot`, `.ticks`, `.proofbar`. Les captures sont dans `assets/landing/` et utilisent des données fictives (mention affichée sous chaque capture).
 
 **Référencement** : `sitemap.xml` liste la landing et les tarifs ; `robots.txt` interdit `/saas/` et `/api/` ; `_headers` ajoute `X-Robots-Tag: noindex` sur `/saas/*`.
 
@@ -477,19 +478,13 @@ Toutes portent `noindex`, un bandeau « Maquette non routée » et un bloc « No
 | Vérification de l'e-mail | `saas/verification-email.html` | `/inscription/verification-email` | Public (compte créé) |
 | Mot de passe oublié | `saas/mot-de-passe-oublie.html` | `/mot-de-passe-oublie` | Public |
 | Nouveau mot de passe | `saas/nouveau-mot-de-passe.html` | `/mot-de-passe/nouveau` | Public avec jeton |
-| Justificatif étudiant | `saas/verification-etudiant.html` | `/inscription/etudiant` | Connecté, formule Étudiant |
-| Vérification du SIRET | `saas/verification-siret.html` | `/inscription/siret` | Connecté, formule Freelance |
 | Bienvenue (onboarding) | `saas/bienvenue.html` | `/bienvenue` | Connecté, premier passage |
 | Reprise des données locales | `saas/migration-donnees.html` | `/migration` | Connecté |
 | Mon compte | `saas/compte.html` | `/compte` | Connecté |
-| Abonnement | `saas/abonnement.html` | `/abonnement` | Connecté |
-| Paiement | `saas/paiement.html` | `/abonnement/paiement` | Connecté |
-| Factures | `saas/factures.html` | `/abonnement/factures` | Connecté |
 | Mes données | `saas/donnees.html` | `/compte/donnees` | Connecté |
 | Aide et contact | `saas/aide.html` | `/aide` | Public |
-| Conditions générales de vente | `saas/cgv.html` | `/cgv` | Public |
 | Liste d'attente | `saas/liste-attente.html` | `/liste-attente` | Public |
 | Page introuvable | `saas/erreur-404.html` | `/404` | Public |
 | Maintenance | `saas/maintenance.html` | `/maintenance` | Public |
 
-Les formules, leurs conditions (justificatif étudiant, SIRET vérifié) et la matrice des fonctions sont dans `docs/OFFRES-ET-TARIFS.md`.
+Le modèle économique (gratuit pour le moment) et le coût de l'IA sont dans `docs/OFFRES-ET-TARIFS.md`.

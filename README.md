@@ -14,7 +14,7 @@ aucun cookie, aucun outil de mesure.
 |---|---|
 | `index.html` | Landing page (racine du site) |
 | `app/index.html` | L'application (tout le HTML, le CSS et le JavaScript), servie sous `/app/` |
-| `tarifs/` | Page tarifs (publique) |
+| `tarifs/` | Page « Gratuit pour le moment » (publique) |
 | `saas/` | Maquettes de pages pour la version SaaS (non routées, `noindex`) |
 | `site/`, `assets/` | Style et script communs des pages publiques ; captures (`assets/landing/`) et banque d'images de la plaquette (`assets/plaquette/`) |
 | `functions/` | Fonctions serveur Cloudflare Pages |
@@ -58,6 +58,10 @@ robots (LinkedIn, Indeed…) ne peuvent pas être lus : on colle alors le texte 
 - Polices (`vendor/fonts*`) et bibliothèques PDF (`vendor/*.js`) sont hébergées sur le site : aucune ressource tierce n'est chargée.
 - `_headers` : politique de sécurité du contenu (CSP), HSTS, X-Frame-Options, etc. (Cloudflare Pages).
 - `robots.txt` et `sitemap.xml` : à garder à jour si le domaine change.
+
+## Sources d'offres d'emploi (en cours d'évaluation)
+
+Variables du projet Cloudflare Pages : `BONNE_ALTERNANCE_KEY` (La bonne alternance), `APP_ID` et `APP_KEY` (Adzuna, 25 appels), `AUTORISATION_KEY` (TheirStack, 200 crédits). La fonction `functions/api/sources-diag.js` (inactive sans `SOURCES_DIAG=1`) fait **un seul appel de test** par source, avec `confirm=1`, sans jamais renvoyer de clé. Détail et conditions de chaque source : `docs/FRANCE-TRAVAIL.md`.
 
 ## Offres France Travail (API « Offres d'emploi »)
 

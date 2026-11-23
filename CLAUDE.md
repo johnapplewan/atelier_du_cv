@@ -7,7 +7,7 @@
 | Si tu changes… | Mets à jour |
 |---|---|
 | un onglet, une fonction, un identifiant, le modèle de données, un moteur, le design, un fichier du dépôt | `docs/ARCHITECTURE.md` (tableau des écrans, modèle de données, moteurs, identifiants, index des fonctions, section 13 pour le site public et les maquettes) |
-| une formule, un prix, une condition d'accès, une fonction réservée à une formule | `docs/OFFRES-ET-TARIFS.md`, puis `tarifs/index.html`, `index.html` (landing) et les maquettes `saas/` concernées |
+| le modèle économique (gratuité, coût de l'IA, tout futur tarif), une condition d'accès | `docs/OFFRES-ET-TARIFS.md`, puis `tarifs/index.html`, `index.html` (landing) et les maquettes `saas/` concernées |
 | une page SaaS (ajout, retrait, état, point à trancher) | `docs/PAGES-SAAS.md`, `saas/index.html` et le tableau de la section 13 de `docs/ARCHITECTURE.md` |
 | un message, une audience, une règle éditoriale | `docs/MARKETING.md` |
 | une étape faite, en attente ou à venir | `docs/ROADMAP.md` |
@@ -22,7 +22,7 @@
 - Rien d'inventé dans les documents produits ; les manques sont signalés par un astérisque.
 - Pas de statistique, de témoignage ni d'avis sans source dans les textes publics ; les captures d'écran utilisent des données fictives.
 - Interface en français, tutoiement.
-- Pendant la bêta, toutes les formules sont gratuites : tout prix affiché porte la mention « gratuit pendant la bêta ».
+- Gratuit pour le moment : aucun prix ni formule affiché ; ne rien annoncer de payant. L'atelier n'appelle aucune IA à ses frais (assistant par le compte Claude de la personne ou copier-coller). Ne jamais lier l'accès aux offres d'emploi à un compte ou à un paiement.
 
 ## Vérifications avant livraison
 

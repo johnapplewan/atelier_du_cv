@@ -25,14 +25,4 @@
     var h = location.hash.replace("#", ""), first = panes.some(function(p){ return p.id === h; }) ? h : panes[0].id;
     show(first);
   }
-  // Bascule mensuel / annuel de la formule Freelance.
-  var bill = document.querySelector("[data-billing]");
-  if(bill){
-    var set = function(mode){
-      bill.querySelectorAll("button").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-mode") === mode ? "true" : "false"); });
-      document.querySelectorAll("[data-price-fl]").forEach(function(el){ el.hidden = el.getAttribute("data-price-fl") !== mode; });
-    };
-    bill.addEventListener("click", function(e){ var b = e.target.closest("button"); if(b) set(b.getAttribute("data-mode")); });
-    set("annuel");
-  }
 })();

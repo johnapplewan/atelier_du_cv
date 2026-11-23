@@ -12,19 +12,19 @@ Pour les personnes qui candidatent souvent (étudiants, personnes en recherche d
 
 ## Audiences
 
-| Audience | Situation | Promesse | Preuves vérifiables | Formule prévue |
-|---|---|---|---|---|
-| Étudiants et alternants | Peu d'expérience, besoin d'un premier CV, de stages, d'alternance | Un premier CV avec ce qu'on a déjà ; niveau honnête par métier ; manques signalés | Profils « accessible sans expérience », astérisques de manque, candidatures spontanées, fiche d'entretien | Étudiant, 10 € par an |
-| Recherche d'emploi | Plusieurs candidatures par semaine, CV à adapter à chaque annonce | Dix candidatures sans dix CV à refaire | Score de correspondance, CV au format ATS, lettre avec contrôle de style, suivi et relances à 10 jours, e-mail d'envoi | Demandeur d'emploi, 20 € par an |
-| Salariés en transition | Salariés qui préparent un autre métier, avec des années d'expérience mais pas dans le métier visé | Changer de métier sans repartir de zéro | Un profil par métier visé avec niveau honnête (« déjà exercé », « accessible sans expérience », « à renforcer »), CV qui remet l'utile devant, CV anonymisé, candidatures spontanées | Demandeur d'emploi, 20 € par an (même formule, même tarif) |
-| Freelances | Démarcher des clients et des intermédiaires | Une offre claire, une plaquette A4, un e-mail qui se lit | Offres suggérées, accroches, 10 modèles de plaquette, suivi des envois et statistiques, signature avec SIRET | Freelance, 10 € par mois ou 79 € par an |
+| Audience | Situation | Promesse | Preuves vérifiables |
+|---|---|---|---|
+| Étudiants et alternants | Peu d'expérience, besoin d'un premier CV, de stages, d'alternance | Un premier CV avec ce qu'on a déjà ; niveau honnête par métier ; manques signalés | Profils « accessible sans expérience », astérisques de manque, candidatures spontanées, fiche d'entretien |
+| Recherche d'emploi | Plusieurs candidatures par semaine, CV à adapter à chaque annonce | Dix candidatures sans dix CV à refaire | Score de correspondance, CV au format ATS, lettre avec contrôle de style, suivi et relances à 10 jours, e-mail d'envoi |
+| Salariés en transition | Salariés qui préparent un autre métier, avec des années d'expérience mais pas dans le métier visé | Changer de métier sans repartir de zéro | Un profil par métier visé avec niveau honnête (« déjà exercé », « accessible sans expérience », « à renforcer »), CV qui remet l'utile devant, CV anonymisé, candidatures spontanées |
+| Freelances | Démarcher des clients et des intermédiaires | Une offre claire, une plaquette A4, un e-mail qui se lit | Offres suggérées, accroches, 10 modèles de plaquette, suivi des envois et statistiques, signature avec SIRET |
 
 ## Messages clés
 
 1. **Une base, tous les documents** : on importe son parcours une fois.
 2. **Rien d'inventé** : ce qui manque est signalé par un astérisque.
-3. **Sur ton ordinateur** : pas de compte pendant la bêta, pas de cookie, pas de suivi.
-4. **Gratuit pendant la bêta** : tarifs simples ensuite.
+3. **Sur ton ordinateur** : pas de compte pour le moment, pas de cookie, pas de suivi.
+4. **Gratuit pour le moment** : aucun prix, aucun compte ; l'assistant d'écriture passe par le compte Claude de la personne, personne ne paie la consommation des autres.
 
 ## Règles éditoriales
 
@@ -33,17 +33,16 @@ Pour les personnes qui candidatent souvent (étudiants, personnes en recherche d
 - Pas de promesse de résultat (« décroche un emploi »). Dire ce que l'outil fait : compose, signale, suit.
 - Pas de garantie de passage des logiciels de tri (ATS) : on décrit les bonnes pratiques et le score.
 - Éviter les contrastes « ce n'est pas X, c'est Y », les listes de négations, les formules toutes faites (« libérez le potentiel », « solution innovante »).
-- Le mot « bêta » et le prix prévu apparaissent ensemble partout où un prix est montré.
-- Les prix et les conditions viennent de `docs/OFFRES-ET-TARIFS.md`.
+- Aucun prix ni formule n'est affiché : on dit « Gratuit pour le moment ». La décision et le coût de l'IA viennent de `docs/OFFRES-ET-TARIFS.md`.
 - Ne pas annoncer de recherche d'offres France Travail tant que l'accès n'est pas accordé (`docs/FRANCE-TRAVAIL.md`) ; ne jamais présenter l'accès aux offres comme une fonction réservée à un compte ou à un tarif.
 
 ## Parcours de conversion
 
-Landing (`/`) → application (`/app/`) : un seul appel à l'action principal, « Ouvrir l'atelier ». Page tarifs (`tarifs/`) → application. Aucune capture d'e-mail pendant la bêta (la maquette `saas/liste-attente.html` existe pour plus tard). Aucun outil de mesure : l'efficacité se lit à la main (retours directs) tant que la politique de confidentialité l'impose.
+Landing (`/`) → application (`/app/`) : un seul appel à l'action principal, « Ouvrir l'atelier ». Page « Gratuit » (`tarifs/`) → application. Aucune capture d'e-mail pendant la bêta (la maquette `saas/liste-attente.html` existe pour plus tard). Aucun outil de mesure : l'efficacité se lit à la main (retours directs) tant que la politique de confidentialité l'impose.
 
 ## Prochaines étapes de lancement
 
 1. Compléter `legal/config.js` et faire relire les pages légales.
 2. Choisir l'URL définitive et mettre à jour `sitemap.xml`, les balises canoniques et Open Graph.
 3. Remplacer les données fictives des captures par de vrais cas autorisés (avec accord écrit) quand il y en aura.
-4. Ajouter des preuves publiables : retours d'utilisateurs de la bêta, avec leur accord.
+4. Ajouter des preuves publiables : retours de personnes qui ont testé l'atelier, avec leur accord.

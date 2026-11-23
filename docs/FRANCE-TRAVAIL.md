@@ -25,10 +25,10 @@ Licence : https://francetravail.io/produits-partages/documentation/conditions-du
 
 ## Analyse par rapport au produit (à faire relire par un juriste)
 
-| Condition | Situation aujourd'hui (bêta) | Situation prévue (SaaS) |
+| Condition | Situation aujourd'hui | À garder |
 |---|---|---|
-| Aucun compte imposé | Respectée : aucun compte | **Risque** : des comptes sont prévus (`saas/`) |
-| Aucune contrepartie financière | Respectée : tout est gratuit | **Risque** : formules payantes (`docs/OFFRES-ET-TARIFS.md`) |
+| Aucun compte imposé | Respectée : aucun compte | À garder : des comptes ne devront jamais conditionner l'accès aux offres |
+| Aucune contrepartie financière | Respectée : tout est gratuit, **aucun tarif** (formules payantes retirées) | À garder : aucun tarif ne doit toucher l'accès aux offres (voir `docs/OFFRES-ET-TARIFS.md`) |
 | Aucune collecte de données | Respectée : base dans le navigateur, seuls mots-clés, lieu et filtres partent vers le serveur | À garder : ne jamais stocker côté serveur le CV ou les recherches |
 | Rapprochement profil / offre | Local (dans le navigateur) | À garder local ; ne pas le conditionner à un compte ou à un paiement |
 | Pas d'entraînement d'IA | Respectée : aucun entraînement ; l'IA passe par le compte Claude de la personne | **À préciser** : le texte d'une offre peut être envoyé à Claude par la personne pour réécrire une lettre ; décider si on le permet pour les offres issues de l'API |
@@ -131,7 +131,7 @@ Pages lues : fiche data.gouv, explorateur de l'API (api.apprentissage.beta.gouv.
 - **Limites** : de 5 à 20 appels par seconde selon les routes.
 - **Contact** : `contact-api@labonnealternance.apprentissage.beta.gouv.fr`. Statut : mission-apprentissage.github.io/upptime. Code source de l'API : github.com/mission-apprentissage/api-apprentissage.
 
-**Lecture pour le produit** : pendant la bêta, entièrement gratuite et sans revenu, un usage non lucratif est défendable. Dès que des formules payantes existent, le risque est réel, même si la recherche d'offres reste gratuite : le texte interdit la « facturation de l'accès pour des tiers comme des candidats » et réserve l'API aux usages non lucratifs. **Ne pas construire de dépendance sans réponse écrite du contact de l'API.**
+**Lecture pour le produit** : avec un outil entièrement gratuit et sans revenu (formules payantes retirées), un usage non lucratif est défendable. Le risque reviendrait avec toute facturation, même hors accès aux offres : le texte interdit la « facturation de l'accès pour des tiers comme des candidats » et réserve l'API aux usages non lucratifs. **Ne pas construire de dépendance sans réponse écrite du contact de l'API.**
 
 ### Questions à poser par écrit (brouillons)
 
@@ -139,9 +139,9 @@ Pages lues : fiche data.gouv, explorateur de l'API (api.apprentissage.beta.gouv.
 
 > Bonjour,
 >
-> Je développe Atelier Candidature, un outil gratuit pendant sa phase bêta qui aide étudiants et alternants à composer un CV et une lettre à partir d'une base qui reste dans leur navigateur (aucun compte, aucun CV envoyé à un serveur). Je souhaite afficher les offres d'alternance de votre API, avec renvoi vers l'offre d'origine, gratuitement et sans condition de compte.
+> Je développe Atelier Candidature, un outil gratuit, sans compte, qui aide étudiants et alternants à composer un CV et une lettre à partir d'une base qui reste dans leur navigateur (aucun compte, aucun CV envoyé à un serveur). Je souhaite afficher les offres d'alternance de votre API, avec renvoi vers l'offre d'origine, gratuitement et sans condition de compte.
 >
-> Plus tard, certains outils de rédaction (composition de CV, lettres, suivi) pourraient faire l'objet d'une formule payante, sans que l'accès aux offres ni la candidature n'en dépendent jamais. Cet usage est-il compatible avec la mention « usages non lucratifs » et l'interdiction de « facturation de l'accès » ? Sinon, sous quelle forme pourrions-nous formaliser un accord ?
+> L'outil n'a aucun tarif aujourd'hui. Si une contribution devait exister un jour (par exemple un financement par des tiers), cet usage resterait-il compatible avec la mention « usages non lucratifs » et l'interdiction de « facturation de l'accès » ? Sous quelle forme pourrions-nous formaliser un accord ?
 >
 > Pouvez-vous aussi préciser : les règles de conservation des offres (affichage temporaire), l'obligation éventuelle d'afficher la source, et l'usage des données avec un assistant d'écriture facultatif que l'utilisateur déclenche lui-même ?
 >
@@ -151,13 +151,15 @@ Pages lues : fiche data.gouv, explorateur de l'API (api.apprentissage.beta.gouv.
 
 > Hello,
 >
-> We are building Atelier Candidature, a French job-application tool (CV and cover-letter builder, tracking). The job search and the link to the original ad are free for users, with no account. Some writing tools may later be paid. We would display Adzuna listings with the required Adzuna label and a link to the ad.
+> We are building Atelier Candidature, a French job-application tool (CV and cover-letter builder, tracking). The whole tool is free for users, with no account and no advertising, and we do not plan any fee. We would display Adzuna listings with the required Adzuna label and a link to the ad.
 >
 > Could you tell us: (1) whether this use falls under a licence agreement, (2) whether France (`fr`) is covered, with the approximate volume of French ads, (3) the rules on caching and storage, and (4) whether using listing text with an AI writing assistant triggered by the user is allowed?
 >
 > Thank you,
 
 ### Tester Adzuna soi-même (France)
+
+Voir aussi `functions/api/sources-diag.js` (même appel, sans exposer la clé). Pour un test manuel :
 
 1. Créer un compte sur developer.adzuna.com pour obtenir un `app_id` et un `app_key`.
 2. Dans un terminal, remplacer les deux valeurs et lancer :
@@ -176,16 +178,40 @@ curl -s "https://api.adzuna.com/v1/api/jobs/fr/search/1?app_id=VOTRE_ID&app_key=
 | `etiennekintzler/api-offres-emploi` | Wrapper Python de l'API Offres d'emploi v2 de France Travail (paquet PyPI `api-offres-emploi`) | **Non** : même API, même accès refusé. Utile seulement comme exemple de code. |
 | `creach-t/job-search-france-travail-api` | D'après son nom, un outil qui s'appuie sur l'API France Travail (dépôt non lu) | **Probablement non** : même source ; à confirmer en lisant son README. |
 | `kitsuno-ai/agentic-job-search-eu` | Répertoire communautaire de sources d'offres joignables depuis l'Europe, avec couverture, type d'accès, limites et notes d'exploration (30 à plus de 50 sources annoncées ; dépôt non lu) | **Indirectement** : un annuaire pour **découvrir** des sources, pas une source. Chaque source garde ses propres conditions. |
-| [LoopCV, API développeurs](https://www.loopcv.pro/fr/developers/) | API REST d'offres agrégées « depuis LinkedIn, Indeed, Glassdoor et 30+ autres plateformes », avec analyse de CV, score, candidature automatique | **À éviter pour les offres** : la page précise ne pas utiliser l'API officielle LinkedIn (collecte non détaillée), couverture France et limites du plan gratuit non indiquées, conditions non lues. Recoupe aussi le produit (analyse de CV côté serveur, ce qui heurte le principe « données dans le navigateur »). |
+| [LoopCV, API développeurs](https://www.loopcv.pro/fr/developers/) | Selon la documentation de l'API (`b2b-api.loopcv.com/connect`, en-tête `X-API-KEY`), seules la **gestion de « loops »** (recherches automatisées) est exposée : création, lecture, modification, suppression. **Aucune route ne liste les offres trouvées.** | **Non, pas comme source d'offres** | Agrège LinkedIn, Indeed, Glassdoor sans leur API officielle ; analyse de CV côté serveur (heurte « données dans le navigateur ») ; quotas du plan gratuit non indiqués |
 | [TheirStack (API)](https://theirstack.com/fr/pricing?tab=api) | Données d'offres d'emploi et de technologies utilisées par les entreprises, 195 pays ; dès 19 $ par mois pour 1 500 crédits (1 crédit par offre) ; plan gratuit annoncé de 200 crédits API par mois | **Intéressant pour les freelances** (repérer des entreprises qui recrutent sur une technologie), pas pour la recherche d'emploi grand public. Part de la France et conditions d'usage non indiquées. |
 | [JobsPipe](https://jobspipe.dev/pricing) | API JSON de 30+ sources d'offres (ATS et sites d'emploi) ; 1 000 crédits gratuits une seule fois ; dès 19,60 $ par mois pour 10 000 crédits ; 12 mois d'historique | Possible, mais **couverture France non indiquée**. Le bac à sable public ne renvoie que 2 offres fictives : il ne permet pas de la mesurer. Conditions non lues. |
 
 Aucun de ces services n'a été validé : prix, couverture France, droit de stockage, usage par une IA et usage commercial restent à vérifier dans leurs conditions complètes avant tout branchement. Ces dépôts n'ont pas été lus.
 
+### Clés, variables et tests (sources d'offres)
+
+Variables définies dans le projet Cloudflare Pages (invisibles depuis une session de développement : seules les fonctions déployées les lisent) :
+
+| Variable | Source | Quota à respecter |
+|---|---|---|
+| `BONNE_ALTERNANCE_KEY` | La bonne alternance (en-tête `Authorization: Bearer …`) | 5 à 20 appels par seconde |
+| `APP_ID`, `APP_KEY` | Adzuna (paramètres d'adresse `app_id` et `app_key`) | **25 appels au total** |
+| `AUTORISATION_KEY` | TheirStack (`Authorization: Bearer …`) | **200 crédits** (1 crédit par offre renvoyée) |
+
+**Fonction de test `functions/api/sources-diag.js`** : inactive tant que `SOURCES_DIAG` n'est pas à `1`. Une seule requête amont par appel, et seulement avec `confirm=1` (sans lui, la fonction décrit l'appel sans le faire) ; elle ne renvoie jamais de clé, seulement un statut, des comptages et quelques champs (titre, entreprise, lieu, date).
+
+- `/api/sources-diag?source=lba` puis `…&confirm=1` : 1 appel La bonne alternance (route `GET /api/job/v1/search`, centrée sur Lyon, rayon 30 km, `caller=atelier-candidature`) ; renvoie la forme de la réponse pour fixer les champs à utiliser.
+- `/api/sources-diag?source=adzuna&confirm=1` : 1 appel sur les 25 (`/v1/api/jobs/fr/search/1`, 3 résultats) ; confirme si la France est couverte.
+- `/api/sources-diag?source=theirstack&confirm=1` : au plus 2 crédits (offres en France des 7 derniers jours, `limit` 2).
+
+Marche à suivre : définir `SOURCES_DIAG=1` dans le projet, redéployer, ouvrir ces adresses **une fois chacune**, copier les réponses (sans clé) dans la conversation, puis **retirer `SOURCES_DIAG`**.
+
+**Ce qui est déjà établi sans clé** : sur `api.apprentissage.beta.gouv.fr`, `GET /api/job/v1/search` et `/api/job/v1/export` existent (réponse 401 « clé d'API valide » sans clé) ; Adzuna répond 401 pour une clé invalide quel que soit le pays (la couverture de `fr` reste à vérifier avec la vraie clé) ; TheirStack : corps attendu `{"job_country_code_or":["FR"],"posted_at_max_age_days":7,"limit":2,"page":0}` (un filtre `posted_at_*` ou un identifiant est obligatoire ; champs de réponse `job_title`, `company`, `location`, `country_code`, `date_posted`, `url`, `description`).
+
+**Connexion de LoopCV (pour mémoire)** : clé API dans Settings → API Key → « Generate API Key » (affichée une seule fois) ; connexion à Claude via un connecteur personnalisé (`https://api.loopcv.com/mcp`, OAuth) selon leur article. Cela ne donne pas accès à des offres pour l'atelier : l'API ne les expose pas.
+
 ### Marche à suivre proposée
 
-1. **La bonne alternance** (étudiants et alternants) : conditions lues, **usage non lucratif exigé** ; envoyer la question écrite (brouillon ci-dessus) avant tout développement.
-2. **Adzuna** : tester la France avec une clé gratuite (commande ci-dessus), puis écrire à Adzuna (brouillon ci-dessus).
+1. **Tester les trois sources avec `sources-diag`** (voir « Clés, variables et tests »), sans dépasser les quotas.
+2. **La bonne alternance** (étudiants et alternants) : conditions lues, **usage non lucratif exigé** (cohérent avec l'abandon des formules payantes) ; envoyer la question écrite (brouillon ci-dessus) avant tout développement.
+3. **Adzuna** : si la France est couverte, écrire à Adzuna (brouillon ci-dessus) : un produit sans revenu ni lead est moins exposé à l'exigence de licence.
+4. **TheirStack** : réservé à une fonction freelance (entreprises qui recrutent sur une technologie), sous réserve de ses conditions.
 3. N'envisager les agrégateurs qui collectent sans accord des sources (LoopCV) qu'après lecture de leurs conditions complètes ; privilégier les sources dont la licence autorise explicitement l'affichage et le renvoi vers l'annonce.
 
 Pistes non confirmées : offres de l'emploi public et de l'insertion (existence d'une API non établie), ainsi que les grands sites d'emploi (aucune API publique repérée ; ne pas récupérer leurs pages automatiquement). Pour chaque source, vérifier en particulier : l'interdiction éventuelle d'utiliser les contenus avec une IA, l'obligation de renvoyer vers la source, l'interdiction de conserver les offres, et la compatibilité avec une application sans compte ni serveur de stockage.
