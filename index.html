@@ -571,10 +571,11 @@
       <button class="rail-item" data-tab="cv" data-group="candidater"><span class="num">06</span>CV<span class="status-dot" id="dot-cv"></span></button>
       <button class="rail-item" data-tab="lettre" data-group="candidater"><span class="num">07</span>Lettre<span class="status-dot" id="dot-lettre"></span></button>
       <button class="rail-item" data-tab="annexe" data-group="candidater"><span class="num">08</span>Annexe<span class="status-dot" id="dot-annexe"></span></button>
-      <button class="rail-item" data-tab="candidatures" data-group="suivi"><span class="num">09</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
-      <button class="rail-item" data-tab="freelance" data-group="chercher"><span class="num">10</span>Freelance<span class="status-dot" id="dot-freelance"></span></button>
-      <button class="rail-item" data-tab="plaquette" data-group="chercher"><span class="num">11</span>Plaquette<span class="status-dot" id="dot-plaquette"></span></button>
-      <button class="rail-item" data-tab="entretien" data-group="suivi"><span class="num">12</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
+      <button class="rail-item" data-tab="email" data-group="candidater"><span class="num">09</span>E-mail<span class="status-dot" id="dot-email"></span></button>
+      <button class="rail-item" data-tab="candidatures" data-group="suivi"><span class="num">10</span>Candidatures<span class="status-dot" id="dot-candidatures"></span></button>
+      <button class="rail-item" data-tab="freelance" data-group="chercher"><span class="num">11</span>Freelance<span class="status-dot" id="dot-freelance"></span></button>
+      <button class="rail-item" data-tab="plaquette" data-group="chercher"><span class="num">12</span>Plaquette<span class="status-dot" id="dot-plaquette"></span></button>
+      <button class="rail-item" data-tab="entretien" data-group="suivi"><span class="num">13</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
     </div>
     <div class="rail-foot">Ta bibliothèque (expériences, compétences, lettres, candidatures) reste dans ce navigateur. Seuls le lien d'une annonce ou les critères d'une recherche d'entreprises transitent, jamais ton CV ni tes coordonnées.</div>
   </nav>
@@ -792,6 +793,56 @@
         <div id="fl-results"></div>
         <button class="btn btn-ghost btn-sm" id="fl-more" type="button" style="display:none;margin-top:8px;">Voir plus de structures</button>
       </div>
+    </section>
+
+    <!-- PANEL E-MAIL -->
+    <section class="panel panel-doc" id="panel-email">
+      <div class="panel-head">
+        <h2>L'e-mail d'envoi</h2>
+        <p>Le message à coller dans ta messagerie, avec tes pièces jointes : CV et lettre pour une candidature, CV et plaquette pour une offre de service. Court, précis, un seul appel à l'action.</p>
+      </div>
+      <div class="split">
+        <div class="controls-col">
+          <div class="card" style="margin-bottom:16px;">
+            <span class="eyebrow">Envoi</span>
+            <div class="row2" style="margin-top:8px;">
+              <div class="field"><label for="em-type">Type d'envoi</label><select id="em-type"><option value="">Automatique (selon l'annonce)</option><option value="offre">Réponse à une offre</option><option value="spontanee">Candidature spontanée</option><option value="freelance">Offre de service (freelance)</option><option value="relance">Relance</option><option value="merci">Remerciement après un entretien</option></select></div>
+              <div class="field"><label for="em-pj">Pièces jointes</label><select id="em-pj"><option value="">Automatique</option><option value="cvlm">CV et lettre de motivation</option><option value="cvpc">CV et plaquette commerciale</option><option value="cvls">CV et lettre d'offre de service</option><option value="cv">CV seul</option><option value="none">Aucune</option></select></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label for="em-dest">Destinataire (prénom et nom, ou « Madame Dupont »)</label><input type="text" id="em-dest" placeholder="vide = formule neutre"></div>
+              <div class="field"><label for="em-ent">Entreprise</label><input type="text" id="em-ent"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label for="em-poste">Poste ou mission visé</label><input type="text" id="em-poste"></div>
+              <div class="field"><label for="em-jours">Relance : jours depuis l'envoi</label><input type="number" id="em-jours" min="1" max="60" value="10"></div>
+            </div>
+            <div class="field"><label for="em-hook">Une phrase vraie sur l'entreprise (facultatif, la plus efficace)</label><input type="text" id="em-hook" placeholder="ex. J'ai lu votre retour d'expérience sur le passage au télétravail."></div>
+            <div class="field"><label for="em-fort">Votre point fort pour ce poste (facultatif)</label><textarea id="em-fort" style="min-height:54px;" placeholder="Une phrase concrète. Sinon, l'atelier cite les mots de l'annonce que ta base confirme."></textarea></div>
+            <div class="toolbar-row"><label class="hint" style="display:flex;gap:6px;align-items:center;"><input type="checkbox" id="em-sigon" checked> Ajouter la signature</label></div>
+          </div>
+          <div class="card">
+            <span class="eyebrow">Ma signature</span>
+            <div class="row2" style="margin-top:8px;">
+              <div class="field"><label for="sg-titre">Intitulé professionnel</label><input type="text" id="sg-titre" placeholder="ex. Développeur web · Freelance"></div>
+              <div class="field"><label for="sg-siret">SIRET (freelance)</label><input type="text" id="sg-siret" inputmode="numeric" placeholder="14 chiffres"></div>
+            </div>
+            <div class="row2">
+              <div class="field"><label for="sg-site">Site ou portfolio</label><input type="text" id="sg-site"></div>
+              <div class="field"><label for="sg-rdv">Lien de prise de rendez-vous</label><input type="text" id="sg-rdv" placeholder="ex. cal.com/mon-nom"></div>
+            </div>
+            <div class="field"><label for="sg-zone">Zone d'intervention (facultatif)</label><input type="text" id="sg-zone"></div>
+            <div class="field"><label for="sg-format">Format</label><select id="sg-format"><option value="complete">Complète</option><option value="courte">Courte (deux lignes)</option></select></div>
+            <textarea id="sg-out" readonly style="min-height:120px;"></textarea>
+            <div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-sm" id="btn-sg-copy" type="button">Copier la signature</button><span class="hint" id="sg-hint"></span></div>
+          </div>
+        </div>
+        <div class="preview-frame">
+          <div class="preview-toolbar"><span class="eyebrow">Message</span><button class="btn btn-sm btn-primary" id="btn-em-copyall" type="button">Copier objet et message</button></div>
+          <div id="em-out"></div>
+        </div>
+      </div>
+      <div class="card" id="em-tips" style="max-width:980px;margin-top:16px;"></div>
     </section>
 
     <!-- PANEL PLAQUETTE -->
@@ -1613,13 +1664,14 @@ function persist(){
 
 /* ---------------- onglets & statut ---------------- */
 
-var TABS = ["base","profils","recherche","offres","annonce","cv","lettre","annexe","candidatures","freelance","plaquette","entretien"];
+var TABS = ["base","profils","recherche","offres","annonce","cv","lettre","annexe","email","candidatures","freelance","plaquette","entretien"];
 var activeTab = "annonce";
 
 function statusFor(tab){
   if(tab === "base"){ var L = state.library; return (L.experiences.length || L.formations.length || L.competences.length) ? "ready" : "empty"; }
   if(tab === "profils"){ return state.profils.length ? "ready" : "empty"; }
   if(tab === "offres"){ return (state.offresResultats || []).length ? "ready" : "empty"; }
+  if(tab === "email"){ return (state.annonce.poste || state.annonce.entreprise) ? "partial" : "empty"; }
   if(tab === "plaquette"){ return (typeof pqState === "function" && (pqState().titre || "").trim()) ? "ready" : "empty"; }
   if(tab === "freelance"){ return flState().services.some(function(s){ return (s.titre || "").trim(); }) ? "ready" : "empty"; }
   if(tab === "recherche"){ return (state.rechercheResultats || []).length ? "ready" : "empty"; }
@@ -1676,6 +1728,7 @@ function switchTab(tab){
   if(tab === "recherche" && typeof rechProfilOptions === "function"){ rechProfilOptions(); renderRechResults(); }
   if(tab === "freelance" && typeof renderFreelance === "function"){ renderFreelance(); }
   if(tab === "plaquette" && typeof renderPlaquette === "function"){ renderPlaquette(); }
+  if(tab === "email" && typeof renderEmail === "function"){ renderEmail(); }
   if(tab === "offres" && typeof offProfilOptions === "function"){ offProfilOptions(); renderOffResults(); }
   TABS.forEach(function(t){
     document.getElementById("panel-"+t).classList.toggle("active", t === tab);
@@ -5745,6 +5798,13 @@ function renderProfilCvBox(pr, box){
 
 /* ===================== PLAQUETTE FREELANCE : 10 modèles, une page A4 ===================== */
 
+// Banque d'images : fichiers de assets/plaquette/ (voir le README du dossier). imgs = images appliquées dans l'ordre (image 1, 2, 3).
+var PQ_PHOTOS = [
+  { id: "t2-a", nom: "Bureau", modeles: ["t2", "t3", "t8"], imgs: ["assets/plaquette/t2-a.jpg"] },
+  { id: "t2-b", nom: "Fenêtre", modeles: ["t2", "t3", "t8"], imgs: ["assets/plaquette/t2-b.jpg"] },
+  { id: "t2-c", nom: "Carnet", modeles: ["t2", "t3", "t8"], imgs: ["assets/plaquette/t2-c.jpg"] }
+];
+
 var PQ_MODELES = [
   { key:"t1",  nom:"Nuit",       desc:"Fond sombre, liste numérotée",    accent:"#C6F135" },
   { key:"t2",  nom:"Terre",      desc:"Serif chaleureux, image en arche", accent:"#C8643C" },
@@ -5789,7 +5849,7 @@ function pqCurrent(){ var l = pqPlaquettes(), id = flState().plaquetteId; return
 function pqNormData(q){
   var d = { modele: "t1", accent: "", kicker: "", titre: "", accroche: "", etapes: [], encadres: [], chiffres: [], temoignage: { texte: "", auteur: "" },
     avantApres: { avantTitre: "", avantTexte: "", avantNote: "", apresTitre: "", apresTexte: "", apresNote: "" }, delai: "", tarif: "", cta: "Parlons de votre projet", images: [],
-    band: "presentation", portrait: "", presentation: { role: "", texte: "", mode: "both", photo: true }, presChiffres: [], avis: [], refs: { clients: "", garanties: "" }, faq: [], offreIds: [], angle: "" };
+    band: "presentation", portrait: "", presentation: { role: "", texte: "", mode: "both", photo: true }, presChiffres: [], avis: [], refs: { clients: "", garanties: "" }, faq: [], offreIds: [], angle: "", tu: false };
   Object.keys(d).forEach(function(k){ if(q[k] === undefined) q[k] = d[k]; });
   q.temoignage = Object.assign({ texte: "", auteur: "" }, q.temoignage);
   q.avantApres = Object.assign({ avantTitre: "", avantTexte: "", avantNote: "", apresTitre: "", apresTexte: "", apresNote: "" }, q.avantApres);
@@ -6037,7 +6097,10 @@ function renderPlaquette(){
   html += '<details class="pq-det"><summary>Images</summary><div style="margin-top:10px;">' + [0, 1, 2].map(function(i){
     var has = q.images[i];
     return '<div class="field"><label>Image ' + (i + 1) + '</label>' + (has ? '<img src="' + has + '" alt="" style="height:54px;border-radius:6px;display:block;margin-bottom:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pq-img-del="' + i + '">Retirer</button>' : '<input type="file" accept="image/*" data-pq-img="' + i + '">') + "</div>";
-  }).join("") + '<div class="field"><label>Ma photo (bandeau de présentation)</label>' + (q.portrait ? '<img src="' + q.portrait + '" alt="" style="height:54px;border-radius:12px;display:block;margin-bottom:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pq-img-del="portrait">Retirer</button>' : '<input type="file" accept="image/*" data-pq-img="portrait">') + '</div><p class="hint">Tes images restent dans ton navigateur ; elles sont réduites automatiquement. Utilise des images dont tu détiens les droits.</p></div></details>';
+  }).join("") + '<div class="field"><label>Ma photo (bandeau de présentation)</label>' + (q.portrait ? '<img src="' + q.portrait + '" alt="" style="height:54px;border-radius:12px;display:block;margin-bottom:6px;"><button class="btn btn-ghost btn-sm" type="button" data-pq-img-del="portrait">Retirer</button>' : '<input type="file" accept="image/*" data-pq-img="portrait">') + '</div>' + (function(){
+    var ph = PQ_PHOTOS.filter(function(x){ return x.modeles.indexOf(q.modele) !== -1; });
+    return ph.length ? '<div class="field"><label>Photos proposées pour ce modèle (remplacent l\'image 1)</label><div style="display:flex;gap:8px;flex-wrap:wrap;">' + ph.map(function(x){ return '<button type="button" class="pq-thumb" style="padding:4px;width:88px;" data-pq-photo="' + x.id + '" aria-label="Utiliser la photo ' + esc(x.nom) + '"><img src="' + x.imgs[0] + '" alt="" style="width:100%;height:96px;object-fit:cover;border-radius:6px;display:block;"><span class="pq-thumb-name">' + esc(x.nom) + "</span></button>"; }).join("") + "</div></div>" : "";
+  })() + '<p class="hint">Tes images restent dans ton navigateur ; elles sont réduites automatiquement. Utilise des images dont tu détiens les droits.</p></div></details>';
   var keepOpen = {}; form.querySelectorAll("details").forEach(function(d, i){ keepOpen[i] = d.open; });
   form.innerHTML = html;
   form.querySelectorAll("details").forEach(function(d, i){ if(i in keepOpen) d.open = keepOpen[i]; });
@@ -6068,7 +6131,8 @@ document.getElementById("pq-form").addEventListener("input", function(e){
 document.getElementById("pq-form").addEventListener("click", function(e){
   var b = e.target.closest("button"); if(!b) return;
   var q = pqState();
-  if(b.getAttribute("data-pq-add")){ q[b.getAttribute("data-pq-add")].push({}); persist(); renderPlaquette(); }
+  if(b.getAttribute("data-pq-photo")){ var ph = PQ_PHOTOS.find(function(x){ return x.id === b.getAttribute("data-pq-photo"); }); if(ph){ q.images = ph.imgs.slice(); persist(); renderPlaquette(); } }
+  else if(b.getAttribute("data-pq-add")){ q[b.getAttribute("data-pq-add")].push({}); persist(); renderPlaquette(); }
   else if(b.getAttribute("data-pq-del")){ var p = b.getAttribute("data-pq-del").split(":"); q[p[0]].splice(+p[1], 1); persist(); renderPlaquette(); }
   else if(b.getAttribute("data-pq-img-del")){ var k = b.getAttribute("data-pq-img-del"); if(k === "portrait") q.portrait = ""; else { q.images[+k] = ""; while(q.images.length && !q.images[q.images.length - 1]) q.images.pop(); } persist(); renderPlaquette(); }
 });
@@ -6147,6 +6211,20 @@ function renderPqOffres(){
     (sg.length ? '<div class="field"><label>Suggestions d\'après ton profil et ton CV</label>' + sg.map(function(o){ return '<label class="pq-opt"><input type="checkbox" data-pq-sug="' + o.sid + '"><span><strong>' + esc(o.titre) + "</strong><small>" + esc(o.desc) + "</small></span></label>"; }).join("") + "</div>" : "") +
     '<button class="btn btn-ghost btn-sm" type="button" id="btn-pq-gofl">Gérer toutes mes prestations</button>';
 }
+
+// Passage du vouvoiement au tutoiement pour les phrases du catalogue (liste fermée de formulations).
+function pqTu(t){
+  var R = [["sans que vous y pensiez", "sans que tu y penses"], ["sans que vous y passiez", "sans que tu y passes"], ["que vous vous posez", "que tu te poses"], ["ce que vous faites", "ce que tu fais"],
+    ["que vous pouvez", "que tu peux"], ["vous restez", "tu restes"], ["Vous gardez", "Tu gardes"], ["que vous laissez", "que tu laisses"], ["ne vous ressemble", "ne te ressemble"],
+    ["vous ralentissent", "te ralentissent"], ["vous oublient", "t'oublient"], ["avec vous", "avec toi"], ["comme vous", "comme toi"], ["chez vous", "chez toi"], ["dans votre ton", "dans ton style"],
+    ["Récupérez", "Récupère"], ["Donnez-leur", "Donne-leur"], ["Gardez", "Garde"], ["Testez", "Teste"], ["Partez", "Pars"]];
+  R.forEach(function(r){ t = t.split(r[0]).join(r[1]); });
+  t = t.replace(/\b([Vv])otre (\S+)/g, function(m, v, w){
+    var fem = /^(mesure|situation|boîte|façon)/i.test(w), vow = /^[aeiouyàâéèêëîïôûh]/i.test(w), cap = v === "V";
+    return (fem && !vow ? (cap ? "Ta " : "ta ") : (cap ? "Ton " : "ton ")) + w;
+  });
+  return t.replace(/\bVos\b/g, "Tes").replace(/\bvos\b/g, "tes");
+}
 function pqSplitTitle(t){ return t.replace(/^(.{12,}?[,?:]) (?=.{10})/, "$1\n"); }
 function pqComputePropos(){
   var sv = pqSelectedServices(), q = pqState(), fl = flState();
@@ -6165,6 +6243,7 @@ function pqComputePropos(){
   if(cat.length) bl.push("Devis écrit, livrables clairs, un point à chaque étape.");
   if(q.delai) bl.push(/[.!?]$/.test(q.delai) ? q.delai : q.delai + "."); else if(fl.dispo) bl.push("Disponible : " + fl.dispo + ".");
   if(fl.zone) bl.push("Intervention : " + fl.zone + ".");
+  if(q.tu){ acc.forEach(function(x){ x.txt = pqTu(x.txt); }); bl = bl.map(pqTu); }
   pqProp = { accroches: acc, baselines: bl.slice(0, 5), a: 0, b: 0 };
 }
 function renderPqAccroches(){
@@ -6172,14 +6251,15 @@ function renderPqAccroches(){
   if(!pqProp) pqComputePropos();
   if(!pqProp.accroches.length){ box.innerHTML = '<p class="empty-note">Coche au moins une offre : trois accroches et des baselines seront proposées.</p>'; return; }
   var opt = function(name, i, txt, tag, on){ return '<label class="pq-opt' + (on ? " on" : "") + '"><input type="radio" name="' + name + '" value="' + i + '"' + (on ? " checked" : "") + "><span><strong>" + esc(txt) + "</strong>" + (tag ? "<small>" + esc(tag) + "</small>" : "") + "</span></label>"; };
-  box.innerHTML = '<div class="field"><label>Accroche : le titre de la plaquette</label>' + pqProp.accroches.map(function(x, i){ return opt("pq-acc", i, x.txt, x.angle, i === pqProp.a); }).join("") + "</div>" +
+  box.innerHTML = '<div class="field"><label for="pq-registre">Registre</label><select id="pq-registre"><option value="vous"' + (pqState().tu ? "" : " selected") + '>Vouvoiement (par défaut)</option><option value="tu"' + (pqState().tu ? " selected" : "") + '>Tutoiement</option></select></div>' +
+    '<div class="field"><label>Accroche : le titre de la plaquette</label>' + pqProp.accroches.map(function(x, i){ return opt("pq-acc", i, x.txt, x.angle, i === pqProp.a); }).join("") + "</div>" +
     '<div class="field"><label>Baseline : la phrase qui rassure, sous le titre</label>' + pqProp.baselines.map(function(x, i){ return opt("pq-base", i, x, "", i === pqProp.b); }).join("") + "</div>" +
     '<div class="toolbar-row"><button class="btn btn-sm btn-primary" type="button" id="btn-pq-apply">Appliquer à la plaquette</button><button class="btn btn-ghost btn-sm" type="button" id="btn-pq-regen">Recalculer</button><button class="btn btn-ghost btn-sm" type="button" id="btn-pq-ia">Affiner avec l\'IA</button><span class="hint" id="pq-prop-status"></span></div>' +
     '<p class="hint" style="margin:6px 0 0;">Les accroches s\'appuient sur les offres cochées : rien n\'est promis qui ne soit dans ton offre, aucun chiffre n\'est inventé.</p>';
 }
 function pqPropAI(){
   var sv = pqSelectedServices(), st = document.getElementById("pq-prop-status"); if(!sv.length) return;
-  var system = "Tu écris pour un freelance français qui démarche des entreprises. À partir de ses offres, propose 3 accroches (titres de 8 à 14 mots, trois angles différents dans cet ordre : bénéfice, problème puis solution, interlocuteur unique) et 4 baselines (une phrase de 8 à 16 mots qui rassure un prospect). Vouvoie le prospect. Phrases concrètes, sans superlatif, sans chiffre inventé, sans formule creuse (« solutions innovantes », « accompagnement sur mesure »), sans contraste « non pas X mais Y », sans tiret long. Réponds par un objet JSON : {\"accroches\":[\"…\"],\"baselines\":[\"…\"]}.";
+  var system = "Tu écris pour un freelance français qui démarche des entreprises. À partir de ses offres, propose 3 accroches (titres de 8 à 14 mots, trois angles différents dans cet ordre : bénéfice, problème puis solution, interlocuteur unique) et 4 baselines (une phrase de 8 à 16 mots qui rassure un prospect). " + (pqState().tu ? "Tutoie le prospect." : "Vouvoie le prospect.") + " Phrases concrètes, sans superlatif, sans chiffre inventé, sans formule creuse (« solutions innovantes », « accompagnement sur mesure »), sans contraste « non pas X mais Y », sans tiret long. Réponds par un objet JSON : {\"accroches\":[\"…\"],\"baselines\":[\"…\"]}.";
   st.textContent = "En cours…";
   iaAsk(system, { offres: sv.map(function(x){ return { titre: scrubForAI(x.titre), description: scrubForAI(x.description) }; }), metier: scrubForAI(state.cv.titre || state.profil.titre || ""), disponibilite: scrubForAI(flState().dispo || "") },
     "Les intitulés de tes offres (sans ton nom ni tes coordonnées) servent à écrire des accroches.").then(function(r){
@@ -6274,6 +6354,8 @@ document.getElementById("pq-controls").addEventListener("change", function(e){
     var o = flSuggestions().find(function(x){ return x.sid === t.getAttribute("data-pq-sug"); }); if(!o) return;
     var sv = flAddSuggestion(o); if(q.offreIds.length && q.offreIds[0] !== "-") q.offreIds.push(sv.id); else if(q.offreIds[0] === "-") q.offreIds = [sv.id];
     pqProp = null; persist(); renderPlaquette();
+  } else if(t.id === "pq-registre"){
+    q.tu = t.value === "tu"; pqProp = null; persist(); renderPqAccroches();
   } else if(t.name === "pq-acc" || t.name === "pq-base"){
     if(t.name === "pq-acc") pqProp.a = +t.value; else pqProp.b = +t.value; renderPqAccroches();
   }
@@ -6302,6 +6384,175 @@ document.getElementById("pq-suivi").addEventListener("change", function(e){
   var t = e.target; if(!t.getAttribute("data-pqe-statut")) return;
   var en = pqCurrent().envois.find(function(x){ return x.id === t.getAttribute("data-pqe-statut"); }); if(en){ en.statut = t.value; persist(); renderPqSuivi(); }
 });
+
+
+/* ===================== E-MAIL D'ENVOI : objet, message, signature, bonnes pratiques ===================== */
+var emOverride = null;     // {objets, corps} venant de l'IA ; vidé à chaque modification des champs
+function emCfg(){
+  var p = state.profil;
+  p.emailCfg = Object.assign({ type: "", pj: "", dest: "", hook: "", fort: "", jours: "10", sigOn: true, format: "complete" }, p.emailCfg);
+  p.emailCfg.sig = Object.assign({ titre: "", siret: "", site: "", rdv: "", zone: "" }, p.emailCfg.sig);
+  return p.emailCfg;
+}
+function emList(a){ return a.length > 1 ? a.slice(0, -1).join(", ") + " et " + a[a.length - 1] : (a[0] || ""); }
+function emLow(t){ t = (t || "").trim(); return t && t !== t.toUpperCase() ? t.charAt(0).toLowerCase() + t.slice(1) : t.toLowerCase(); }
+function emTitre(){ return emLow(state.cv.titre || state.profil.titre || ""); }
+function emKeywords(){
+  var lib = state.library, corp = norm(lib.competences.map(function(c){ return c.label; }).join(" ") + " " + lib.experiences.map(function(e){ return (e.poste || "") + " " + (e.details || ""); }).join(" "));
+  return (state.annonce.keywords || []).filter(function(k){ return k && k.term && corp.indexOf(norm(k.term)) !== -1; }).sort(function(a, b){ return (b.count || 0) - (a.count || 0); }).slice(0, 3).map(function(k){ return displayTerm(k.term); });
+}
+function emType(){ var c = emCfg(), A = state.annonce; return c.type || (A.service ? "freelance" : (A.spontanee ? "spontanee" : "offre")); }
+function emPj(type){ var c = emCfg(); return c.pj || (type === "freelance" ? "cvpc" : ((type === "relance" || type === "merci") ? "none" : "cvlm")); }
+function emFiles(pj){
+  var n = fileSafe(state.profil.nom || "candidat"), out = [];
+  if(pj !== "none") out.push(n + "-CV.pdf");
+  if(pj === "cvlm" || pj === "cvls") out.push(n + "-lettre.pdf");
+  if(pj === "cvpc") out.push(fileSafe((state.profil.nom || "plaquette") + "-" + (pqCurrent().nom || "plaquette")) + ".pdf");
+  return out;
+}
+function emSignature(){
+  var c = emCfg(), P = state.profil, g = c.sig, fl = flState(), type = emType(), isFl = type === "freelance" || !!state.annonce.service;
+  var titre = g.titre || emTitre(), lines = [];
+  if(c.format === "courte"){
+    lines.push([P.nom, titre ? (titre.charAt(0).toUpperCase() + titre.slice(1)) + (isFl && !/freelance|indépendant/i.test(titre) ? " · Freelance" : "") : ""].filter(Boolean).join(" · "));
+    lines.push([P.tel, P.email].filter(Boolean).join(" · "));
+    return lines.filter(Boolean).join("\n");
+  }
+  lines.push(P.nom || "Prénom Nom");
+  var t2 = titre ? titre.charAt(0).toUpperCase() + titre.slice(1) : "";
+  if(isFl && t2 && !/freelance|indépendant/i.test(t2)) t2 += " · Freelance";
+  if(t2) lines.push(t2);
+  var contact = [P.tel, P.email].filter(Boolean).join(" · "); if(contact) lines.push(contact);
+  var site = g.site || P.lien; if(site) lines.push(site);
+  if(g.rdv) lines.push("Prendre rendez-vous : " + g.rdv);
+  if(isFl){ if(g.siret) lines.push("SIRET " + g.siret); if(g.zone || fl.zone) lines.push("Intervention : " + (g.zone || fl.zone)); }
+  return lines.join("\n");
+}
+function emBuild(){
+  var c = emCfg(), P = state.profil, A = state.annonce, fl = flState(), type = emType(), isFl = type === "freelance" || !!A.service, pj = emPj(type);
+  var poste = (c.poste !== undefined ? c.poste : "") || (A.poste || ""), ent = (c.ent !== undefined ? c.ent : "") || (A.entreprise || "");
+  var dest = (c.dest || state.lettre.destinataire || "").trim(), hook = (c.hook || "").trim(), fort = (c.fort || "").trim(), titre = emTitre();
+  var kws = emKeywords(), svc = pqSelectedServices().slice(0, 3).map(function(x){ return emLow(x.titre); }), svc1 = svc[0] || (poste ? emLow(poste) : "mon accompagnement");
+  var hello = !dest ? (type === "freelance" ? "Bonjour," : "Madame, Monsieur,") : (/^(madame|monsieur|mme|m\.)/i.test(dest) ? dest + "," : "Bonjour " + dest + ",");
+  var P_ = poste || "[poste]", E_ = ent;
+  var pjTxt = { cvlm: "mon CV et ma lettre de motivation", cvpc: "mon CV et ma plaquette de présentation", cvls: "mon CV et ma lettre d'offre de service", cv: "mon CV", none: "" }[pj];
+  var pjLine = pjTxt ? "Vous trouverez ci-joints " + pjTxt + "." : "";
+  var jours = Math.max(1, parseInt(c.jours, 10) || 10), cible = FL_CIBLES[A.cible] ? FL_CIBLES[A.cible].intro : "";
+  var proof = fort || (kws.length ? (A.texte && type === "offre" ? "Parmi les compétences que vous citez, je pratique : " : "Je pratique au quotidien : ") + emList(kws) + "." : (titre ? "Je suis " + titre + "." : ""));
+  var para = [], objets = [], ctaBase = "Je serais ravi d'en discuter lors d'un échange de 15 minutes, au moment qui vous convient.";
+  var nom = P.nom || "", n_ = nom ? " · " + nom : "";
+  var short = function(arr){ return arr.map(function(t){ return t.length > 60 ? t.slice(0, 58).replace(/\s+\S*$/, "") + "…" : t; }); };
+  if(type === "offre"){
+    para = [hello, (hook ? hook + " C'est ce qui m'a donné envie de postuler au poste de " + P_ + "." : "Le poste de " + P_ + (E_ ? " chez " + E_ : "") + " retient mon attention."), proof, pjLine, ctaBase];
+    objets = ["Candidature : " + P_ + n_, P_ + (kws[0] ? " · " + kws[0] : (titre ? " · " + titre : "")) + n_, "Candidature au poste de " + P_ + (E_ ? " chez " + E_ : "")];
+  } else if(type === "spontanee"){
+    para = [hello, hook ? hook + " Je vous écris donc spontanément." : "Je vous écris spontanément, car " + (E_ ? E_ : "votre structure") + " travaille dans un domaine proche de mon parcours.", proof || (titre ? "Je suis " + titre + "." : ""), pjLine, "Je serais ravi de vous présenter ce que je peux apporter, lors d'un échange de 15 minutes."];
+    objets = ["Candidature spontanée : " + (titre || poste || "profil") + n_, (titre || poste || "Mon profil") + " : un échange de 15 minutes ?", "Candidature spontanée" + (E_ ? " · " + E_ : "") + n_];
+  } else if(type === "freelance"){
+    var dispo = (fl.dispo ? "Je suis disponible " + fl.dispo + "." : "") + (fl.zone ? " J'interviens : " + fl.zone + "." : "");
+    if(fl.showTjm && fl.tjm) dispo += " Mon tarif indicatif : " + fl.tjm + ".";
+    para = [hello, hook || (cible ? "Je vous contacte pour " + cible + "." : "Je vous écris pour vous proposer un renfort ponctuel."),
+      "Je suis " + (titre || "indépendant") + " en freelance" + (svc.length ? " et j'interviens sur : " + emList(svc) + "." : "."), dispo.trim(), pjLine,
+      "Un échange de 15 minutes cette semaine, pour voir si je peux vous être utile ?"];
+    para.push("Si vous ne souhaitez plus recevoir de message de ma part, répondez simplement « stop ».");
+    objets = [(titre ? titre.charAt(0).toUpperCase() + titre.slice(1) : "Freelance") + " freelance : disponible " + (fl.dispo || "prochainement"), svc1.charAt(0).toUpperCase() + svc1.slice(1) + " : un renfort pour " + (E_ || "vos projets"), "Proposition de collaboration : " + svc1];
+  } else if(type === "relance"){
+    para = [hello, isFl ? "Je reviens vers vous au sujet de ma proposition de " + svc1 + ", envoyée il y a " + jours + " jours." : "Je reviens vers vous au sujet de ma candidature au poste de " + P_ + ", envoyée il y a " + jours + " jours.",
+      "Mon intérêt reste entier et je suis disponible pour un échange quand cela vous arrange." + (pjTxt ? " Je joins à nouveau " + pjTxt + " pour vous faciliter la lecture." : ""),
+      isFl ? "" : "Si ce poste est pourvu, merci de me le signaler : je resterai attentif à vos prochaines ouvertures."];
+    objets = ["Relance : " + (isFl ? svc1 : P_) + n_, (isFl ? "Suite à ma proposition : " + svc1 : "Suite à ma candidature : " + P_), "Un point sur " + (isFl ? "ma proposition" : "ma candidature") + n_];
+  } else {
+    para = [hello, "Je vous remercie pour le temps que vous m'avez accordé " + (isFl ? "pour échanger sur la mission" : "pour échanger sur le poste de " + P_) + (E_ ? " chez " + E_ : "") + ".",
+      "Notre échange a renforcé mon intérêt" + (fort ? ", en particulier " + fort : (E_ ? " pour " + E_ : "")) + ".", "Je reste à votre disposition pour tout complément d'information."];
+    objets = ["Merci pour notre échange" + n_, "Suite à notre entretien : " + (isFl ? svc1 : P_), "Remerciements et suite" + (E_ ? " · " + E_ : "")];
+  }
+  var corps = para.filter(Boolean).join("\n\n") + "\n\nCordialement,";
+  if(c.sigOn !== false) corps += "\n" + emSignature();
+  return { objets: short(objets.filter(Boolean)), corps: corps, type: type, pj: pj, files: emFiles(pj) };
+}
+function emWords(t){ return (t.replace(/\n\nCordialement,[\s\S]*$/, "").match(/\S+/g) || []).length; }
+function emMailto(obj, corps){ return "mailto:?subject=" + encodeURIComponent(obj) + "&body=" + encodeURIComponent(corps.replace(/\n/g, "\r\n")); }
+function emCopy(txt, st){
+  var done = function(){ st.textContent = "Copié."; };
+  try{ navigator.clipboard.writeText(txt).then(done, function(){ st.textContent = "Copie impossible : sélectionne le texte et fais Ctrl+C."; }); }
+  catch(e){ st.textContent = "Copie impossible : sélectionne le texte et fais Ctrl+C."; }
+}
+var emSel = 0;
+function renderEmailOut(){
+  var box = document.getElementById("em-out"); if(!box) return;
+  var r = emBuild(); if(emOverride){ r.objets = emOverride.objets; r.corps = emOverride.corps + (emCfg().sigOn !== false ? "\n" + emSignature() : ""); }
+  if(emSel >= r.objets.length) emSel = 0;
+  var gaps = (r.corps.match(/\[[^\]]+\]/g) || []).length, words = emWords(r.corps), warn = [];
+  if(gaps) warn.push(gaps + " champ" + (gaps > 1 ? "s" : "") + " entre crochets à compléter avant l'envoi.");
+  if(words > 140) warn.push("Message long (" + words + " mots) : vise 120 mots au plus.");
+  box.innerHTML = '<div class="field"><label>Objet : choisis ou modifie (60 caractères au plus)</label>' + r.objets.map(function(o, i){ return '<label class="pq-opt' + (i === emSel ? " on" : "") + '"><input type="radio" name="em-obj" value="' + i + '"' + (i === emSel ? " checked" : "") + "><span><strong>" + esc(o) + "</strong><small>" + o.length + " caractères</small></span></label>"; }).join("") + "</div>" +
+    '<div class="field"><label for="em-objet">Objet à copier</label><input type="text" id="em-objet" value="' + esc(r.objets[emSel] || "") + '"></div>' +
+    '<div class="field"><label for="em-corps">Message (modifiable) · ' + words + " mots</label><textarea id=\"em-corps\" style=\"min-height:340px;\">" + esc(r.corps) + "</textarea></div>" +
+    (warn.length ? '<p class="hint" style="color:var(--caution);">' + warn.map(esc).join(" ") + "</p>" : "") +
+    '<div class="field"><label>Pièces à joindre</label>' + (r.files.length ? r.files.map(function(f){ return '<div class="hint">' + esc(f) + "</div>"; }).join("") + '<p class="hint" style="margin:4px 0 0;">Télécharge-les depuis les onglets CV, Lettre ou Plaquette.</p>' : '<p class="hint">Aucune pièce jointe pour ce type d\'envoi.</p>') + "</div>" +
+    '<div class="toolbar-row"><button class="btn btn-sm" type="button" id="btn-em-cobj">Copier l\'objet</button><button class="btn btn-sm" type="button" id="btn-em-cocorps">Copier le message</button><a class="btn btn-ghost btn-sm" id="em-mailto" href="#">Ouvrir dans ma messagerie</a><button class="btn btn-ghost btn-sm" type="button" id="btn-em-ia">Affiner avec l\'IA</button><button class="btn btn-ghost btn-sm" type="button" id="btn-em-regen">Régénérer</button><span class="hint" id="em-status"></span></div>';
+  var upd = function(){ document.getElementById("em-mailto").href = emMailto(document.getElementById("em-objet").value, document.getElementById("em-corps").value); }; upd();
+  document.getElementById("em-objet").addEventListener("input", upd); document.getElementById("em-corps").addEventListener("input", upd);
+}
+function renderEmailTips(){
+  var box = document.getElementById("em-tips"); if(!box) return;
+  var L = function(t, a){ return '<div><h3 style="font-size:15px;margin:0 0 6px;">' + t + '</h3><ul style="margin:0;padding-left:18px;font-size:13.5px;line-height:1.55;">' + a.map(function(x){ return "<li>" + esc(x) + "</li>"; }).join("") + "</ul></div>"; };
+  box.innerHTML = '<span class="eyebrow">Bonnes pratiques</span><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin-top:10px;">' +
+    L("Objet et message", ["Un objet précis, 60 caractères au plus : le poste ou la prestation, et votre nom.", "Une première phrase qui parle du destinataire, pas de vous.", "Une preuve concrète, un seul appel à l'action, 120 mots au plus.", "Texte simple, sans image ni mise en forme chargée, relu à voix haute."]) +
+    L("Pièces jointes", ["PDF uniquement, nommés « Prénom-Nom-CV.pdf », poids total sous 2 Mo.", "Cité dans le message : le destinataire sait ce qu'il doit ouvrir.", "Ouvre le PDF avant l'envoi : mise en page et liens.", "Pas de lien de partage qui demande une connexion."]) +
+    L("Envoi et suivi", ["Du mardi au jeudi, le matin, de préférence.", "Une relance après 7 à 10 jours, une seule, plus courte que le premier message.", "Note l'envoi dans l'onglet Candidatures (ou Plaquette pour une offre de service).", "Adresse d'expédition sobre : prénom.nom@…, jamais un pseudo."]) +
+    L("Pour les freelances", ["Signature avec ton SIRET, ton site et un lien de prise de rendez-vous.", "Un message par structure et par prestation : pas d'envoi groupé en copie visible.", "Prospection par e-mail d'un professionnel : reste dans le périmètre de sa fonction et indique comment ne plus être contacté (la phrase « stop » est ajoutée).", "Ne donne le tarif que s'il est demandé ou si tu as choisi de l'afficher."]) +
+    "</div>";
+}
+function renderSigOut(){
+  var c = emCfg(), g = c.sig;
+  document.getElementById("sg-out").value = emSignature();
+  var siret = (g.siret || "").replace(/\s/g, ""), h = document.getElementById("sg-hint");
+  h.textContent = siret && !/^\d{14}$/.test(siret) ? "Le SIRET compte 14 chiffres." : "";
+}
+function renderEmail(){
+  var c = emCfg(), A = state.annonce, g = c.sig;
+  var set = function(id, v){ var el = document.getElementById(id); if(el && document.activeElement !== el) el.value = v || ""; };
+  set("em-type", c.type); set("em-pj", c.pj); set("em-dest", c.dest || state.lettre.destinataire); set("em-ent", c.ent !== undefined && c.ent !== "" ? c.ent : A.entreprise);
+  set("em-poste", c.poste !== undefined && c.poste !== "" ? c.poste : A.poste); set("em-jours", c.jours); set("em-hook", c.hook); set("em-fort", c.fort);
+  document.getElementById("em-sigon").checked = c.sigOn !== false;
+  set("sg-titre", g.titre); set("sg-siret", g.siret); set("sg-site", g.site); set("sg-rdv", g.rdv); set("sg-zone", g.zone); set("sg-format", c.format);
+  renderEmailOut(); renderEmailTips(); renderSigOut();
+}
+(function bindEmail(){
+  var map = { "em-type": "type", "em-pj": "pj", "em-dest": "dest", "em-ent": "ent", "em-poste": "poste", "em-jours": "jours", "em-hook": "hook", "em-fort": "fort", "sg-format": "format" };
+  var smap = { "sg-titre": "titre", "sg-siret": "siret", "sg-site": "site", "sg-rdv": "rdv", "sg-zone": "zone" };
+  var onField = function(e){
+    var id = e.target.id, c;
+    if(map[id]){ c = emCfg(); c[map[id]] = e.target.value; }
+    else if(smap[id]){ c = emCfg(); c.sig[smap[id]] = e.target.value; }
+    else if(id === "em-sigon"){ c = emCfg(); c.sigOn = e.target.checked; }
+    else return;
+    emOverride = null; persist(); renderEmailOut(); renderSigOut();
+  };
+  var panel = document.getElementById("panel-email");
+  panel.addEventListener("input", onField); panel.addEventListener("change", function(e){ if(e.target.name === "em-obj"){ emSel = +e.target.value; renderEmailOut(); } else if(e.target.tagName === "SELECT" || e.target.type === "checkbox") onField(e); });
+  panel.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if(!b) return;
+    var st = document.getElementById("em-status");
+    if(b.id === "btn-em-cobj") emCopy(document.getElementById("em-objet").value, st);
+    else if(b.id === "btn-em-cocorps") emCopy(document.getElementById("em-corps").value, st);
+    else if(b.id === "btn-em-copyall") emCopy("Objet : " + document.getElementById("em-objet").value + "\n\n" + document.getElementById("em-corps").value, st);
+    else if(b.id === "btn-sg-copy") emCopy(document.getElementById("sg-out").value, document.getElementById("sg-hint"));
+    else if(b.id === "btn-em-regen"){ emOverride = null; renderEmailOut(); }
+    else if(b.id === "btn-em-ia") emAI();
+  });
+})();
+function emAI(){
+  var r = emBuild(), st = document.getElementById("em-status"), c = emCfg(), A = state.annonce;
+  var system = "Tu rédiges l'e-mail d'accompagnement d'une candidature ou d'une offre de service en France, destiné à un recruteur ou à un décideur. Objectif : retenir l'attention en restant professionnel. Règles : 80 à 120 mots ; vouvoiement ; première phrase centrée sur le destinataire ; une preuve concrète tirée des données ; un seul appel à l'action (échange de 15 minutes) ; mentionne les pièces jointes ; pas de « je me permets », « n'hésitez pas », « je suis très motivé » ; pas de superlatif ; pas de tiret long ; pas de contraste « non pas X mais Y » ; n'écris ni la formule de politesse finale ni la signature. Propose aussi 3 objets de 60 caractères au plus. Réponds par un objet JSON : {\"objets\":[\"…\"],\"corps\":\"…\"}.";
+  st.textContent = "En cours…";
+  iaAsk(system, { type_envoi: r.type, pieces_jointes: r.files.map(function(f){ return f.replace(/^.*?-(CV|lettre)/, "$1"); }), poste_ou_mission: scrubForAI(c.poste || A.poste || ""), entreprise: scrubForAI(c.ent || A.entreprise || ""), phrase_sur_entreprise: scrubForAI(c.hook || ""), point_fort: scrubForAI(c.fort || ""), titre_du_candidat: scrubForAI(state.cv.titre || state.profil.titre || ""), mots_cles_confirmes_par_la_base: emKeywords(), prestations: pqSelectedServices().slice(0, 3).map(function(x){ return scrubForAI(x.titre); }), brouillon_actuel: scrubForAI(r.corps.replace(/\n\nCordialement,[\s\S]*$/, "")) },
+    "Le contenu du brouillon et le poste visé (sans ton nom ni tes coordonnées) servent à améliorer le message.").then(function(res){
+      var corps = String(res.corps || "").replace(/\n+\s*Cordialement,?[\s\S]*$/i, "").trim(); if(!corps) throw new Error("réponse vide");
+      emOverride = { objets: (res.objets || []).slice(0, 3).map(String).filter(Boolean).length ? (res.objets || []).slice(0, 3).map(String) : r.objets, corps: corps + "\n\nCordialement," }; emSel = 0; renderEmailOut();
+    }).catch(function(e){ var el = document.getElementById("em-status"); if(el) el.textContent = (e && e.message === "annulé") ? "" : "L'IA n'a pas répondu : " + ((e && e.message) || "erreur") + "."; });
+}
 
 /* ===================== CANDIDATURES MULTIPLES : barre, bascule, sauvegarde locale ===================== */
 
