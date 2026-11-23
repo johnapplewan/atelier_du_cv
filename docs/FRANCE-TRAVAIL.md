@@ -104,9 +104,39 @@ Annoncer des offres France Travail avant accord ; afficher un prix, un compte ou
 |---|---|---|---|
 | [La bonne alternance](https://www.data.gouv.fr/dataservices/api-la-bonne-alternance) | API publique et gratuite d'opportunités d'alternance en France, alimentée par La bonne alternance et ses sites partenaires | Très adaptée à la cible **étudiants et alternants** | Conditions d'accès et d'usage, quotas, mentions obligatoires |
 | [Offres d'emploi diffusées à France Travail (jeu de données)](https://data.gouv.fr/en/datasets/offres-demploi-diffusees-a-france-travail) | Données brutes publiées sur data.gouv.fr, mises à jour chaque trimestre | Statistiques et cartographie des métiers, pas une recherche en direct | Licence, fraîcheur des données |
-| [Adzuna](https://developer.adzuna.com/overview) | API d'agrégation d'annonces ; clé gratuite immédiate ; pays par code (France probablement `fr`) | Recherche en direct | Les [conditions](https://developer.adzuna.com/docs/terms_of_service) prévoient une période d'essai de 14 jours pour un usage commercial ; limites de requêtes non publiées ; contact avec les fournisseurs d'annonces interdit |
+| [Adzuna](https://developer.adzuna.com/overview) | API d'agrégation d'annonces ; clé gratuite immédiate | Recherche en direct | Voir « Adzuna : usage commercial et France » ci-dessous |
 | [Jooble](https://jooble.jooble.org/api/about) | API REST (POST, clé personnelle) sur demande via un formulaire | Recherche en direct, large couverture | Quotas et durée de vie de la clé non confirmés ; une clé par pays ; conditions d'usage |
 | [Careerjet](https://www.careerjet.im/partners/api) | API partenaire (clé par site éditeur, authentification Basic) | Recherche en direct, localisation française | Contrat partenaire, limites de requêtes, mentions obligatoires |
+
+
+### Adzuna : usage commercial et France
+
+Lu dans les [conditions](https://developer.adzuna.com/docs/terms_of_service) (non juridique, à confirmer avec Adzuna) :
+
+- Usages autorisés sans accord écrit : recherche d'emploi personnelle, **publication des annonces Adzuna** (avec le libellé « Adzuna » d'au moins 116 × 23 px, lié à adzuna.co.uk ou au domaine local), publication des estimations de salaire Jobsworth, recherche personnelle ou académique. Tout autre usage « requires our written agreement ».
+- Organisations commerciales : essai de **14 jours** « strictly for the purpose of validating the general coverage and quality of the data » ; ensuite, « for any use in a product or service that generates revenue or leads, a licence agreement is required ».
+- **Gratuité de la partie recherche et candidature** : les conditions ne disent pas qu'un service gratuit pour l'utilisateur échappe au régime commercial. Le critère écrit est « generates revenue or leads ». Un produit qui a des formules payantes (même si la recherche est gratuite) entre très probablement dans ce cas. Pendant la bêta entièrement gratuite et sans publicité, la situation est ambiguë : la publication d'annonces avec le libellé Adzuna est un usage autorisé, mais l'accès reste « à la discrétion absolue » d'Adzuna. À trancher par **écrit auprès d'Adzuna**, en décrivant précisément le service.
+- Autres règles : ne pas contacter les fournisseurs d'annonces (révocation immédiate), pas de comptes multiples, retrait des données à la résiliation, limites de requêtes visibles dans le compte (« we may vary limits ») ; **aucune mention de l'IA** sur les pages lues ; règles de stockage et de cache non précisées.
+- **Annonces en France** : **non confirmé**. Les pages ne listent aucun pays (exemple `gb` seulement) ; une source communautaire indique `fr`. Pour vérifier : créer une clé gratuite et appeler `/v1/api/jobs/fr/search/1`, ou consulter la documentation interactive d'Adzuna.
+
+### Dépôts et services signalés (à vérifier)
+
+| Élément | Ce que c'est | Une nouvelle source d'offres ? |
+|---|---|---|
+| `etiennekintzler/api-offres-emploi` | Wrapper Python de l'API Offres d'emploi v2 de France Travail (paquet PyPI `api-offres-emploi`) | **Non** : même API, même accès refusé. Utile seulement comme exemple de code. |
+| `creach-t/job-search-france-travail-api` | D'après son nom, un outil qui s'appuie sur l'API France Travail (dépôt non lu) | **Probablement non** : même source ; à confirmer en lisant son README. |
+| `kitsuno-ai/agentic-job-search-eu` | Répertoire communautaire de sources d'offres joignables depuis l'Europe, avec couverture, type d'accès, limites et notes d'exploration (30 à plus de 50 sources annoncées ; dépôt non lu) | **Indirectement** : un annuaire pour **découvrir** des sources, pas une source. Chaque source garde ses propres conditions. |
+| [LoopCV, API développeurs](https://www.loopcv.pro/fr/developers/) | API REST d'offres agrégées « depuis LinkedIn, Indeed, Glassdoor et 30+ autres plateformes », avec analyse de CV, score, candidature automatique | **À éviter pour les offres** : la page précise ne pas utiliser l'API officielle LinkedIn (collecte non détaillée), couverture France et limites du plan gratuit non indiquées, conditions non lues. Recoupe aussi le produit (analyse de CV côté serveur, ce qui heurte le principe « données dans le navigateur »). |
+| [TheirStack (API)](https://theirstack.com/fr/pricing?tab=api) | Données d'offres d'emploi et de technologies utilisées par les entreprises, 195 pays ; dès 19 $ par mois pour 1 500 crédits (1 crédit par offre) ; plan gratuit annoncé de 200 crédits API par mois | **Intéressant pour les freelances** (repérer des entreprises qui recrutent sur une technologie), pas pour la recherche d'emploi grand public. Part de la France et conditions d'usage non indiquées. |
+| [JobsPipe](https://jobspipe.dev/pricing) | API JSON de 30+ sources d'offres (ATS et sites d'emploi) ; 1 000 crédits gratuits une seule fois ; dès 19,60 $ par mois pour 10 000 crédits ; 12 mois d'historique | Possible, mais **couverture France non indiquée**. Le bac à sable public ne renvoie que 2 offres fictives : il ne permet pas de la mesurer. Conditions non lues. |
+
+Aucun de ces services n'a été validé : prix, couverture France, droit de stockage, usage par une IA et usage commercial restent à vérifier dans leurs conditions complètes avant tout branchement. Ces dépôts n'ont pas été lus.
+
+### Marche à suivre proposée
+
+1. **La bonne alternance** d'abord (étudiants et alternants) : lire ses conditions d'accès.
+2. **Adzuna** : créer une clé gratuite, tester la France, puis écrire à Adzuna pour savoir si un service gratuit avec formules payantes pour les outils de rédaction entre dans leur licence.
+3. N'envisager les agrégateurs qui collectent sans accord des sources (LoopCV) qu'après lecture de leurs conditions complètes ; privilégier les sources dont la licence autorise explicitement l'affichage et le renvoi vers l'annonce.
 
 Pistes non confirmées : offres de l'emploi public et de l'insertion (existence d'une API non établie), ainsi que les grands sites d'emploi (aucune API publique repérée ; ne pas récupérer leurs pages automatiquement). Pour chaque source, vérifier en particulier : l'interdiction éventuelle d'utiliser les contenus avec une IA, l'obligation de renvoyer vers la source, l'interdiction de conserver les offres, et la compatibilité avec une application sans compte ni serveur de stockage.
 
