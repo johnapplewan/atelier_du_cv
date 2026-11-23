@@ -473,7 +473,7 @@
 
 <noscript><p style="padding:16px;">Atelier Candidature a besoin de JavaScript pour fonctionner. Vos données restent dans votre navigateur.</p></noscript>
 <dialog id="ia-dialog" style="max-width:560px;width:92vw;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);color:var(--ink-900);padding:22px;">
-  <h3 style="margin:0 0 8px;font-size:17px;">Assistant IA : ton compte Claude, sans clé API</h3>
+  <h3 style="margin:0 0 8px;font-size:17px;">Assistant IA : ton compte Claude, sans clé obligatoire</h3>
   <p class="hint" style="margin:0 0 10px;">L'atelier fonctionne sans IA. Quand tu demandes une reformulation ou une lettre sur mesure, le travail est fait par <strong>ton compte Claude</strong> :</p>
   <ul class="hint" style="margin:0 0 12px;padding-left:18px;line-height:1.55;">
     <li><strong>Dans la version publiée sur claude.ai</strong> : un clic, Claude répond directement dans la page (Claude te demande ton accord la première fois).</li>
@@ -482,7 +482,17 @@
     <li><strong>Inclus</strong> : le texte de l'annonce, tes expériences (poste, entreprise, réalisations), tes compétences, ta « voix » et tes remarques.</li>
   </ul>
   <p class="hint" id="ia-mode-line" style="margin:0 0 10px;"></p>
-  <label class="hint" style="display:flex;gap:6px;align-items:center;margin-bottom:12px;"><input type="checkbox" id="ia-skip"> Ne plus afficher l'aperçu avant l'envoi direct (version claude.ai)</label>
+  <details class="pq-det" style="margin-bottom:12px;"><summary>Option : ma propre clé d'API (facultatif)</summary>
+    <div style="margin-top:10px;">
+      <p class="hint" style="margin:0 0 8px;">Pour un envoi direct sans passer par claude.ai. Les appels partent de ton navigateur vers <strong>api.anthropic.com</strong> et sont facturés sur <strong>ton</strong> compte API : l'atelier ne paie rien et ne voit rien. Crée une clé dédiée avec une limite de dépenses.</p>
+      <label class="hint" style="display:flex;gap:6px;align-items:center;margin-bottom:8px;"><input type="checkbox" id="ia-byok-on"> Utiliser ma clé d'API</label>
+      <div class="field"><label for="ia-key">Clé d'API</label><input type="password" id="ia-key" autocomplete="off" spellcheck="false" placeholder="sk-ant-…"></div>
+      <div class="field"><label for="ia-model">Modèle</label><select id="ia-model"><option value="claude-haiku-5-5">Haiku 5.5 : le plus économique</option><option value="claude-sonnet-5-5">Sonnet 5.5 : plus soigné, plus cher</option></select></div>
+      <div class="toolbar-row"><button class="btn btn-ghost btn-sm" id="ia-key-test" type="button">Tester la clé</button><button class="btn btn-ghost btn-sm" id="ia-key-clear" type="button">Supprimer la clé</button><span class="hint" id="ia-key-status"></span></div>
+      <p class="hint" style="margin:8px 0 0;">La clé reste dans ce navigateur : elle n'est pas dans la sauvegarde et « Tout effacer » la supprime. Toute personne qui utilise ce navigateur peut la lire : n'active cette option que sur ton appareil.</p>
+    </div>
+  </details>
+  <label class="hint" style="display:flex;gap:6px;align-items:center;margin-bottom:12px;"><input type="checkbox" id="ia-skip"> Ne plus afficher l'aperçu avant l'envoi direct (claude.ai ou clé d'API)</label>
   <div class="toolbar-row" style="justify-content:flex-end;">
     <button class="btn btn-primary btn-sm" id="ia-save" type="button">Fermer</button>
   </div>
@@ -1984,7 +1994,7 @@ wireExportButton("btn-export-all", "export-all-status",
 
 document.getElementById("btn-reset").addEventListener("click", function(){
   if(!confirm("Effacer toutes les informations saisies (bibliothèque comprise) et repartir d'un dossier vide ?")) return;
-  try{ localStorage.removeItem("atelier-candidature-v2"); }catch(e){}
+  try{ localStorage.removeItem("atelier-candidature-v2"); localStorage.removeItem("atelier-candidature-ia-pref"); }catch(e){}
   location.reload();
 });
 
@@ -6936,7 +6946,29 @@ function renderStyleCheck(){
 /* ===================== ASSISTANT IA (facultatif) + AFFINAGE DE LA LETTRE + VOIX ===================== */
 
 var IA_PREF = "atelier-candidature-ia-pref";
-function iaPrefs(){ try{ return Object.assign({ skip:false }, JSON.parse(localStorage.getItem(IA_PREF) || "{}")); }catch(e){ return { skip:false }; } }
+function iaPrefs(){
+  var base = { skip: false, byok: { on: false, key: "", model: "claude-haiku-5-5" } }, v = {};
+  try{ v = JSON.parse(localStorage.getItem(IA_PREF) || "{}"); }catch(e){}
+  return Object.assign(base, v, { byok: Object.assign(base.byok, v.byok) });
+}
+// Clé d'API personnelle (facultative) : stockée seulement ici, jamais dans la sauvegarde, jamais envoyée à l'atelier ; les appels partent du navigateur vers api.anthropic.com.
+function iaByokActive(){ var b = iaPrefs().byok; return !!(b.on && b.key); }
+function iaByok(prompt){
+  var b = iaPrefs().byok;
+  return fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "content-type": "application/json", "x-api-key": b.key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
+    body: JSON.stringify({ model: b.model, max_tokens: 4096, messages: [{ role: "user", content: prompt }] })
+  }).then(function(res){
+    return res.json().then(function(d){
+      if(!res.ok){
+        var m = (d && d.error && d.error.message) || ("erreur " + res.status);
+        throw new Error(res.status === 401 ? "clé refusée par Anthropic" : res.status === 429 ? "limite d'usage atteinte sur ta clé" : m);
+      }
+      return (d.content || []).map(function(c){ return c.text || ""; }).join("");
+    }, function(){ throw new Error("réponse illisible (" + res.status + ")"); });
+  }, function(){ throw new Error("connexion impossible vers api.anthropic.com"); });
+}
 function iaPrefSave(v){ try{ localStorage.setItem(IA_PREF, JSON.stringify(v)); }catch(e){} }
 
 // Dans une page publiée sur claude.ai, « sample » fait répondre Claude avec le compte de la personne qui ouvre la page.
@@ -6947,19 +6979,34 @@ if(window.claude && typeof window.claude.use === "function"){
 function iaOn(){ return true; }
 function refreshIaState(){
   var el = document.getElementById("ia-state");
-  if(el) el.textContent = iaSample ? "mon compte Claude" : "copier-coller";
+  if(el) el.textContent = iaSample ? "mon compte Claude" : (iaByokActive() ? "ma clé API" : "copier-coller");
   refreshAffinerUI();
 }
 
 document.getElementById("btn-ia-settings").addEventListener("click", function(){
   document.getElementById("ia-skip").checked = !!iaPrefs().skip;
+  var bp = iaPrefs().byok;
+  document.getElementById("ia-byok-on").checked = !!bp.on; document.getElementById("ia-key").value = bp.key || ""; document.getElementById("ia-model").value = bp.model || "claude-haiku-5-5";
+  document.getElementById("ia-key-status").textContent = "";
   document.getElementById("ia-mode-line").textContent = iaSample
     ? "Mode actuel : envoi direct à ton compte Claude depuis cette page."
-    : "Mode actuel : copier-coller vers claude.ai (cette page n'est pas hébergée sur claude.ai).";
+    : (iaByokActive() ? "Mode actuel : ta clé d'API personnelle (envoi direct depuis ton navigateur vers api.anthropic.com)." : "Mode actuel : copier-coller vers claude.ai (cette page n'est pas hébergée sur claude.ai).");
   document.getElementById("ia-dialog").showModal();
 });
+document.getElementById("ia-key-clear").addEventListener("click", function(){
+  var v = iaPrefs(); v.byok = { on: false, key: "", model: v.byok.model }; iaPrefSave(v);
+  document.getElementById("ia-key").value = ""; document.getElementById("ia-byok-on").checked = false; document.getElementById("ia-key-status").textContent = "Clé supprimée de ce navigateur."; refreshIaState();
+});
+document.getElementById("ia-key-test").addEventListener("click", function(){
+  var st = document.getElementById("ia-key-status"), key = document.getElementById("ia-key").value.trim();
+  if(!key){ st.textContent = "Saisis d'abord ta clé."; return; }
+  var v = iaPrefs(); v.byok = { on: true, key: key, model: document.getElementById("ia-model").value }; iaPrefSave(v);
+  st.textContent = "Test en cours (une très courte requête)…";
+  iaByok("Réponds seulement par le mot : ok").then(function(){ st.textContent = "La clé fonctionne."; document.getElementById("ia-byok-on").checked = true; refreshIaState(); }, function(e){ st.textContent = "Échec : " + e.message + "."; });
+});
 document.getElementById("ia-save").addEventListener("click", function(){
-  iaPrefSave({ skip: document.getElementById("ia-skip").checked });
+  iaPrefSave({ skip: document.getElementById("ia-skip").checked, byok: { on: document.getElementById("ia-byok-on").checked, key: document.getElementById("ia-key").value.trim(), model: document.getElementById("ia-model").value } });
+  refreshIaState();
   document.getElementById("ia-dialog").close();
 });
 
@@ -6984,7 +7031,7 @@ function extractJson(txt){
   return JSON.parse(m[0]);
 }
 
-// Demande à Claude (compte de la personne) : envoi direct si la page tourne sur claude.ai, sinon copier-coller.
+// Demande à Claude : envoi direct avec le compte de la personne si la page tourne sur claude.ai, sinon avec sa clé d'API personnelle si elle en a saisi une, sinon copier-coller.
 // `what` décrit ce qui part, pour l'aperçu.
 function iaAsk(system, userObj, what){
   var prompt = system + "\n\n=== DONNÉES (JSON) ===\n" + JSON.stringify(userObj, null, 1) + "\n\nRéponds uniquement par l'objet JSON demandé, sans texte avant ni après.";
@@ -6994,6 +7041,13 @@ function iaAsk(system, userObj, what){
       if(!ok) throw new Error("annulé");
       return iaSample(prompt, { modelTier: "default", cache: false }).then(function(r){ return extractJson(r.text); },
         function(e){ throw new Error((e && e.code === "not_granted") ? "accès à Claude refusé" : ((e && e.message) || "Claude n'a pas répondu")); });
+    });
+  }
+  if(iaByokActive()){
+    var go2 = iaPrefs().skip ? Promise.resolve(true) : iaConfirm(what, prompt);
+    return go2.then(function(ok){
+      if(!ok) throw new Error("annulé");
+      return iaByok(prompt).then(extractJson);
     });
   }
   return new Promise(function(resolve, reject){

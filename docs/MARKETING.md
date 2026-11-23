@@ -24,7 +24,7 @@ Pour les personnes qui candidatent souvent (étudiants, personnes en recherche d
 1. **Une base, tous les documents** : on importe son parcours une fois.
 2. **Rien d'inventé** : ce qui manque est signalé par un astérisque.
 3. **Sur ton ordinateur** : pas de compte pour le moment, pas de cookie, pas de suivi.
-4. **Gratuit pour le moment** : aucun prix, aucun compte ; l'assistant d'écriture passe par le compte Claude de la personne, personne ne paie la consommation des autres.
+4. **Gratuit pour le moment** : aucun prix, aucun compte ; l'assistant d'écriture passe par le compte Claude de la personne, sa propre clé d'API facultative ou un copier-coller : personne ne paie la consommation des autres.
 
 ## Règles éditoriales
 

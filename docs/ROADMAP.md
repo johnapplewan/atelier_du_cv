@@ -10,6 +10,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 - Score ATS avec suggestions, optimisation automatique, plan d'action Markdown ; CV anonymisé.
 - Suivi des candidatures avec relances, versions enregistrées, plusieurs personnes et plusieurs candidatures.
 - Landing page à la racine (`/`), application sous `/app/`, page « Gratuit pour le moment » (`tarifs/`), sans prix, 13 maquettes SaaS non routées (`saas/`), documentation des offres et du positionnement.
+- Assistant IA : clé d'API personnelle facultative (appel direct du navigateur, hors sauvegarde).
 - E-mail d'envoi (cinq types, signature freelance, bonnes pratiques), fiche de préparation à l'entretien, banque d'images de la plaquette.
 - Mobile (navigation par groupes), thème par bouton icône, accueil (premiers pas, alerte des relances).
 - Pages légales, polices et bibliothèques auto-hébergées, en-têtes de sécurité, documentation (`ARCHITECTURE.md`, `METHODE-LETTRE-RAPOS.md`).
@@ -36,7 +37,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 
 Décision : aucun prix ni formule (voir `docs/OFFRES-ET-TARIFS.md`). Il reste à trancher :
 
-- le financement de l'IA au-delà du copier-coller (clé personnelle facultative, plafond, financement par des tiers) ;
+- le financement de l'IA au-delà du copier-coller et de la clé personnelle (déjà en place) : plafond, financement par des tiers ;
 - la structure juridique si un financement apparaît ;
 - les comptes et la synchronisation entre appareils, si on les ouvre : qui finance l'hébergement ;
 - l'abandon ou la reprise des maquettes payantes (retirées, récupérables dans l'historique git).

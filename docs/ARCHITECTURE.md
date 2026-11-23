@@ -16,7 +16,7 @@ Principes de conception à conserver :
 2. **L'application fait le tri elle-même** : dès que la base, le profil ou l'annonce change, le CV et les indicateurs se recalculent. L'utilisateur ajuste ensuite (cases à cocher, texte), il n'a pas à tout reconstruire.
 3. **Rien n'est inventé** : tout contenu produit vient de la base de l'utilisateur ; ce qui manque est signalé par un astérisque (*) à l'écran, jamais comblé.
 4. **Multi-personnes sur un même ordinateur** : chaque personne a sa base, sa « voix », ses profils, ses candidatures.
-5. **IA facultative** : via le compte Claude de l'utilisateur (envoi direct sur claude.ai, sinon copier-coller). Jamais de clé API dans l'application.
+5. **IA facultative et à la charge de la personne** : via son compte Claude (envoi direct sur claude.ai), sa **propre clé d'API facultative** (appel direct du navigateur vers api.anthropic.com), ou le copier-coller. Aucune clé de l'éditeur dans l'application, aucun appel d'IA à ses frais.
 
 ---
 
@@ -41,7 +41,7 @@ Principes de conception à conserver :
 
 **Contraintes qui pèsent sur un redesign**
 
-- **CSP** (`_headers`) : `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'`. Aucune ressource externe (CDN, polices distantes, analytics) ne doit être ajoutée. Le JavaScript est inline : si on le sort dans des fichiers, garder `'self'`.
+- **CSP** (`_headers`) : `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.anthropic.com`. La seule destination externe autorisée est l'API d'Anthropic, utilisée **uniquement** si la personne saisit sa propre clé d'API. Aucune ressource externe (CDN, polices distantes, analytics) ne doit être ajoutée. Le JavaScript est inline : si on le sort dans des fichiers, garder `'self'`.
 - **Pas de framework ni de build** aujourd'hui. Un redesign peut introduire un build, mais l'ensemble doit rester servable en statique sur Cloudflare Pages.
 - **Une version publiée comme artefact claude.ai** existe (même `app/index.html` + `vendor/`) ; elle ne peut pas appeler `/api/*` (la lecture d'annonce par lien, la recherche d'entreprises et d'offres n'y fonctionnent pas, un message l'indique).
 - Le HTML est **en grande partie généré en JavaScript** (`innerHTML` dans les fonctions `render…`). Les classes CSS et les `id` listés en §8 et §9 sont donc un **contrat** entre le style et le code.
@@ -165,7 +165,7 @@ Dossier (une candidature en cours) = { id, titre, titreAuto, candidatureId,
 | Lettres | `generateLettre` → `generateLettreParagraphs` (offre), `LETTRE_SPONTANEE`, `generateOffreServiceParagraphs` | Ouverture selon le ton et le type d'émetteur, expériences proches, réalisations, mots-clés maîtrisés, voix de la personne, clôture. Aucun fait inventé. |
 | Anonymisation | `anonymizedCvElement`, `scrubForAI` | Retire nom, contacts, photo, liens ; options pour masquer employeurs et établissements. |
 | Export PDF | `buildPdfFromSections`, `fitPdfClone`, `addCanvasAsPages` | Recompose le document hors écran à largeur A4, resserre pour tenir en 2 pages (CV) / 1 page (lettre), coupe entre deux blocs, retire astérisques et zones éditables. |
-| Assistant IA | `iaAsk`, `iaReformulerCV`, `btn-affiner-ia` | Message sans nom ni coordonnées ni noms d'employeurs ; mode direct (version claude.ai) ou copier-coller ; règles de `prompts.js` envoyées à chaque demande ; réponse `{paragraphs, remarques}`. |
+| Assistant IA | `iaAsk`, `iaByok`, `iaByokActive`, `iaReformulerCV`, `btn-affiner-ia` | Message sans nom ni coordonnées ni noms d'employeurs ; trois modes dans cet ordre : direct (version claude.ai), **clé d'API personnelle** (facultative : `POST https://api.anthropic.com/v1/messages` depuis le navigateur, en-têtes `x-api-key`, `anthropic-version`, `anthropic-dangerous-direct-browser-access`, modèle au choix Haiku 5.5 ou Sonnet 5.5, aperçu avant envoi), ou copier-coller ; la clé est stockée dans `localStorage["atelier-candidature-ia-pref"]` (`byok:{on,key,model}`), hors sauvegarde, supprimée par « Tout effacer » ; une annonce issue de l'API France Travail n'est jamais envoyée, quel que soit le mode ; règles de `prompts.js` envoyées à chaque demande ; réponse `{paragraphs, remarques}`. |
 | Offres suggérées | `FL_OFFRES`, `flSuggestions`, `flAddSuggestion`, `flRemoveSuggestion`, `renderFlSuggest` | Catalogue de 13 domaines (2 à 4 offres chacun : intitulé, description, accroche bénéfice, accroche problème, baseline). Les trois domaines les mieux classés d'après `profilEvidence` (profils existants +3) alimentent la liste ; cocher ajoute une prestation, décocher la retire. |
 | Plaquette | `PQ_MODELES`, `PQ_RENDER`, `pqData`, `pqHtml`, `pqBand`, `pqFit`, `renderPlaquette` | Un gabarit HTML/CSS par modèle (794 × 1123 px), rempli depuis la base et la plaquette active ; détails ci-dessous. |
 | Accroches | `pqComputePropos`, `pqTu`, `pqPropAI` | Trois accroches (bénéfice, problème puis solution, interlocuteur unique) et jusqu'à cinq baselines, tirées des offres retenues ; aucun chiffre inventé ; tutoiement par conversion d'une liste fermée de formulations ; affinage IA possible. |
@@ -249,7 +249,7 @@ Les `id` ci-dessous sont lus par le script. **Ne pas les renommer sans adapter l
 
 **Barre haute, sélecteurs personne/candidature, dialogues, rail, pied de page**
 
-`#ia-dialog`, `#ia-mode-line`, `#ia-skip`, `#ia-save`, `#ia-paste`, `#ia-paste-what`, `#ia-paste-prompt`, `#ia-paste-copy`, `#ia-paste-copied`, `#ia-paste-answer`, `#ia-paste-error`, `#ia-paste-cancel`, `#ia-paste-ok`, `#ia-confirm`, `#ia-confirm-what`, `#ia-confirm-text`, `#ia-confirm-no`, `#ia-confirm-yes`, `#app`, `#mobile-title`, `#btn-menu`, `#app-menu`, `#btn-theme`, `#theme-icon`, `#theme-label`, `#btn-ia-settings`, `#ia-state`, `#btn-reset`, `#btn-export-cv-lettre`, `#btn-export-all`, `#person-bar`, `#person-select`, `#btn-new-person`, `#btn-rename-person`, `#btn-del-person`, `#dossier-bar`, `#dossier-select`, `#dossier-title`, `#btn-new-dossier`, `#btn-dup-dossier`, `#btn-del-dossier`, `#btn-backup`, `#btn-restore`, `#restore-file`, `#export-cv-lettre-status`, `#export-all-status`, `#bottom-nav`, `#bn-dot-suivi`, `#rail`, `#dot-base`, `#dot-profils`, `#dot-recherche`, `#dot-offres`, `#dot-annonce`, `#dot-cv`, `#dot-lettre`, `#dot-annexe`, `#dot-email`, `#dot-candidatures`, `#dot-freelance`, `#dot-plaquette`, `#dot-entretien`, `#home-strip`
+`#ia-dialog`, `#ia-mode-line`, `#ia-byok-on`, `#ia-key`, `#ia-model`, `#ia-key-test`, `#ia-key-clear`, `#ia-key-status`, `#ia-skip`, `#ia-save`, `#ia-paste`, `#ia-paste-what`, `#ia-paste-prompt`, `#ia-paste-copy`, `#ia-paste-copied`, `#ia-paste-answer`, `#ia-paste-error`, `#ia-paste-cancel`, `#ia-paste-ok`, `#ia-confirm`, `#ia-confirm-what`, `#ia-confirm-text`, `#ia-confirm-no`, `#ia-confirm-yes`, `#app`, `#mobile-title`, `#btn-menu`, `#app-menu`, `#btn-theme`, `#theme-icon`, `#theme-label`, `#btn-ia-settings`, `#ia-state`, `#btn-reset`, `#btn-export-cv-lettre`, `#btn-export-all`, `#person-bar`, `#person-select`, `#btn-new-person`, `#btn-rename-person`, `#btn-del-person`, `#dossier-bar`, `#dossier-select`, `#dossier-title`, `#btn-new-dossier`, `#btn-dup-dossier`, `#btn-del-dossier`, `#btn-backup`, `#btn-restore`, `#restore-file`, `#export-cv-lettre-status`, `#export-all-status`, `#bottom-nav`, `#bn-dot-suivi`, `#rail`, `#dot-base`, `#dot-profils`, `#dot-recherche`, `#dot-offres`, `#dot-annonce`, `#dot-cv`, `#dot-lettre`, `#dot-annexe`, `#dot-email`, `#dot-candidatures`, `#dot-freelance`, `#dot-plaquette`, `#dot-entretien`, `#home-strip`
 
 **panel-base**
 
@@ -427,7 +427,7 @@ Numéros de ligne omis (ils changent) : chercher le nom dans `app/index.html`. R
 
 **ASSISTANT IA (facultatif) + AFFINAGE DE LA LETTRE + VOIX**
 
-`iaPrefs`, `iaPrefSave`, `iaOn`, `refreshIaState`, `scrubForAI`, `extractJson`, `iaAsk`, `iaConfirm`, `relevantExperiences`, `annonceForAI`, `iaReformulerCV`, `refreshAffinerUI`, `addRemarque`, `lettreCurrentParagraphs`, `renderVoixCard`
+`iaPrefs`, `iaPrefSave`, `iaByokActive`, `iaByok`, `iaOn`, `refreshIaState`, `scrubForAI`, `extractJson`, `iaAsk`, `iaConfirm`, `relevantExperiences`, `annonceForAI`, `iaReformulerCV`, `refreshAffinerUI`, `addRemarque`, `lettreCurrentParagraphs`, `renderVoixCard`
 
 ---
 
