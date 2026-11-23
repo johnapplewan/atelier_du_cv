@@ -102,7 +102,7 @@ Annoncer des offres France Travail avant accord ; afficher un prix, un compte ou
 
 | Source | Ce que c'est | Intérêt | Points à vérifier |
 |---|---|---|---|
-| [La bonne alternance](https://www.data.gouv.fr/dataservices/api-la-bonne-alternance) | API publique et gratuite d'opportunités d'alternance en France, alimentée par La bonne alternance et ses sites partenaires | Très adaptée à la cible **étudiants et alternants** | Conditions d'accès et d'usage, quotas, mentions obligatoires |
+| [La bonne alternance](https://www.data.gouv.fr/dataservices/api-la-bonne-alternance) | API publique d'opportunités d'alternance (offres, entreprises à fort potentiel d'embauche, formations) | Très adaptée à la cible **étudiants et alternants** | **Usage réservé aux usages non lucratifs** : voir « La bonne alternance : conditions lues » ci-dessous |
 | [Offres d'emploi diffusées à France Travail (jeu de données)](https://data.gouv.fr/en/datasets/offres-demploi-diffusees-a-france-travail) | Données brutes publiées sur data.gouv.fr, mises à jour chaque trimestre | Statistiques et cartographie des métiers, pas une recherche en direct | Licence, fraîcheur des données |
 | [Adzuna](https://developer.adzuna.com/overview) | API d'agrégation d'annonces ; clé gratuite immédiate | Recherche en direct | Voir « Adzuna : usage commercial et France » ci-dessous |
 | [Jooble](https://jooble.jooble.org/api/about) | API REST (POST, clé personnelle) sur demande via un formulaire | Recherche en direct, large couverture | Quotas et durée de vie de la clé non confirmés ; une clé par pays ; conditions d'usage |
@@ -119,6 +119,56 @@ Lu dans les [conditions](https://developer.adzuna.com/docs/terms_of_service) (no
 - Autres règles : ne pas contacter les fournisseurs d'annonces (révocation immédiate), pas de comptes multiples, retrait des données à la résiliation, limites de requêtes visibles dans le compte (« we may vary limits ») ; **aucune mention de l'IA** sur les pages lues ; règles de stockage et de cache non précisées.
 - **Annonces en France** : **non confirmé**. Les pages ne listent aucun pays (exemple `gb` seulement) ; une source communautaire indique `fr`. Pour vérifier : créer une clé gratuite et appeler `/v1/api/jobs/fr/search/1`, ou consulter la documentation interactive d'Adzuna.
 
+
+### La bonne alternance : conditions lues
+
+Pages lues : fiche data.gouv, explorateur de l'API (api.apprentissage.beta.gouv.fr), CGU v1.0 du 31 mars 2025, page de la route « Recherche d'offres ». Éditeur selon les CGU : DGEFP ; producteur selon data.gouv : DINUM.
+
+- **Contenu** : offres d'emploi en alternance (`offres_emploi_lba`, `offres_emploi_partenaires`), entreprises à fort potentiel d'embauche (`recruteurs_lba`), formations en apprentissage ; mise à jour quotidienne.
+- **Accès** : inscription par adresse e-mail, lien de connexion, puis création d'un « code technique d'accès » (CGU art. 4). Validation manuelle, délai et méthode d'authentification : non indiqués dans les pages lues. Certaines routes (dépôt d'offres, candidature, rendez-vous) exigent une habilitation.
+- **Gratuité** : oui (« gratuitement et en temps réel »), mais la page de la route précise : « L'utilisation de cette API est gratuite et **réservée à des usages non lucratifs** » ; « toute utilisation de ces données à des fins commerciales, telles que la revente ou la **facturation de l'accès pour des tiers comme des candidats** est interdite ». CGU art. 5.2 : l'utilisateur s'engage à ne pas commercialiser les données reçues.
+- **Non indiqué** : obligation d'affichage ou de renvoi vers l'offre d'origine, règles de stockage, interdiction d'usage par une IA, licence des données (le site cite etalab-2.0 pour ses contenus).
+- **Limites** : de 5 à 20 appels par seconde selon les routes.
+- **Contact** : `contact-api@labonnealternance.apprentissage.beta.gouv.fr`. Statut : mission-apprentissage.github.io/upptime. Code source de l'API : github.com/mission-apprentissage/api-apprentissage.
+
+**Lecture pour le produit** : pendant la bêta, entièrement gratuite et sans revenu, un usage non lucratif est défendable. Dès que des formules payantes existent, le risque est réel, même si la recherche d'offres reste gratuite : le texte interdit la « facturation de l'accès pour des tiers comme des candidats » et réserve l'API aux usages non lucratifs. **Ne pas construire de dépendance sans réponse écrite du contact de l'API.**
+
+### Questions à poser par écrit (brouillons)
+
+**À La bonne alternance** (`contact-api@labonnealternance.apprentissage.beta.gouv.fr`) :
+
+> Bonjour,
+>
+> Je développe Atelier Candidature, un outil gratuit pendant sa phase bêta qui aide étudiants et alternants à composer un CV et une lettre à partir d'une base qui reste dans leur navigateur (aucun compte, aucun CV envoyé à un serveur). Je souhaite afficher les offres d'alternance de votre API, avec renvoi vers l'offre d'origine, gratuitement et sans condition de compte.
+>
+> Plus tard, certains outils de rédaction (composition de CV, lettres, suivi) pourraient faire l'objet d'une formule payante, sans que l'accès aux offres ni la candidature n'en dépendent jamais. Cet usage est-il compatible avec la mention « usages non lucratifs » et l'interdiction de « facturation de l'accès » ? Sinon, sous quelle forme pourrions-nous formaliser un accord ?
+>
+> Pouvez-vous aussi préciser : les règles de conservation des offres (affichage temporaire), l'obligation éventuelle d'afficher la source, et l'usage des données avec un assistant d'écriture facultatif que l'utilisateur déclenche lui-même ?
+>
+> Cordialement,
+
+**À Adzuna** (formulaire de contact indiqué dans leurs conditions, sur adzuna.co.uk) :
+
+> Hello,
+>
+> We are building Atelier Candidature, a French job-application tool (CV and cover-letter builder, tracking). The job search and the link to the original ad are free for users, with no account. Some writing tools may later be paid. We would display Adzuna listings with the required Adzuna label and a link to the ad.
+>
+> Could you tell us: (1) whether this use falls under a licence agreement, (2) whether France (`fr`) is covered, with the approximate volume of French ads, (3) the rules on caching and storage, and (4) whether using listing text with an AI writing assistant triggered by the user is allowed?
+>
+> Thank you,
+
+### Tester Adzuna soi-même (France)
+
+1. Créer un compte sur developer.adzuna.com pour obtenir un `app_id` et un `app_key`.
+2. Dans un terminal, remplacer les deux valeurs et lancer :
+
+```bash
+curl -s "https://api.adzuna.com/v1/api/jobs/fr/search/1?app_id=VOTRE_ID&app_key=VOTRE_CLE&results_per_page=5&what=communication&where=Lyon"
+```
+
+3. Une réponse avec un champ `count` non nul et des `results` en français confirme la couverture ; une erreur « pays inconnu » l'infirme. Ne partagez pas la clé dans une conversation.
+
+
 ### Dépôts et services signalés (à vérifier)
 
 | Élément | Ce que c'est | Une nouvelle source d'offres ? |
@@ -134,8 +184,8 @@ Aucun de ces services n'a été validé : prix, couverture France, droit de stoc
 
 ### Marche à suivre proposée
 
-1. **La bonne alternance** d'abord (étudiants et alternants) : lire ses conditions d'accès.
-2. **Adzuna** : créer une clé gratuite, tester la France, puis écrire à Adzuna pour savoir si un service gratuit avec formules payantes pour les outils de rédaction entre dans leur licence.
+1. **La bonne alternance** (étudiants et alternants) : conditions lues, **usage non lucratif exigé** ; envoyer la question écrite (brouillon ci-dessus) avant tout développement.
+2. **Adzuna** : tester la France avec une clé gratuite (commande ci-dessus), puis écrire à Adzuna (brouillon ci-dessus).
 3. N'envisager les agrégateurs qui collectent sans accord des sources (LoopCV) qu'après lecture de leurs conditions complètes ; privilégier les sources dont la licence autorise explicitement l'affichage et le renvoi vers l'annonce.
 
 Pistes non confirmées : offres de l'emploi public et de l'insertion (existence d'une API non établie), ainsi que les grands sites d'emploi (aucune API publique repérée ; ne pas récupérer leurs pages automatiquement). Pour chaque source, vérifier en particulier : l'interdiction éventuelle d'utiliser les contenus avec une IA, l'obligation de renvoyer vers la source, l'interdiction de conserver les offres, et la compatibilité avec une application sans compte ni serveur de stockage.
