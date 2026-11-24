@@ -2,10 +2,10 @@
 
 ## Décision en cours
 
-**Option B retenue** : on se passe de l'API pour l'instant. Mesures en place dans l'application :
+**Option B retenue** : on se passe de l'API France Travail. Mesures en place dans l'application :
 
-- `OFFRES_API_ACTIVE = false` (`app/index.html`) : le formulaire de recherche de l'onglet **Offres** est masqué ; un avis explique la situation et propose « Coller une annonce » (onglet Annonce) et la recherche d'entreprises. Repasser la constante à `true` quand un accès sera accordé.
-- **Aucun envoi à l'IA du contenu d'une offre issue de l'API** (condition n° 2) : une annonce créée depuis l'API porte `annonce.source = "france-travail"` ; `offreVientDeLAPI()` bloque alors la reformulation du CV, la réécriture de la lettre par Claude et l'e-mail amélioré par l'IA (message `IA_OFFRE_API_MSG`), et `annonceForAI()` ne renvoie plus rien de l'offre. Relire une annonce par son lien (`fetchAnnonce`) remet la source à vide.
+- L'onglet **Offres** utilise désormais **La bonne alternance** (`OFFRES_API_ACTIVE = true`, `functions/api/alternance.js`). Si la source est coupée (`false`), le formulaire est masqué et un avis propose « Coller une annonce » (onglet Annonce) et la recherche d'entreprises. Le code France Travail (`functions/api/offres.js`) reste en réserve, inutilisé.
+- **Aucun envoi à l'IA du contenu d'une offre issue de l'API** (condition n° 2) : une annonce créée depuis une API d'offres porte `annonce.source = "france-travail"` ou `"la-bonne-alternance"` ; `offreVientDeLAPI()` bloque alors la reformulation du CV, la réécriture de la lettre par Claude et l'e-mail amélioré par l'IA (message `IA_OFFRE_API_MSG`), et `annonceForAI()` ne renvoie plus rien de l'offre. Relire une annonce par son lien (`fetchAnnonce`) remet la source à vide.
 
 ## État
 
@@ -205,6 +205,23 @@ Marche à suivre : définir `SOURCES_DIAG=1` dans le projet, redéployer, ouvrir
 **Ce qui est déjà établi sans clé** : sur `api.apprentissage.beta.gouv.fr`, `GET /api/job/v1/search` et `/api/job/v1/export` existent (réponse 401 « clé d'API valide » sans clé) ; Adzuna répond 401 pour une clé invalide quel que soit le pays (la couverture de `fr` reste à vérifier avec la vraie clé) ; TheirStack : corps attendu `{"job_country_code_or":["FR"],"posted_at_max_age_days":7,"limit":2,"page":0}` (un filtre `posted_at_*` ou un identifiant est obligatoire ; champs de réponse `job_title`, `company`, `location`, `country_code`, `date_posted`, `url`, `description`).
 
 **Connexion de LoopCV (pour mémoire)** : clé API dans Settings → API Key → « Generate API Key » (affichée une seule fois) ; connexion à Claude via un connecteur personnalisé (`https://api.loopcv.com/mcp`, OAuth) selon leur article. Cela ne donne pas accès à des offres pour l'atelier : l'API ne les expose pas.
+
+### Résultats des tests (24 novembre 2026)
+
+Un appel par source via `/api/sources-diag` en production (quotas respectés) :
+
+| Source | Résultat | Consommation |
+|---|---|---|
+| **La bonne alternance** | Réponse 200 : **273 offres et 150 entreprises** autour de Lyon (rayon 30 km). Structure d'une offre : `identifier{id, partner_label, partner_job_id}`, `workplace{siret, brand, legal_name, name, size, location{address, geopoint}, domain{idcc, opco, naf{code, label}}}`, `apply{url, phone, recipient_id}`, `contract{start, start_type, duration, type[], remote}`, `offer{title, rome_codes, description, …}`, `is_delegated`. Listes `jobs`, `recruiters`, `warnings`. | 1 appel |
+| **Adzuna** | Réponse 200 : **la France est couverte** (4 250 résultats pour « communication » à Lyon ; offres de stage et d'alternance ; liens vers adzuna.fr). | 1 appel sur 25 |
+| **TheirStack** | Réponse 200 : offres en France du jour (`job_country_code_or: ["FR"]`), mais de toute nature (santé, restauration…) ; `total_results` vide sans `include_total_results`. | 2 crédits sur 200 |
+
+**Décisions**
+
+- **La bonne alternance est branchée** : `functions/api/alternance.js` et l'onglet **Offres** (offres d'alternance, entreprises qui recrutent souvent pour la candidature spontanée, mention de la source, lien vers l'offre d'origine). Gratuit et non lucratif ; la question écrite au contact de l'API reste recommandée (brouillon plus haut). Le contenu de ces offres n'est jamais envoyé à l'IA, par précaution.
+- **Adzuna n'est pas branchable en l'état** : le plan gratuit (25 appels) sert à évaluer ; un usage réel demande un accord écrit d'Adzuna.
+- **TheirStack n'est pas branchable en l'état** : 200 crédits gratuits, généraliste et orienté données d'entreprises ; réservé à une éventuelle fonction freelance, avec un forfait payant, ce qui s'écarte du cadre non lucratif.
+- **Retirer `SOURCES_DIAG`** du projet Cloudflare une fois les tests terminés (la fonction devient inerte).
 
 ### Marche à suivre proposée
 

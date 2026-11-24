@@ -10,6 +10,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 - Score ATS avec suggestions, optimisation automatique, plan d'action Markdown ; CV anonymisé.
 - Suivi des candidatures avec relances, versions enregistrées, plusieurs personnes et plusieurs candidatures.
 - Landing page à la racine (`/`), application sous `/app/`, page « Gratuit pour le moment » (`tarifs/`), sans prix, 13 maquettes SaaS non routées (`saas/`), documentation des offres et du positionnement.
+- Recherche d'offres d'alternance (La bonne alternance) et candidature spontanée aux entreprises qui recrutent souvent.
 - Assistant IA : clé d'API personnelle facultative (appel direct du navigateur, hors sauvegarde).
 - E-mail d'envoi (cinq types, signature freelance, bonnes pratiques), fiche de préparation à l'entretien, banque d'images de la plaquette.
 - Mobile (navigation par groupes), thème par bouton icône, accueil (premiers pas, alerte des relances).
@@ -20,7 +21,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 | Sujet | Attente | Prochaine action |
 |---|---|---|
 | Offres d'emploi France Travail | **Accès refusé** (incident INC2791790, mesure conservatoire) ; option B retenue : formulaire masqué, aucun envoi d'offre à l'IA | Redéposer après diffusion avec le dossier décrit dans `docs/FRANCE-TRAVAIL.md` ; écrire à La bonne alternance (usage non lucratif exigé) et à Adzuna (tester la France, demander la licence) : brouillons dans `docs/FRANCE-TRAVAIL.md` |
-| Sources d'offres de remplacement | Clés ajoutées dans le projet : `BONNE_ALTERNANCE_KEY`, `APP_ID`/`APP_KEY` (Adzuna, 25 appels), `AUTORISATION_KEY` (TheirStack, 200 crédits) | Activer `SOURCES_DIAG`, lancer chaque test une fois (`/api/sources-diag`), puis brancher la source retenue ; LoopCV écartée (pas d'offres via l'API) |
+| Sources d'offres | La bonne alternance **branchée** ; Adzuna (France couverte, 25 appels gratuits) et TheirStack (200 crédits) testées mais non branchables sans accord ; LoopCV écartée | Retirer `SOURCES_DIAG` ; envoyer la question écrite à La bonne alternance ; écrire à Adzuna si on veut aller plus loin |
 | La Bonne Boîte | Habilitation (scope accordé, API répond « 403 Invalid scope ») ; même fournisseur que l'API Offres | Vérifier ses conditions avant toute nouvelle demande |
 | ROME 4.0 | Noms de scopes à confirmer sur l'application | Affiner les profils avec les métiers et compétences du référentiel |
 | Identité de l'éditeur | À renseigner dans `legal/config.js` | Relecture juridique des pages légales |

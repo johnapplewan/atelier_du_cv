@@ -725,38 +725,35 @@
     <!-- PANEL OFFRES -->
     <section class="panel" id="panel-offres">
       <div class="panel-head">
-        <h2>Offres d'emploi</h2>
-        <p>Cherche les offres publiées sur France Travail pour ton profil, près de chez toi. Un clic prépare la candidature : annonce, mots-clés, CV et lettre sur mesure.</p>
+        <h2>Offres d'alternance</h2>
+        <p>Cherche les offres d'alternance et les entreprises qui recrutent souvent, près de chez toi, avec La bonne alternance. Un clic prépare la candidature : annonce, mots-clés, CV et lettre sur mesure.</p>
       </div>
       <div style="max-width:980px;">
         <div class="card" id="off-unavailable" style="margin-bottom:16px;">
           <span class="eyebrow">Recherche d'offres indisponible pour le moment</span>
-          <p style="margin:10px 0 14px;">L'accès à l'API d'offres d'emploi de France Travail n'est pas accordé à ce stade. Tu peux quand même candidater : colle le lien ou le texte de l'annonce qui t'intéresse, l'atelier compose le CV et la lettre.</p>
+          <p style="margin:10px 0 14px;">La source d'offres n'est pas disponible sur ce site pour le moment. Tu peux quand même candidater : colle le lien ou le texte de l'annonce qui t'intéresse, l'atelier compose le CV et la lettre.</p>
           <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-off-to-annonce" type="button">Coller une annonce</button><button class="btn btn-ghost btn-sm" id="btn-off-to-recherche" type="button">Chercher des entreprises à démarcher</button></div>
         </div>
         <div class="card" id="off-form-card" style="margin-bottom:16px;">
           <div class="row2">
             <div class="field"><label for="off-profil">Profil de recherche</label><select id="off-profil"></select></div>
-            <div class="field"><label for="off-q">Mots-clés</label><input type="text" id="off-q" placeholder="ex. développeur web, chargé de communication"></div>
+            <div class="field"><label for="off-q">Mots-clés (gardent les offres qui en contiennent au moins un)</label><input type="text" id="off-q" placeholder="ex. développeur web, communication"></div>
           </div>
           <p class="hint" id="off-exp-note" style="margin:-4px 0 8px;"></p>
           <div class="row2">
             <div class="field"><label for="off-lieu">Lieu</label>
               <div style="display:flex;gap:8px;"><input type="text" id="off-lieu" placeholder="ex. Reims"><button class="btn btn-sm" id="btn-off-lieu" type="button">Chercher le lieu</button></div>
               <div class="chips" id="off-lieu-list" style="margin-top:6px;"></div></div>
-            <div class="field"><label for="off-dist">Rayon</label><select id="off-dist"><option value="10">10 km</option><option value="20" selected>20 km</option><option value="50">50 km</option><option value="100">100 km</option></select></div>
+            <div class="field"><label for="off-dist">Rayon</label><select id="off-dist"><option value="10">10 km</option><option value="30" selected>30 km</option><option value="50">50 km</option><option value="100">100 km</option></select></div>
           </div>
-          <div class="row2">
-            <div class="field"><label for="off-contrat">Contrat</label><select id="off-contrat"><option value="">Tous</option><option value="CDI">CDI</option><option value="CDD">CDD</option><option value="MIS">Intérim</option><option value="LIB">Profession libérale / indépendant</option></select></div>
-            <div class="field"><label for="off-depuis">Publiée depuis</label><select id="off-depuis"><option value="">Toute période</option><option value="1">1 jour</option><option value="3">3 jours</option><option value="7">7 jours</option><option value="14">14 jours</option><option value="31">31 jours</option></select></div>
-          </div>
-          <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-off-go" type="button">Rechercher des offres</button></div>
+          <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-off-go" type="button">Rechercher des offres d'alternance</button></div>
           <p class="hint" id="off-status" style="margin:10px 0 0;"></p>
-          <p class="hint" style="margin:6px 0 0;">Seuls les mots-clés, le lieu et les filtres sont transmis à France Travail ; ni ton nom, ni tes coordonnées, ni ton CV.</p>
+          <p class="hint" style="margin:6px 0 0;">Seuls le lieu (coordonnées de la commune) et le rayon sont transmis, par le serveur de l'atelier, à La bonne alternance ; les mots-clés filtrent les résultats sur ton appareil. Ni ton nom, ni tes coordonnées, ni ton CV.</p>
         </div>
         <div id="off-results"></div>
+        <div id="off-recruiters" style="margin-top:20px;"></div>
         <button class="btn btn-ghost btn-sm" id="off-more" type="button" style="display:none;margin-top:8px;">Voir plus d'offres</button>
-        <p class="hint" id="off-attrib" style="display:none;margin-top:14px;">Offres issues de France Travail (francetravail.io), affichées le temps de la recherche et non conservées. La candidature se fait sur la source de l'offre.</p>
+        <p class="hint" id="off-attrib" style="display:none;margin-top:14px;">Offres issues de La bonne alternance (labonnealternance.apprentissage.beta.gouv.fr, DGEFP), affichées le temps de la recherche et non conservées. La candidature se fait sur la source de l'offre.</p>
       </div>
     </section>
 
@@ -4868,7 +4865,7 @@ function startSpontanee(res){
   if(!res || !pr) return;
   persist();
   document.getElementById("btn-new-dossier").click();
-  var nom = titleCaseName(res.nom), naf = NAF_LABELS[res.naf] || "";
+  var nom = titleCaseName(res.nom), naf = NAF_LABELS[res.naf] || res.nafLabel || "";
   anPoste.value = pr.titreVise; anEntreprise.value = nom; anUrl.value = res.fiche;
   anTexte.value = "Candidature spontanée chez " + nom + ". Secteur : " + naf + ". Lieu : " + res.ville + ". Compétences du profil : " + (pr.motsCles || []).join(", ") + ".";
   state.annonce.spontanee = true;
@@ -5273,12 +5270,12 @@ function generateOffreServiceParagraphs(){
 
 /* ===================== OFFRES D'EMPLOI (France Travail) ===================== */
 
-// L'accès à l'API Offres d'emploi n'est pas accordé à ce stade (docs/FRANCE-TRAVAIL.md) : le formulaire est masqué et l'onglet renvoie vers l'onglet Annonce.
-// Repasser à true quand l'accès sera accordé.
-var OFFRES_API_ACTIVE = false;
+// Source d'offres : La bonne alternance (accès gratuit, usage non lucratif). L'API France Travail est refusée à ce stade (docs/FRANCE-TRAVAIL.md).
+// Passer à false pour masquer le formulaire et renvoyer vers l'onglet Annonce.
+var OFFRES_API_ACTIVE = true;   // source active : La bonne alternance (/api/alternance). France Travail reste refusée.
 // Condition de la licence : l'API ne sert à aucun entraînement ni affinage d'un modèle d'IA. Le contenu d'une offre issue de l'API n'est donc jamais envoyé à l'assistant IA.
-var IA_OFFRE_API_MSG = "Cette annonce vient de l'API France Travail : son contenu n'est jamais envoyé à l'IA (condition de la licence). Colle le texte d'une annonce d'une autre source pour utiliser l'assistant.";
-function offreVientDeLAPI(){ return !!(state.annonce && state.annonce.source === "france-travail"); }
+var IA_OFFRE_API_MSG = "Cette annonce vient d'une API d'offres (France Travail ou La bonne alternance) : son contenu n'est jamais envoyé à l'IA par précaution (conditions des licences). Colle le texte d'une annonce d'une autre source pour utiliser l'assistant.";
+function offreVientDeLAPI(){ return !!(state.annonce && (state.annonce.source === "france-travail" || state.annonce.source === "la-bonne-alternance")); }
 function renderOffAvailability(){
   var form = document.getElementById("off-form-card"), note = document.getElementById("off-unavailable"); if(!form || !note) return;
   form.style.display = OFFRES_API_ACTIVE ? "" : "none";
@@ -5287,6 +5284,7 @@ function renderOffAvailability(){
 
 var offPlace = null, offLast = null;
 state.offresResultats = [];
+state.offresRecruteurs = [];
 
 function offProfilOptions(){
   var sel = document.getElementById("off-profil"), cur = sel.value;
@@ -5300,10 +5298,7 @@ function offLoadProfil(){
   var pr = offCurrentProfil(); if(!pr) return;
   document.getElementById("off-q").value = pr.titreVise || "";
   if(!document.getElementById("off-lieu").value) document.getElementById("off-lieu").value = pr.lieu || "";
-  var c = (pr.contrats || [])[0];
-  var map = { "CDI":"CDI", "CDD":"CDD", "Intérim":"MIS", "Freelance":"LIB", "Alternance":"", "Stage":"" };
-  document.getElementById("off-contrat").value = map[c] || "";
-  document.getElementById("off-exp-note").textContent = pr.modes && pr.modes.debutant ? "Ce profil n'a pas d'expérience dans le domaine : la recherche est limitée aux offres « débutant accepté »." : "";
+  document.getElementById("off-exp-note").textContent = "";
 }
 document.getElementById("off-profil").addEventListener("change", function(){ offPlace = null; document.getElementById("off-lieu").value = ""; offLoadProfil(); });
 
@@ -5326,39 +5321,49 @@ document.getElementById("btn-off-lieu").addEventListener("click", offLieuSearch)
 document.getElementById("off-lieu").addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); offLieuSearch(); } });
 document.getElementById("off-lieu").addEventListener("input", function(){ offPlace = null; });
 
-function offRun(page){
-  var st = document.getElementById("off-status"), pr = offCurrentProfil();
-  var q = document.getElementById("off-q").value.trim();
-  var qs = ["page=" + (page || 1)];
-  if(q) qs.push("q=" + encodeURIComponent(q));
-  if(offPlace){ qs.push("commune=" + encodeURIComponent(offPlace.citycode), "distance=" + document.getElementById("off-dist").value); }
-  else if(document.getElementById("off-lieu").value.trim()){ st.textContent = "Choisis la commune avec « Chercher le lieu »."; return; }
-  var ct = document.getElementById("off-contrat").value; if(ct) qs.push("contrat=" + ct);
-  var dp = document.getElementById("off-depuis").value; if(dp) qs.push("depuis=" + dp);
-  if(pr && pr.modes && pr.modes.debutant) qs.push("experience=D");
-  if(!q && !offPlace){ st.textContent = "Indique un mot-clé ou un lieu."; return; }
+function offRun(){
+  var st = document.getElementById("off-status");
+  if(!offPlace){ st.textContent = document.getElementById("off-lieu").value.trim() ? "Choisis la commune avec « Chercher le lieu »." : "Indique un lieu : les offres d'alternance se cherchent autour d'une commune."; return; }
   var btn = document.getElementById("btn-off-go"); btn.disabled = true; st.textContent = "Recherche en cours…";
-  flFetch("/api/offres?" + qs.join("&")).then(function(d){
+  flFetch("/api/alternance?lat=" + encodeURIComponent(offPlace.lat) + "&lon=" + encodeURIComponent(offPlace.lon) + "&radius=" + encodeURIComponent(document.getElementById("off-dist").value)).then(function(d){
     btn.disabled = false;
     if(!d.ok){
-      var msg = {
-        not_configured: "La recherche d'offres n'est pas encore activée sur ce site (identifiants France Travail non renseignés côté serveur).",
-        auth_scope: "France Travail refuse les autorisations (scopes) demandées : vérifie que ton application est bien abonnée à l'API « Offres d'emploi » sur francetravail.io, et que la variable FT_SCOPE correspond.",
-        auth_client: "Identifiant ou clé secrète refusés par France Travail : vérifie les variables FT_CLIENT_ID et FT_CLIENT_SECRET.",
-        auth_denied: "France Travail refuse l'accès à l'API : vérifie l'abonnement de ton application.",
+      st.textContent = {
+        not_configured: "La recherche d'offres n'est pas encore activée sur ce site (clé La bonne alternance non renseignée côté serveur).",
+        auth: "La bonne alternance refuse la clé du site : vérifie BONNE_ALTERNANCE_KEY.",
         rate: "Trop de recherches d'un coup : réessaie dans une minute.",
-        criteria_required: "Indique un mot-clé ou un lieu."
+        place_required: "Indique un lieu."
       }[d.reason] || ("La recherche n'a pas abouti (" + (d.reason || "erreur") + ").");
-      st.textContent = msg; return;
+      return;
     }
-    offLast = { page: d.page, totalPages: d.totalPages };
-    state.offresResultats = (page > 1 ? state.offresResultats : []).concat(d.results);
-    st.textContent = d.total ? d.total + " offre(s) trouvée(s) (France Travail), les plus récentes d'abord." : "Aucune offre pour ces critères : élargis le rayon, la période ou les mots-clés.";
+    var q = norm(document.getElementById("off-q").value).split(/[^a-z0-9]+/).filter(function(w){ return w.length >= 3; });
+    var keep = function(o){ var hay = norm([o.intitule, o.entreprise, o.description, o.nom, o.nafLabel].join(" ")); return !q.length || q.some(function(w){ return hay.indexOf(w) !== -1; }); };   // au moins un mot-clé
+    state.offresResultats = d.results.filter(keep);
+    state.offresRecruteurs = (d.recruiters || []).filter(keep);
+    offLast = null;
+    st.textContent = state.offresResultats.length + " offre(s) d'alternance et " + state.offresRecruteurs.length + " entreprise(s) qui recrutent souvent" + (q.length ? " pour « " + document.getElementById("off-q").value.trim() + " »" : "") + " (La bonne alternance, " + d.total + " offres reçues autour de " + offPlace.label + ").";
     renderOffResults(); refreshStatusDots();
   }, function(){ btn.disabled = false; st.textContent = rechOffline(); });
 }
-document.getElementById("btn-off-go").addEventListener("click", function(){ offRun(1); });
-document.getElementById("off-more").addEventListener("click", function(){ offRun((offLast ? offLast.page : 1) + 1); });
+document.getElementById("btn-off-go").addEventListener("click", function(){ offRun(); });
+
+// Entreprises à fort potentiel d'embauche (pas d'offre publiée) : candidature spontanée.
+function renderOffRecruiters(){
+  var w = document.getElementById("off-recruiters"), l = state.offresRecruteurs || [];
+  if(!l.length){ w.innerHTML = ""; return; }
+  w.innerHTML = '<span class="eyebrow">Entreprises qui recrutent souvent en alternance</span><p class="hint" style="margin:6px 0 10px;">Pas d\'offre publiée, mais un fort potentiel d\'embauche : tu peux envoyer une candidature spontanée.</p>';
+  l.slice(0, 30).forEach(function(r, i){
+    var d = document.createElement("div"); d.className = "exp-block";
+    d.innerHTML = '<div class="exp-block-head"><strong>' + esc(r.nom) + '</strong></div><p class="hint" style="margin:0 0 8px;">' + esc([r.ville, r.nafLabel, r.taille && r.taille !== "Non diffusé" ? r.taille : ""].filter(Boolean).join(" · ")) + '</p>' +
+      '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-off-rec="' + i + '">Candidature spontanée</button>' + (r.url ? '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(r.url) + '">Voir sur La bonne alternance</a>' : "") + '</div>';
+    w.appendChild(d);
+  });
+  w.querySelectorAll("[data-off-rec]").forEach(function(b){ b.addEventListener("click", function(){
+    var r = state.offresRecruteurs[+b.getAttribute("data-off-rec")], pr = offCurrentProfil(), st = document.getElementById("off-status");
+    if(!pr){ st.textContent = "Crée d'abord un profil de recherche (onglet Mes profils) pour préparer une candidature spontanée."; return; }
+    startSpontanee({ _profilId: pr.id, nom: r.nom, naf: r.nafCode, nafLabel: r.nafLabel, fiche: r.url || "", ville: r.ville, cp: r.cp });
+  }); });
+}
 
 // Correspondance entre une offre et la base de la personne (mots-clés de l'offre retrouvés dans ses expériences, formations, projets).
 function offMatch(o){
@@ -5372,8 +5377,9 @@ function offMatch(o){
 function renderOffResults(){
   var wrap = document.getElementById("off-results"), ec = state.profil.offresEcartees || {};
   var list = state.offresResultats.filter(function(o){ return !ec[o.id]; });
-  document.getElementById("off-more").style.display = (offLast && offLast.page < offLast.totalPages && state.offresResultats.length) ? "inline-flex" : "none";
-  document.getElementById("off-attrib").style.display = state.offresResultats.length ? "block" : "none";
+  document.getElementById("off-more").style.display = "none";
+  document.getElementById("off-attrib").style.display = (state.offresResultats.length || (state.offresRecruteurs || []).length) ? "block" : "none";
+  renderOffRecruiters();
   if(!list.length){ wrap.innerHTML = ""; return; }
   wrap.innerHTML = "";
   list.forEach(function(o){
@@ -5384,7 +5390,7 @@ function renderOffResults(){
       '<p style="font-size:13px;color:var(--ink-600);line-height:1.5;margin:0 0 8px;">' + esc(o.description.replace(/\s+/g, " ").slice(0, 260)) + (o.description.length > 260 ? "…" : "") + '</p>' +
       (m.missing.length ? '<p class="hint" style="margin:0 0 8px;">Mots-clés de l\'offre absents de ta base : ' + esc(m.missing.slice(0, 6).join(", ")) + '.</p>' : '') +
       '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-off-use="' + esc(o.id) + '">Candidater avec cette offre</button>' +
-      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(o.url) + '">Voir sur France Travail</a>' +
+      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(o.url) + '">Voir sur La bonne alternance</a>' +
       '<button class="btn btn-ghost btn-sm" type="button" data-off-skip="' + esc(o.id) + '">Écarter</button></div>';
     wrap.appendChild(d);
   });
@@ -5399,7 +5405,7 @@ function startFromOffre(o){
   document.getElementById("btn-new-dossier").click();
   anPoste.value = o.intitule; anEntreprise.value = o.entreprise || ""; anUrl.value = o.url; anTexte.value = o.description;
   state.annonce.meta = { lieu: o.lieu, contrat: o.contrat, salaire: o.salaire, date: o.date, secteur: "" };
-  state.annonce.source = "france-travail";
+  state.annonce.source = o.source || "france-travail";   // les offres d'API ne partent jamais vers l'IA
   reanalyzeAnnonce();
   var pr = offCurrentProfil();
   if(pr){ state.cv.profilId = pr.id; state.cv.profilManuel = true; applyProfilToDossier(pr.id, false); }
