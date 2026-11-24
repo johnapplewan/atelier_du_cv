@@ -1,7 +1,8 @@
 # Atelier Candidature : fonctionnement, fonctions et architecture
 
 Document de passation pour retravailler le design (front, UX, UI) hors de la conversation de développement.
-État du code : branche `claude/new-session-6jo73r`, fichier principal `index.html` (≈ 5 800 lignes).
+État du code : branche `claude/new-session-6jo73r`, fichier principal `app/index.html` (≈ 7 300 lignes).
+Ce document, `docs/ROADMAP.md`, `docs/OFFRES-ET-TARIFS.md`, `docs/PAGES-SAAS.md`, `docs/MARKETING.md` et `docs/FRANCE-TRAVAIL.md` sont **tenus à jour à chaque modification** de pages, de fonctions, de données, de modèle économique ou de textes (voir `CLAUDE.md`) : toute information ajoutée, modifiée ou retirée dans le code l'est aussi ici.
 
 ---
 
@@ -15,7 +16,7 @@ Principes de conception à conserver :
 2. **L'application fait le tri elle-même** : dès que la base, le profil ou l'annonce change, le CV et les indicateurs se recalculent. L'utilisateur ajuste ensuite (cases à cocher, texte), il n'a pas à tout reconstruire.
 3. **Rien n'est inventé** : tout contenu produit vient de la base de l'utilisateur ; ce qui manque est signalé par un astérisque (*) à l'écran, jamais comblé.
 4. **Multi-personnes sur un même ordinateur** : chaque personne a sa base, sa « voix », ses profils, ses candidatures.
-5. **IA facultative** : via le compte Claude de l'utilisateur (envoi direct sur claude.ai, sinon copier-coller). Jamais de clé API dans l'application.
+5. **IA facultative et à la charge de la personne** : via son compte Claude (envoi direct sur claude.ai), sa **propre clé d'API facultative** (appel direct du navigateur vers api.anthropic.com), ou le copier-coller. Aucune clé de l'éditeur dans l'application, aucun appel d'IA à ses frais.
 
 ---
 
@@ -23,8 +24,14 @@ Principes de conception à conserver :
 
 | Élément | Rôle |
 |---|---|
-| `index.html` | **Toute l'application** : HTML des écrans, CSS (`<style>`), JavaScript (`<script>`, sans framework ni build). |
+| `app/index.html` | **Toute l'application** : HTML des écrans, CSS (`<style>`), JavaScript (`<script>`, sans framework ni build). Routée sous `/app/` ; ses ressources sont référencées en relatif (`../vendor/`, `../prompts.js`, `../legal/`, `../assets/`), les fonctions serveur en absolu (`/api/...`). |
 | `vendor/` | `fonts.css` + `fonts/*.woff2` (Newsreader, Public Sans, IBM Plex Mono, Space Grotesk, Bebas Neue ; latin et latin-ext), `html2canvas.min.js`, `jspdf.umd.min.js` (génération PDF). |
+| `index.html` (racine) | **Landing page** publique (quatre audiences, fonctionnalités, confidentialité, section « Gratuit », FAQ). Routée sous `/`. |
+| `tarifs/index.html` | **Page « Gratuit pour le moment »** (adresse historique `/tarifs/`) : ce qui est inclus, comment l'IA est prise en charge, FAQ. Aucun prix. |
+| `saas/*.html` | **Maquettes SaaS non routées** (13 pages : connexion, inscription, vérification de l'e-mail, mot de passe, bienvenue, reprise des données, compte, données, aide…). `noindex`. Voir `docs/PAGES-SAAS.md`. |
+| `site/site.css`, `site/site.js` | Feuille de style et script **communs** à la landing, aux tarifs et aux maquettes SaaS (menu, onglets « Pour qui »). |
+| `assets/landing/` | Captures d'écran de l'application (données fictives) utilisées par la landing, en WebP. |
+| `assets/plaquette/` | Banque d'images de la plaquette (JPEG, servis tels quels) ; `README.md` du dossier : nommage, formats, règles. Liste des fichiers proposés dans l'application : `PQ_PHOTOS` (`index.html`). |
 | `functions/api/*.js` | Cloudflare Pages Functions (côté serveur, voir §7). |
 | `prompts.js` | Méthodes d'écriture données à l'assistant IA (lettre RAPOS, règles d'humanisation, reformulation du CV). Chargé avant le script principal. Référence lisible : `docs/METHODE-LETTRE-RAPOS.md`. |
 | `legal/` | Pages légales statiques : mentions légales, confidentialité, CGU, accessibilité (`config.js` = identité de l'éditeur à compléter, `legal.css` = style propre). |
@@ -34,20 +41,20 @@ Principes de conception à conserver :
 
 **Contraintes qui pèsent sur un redesign**
 
-- **CSP** (`_headers`) : `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'`. Aucune ressource externe (CDN, polices distantes, analytics) ne doit être ajoutée. Le JavaScript est inline : si on le sort dans des fichiers, garder `'self'`.
+- **CSP** (`_headers`) : `default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://api.anthropic.com`. La seule destination externe autorisée est l'API d'Anthropic, utilisée **uniquement** si la personne saisit sa propre clé d'API. Aucune ressource externe (CDN, polices distantes, analytics) ne doit être ajoutée. Le JavaScript est inline : si on le sort dans des fichiers, garder `'self'`.
 - **Pas de framework ni de build** aujourd'hui. Un redesign peut introduire un build, mais l'ensemble doit rester servable en statique sur Cloudflare Pages.
-- **Une version publiée comme artefact claude.ai** existe (même `index.html` + `vendor/`) ; elle ne peut pas appeler `/api/*` (la lecture d'annonce par lien, la recherche d'entreprises et d'offres n'y fonctionnent pas, un message l'indique).
+- **Une version publiée comme artefact claude.ai** existe (même `app/index.html` + `vendor/`) ; elle ne peut pas appeler `/api/*` (la lecture d'annonce par lien, la recherche d'entreprises et d'offres n'y fonctionnent pas, un message l'indique).
 - Le HTML est **en grande partie généré en JavaScript** (`innerHTML` dans les fonctions `render…`). Les classes CSS et les `id` listés en §8 et §9 sont donc un **contrat** entre le style et le code.
 
 ### Flux de données
 
 ```
-Navigateur (localStorage)  ←→  index.html (état + moteurs de composition)
+Navigateur (localStorage)  ←→  app/index.html (état + moteurs de composition)
         │                              │
         │                              ├─ /api/annonce     → page d'une offre (lecture par lien)
         │                              ├─ /api/lieu        → API Adresse (communes)
         │                              ├─ /api/entreprises → API Recherche d'entreprises (data.gouv.fr)
-        │                              └─ /api/offres      → API Offres d'emploi de France Travail (accès en attente)
+        │                              └─ /api/offres      → API Offres d'emploi de France Travail (accès refusé à ce stade, voir `docs/FRANCE-TRAVAIL.md`)
         └─ Assistant IA (facultatif) : copier-coller vers claude.ai, ou envoi direct dans la version claude.ai
 ```
 
@@ -64,29 +71,32 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 | 01 | **Ma base** (`base`) | Constituer et fusionner la base de la personne | Import de CV (nom du CV + texte, case « remplacer »), listes modifiables expériences / formations / rubriques / compétences / certifications, liste des CV importés, **carte de la base** (SVG radial + détail par branche, mise en évidence par profil) |
 | 02 | **Mes profils** (`profils`) | Créer des profils de recherche et leur CV type | Profils proposés d'après la base (niveau : déjà exercé / base suffisante / accessible sans expérience / pas assez d'éléments), « Viser un autre métier », éditeur par profil (titre visé, lieu, rayon, contrats, mots-clés, accroche, ton, à compléter, import de texte, **CV type** avec aperçu, ajustements, PDF) |
 | 03 | **Recherche** (`recherche`) | Entreprises à démarcher (candidatures spontanées) | Profil, lieu (recherche de commune), rayon, taille, résultats avec « Candidature spontanée », lien page recrutement, fiche, écarter |
-| 04 | **Offres** (`offres`) | Offres d'emploi France Travail | Profil, mots-clés, lieu, rayon, contrat, période, correspondance avec la base, « Candidater avec cette offre ». **Accès API en attente côté France Travail** : l'onglet affiche « non activée » tant que l'accès n'est pas accordé |
-| 05 | **Freelance** (`freelance`) | Offre de service et démarchage des intermédiaires | Prestations, disponibilité, modalités, tarif facultatif, références (cases parmi les expériences), import de texte, types de structures (ESN, conseil, intérim, recrutement, portage, formation, agences, entreprises du secteur), recherche, « Lettre d'offre de service » |
-| 06 | **Plaquette** (`plaquette`) | Plaquette freelance d'une page A4 | Dix modèles à choisir (Nuit, Terre, Affiche, Cartes, Étapes, Chiffres, Programme, Citation, Avant/après, Studio), couleur d'accent, contenu (titre, présentation, étapes, encadrés, chiffres, témoignage, avant/après, tarif, appel à l'action), trois images, aperçu à l'échelle, PDF pleine page |
-| 07 | **Annonce** (`annonce`) | Saisir ou récupérer l'annonce | Champ lien + « Récupérer l'annonce », poste, entreprise, texte, mots-clés détectés, encadré d'analyse (qui publie : direct / cabinet / intérim / ESN, entreprise finale, lieu, contrat, rémunération, profil utilisé) |
-| 08 | **CV** (`cv`) | CV de la candidature en cours | Identité (nom, contacts, photo, langue FR/EN, accroche), **composition** (cases par élément, manques `*`), score ATS + suggestions + optimisation + plan d'action, **aperçu éditable**, PDF et PDF anonymisé |
-| 09 | **Lettre** (`lettre`) | Lettre de motivation / spontanée / offre de service | Destinataire, langue, ton, affinage (boutons rapides + remarques + « Réécrire avec Claude »), voix de la personne, texte modifiable, aperçu éditable, PDF |
-| 10 | **Annexe** (`annexe`) | Contenus complémentaires par catégorie de métier | Grille de catégories, suggestions, éléments, aperçu, PDF |
-| 11 | **Candidatures** (`candidatures`) | Suivi | Une ligne par candidature (créée automatiquement), statut, notes, versions enregistrées, « Revenir à cette version » |
-| 12 | **Entretien** (`entretien`) | Entraînement | Questions générées d'après l'annonce, réponses, corrigé heuristique |
+| 04 | **Offres** (`offres`) | Offres d'emploi France Travail | Profil, mots-clés, lieu, rayon, contrat, période, correspondance avec la base, « Candidater avec cette offre ». **Accès API refusé par France Travail à ce stade** (voir `docs/FRANCE-TRAVAIL.md`) : `OFFRES_API_ACTIVE = false`, le formulaire est masqué et un avis propose « Coller une annonce » et la recherche d'entreprises ; le contenu d'une offre issue de l'API n'est jamais envoyé à l'IA (`offreVientDeLAPI`) |
+| 05 | **Annonce** (`annonce`) | Saisir ou récupérer l'annonce | Champ lien + « Récupérer l'annonce », poste, entreprise, texte, mots-clés détectés, encadré d'analyse (qui publie : direct / cabinet / intérim / ESN, entreprise finale, lieu, contrat, rémunération, profil utilisé) |
+| 06 | **CV** (`cv`) | CV de la candidature en cours | Identité (nom, contacts, photo, langue FR/EN, accroche), **composition** (cases par élément, manques `*`), score ATS + suggestions + optimisation + plan d'action, **aperçu éditable**, PDF et PDF anonymisé |
+| 07 | **Lettre** (`lettre`) | Lettre de motivation / spontanée / offre de service | Destinataire, langue, ton, affinage (boutons rapides + remarques + « Réécrire avec Claude »), voix de la personne, texte modifiable, aperçu éditable, PDF |
+| 08 | **Annexe** (`annexe`) | Contenus complémentaires par catégorie de métier | Grille de catégories, suggestions, éléments, aperçu, PDF |
+| 09 | **E-mail** (`email`) | Message d'envoi à coller dans la messagerie | Cinq types d'envoi (réponse à une offre, candidature spontanée, offre de service freelance, relance, remerciement), pièces jointes (CV + lettre, CV + plaquette, CV + lettre d'offre de service, CV seul, aucune) avec noms de fichiers, trois objets (60 caractères au plus), message modifiable (120 mots visés), avertissements (longueur, champs entre crochets), copie, lien « messagerie », amélioration par l'IA, **signature** (complète ou courte : intitulé, SIRET, site, rendez-vous, zone) et **bonnes pratiques** |
+| 10 | **Candidatures** (`candidatures`) | Suivi | Une ligne par candidature (créée automatiquement), statut, notes, versions enregistrées, « Revenir à cette version » |
+| 11 | **Freelance** (`freelance`) | Offre de service et démarchage des intermédiaires | **Offres suggérées à cocher** (d'après les profils, le CV et le positionnement ; ajout manuel toujours possible), prestations, disponibilité, modalités, tarif facultatif, références (cases parmi les expériences), import de texte, types de structures (ESN, conseil, intérim, recrutement, portage, formation, agences, entreprises du secteur), recherche, « Lettre d'offre de service » |
+| 12 | **Plaquette** (`plaquette`) | Plaquettes commerciales A4 d'une page, plusieurs par personne, avec suivi des retours | **Mes plaquettes** (créer, dupliquer, renommer, supprimer) ; **offres de la plaquette** à cocher + suggestions ; **accroches et baselines** (3 + 3, registre vouvoiement ou tutoiement, affinage IA) ; dix modèles (Nuit, Terre, Affiche, Cartes, Étapes, Chiffres, Programme, Citation, Avant/après, Studio) et couleur d'accent ; contenu (titre, présentation, étapes, encadrés, chiffres, témoignage, avant/après, tarif, appel à l'action) ; **bandeau du bas** au choix (présentation avec photo, trois retours clients, références et garanties, questions fréquentes, aucun) ; images (téléversement ou banque `assets/plaquette/`) ; aperçu et PDF pleine page ; **envois et retours** par plaquette, **comparatif et lecture automatique** de ce qui fonctionne |
+| 13 | **Entretien** (`entretien`) | Préparer et s'entraîner | **Fiche de préparation** (présentation en 60 secondes modifiable, questions à poser selon le type d'envoi et d'émetteur, points de vigilance tirés des mots de l'annonce confirmés ou absents de la base, liste à cocher, bouton vers le remerciement, copie Markdown) ; questions générées d'après l'annonce, réponses, corrigé heuristique |
 
 **Barre haute** : marque, bouton icône de thème (soleil, lune ou demi-cercle pour automatique ; un clic passe au suivant), « Assistant IA : <mode> », « Tout effacer », « CV + Lettre (PDF) », « Télécharger le dossier complet (PDF) ».
 **Barre Personne** : choisir, ajouter, renommer, supprimer une personne.
 **Barre Candidature** : choisir, nommer, nouvelle, dupliquer, supprimer, Sauvegarder (fichier .json) / Restaurer.
-**Pied de page** : liens vers les pages légales.
+**Pied de page** : liens vers la présentation, la page « Gratuit » (`/tarifs/`) et les pages légales.
 **Bandeau d'accueil** (`#home-strip`, en haut du contenu) : « Premiers pas » (importer un CV, créer un profil, préparer une candidature ; masquable, mémorisé par personne) et alerte « N relances à faire » (« Voir », « Plus tard »). À l'ouverture, une base vide ouvre directement « Ma base ».
 
 ### Parcours principaux
 
 1. **Première utilisation** : Ma base → importer un ou plusieurs CV → Mes profils → créer un profil → Annonce (coller un lien ou un texte) → CV → Lettre → PDF.
 2. **Candidature spontanée** : Recherche → choisir un profil et un lieu → résultats → « Candidature spontanée » → CV + lettre générés → suivi créé avec relance à 10 jours.
-3. **Offre France Travail** (quand l'accès sera accordé) : Offres → résultats → « Candidater avec cette offre » → CV et lettre sur mesure.
+3. **Offre France Travail** (parcours inactif : accès à l'API refusé à ce stade, voir `docs/FRANCE-TRAVAIL.md`) : Offres → résultats → « Candidater avec cette offre » → CV et lettre sur mesure.
 4. **Freelance** : Freelance → décrire l'offre → choisir les types de structures → résultats → « Lettre d'offre de service ».
-5. **Enrichir la base** : n'importe quand, Ma base ou l'encart « Compléter avec un texte » d'un profil / de l'onglet Freelance → la base fusionne et tout se recalcule.
+5. **Offre de service complète (freelance)** : Freelance (cocher des offres suggérées ou saisir les siennes) → Plaquette (choisir les offres, appliquer une accroche et une baseline, modèle, bandeau, images) → PDF → E-mail (type « Offre de service », CV + plaquette) → noter l'envoi dans Plaquette, puis lire ce qui fonctionne et dupliquer la meilleure plaquette pour tester une variante.
+6. **Entretien obtenu** : Entretien → fiche de préparation (présentation, questions à poser, vigilance) → après l'entretien, E-mail type « Remerciement ».
+7. **Enrichir la base** : n'importe quand, Ma base ou l'encart « Compléter avec un texte » d'un profil / de l'onglet Freelance → la base fusionne et tout se recalcule.
 
 ---
 
@@ -100,7 +110,14 @@ Stockage = { version: 4, currentPersonId, people: [ Personne ] }
 Personne = { id, nom, data: {
   profil:        { nom, titre, email, tel, ville, lien, langues, atouts[], photo (data URL),
                    voix:{ description, formuleFinale, eviter },
-                   freelance:{ services[{titre,description}], offre, expIds[], dispo, mode, zone, tjm, showTjm },
+                   freelance:{ services[{id,titre,description,sid?}], offre, expIds[], dispo, mode, zone, tjm, showTjm,
+                               plaquettes:[ { id, nom, envois:[{id,date,dest,type,canal,note,statut}],
+                                              data:{ modele, accent, kicker, titre, accroche, etapes[], encadres[], chiffres[],
+                                                     temoignage{}, avantApres{}, delai, tarif, cta, images[] (URL ou data URL),
+                                                     band, portrait, presentation{role,texte,mode,photo}, presChiffres[], avis[],
+                                                     refs{clients,garanties}, faq[], offreIds[], angle, tu } } ],
+                               plaquetteId },
+                   emailCfg:{ type, pj, dest, ent, poste, hook, fort, jours, sigOn, format, sig{titre,siret,site,rdv,zone} },
                    ecartes{siren:true}, offresEcartees{id:true} },
   library:       { experiences[{id,poste,entreprise,dates,details,src[]}],   // details = une réalisation par ligne
                    formations[{id,diplome,etablissement,dates,details,src[]}],
@@ -122,10 +139,12 @@ Dossier (une candidature en cours) = { id, titre, titreAuto, candidatureId,
   lettre:   { lang, ton, destinataire, disponibilite, options{court,concret}, remarques[], motivations[],
               competencesChoisies[], corps (paragraphes modifiés ou null), corpsPrev, seed },
   annexeDossier: { categorie, selectedItemIds[] },
-  entretien: { questions[], reponses{}, seed, corrigeVisible } }
+  entretien: { questions[], reponses{}, seed, corrigeVisible, pitch, checks{texte:bool} } }
 ```
 
 **Alias d'exécution** : `state.profil`, `state.library`, `state.profils`, `state.candidatures`, `state.dossiers` pointent vers la personne active ; `state.annonce`, `state.cv`, `state.lettre`, `state.annexeDossier`, `state.entretien` vers la candidature active. Changer de personne ou de candidature = réassigner ces alias puis relancer les rendus (`syncPersonUI()`, `syncDossierUI()`).
+
+**Attention** : `flState()` renvoie un **nouvel objet** à chaque appel (copie superficielle de `profil.freelance`). Pour modifier un champ simple (`plaquetteId`, `plaquettes`), appeler `flState()` au moment de l'écriture ; les tableaux et objets imbriqués sont partagés. De même `emCfg()`. `pqState()`, elle, renvoie toujours le même objet `data` de la plaquette active.
 
 `persist()` écrit tout. Elle est appelée après chaque modification.
 
@@ -146,9 +165,31 @@ Dossier (une candidature en cours) = { id, titre, titreAuto, candidatureId,
 | Lettres | `generateLettre` → `generateLettreParagraphs` (offre), `LETTRE_SPONTANEE`, `generateOffreServiceParagraphs` | Ouverture selon le ton et le type d'émetteur, expériences proches, réalisations, mots-clés maîtrisés, voix de la personne, clôture. Aucun fait inventé. |
 | Anonymisation | `anonymizedCvElement`, `scrubForAI` | Retire nom, contacts, photo, liens ; options pour masquer employeurs et établissements. |
 | Export PDF | `buildPdfFromSections`, `fitPdfClone`, `addCanvasAsPages` | Recompose le document hors écran à largeur A4, resserre pour tenir en 2 pages (CV) / 1 page (lettre), coupe entre deux blocs, retire astérisques et zones éditables. |
-| Assistant IA | `iaAsk`, `iaReformulerCV`, `btn-affiner-ia` | Message sans nom ni coordonnées ni noms d'employeurs ; mode direct (version claude.ai) ou copier-coller ; règles de `prompts.js` envoyées à chaque demande ; réponse `{paragraphs, remarques}`. |
-| Plaquette | `PQ_MODELES`, `PQ_RENDER`, `pqData`, `pqHtml`, `renderPlaquette`, `btn-pq-pdf` | Un gabarit HTML/CSS par modèle (`.pq-t1` à `.pq-t10`, 794 × 1123 px), rempli avec la base de la personne : prestations de l'onglet Freelance, présentation, tarif, contacts du profil. Un **bandeau du bas** au choix (`pqBand`, injecté par `pqFoot`) : présentation avec photo facultative et texte ou chiffres, trois retours clients, références et garanties, trois questions fréquentes ; la classe `.pq-hasband` ajuste chaque modèle pour que le contenu tienne au-dessus (zone haute ≈ 740 px). Un bloc vide est omis ; à l'écran, une étoile rouge (`.pq-gap`) et un texte pâle (`.pq-ph`) le signalent, retirés du PDF. PDF = capture pleine page A4. |
+| Assistant IA | `iaAsk`, `iaByok`, `iaByokActive`, `iaReformulerCV`, `btn-affiner-ia` | Message sans nom ni coordonnées ni noms d'employeurs ; trois modes dans cet ordre : direct (version claude.ai), **clé d'API personnelle** (facultative : `POST https://api.anthropic.com/v1/messages` depuis le navigateur, en-têtes `x-api-key`, `anthropic-version`, `anthropic-dangerous-direct-browser-access`, modèle au choix Haiku 5.5 ou Sonnet 5.5, aperçu avant envoi), ou copier-coller ; la clé est stockée dans `localStorage["atelier-candidature-ia-pref"]` (`byok:{on,key,model}`), hors sauvegarde, supprimée par « Tout effacer » ; une annonce issue de l'API France Travail n'est jamais envoyée, quel que soit le mode ; règles de `prompts.js` envoyées à chaque demande ; réponse `{paragraphs, remarques}`. |
+| Offres suggérées | `FL_OFFRES`, `flSuggestions`, `flAddSuggestion`, `flRemoveSuggestion`, `renderFlSuggest` | Catalogue de 13 domaines (2 à 4 offres chacun : intitulé, description, accroche bénéfice, accroche problème, baseline). Les trois domaines les mieux classés d'après `profilEvidence` (profils existants +3) alimentent la liste ; cocher ajoute une prestation, décocher la retire. |
+| Plaquette | `PQ_MODELES`, `PQ_RENDER`, `pqData`, `pqHtml`, `pqBand`, `pqFit`, `renderPlaquette` | Un gabarit HTML/CSS par modèle (794 × 1123 px), rempli depuis la base et la plaquette active ; détails ci-dessous. |
+| Accroches | `pqComputePropos`, `pqTu`, `pqPropAI` | Trois accroches (bénéfice, problème puis solution, interlocuteur unique) et jusqu'à cinq baselines, tirées des offres retenues ; aucun chiffre inventé ; tutoiement par conversion d'une liste fermée de formulations ; affinage IA possible. |
+| Retours et statistiques | `pqStats`, `pqInsights`, `renderPqSuivi` | Réponses, rendez-vous, missions par plaquette ; comparaisons par structure, canal et offre (seuil de 3 envois) ; « prochain test » proposé. |
+| E-mail | `emBuild`, `emSignature`, `emKeywords`, `emAI` | Gabarits par type d'envoi en vouvoiement, mots de l'annonce confirmés par la base, une seule demande, signature adaptée au freelance. |
+| Fiche d'entretien | `entPitch`, `entFiche`, `renderEntretienFiche` | Présentation en 60 secondes, questions à poser selon le contexte (offre, intermédiaire, freelance), vigilance par mots-clés confirmés ou absents de la base. |
 | Contrôle de style | `styleReport`, `renderStyleCheck` | Port JavaScript de l'analyseur d'humanisation : formules typiques, contrastes, tirets, rythme, débuts répétés, triades, paragraphes uniformes ; score estimé /100, longueur 150 à 250 mots, noms d'employeurs cités ; bouton « Corriger ces points avec Claude ». |
+
+### Plaquette : fonctionnement détaillé
+
+- **Modèles** : `.pq-t1` à `.pq-t10`, tous en 794 × 1123 px. Le HTML est produit par `PQ_RENDER[tN](D)` ; `pqHtml(key, D)` pose `--accent`, `--on` (texte lisible sur l'accent) et la classe `pq-hasband` quand un bandeau est actif. Les ajustements par modèle avec bandeau sont dans les règles `.pq-hasband.pq-tN`.
+- **Bandeau du bas** : `pqBand(D)`, appelé par `pqFoot(D)`. Quatre contenus : présentation (photo facultative, texte et/ou chiffres), trois retours clients, références et garanties, trois questions. Position absolue au-dessus du pied (sauf modèle 3, où il est dans le bloc bas).
+- **Anti-chevauchement** : `pqFit(root)` enveloppe le contenu du haut dans `.pq-main` et le réduit (jamais sous 55 %) pour qu'il reste au-dessus du bandeau. À appeler après chaque insertion d'une plaquette dans le DOM (aperçu, vignettes, clone d'export).
+- **Photo du bandeau** : `q.portrait` (plaquette), sinon `profil.photo` (CV), sinon portrait d'exemple `PQ_PORTRAIT_PH` (`assets/plaquette/p-a.jpg`), affiché **à l'écran seulement** (classe `pq-ph-photo`, attribut `data-pq-placeholder`). À l'export, ces éléments sont retirés : pas de cadre vide, texte aligné à gauche. Ne jamais exporter ce portrait.
+- **Export** : clone hors écran, retrait de `.pq-ph`, `.pq-gap`, `.pq-ph-photo`, `[data-pq-placeholder]`, `pqFit`, capture `html2canvas` (échelle 2), image pleine page dans un PDF A4.
+- **Banque d'images** : fichiers dans `assets/plaquette/`, déclarés dans `PQ_PHOTOS` (`id`, `nom`, `modeles[]`, `imgs[]`). Cliquer une photo remplace `images` (1 à 3 emplacements). Voir le `README.md` du dossier pour le nommage et les formats (3:4, 4:5, 16:10, 16:9, 1:1).
+- **Plusieurs plaquettes** : `pqPlaquettes()` (reprend l'ancienne plaquette unique `freelance.plaquette`), `pqCurrent()`, `pqNormData()`. Chaque plaquette a ses offres (`offreIds`, vide = toutes), son accroche, son registre et ses envois.
+- **Blocs vides** : omis du PDF ; à l'écran, étoile rouge (`.pq-gap`) ou texte pâle (`.pq-ph`).
+
+### E-mail et fiche d'entretien
+
+- Réglages dans `profil.emailCfg` (par personne). Le type d'envoi est automatique d'après l'annonce (`service` = offre de service, `spontanee`, sinon offre) et peut être forcé. `emFiles()` donne les noms de fichiers cohérents avec les exports PDF.
+- L'objet est tronqué à 60 caractères ; le corps est un texte brut modifiable ; la phrase « stop » est ajoutée aux démarchages freelance (bonne pratique de prospection B2B).
+- La fiche d'entretien stocke `entretien.pitch` (présentation modifiée) et `entretien.checks` (cases cochées). Le bouton « Rédiger le remerciement » règle `emailCfg.type = "merci"` et ouvre l'onglet E-mail.
 
 ---
 
@@ -161,6 +202,7 @@ Dossier (une candidature en cours) = { id, titre, titreAuto, candidatureId,
 | `/api/entreprises` | `naf`, `lat`/`lon`/`radius` ou `dep`, `taille`, `page` | 20 entreprises actives (nom, activité, effectif, ville, fiche) | Secteur, zone, taille (API Recherche d'entreprises) |
 | `/api/offres` | `q`, `commune`, `distance`, `contrat`, `experience`, `depuis`, `page` | 20 offres normalisées | Critères de recherche (API France Travail ; variables `FT_CLIENT_ID`, `FT_CLIENT_SECRET`, `FT_SCOPE` facultatif) |
 | `/api/ft-diagnostic` | `probe`, `scope`, `path` | Diagnostic des accès France Travail ; **inactif** tant que la variable `FT_DIAG` n'existe pas (à supprimer du dépôt si inutile) | — |
+| `/api/sources-diag` | `source` (`lba`, `adzuna`, `theirstack`), `confirm=1` | Résumé d'**un seul** appel de test (statut, comptages, quelques champs) ; sans `confirm=1`, décrit l'appel sans le faire ; **inactif** tant que `SOURCES_DIAG` n'est pas `1` ; ne renvoie jamais de clé (à supprimer après les tests) | Variables `BONNE_ALTERNANCE_KEY`, `APP_ID`, `APP_KEY`, `AUTORISATION_KEY` ; voir `docs/FRANCE-TRAVAIL.md` |
 
 ---
 
@@ -173,7 +215,7 @@ Sobre, éditorial, papier et encre, accent bleu nuit, laiton comme second accent
 ### Jetons (variables CSS, `:root`)
 
 Couleurs (clair → sombre) : `--bg`, `--surface`, `--surface-2`, `--border`, `--border-strong`, `--ink-900/600/400`, `--accent` `#2E4C82` (sombre `#8CA9DE`), `--accent-ink`, `--accent-soft`, `--on-accent`, `--brass`, `--brass-soft`, `--success`, `--caution`, `--danger` (+ variantes `-soft`), `--shadow`, `--radius: 10px`.
-Polices : `--font-display` Newsreader (titres), `--font-body` Public Sans (texte), `--font-mono` IBM Plex Mono (étiquettes, puces, chiffres).
+Polices : `--font-display` Newsreader (titres), `--font-body` Public Sans (texte), `--font-mono` IBM Plex Mono (étiquettes, puces, chiffres). Les plaquettes ajoutent Space Grotesk (500, 700) et Bebas Neue, auto-hébergées comme les autres.
 Thème : clair / sombre / auto, bouton icône `#btn-theme` qui fait défiler les trois (`prefers-color-scheme`, attribut `data-theme` sur `<html>`, préférence mémorisée).
 
 ### Composants CSS existants
@@ -183,10 +225,10 @@ Thème : clair / sombre / auto, bouton icône `#btn-theme` qui fait défiler les
 
 ### Navigation mobile (≤ 860 px)
 
-- **Barre du bas** (`#bottom-nav`) : 4 groupes, Préparer (Ma base, Mes profils), Chercher (Recherche, Offres, Freelance, Plaquette), Candidater (Annonce, CV, Lettre, Annexe), Suivi (Candidatures, Entretien). Pastille sur Suivi quand une relance est due.
+- **Barre du bas** (`#bottom-nav`) : 4 groupes, Préparer (Ma base, Mes profils), Chercher (Recherche, Offres, Freelance, Plaquette), Candidater (Annonce, CV, Lettre, Annexe, E-mail), Suivi (Candidatures, Entretien). Pastille sur Suivi quand une relance est due.
 - **Bande d'onglets du haut** (`#rail`, collante) : n'affiche que les onglets du groupe actif (`body[data-group]`, attribut `data-group` sur chaque `.rail-item`). Le dernier onglet visité de chaque groupe est mémorisé (`lastTabByGroup`).
 - **Bouton Menu** (`#btn-menu`) : déplie les réglages d'interface, les barres Personne et Candidature, les exports (`body.menu-open`). Le titre de la candidature en cours s'affiche sous la marque (`#mobile-title`).
-- **Réglages / Aperçu** : sur les écrans à deux colonnes (`.panel-doc` : Ma base, CV, Lettre, Annexe), une bascule `.mobile-switch` montre une colonne à la fois (`data-view`).
+- **Réglages / Aperçu** : sur les écrans à deux colonnes (`.panel-doc` : Ma base, CV, Lettre, Annexe, E-mail, Plaquette), une bascule `.mobile-switch` montre une colonne à la fois (`data-view`).
 - Champs à 16 px (évite le zoom iOS), cibles tactiles d'au moins 44 px, `viewport-fit=cover` et marge de sécurité en bas (`env(safe-area-inset-bottom)`).
 
 ### Responsive et accessibilité (état)
@@ -207,11 +249,11 @@ Les `id` ci-dessous sont lus par le script. **Ne pas les renommer sans adapter l
 
 **Barre haute, sélecteurs personne/candidature, dialogues, rail, pied de page**
 
-`#ia-dialog`, `#ia-mode-line`, `#ia-skip`, `#ia-save`, `#ia-paste`, `#ia-paste-what`, `#ia-paste-prompt`, `#ia-paste-copy`, `#ia-paste-copied`, `#ia-paste-answer`, `#ia-paste-error`, `#ia-paste-cancel`, `#ia-paste-ok`, `#ia-confirm`, `#ia-confirm-what`, `#ia-confirm-text`, `#ia-confirm-no`, `#ia-confirm-yes`, `#app`, `#btn-theme`, `#theme-icon`, `#theme-label`, `#btn-ia-settings`, `#ia-state`, `#btn-reset`, `#btn-export-cv-lettre`, `#btn-export-all`, `#person-bar`, `#person-select`, `#btn-new-person`, `#btn-rename-person`, `#btn-del-person`, `#dossier-bar`, `#dossier-select`, `#dossier-title`, `#btn-new-dossier`, `#btn-dup-dossier`, `#btn-del-dossier`, `#btn-backup`, `#btn-restore`, `#restore-file`, `#export-cv-lettre-status`, `#export-all-status`, `#rail`, `#dot-base`, `#dot-profils`, `#dot-recherche`, `#dot-offres`, `#dot-freelance`, `#dot-annonce`, `#dot-cv`, `#dot-lettre`, `#dot-annexe`, `#dot-candidatures`, `#dot-entretien`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + c.id + '`, `#' + sec.id + '`, `#' + sec.id + '`, `#lettre-body`, `#'+it.id+'`, `#'+it.id+'`, `#'+it.id+'`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`
+`#ia-dialog`, `#ia-mode-line`, `#ia-byok-on`, `#ia-key`, `#ia-model`, `#ia-key-test`, `#ia-key-clear`, `#ia-key-status`, `#ia-skip`, `#ia-save`, `#ia-paste`, `#ia-paste-what`, `#ia-paste-prompt`, `#ia-paste-copy`, `#ia-paste-copied`, `#ia-paste-answer`, `#ia-paste-error`, `#ia-paste-cancel`, `#ia-paste-ok`, `#ia-confirm`, `#ia-confirm-what`, `#ia-confirm-text`, `#ia-confirm-no`, `#ia-confirm-yes`, `#app`, `#mobile-title`, `#btn-menu`, `#app-menu`, `#btn-theme`, `#theme-icon`, `#theme-label`, `#btn-ia-settings`, `#ia-state`, `#btn-reset`, `#btn-export-cv-lettre`, `#btn-export-all`, `#person-bar`, `#person-select`, `#btn-new-person`, `#btn-rename-person`, `#btn-del-person`, `#dossier-bar`, `#dossier-select`, `#dossier-title`, `#btn-new-dossier`, `#btn-dup-dossier`, `#btn-del-dossier`, `#btn-backup`, `#btn-restore`, `#restore-file`, `#export-cv-lettre-status`, `#export-all-status`, `#bottom-nav`, `#bn-dot-suivi`, `#rail`, `#dot-base`, `#dot-profils`, `#dot-recherche`, `#dot-offres`, `#dot-annonce`, `#dot-cv`, `#dot-lettre`, `#dot-annexe`, `#dot-email`, `#dot-candidatures`, `#dot-freelance`, `#dot-plaquette`, `#dot-entretien`, `#home-strip`
 
 **panel-base**
 
-`#panel-base`, `#cv-import-label`, `#cv-import-text`, `#btn-import-cv`, `#cv-import-replace`, `#cv-import-status`, `#btn-recompose`, `#btn-ia-cv`, `#btn-ia-cv-undo`, `#btn-add-exp`, `#ia-cv-status`, `#exp-list`, `#btn-add-formation`, `#formation-list`, `#btn-add-section`, `#section-list`, `#cv-skill-input`, `#btn-add-skill`, `#cv-skill-chips`, `#cv-skill-suggest`, `#btn-add-cert`, `#cert-list`, `#sources-list`, `#base-map-card`, `#map-profil`, `#base-map`, `#base-map-detail`
+`#panel-base`, `#cv-import-label`, `#cv-import-text`, `#btn-import-cv`, `#cv-import-replace`, `#cv-import-status`, `#btn-add-exp`, `#exp-list`, `#btn-add-formation`, `#formation-list`, `#btn-add-section`, `#section-list`, `#cv-skill-input`, `#btn-add-skill`, `#cv-skill-chips`, `#cv-skill-suggest`, `#btn-add-cert`, `#cert-list`, `#sources-list`, `#base-map-card`, `#map-profil`, `#base-map`, `#base-map-detail`
 
 **panel-profils**
 
@@ -223,11 +265,7 @@ Les `id` ci-dessous sont lus par le script. **Ne pas les renommer sans adapter l
 
 **panel-offres**
 
-`#panel-offres`, `#off-profil`, `#off-q`, `#off-exp-note`, `#off-lieu`, `#btn-off-lieu`, `#off-lieu-list`, `#off-dist`, `#off-contrat`, `#off-depuis`, `#btn-off-go`, `#off-status`, `#off-results`, `#off-more`, `#off-attrib`
-
-**panel-freelance**
-
-`#panel-freelance`, `#fl-services`, `#btn-fl-add`, `#fl-offre`, `#btn-fl-offre-gen`, `#fl-dispo`, `#fl-mode`, `#fl-zone`, `#fl-tjm`, `#fl-showtjm`, `#fl-refs`, `#fl-import`, `#btn-fl-import`, `#fl-import-status`, `#fl-profil`, `#fl-taille`, `#fl-cibles`, `#fl-lieu`, `#btn-fl-lieu`, `#fl-lieu-list`, `#fl-rayon`, `#btn-fl-go`, `#fl-status`, `#fl-results`, `#fl-more`
+`#panel-offres`, `#off-unavailable`, `#btn-off-to-annonce`, `#btn-off-to-recherche`, `#off-form-card`, `#off-profil`, `#off-q`, `#off-exp-note`, `#off-lieu`, `#btn-off-lieu`, `#off-lieu-list`, `#off-dist`, `#off-contrat`, `#off-depuis`, `#btn-off-go`, `#off-status`, `#off-results`, `#off-more`, `#off-attrib`
 
 **panel-annonce**
 
@@ -235,31 +273,44 @@ Les `id` ci-dessous sont lus par le script. **Ne pas les renommer sans adapter l
 
 **panel-cv**
 
-`#panel-cv`, `#cv-nom`, `#cv-titre`, `#cv-email`, `#cv-tel`, `#cv-ville`, `#cv-lien`, `#cv-resume`, `#btn-resume-auto`, `#resume-auto-status`, `#cv-langues`, `#prof-atouts-input`, `#btn-add-atout`, `#prof-atouts-chips`, `#prof-photo-thumb-wrap`, `#prof-photo-input`, `#lang-segmented`, `#card-compo`, `#compo-intro`, `#btn-compo-regen`, `#btn-compo-reset`, `#compo-gaps`, `#compo-lists`, `#ats-score`, `#ats-tier`, `#ats-missing`, `#ats-panel`, `#btn-ats-optimize`, `#btn-ats-plan`, `#btn-ats-plan-copy`, `#ats-result`, `#ats-suggestions`, `#btn-print-cv`, `#btn-print-cv-anon`, `#anon-mask-employers`, `#anon-mask-schools`, `#cv-preview`, `#cv-download-status`
+`#panel-cv`, `#cv-nom`, `#cv-titre`, `#cv-email`, `#cv-tel`, `#cv-ville`, `#cv-lien`, `#cv-resume`, `#btn-resume-auto`, `#resume-auto-status`, `#cv-langues`, `#prof-atouts-input`, `#btn-add-atout`, `#prof-atouts-chips`, `#prof-photo-thumb-wrap`, `#prof-photo-input`, `#lang-segmented`, `#card-compo`, `#compo-intro`, `#btn-compo-regen`, `#btn-compo-reset`, `#btn-ia-cv`, `#btn-ia-cv-undo`, `#ia-cv-status`, `#compo-gaps`, `#compo-lists`, `#ats-score`, `#ats-tier`, `#ats-missing`, `#ats-panel`, `#btn-ats-optimize`, `#btn-ats-plan`, `#btn-ats-plan-copy`, `#ats-result`, `#ats-suggestions`, `#btn-print-cv`, `#btn-print-cv-anon`, `#anon-mask-employers`, `#anon-mask-schools`, `#cv-preview`, `#cv-download-status`
 
 **panel-lettre**
 
-`#panel-lettre`, `#l-destinataire`, `#lettre-lang-segmented`, `#tone-segmented`, `#card-affiner`, `#affiner-chips`, `#affiner-input`, `#btn-affiner-add`, `#affiner-remarques`, `#btn-affiner-ia`, `#btn-affiner-go`, `#btn-affiner-undo`, `#affiner-status`, `#card-voix`, `#voix-description`, `#voix-eviter`, `#voix-formule`, `#lettre-texte`, `#question-bank`, `#motiv-list`, `#btn-add-motiv`, `#l-skill-suggest`, `#l-skill-chosen`, `#l-disponibilite`, `#btn-add-archive`, `#archive-list`, `#btn-analyser-patterns`, `#patterns-result`, `#lettre-reference`, `#reference-list`, `#btn-reroll`, `#lettre-edit-note`, `#btn-print-lettre`, `#lettre-preview`, `#lettre-download-status`
+`#panel-lettre`, `#l-destinataire`, `#lettre-lang-segmented`, `#tone-segmented`, `#card-affiner`, `#affiner-chips`, `#affiner-input`, `#btn-affiner-add`, `#affiner-remarques`, `#btn-affiner-ia`, `#btn-affiner-go`, `#btn-affiner-undo`, `#affiner-status`, `#style-check`, `#card-voix`, `#voix-description`, `#voix-eviter`, `#voix-formule`, `#lettre-texte`, `#question-bank`, `#motiv-list`, `#btn-add-motiv`, `#l-skill-suggest`, `#l-skill-chosen`, `#l-disponibilite`, `#btn-add-archive`, `#archive-list`, `#btn-analyser-patterns`, `#patterns-result`, `#lettre-reference`, `#reference-list`, `#btn-reroll`, `#lettre-edit-note`, `#btn-print-lettre`, `#lettre-preview`, `#lettre-download-status`
 
 **panel-annexe**
 
 `#panel-annexe`, `#cat-grid`, `#annexe-suggest`, `#btn-add-annexe-item`, `#annexe-items-list`, `#btn-print-annexe`, `#annexe-preview`, `#annexe-download-status`
 
+**panel-email**
+
+`#panel-email`, `#em-type`, `#em-pj`, `#em-dest`, `#em-ent`, `#em-poste`, `#em-jours`, `#em-hook`, `#em-fort`, `#em-sigon`, `#sg-titre`, `#sg-siret`, `#sg-site`, `#sg-rdv`, `#sg-zone`, `#sg-format`, `#sg-out`, `#btn-sg-copy`, `#sg-hint`, `#btn-em-copyall`, `#em-out`, `#em-tips`
+
 **panel-candidatures**
 
-`#panel-candidatures`, `#btn-save-current-candidature`, `#btn-add-candidature`, `#candidatures-summary`, `#candidatures-list`
+`#panel-candidatures`, `#btn-save-current-candidature`, `#btn-add-candidature`, `#candidatures-summary`, `#relances-due`, `#candidatures-list`
+
+**panel-freelance**
+
+`#panel-freelance`, `#fl-suggest`, `#fl-services`, `#btn-fl-add`, `#fl-offre`, `#btn-fl-offre-gen`, `#fl-dispo`, `#fl-mode`, `#fl-zone`, `#fl-tjm`, `#fl-showtjm`, `#fl-refs`, `#fl-import`, `#btn-fl-import`, `#fl-import-status`, `#fl-profil`, `#fl-taille`, `#fl-cibles`, `#fl-lieu`, `#btn-fl-lieu`, `#fl-lieu-list`, `#fl-rayon`, `#btn-fl-go`, `#fl-status`, `#fl-results`, `#fl-more`
+
+**panel-plaquette**
+
+`#panel-plaquette`, `#pq-controls`, `#pq-select`, `#pq-nom`, `#btn-pq-new`, `#btn-pq-dup`, `#btn-pq-del`, `#pq-offres`, `#pq-accroches`, `#pq-grid`, `#pq-accent`, `#pq-accent-reset`, `#btn-pq-fill`, `#pq-form`, `#btn-pq-pdf`, `#pq-stage`, `#pq-status`, `#pq-suivi`
 
 **panel-entretien**
 
-`#panel-entretien`, `#btn-generer-questions`, `#btn-voir-corrige`, `#entretien-questions`, `#entretien-corrige`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + exp.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + f.id + '`, `#' + c.id + '`, `#' + sec.id + '`, `#' + sec.id + '`, `#lettre-body`, `#'+it.id+'`, `#'+it.id+'`, `#'+it.id+'`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`, `#' + c.id + '`
+`#panel-entretien`, `#entretien-fiche`, `#btn-generer-questions`, `#btn-voir-corrige`, `#entretien-questions`, `#entretien-corrige`
 
+Les identifiants des éléments générés en JavaScript (listes d'expériences, de formations, de compétences, de résultats…) sont construits à l'exécution (`data-*`) ; voir les fonctions `render…` correspondantes.
 
 ---
 
 ## 9. Points d'attention UX connus (pour votre refonte)
 
 1. **Densité** : les onglets de réglages (Ma base, CV, Lettre) sont de longues colonnes de cartes. Une navigation interne (sections repliables, étapes) aiderait.
-2. **Onze onglets** dans le rail : regrouper (Préparer : base et profils ; Chercher : recherche, offres, freelance ; Candidater : annonce, CV, lettre, annexe ; Suivre : candidatures, entretien) est une piste évidente.
+2. **Treize onglets** dans le rail : regrouper (Préparer : base et profils ; Chercher : recherche, offres, freelance, plaquette ; Candidater : annonce, CV, lettre, annexe, e-mail ; Suivre : candidatures, entretien) est une piste évidente.
 3. **Parcours de démarrage** : aucun assistant « première fois ». Un écran d'accueil guidant import → profil → première candidature manque.
 4. **Aperçu et réglages** : sur mobile, l'aperçu se retrouve sous une longue colonne ; prévoir un basculement réglages / aperçu.
 5. **Barres Personne et Candidature** : très présentes alors que beaucoup d'utilisateurs n'ont qu'une personne ; elles pourraient se replier.
@@ -277,7 +328,7 @@ Les `id` ci-dessous sont lus par le script. **Ne pas les renommer sans adapter l
 L'application est statique : n'importe quel serveur de fichiers suffit pour tout sauf `/api/*`.
 
 ```bash
-python3 -m http.server 8080      # puis http://localhost:8080
+python3 -m http.server 8080      # landing : http://localhost:8080/ · application : http://localhost:8080/app/
 ```
 
 Pour les routes `/api/*`, utiliser `npx wrangler pages dev .` (Cloudflare) ou déployer sur Cloudflare Pages. Les variables `FT_*` ne sont nécessaires que pour `/api/offres`.
@@ -288,7 +339,7 @@ Tests : scripts Playwright ad hoc utilisés pendant le développement (non versi
 
 ## 11. Index des fonctions JavaScript
 
-Numéros de ligne omis (ils changent) : chercher le nom dans `index.html`. Regroupées par module, dans l'ordre du fichier.
+Numéros de ligne omis (ils changent) : chercher le nom dans `app/index.html`. Regroupées par module, dans l'ordre du fichier.
 
 **SOCLE PARTAGÉ**
 
@@ -340,7 +391,7 @@ Numéros de ligne omis (ils changent) : chercher le nom dans `index.html`. Regro
 
 **OFFRES D'EMPLOI (France Travail)**
 
-`offProfilOptions`, `offCurrentProfil`, `offLoadProfil`, `offLieuSearch`, `offRun`, `offMatch`, `renderOffResults`, `startFromOffre`
+`offreVientDeLAPI`, `renderOffAvailability`, `offProfilOptions`, `offCurrentProfil`, `offLoadProfil`, `offLieuSearch`, `offRun`, `offMatch`, `renderOffResults`, `startFromOffre`
 
 **MA BASE : fusion de CV, catégories, certifications, carte**
 
@@ -349,6 +400,22 @@ Numéros de ligne omis (ils changent) : chercher le nom dans `index.html`. Regro
 **COMPOSITION DU CV : ce que la base fournit, trié et organisé selon le profil et l'annonce**
 
 `dateRank`, `compoKeywords`, `compoDecision`, `composeCv`, `recomposerCV`, `compoText`, `cvFullText`, `computeGaps`, `gapStar`, `renderComposition`, `profilCvElement`, `renderProfilCvBox`
+
+**OFFRES COMMERCIALES SUGGÉRÉES (catalogue `FL_OFFRES`)**
+
+`flOfferBySid`, `flSuggestions`, `flAddSuggestion`, `flRemoveSuggestion`, `renderFlSuggest`
+
+**PLAQUETTE FREELANCE : modèles, bandeau, plusieurs plaquettes, accroches, envois et statistiques**
+
+`pqPlaquettes`, `pqCurrent`, `pqNormData`, `pqState`, `pqSelectedServices`, `pqData`, `pqEsc`, `pqHead`, `pqKick`, `pqIntro`, `pqBand`, `pqFoot`, `pqImg`, `pqServices`, `pqSteps`, `pqArrow`, `pqStar`, `pqHtml`, `pqFit`, `pqGet`, `pqSet`, `pqListEditor`, `renderPlaquette`, `renderPlaquettePreview`, `fitPlaquette`, `refreshPqThumbs`, `renderPqList`, `renderPqOffres`, `pqTu`, `pqSplitTitle`, `pqComputePropos`, `renderPqAccroches`, `pqPropAI`, `pqStats`, `pqPct`, `pqOfferTitles`, `pqInsights`, `renderPqSuivi`
+
+**E-MAIL D'ENVOI : objet, message, signature**
+
+`emCfg`, `emList`, `emLow`, `emTitre`, `emKeywords`, `emType`, `emPj`, `emFiles`, `emSignature`, `emBuild`, `emWords`, `emMailto`, `emCopy`, `renderEmailOut`, `renderEmailTips`, `renderSigOut`, `renderEmail`, `emAI`
+
+**FICHE DE PRÉPARATION À L'ENTRETIEN**
+
+`entBaseHas`, `entPitch`, `entFiche`, `renderEntretienFiche`
 
 **CANDIDATURES MULTIPLES : barre, bascule, sauvegarde locale**
 
@@ -360,13 +427,64 @@ Numéros de ligne omis (ils changent) : chercher le nom dans `index.html`. Regro
 
 **ASSISTANT IA (facultatif) + AFFINAGE DE LA LETTRE + VOIX**
 
-`iaPrefs`, `iaPrefSave`, `iaOn`, `refreshIaState`, `scrubForAI`, `extractJson`, `iaAsk`, `iaConfirm`, `relevantExperiences`, `annonceForAI`, `iaReformulerCV`, `refreshAffinerUI`, `addRemarque`, `lettreCurrentParagraphs`, `renderVoixCard`
+`iaPrefs`, `iaPrefSave`, `iaByokActive`, `iaByok`, `iaOn`, `refreshIaState`, `scrubForAI`, `extractJson`, `iaAsk`, `iaConfirm`, `relevantExperiences`, `annonceForAI`, `iaReformulerCV`, `refreshAffinerUI`, `addRemarque`, `lettreCurrentParagraphs`, `renderVoixCard`
 
 ---
 
 ## 12. Dette technique à connaître
 
-- Fichier unique de ≈ 5 800 lignes : le découper (CSS, modules JS) facilitera le travail de design sans toucher à la logique.
+- Fichier unique de ≈ 7 300 lignes : le découper (CSS, modules JS) facilitera le travail de design sans toucher à la logique.
 - HTML généré par concaténation de chaînes dans les fonctions `render…` : à migrer vers des gabarits (ou un composant) si un framework est introduit.
 - Quelques noms historiques (`atelier-candidature-v2`, `annexe`, `dossier`) ; la migration d'anciennes données est gérée par `normPersonData`.
 - Les listes de mots (domaines, catégories de compétences, détection d'émetteur) sont en dur dans le script ; elles gagneraient à être externalisées en JSON.
+- Les listes d'offres commerciales (`FL_OFFRES`), les formulations converties au tutoiement (`pqTu`) et la banque d'images (`PQ_PHOTOS`) sont en dur dans le script ; à externaliser en JSON (et en dossier d'assets indexé) pour qu'un non-développeur puisse les enrichir.
+- Les modèles de plaquette dépendent de dimensions en pixels (794 × 1123) et de plusieurs règles `.pq-hasband` par modèle : toute refonte doit conserver la capture pleine page A4 et le garde-fou `pqFit`.
+- Les pages publiques et les maquettes SaaS sont écrites à la main : la barre de navigation et le pied de page sont dupliqués dans chaque fichier de `index.html` (racine), `tarifs/` et `saas/`. Une refonte devra les factoriser (composants ou gabarit).
+- L'onboarding complet à concevoir avant le SaaS est décrit dans `docs/ROADMAP.md`.
+
+---
+
+## 13. Site public et pages SaaS (hors application)
+
+La **landing est à la racine** (`/`, fichier `index.html`) et l'**application sous `/app/`** (fichier `app/index.html`). Les pages ci-dessous sont **indépendantes de l'application** : elles ne lisent ni n'écrivent aucune donnée, utilisent `vendor/fonts.css` et `site/site.css`, et respectent la même CSP (aucune ressource externe).
+
+### Pages routées
+
+| Page | Fichier | URL | Rôle |
+|---|---|---|---|
+| Landing | `index.html` | `/` | Présenter l'atelier à quatre audiences (étudiants, recherche d'emploi, salariés en transition, freelances) et amener vers l'application |
+| Gratuit | `tarifs/index.html` | `/tarifs/` | Dit que tout est gratuit pour le moment, liste ce qui est inclus, explique que l'IA passe par le compte de la personne ; aucun prix |
+
+**Sections de la landing** (ordre) : en-tête collant, héros (titre, sous-titre, deux boutons, capture, mention « Gratuit pour le moment »), bandeau de quatre preuves vérifiables, problème (« Candidater, c'est réécrire »), trois étapes, **Pour qui** (quatre volets en onglets : Étudiants, Recherche d'emploi, Salariés en transition, Freelances ; tous visibles sans JavaScript), fonctionnalités (six cartes), confidentialité (section sombre), section « Gratuit », FAQ (8 questions, `<details>`), appel final, pied de page. Données structurées JSON-LD `SoftwareApplication`.
+
+**Sections de la page « Gratuit »** : en-tête et bandeau « Aucun tarif n'est affiché ni prévu à cette date », « Tout est ouvert » (deux cartes : pour tout le monde, pour les freelances en plus), « Et l'IA ? » (trois cartes : facultatif, ton compte pas le nôtre, tu vois ce qui part), FAQ (6 questions), appel final. JSON-LD `Product` avec une offre à 0 €.
+
+**Contrat HTML / JavaScript** (`site/site.js`) : `.nav` + `.menu-btn` (menu mobile), `[data-tabs]` avec `[role=tab]` / `.pane` (onglets, flèches du clavier, repli sans JavaScript via `.noscript-panes`). Les ancres `#fonctions`, `#pour-qui`, `#faq`, `#etudiants`, `#emploi`, `#transition`, `#freelance` sont utilisées par la navigation et les liens entre pages.
+
+**Design** : jetons dans `site/site.css` (`--bg`, `--brand` `#2E4C82`, `--brass`, polices Newsreader, Public Sans, IBM Plex Mono), composants `.nav`, `.btn`, `.card`, `.callout`, `.faq`, `.shot`, `.ticks`, `.proofbar`. Les captures sont dans `assets/landing/` et utilisent des données fictives (mention affichée sous chaque capture).
+
+**Référencement** : `sitemap.xml` liste la landing et les tarifs ; `robots.txt` interdit `/saas/` et `/api/` ; `_headers` ajoute `X-Robots-Tag: noindex` sur `/saas/*`.
+
+**Organisation des URL** : `/` landing, `/tarifs/` tarifs, `/app/` application, `/legal/...` pages légales, `/saas/` maquettes non routées, `/api/...` fonctions serveur. Les données enregistrées gardent la même origine, donc la même clé `localStorage` ; les chemins d'images `assets/...` d'anciennes plaquettes sont réécrits en `../assets/...` par `pqNormData`. Les pages légales renvoient vers `../app/` (« Retour à l'application »). Pour un test local, servir le dépôt et ouvrir `/` (landing) puis `/app/`.
+
+### Maquettes SaaS non routées
+
+Toutes portent `noindex`, un bandeau « Maquette non routée » et un bloc « Notes pour la refonte » (états à prévoir, points à trancher). Index navigable : `saas/index.html`. Détail complet : `docs/PAGES-SAAS.md`.
+
+| Page | Fichier | URL prévue | Accès |
+|---|---|---|---|
+| Connexion | `saas/connexion.html` | `/connexion` | Public |
+| Inscription | `saas/inscription.html` | `/inscription` | Public |
+| Vérification de l'e-mail | `saas/verification-email.html` | `/inscription/verification-email` | Public (compte créé) |
+| Mot de passe oublié | `saas/mot-de-passe-oublie.html` | `/mot-de-passe-oublie` | Public |
+| Nouveau mot de passe | `saas/nouveau-mot-de-passe.html` | `/mot-de-passe/nouveau` | Public avec jeton |
+| Bienvenue (onboarding) | `saas/bienvenue.html` | `/bienvenue` | Connecté, premier passage |
+| Reprise des données locales | `saas/migration-donnees.html` | `/migration` | Connecté |
+| Mon compte | `saas/compte.html` | `/compte` | Connecté |
+| Mes données | `saas/donnees.html` | `/compte/donnees` | Connecté |
+| Aide et contact | `saas/aide.html` | `/aide` | Public |
+| Liste d'attente | `saas/liste-attente.html` | `/liste-attente` | Public |
+| Page introuvable | `saas/erreur-404.html` | `/404` | Public |
+| Maintenance | `saas/maintenance.html` | `/maintenance` | Public |
+
+Le modèle économique (gratuit pour le moment) et le coût de l'IA sont dans `docs/OFFRES-ET-TARIFS.md`.

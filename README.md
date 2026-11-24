@@ -4,13 +4,28 @@ Outil d'aide à la candidature : annonce, CV (bibliothèque + recomposition ATS)
 motivation, annexe, suivi des candidatures et entraînement à l'entretien.
 
 Tout fonctionne côté navigateur : bibliothèque, préférences et suivi des candidatures sont
-stockés dans `localStorage`, rien n'est envoyé à un serveur. Les seules requêtes externes sont
-le chargement de polices (Google Fonts) et de deux bibliothèques techniques publiques
-(html2canvas, jsPDF) utilisées pour générer les PDF — aucune donnée saisie ne leur est transmise.
+stockés dans `localStorage`, rien n'est envoyé à un serveur. Les polices et les bibliothèques
+PDF (html2canvas, jsPDF) sont hébergées avec le site (`vendor/`) : aucune ressource externe,
+aucun cookie, aucun outil de mesure.
+
+## Contenu du dépôt
+
+| Élément | Rôle |
+|---|---|
+| `index.html` | Landing page (racine du site) |
+| `app/index.html` | L'application (tout le HTML, le CSS et le JavaScript), servie sous `/app/` |
+| `tarifs/` | Page « Gratuit pour le moment » (publique) |
+| `saas/` | Maquettes de pages pour la version SaaS (non routées, `noindex`) |
+| `site/`, `assets/` | Style et script communs des pages publiques ; captures (`assets/landing/`) et banque d'images de la plaquette (`assets/plaquette/`) |
+| `functions/` | Fonctions serveur Cloudflare Pages |
+| `legal/` | Pages légales |
+| `docs/` | Documentation : `ARCHITECTURE.md` (référence complète), `ROADMAP.md`, `OFFRES-ET-TARIFS.md`, `PAGES-SAAS.md`, `MARKETING.md`, `METHODE-LETTRE-RAPOS.md` |
+
+La documentation est tenue à jour à chaque modification (voir `CLAUDE.md`).
 
 ## Déploiement
 
-Le site est 100 % statique (`index.html`), aucun build n'est nécessaire.
+Le site est 100 % statique (`index.html`, `app/`, `tarifs/`), aucun build n'est nécessaire.
 
 **Cloudflare Pages (recommandé) :**
 1. Cloudflare Dashboard → Workers & Pages → Create → Pages → Connect to Git.
@@ -21,7 +36,7 @@ Le site est 100 % statique (`index.html`), aucun build n'est nécessaire.
 Un sous-domaine personnalisé (ex. un sous-domaine de johnapple.fr) se configure ensuite dans
 l'onglet *Custom domains* du projet Pages.
 
-**En local :** ouvrir `index.html` dans un navigateur, ou `npx serve .`.
+**En local :** ouvrir `app/index.html` dans un navigateur (l'application) ou `index.html` (la landing), ou `npx serve .` puis `/` et `/app/`.
 
 ## Lecture automatique d'une annonce par son lien
 
@@ -44,9 +59,13 @@ robots (LinkedIn, Indeed…) ne peuvent pas être lus : on colle alors le texte 
 - `_headers` : politique de sécurité du contenu (CSP), HSTS, X-Frame-Options, etc. (Cloudflare Pages).
 - `robots.txt` et `sitemap.xml` : à garder à jour si le domaine change.
 
+## Sources d'offres d'emploi (en cours d'évaluation)
+
+Variables du projet Cloudflare Pages : `BONNE_ALTERNANCE_KEY` (La bonne alternance), `APP_ID` et `APP_KEY` (Adzuna, 25 appels), `AUTORISATION_KEY` (TheirStack, 200 crédits). La fonction `functions/api/sources-diag.js` (inactive sans `SOURCES_DIAG=1`) fait **un seul appel de test** par source, avec `confirm=1`, sans jamais renvoyer de clé. Détail et conditions de chaque source : `docs/FRANCE-TRAVAIL.md`.
+
 ## Offres France Travail (API « Offres d'emploi »)
 
-`functions/api/offres.js` interroge l'API France Travail. Les identifiants ne sont jamais dans le code : ils se définissent dans
+**État : accès refusé par France Travail à ce stade** (voir `docs/FRANCE-TRAVAIL.md`) ; le formulaire de l'onglet Offres est masqué (`OFFRES_API_ACTIVE`) et le contenu d'une offre issue de l'API n'est jamais envoyé à l'IA. `functions/api/offres.js` interroge l'API France Travail. Les identifiants ne sont jamais dans le code : ils se définissent dans
 Cloudflare → Workers & Pages → projet → Settings → Variables and Secrets (type « Secret » pour les deux premiers), puis redéployer :
 
 | Variable | Rôle |
