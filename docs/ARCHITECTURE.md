@@ -204,7 +204,6 @@ Dossier (une candidature en cours) = { id, titre, titreAuto, candidatureId,
 | `/api/alternance` | `lat`, `lon`, `radius` (5 à 100 km, défaut 30) | Offres d'alternance et entreprises à fort potentiel d'embauche normalisées (`results[]` : `id`, `intitule`, `entreprise`, `lieu`, `contrat`, `duree`, `debut`, `date`, `description`, `url`, `source`, `rome` ; `recruiters[]` : `nom`, `ville`, `cp`, `nafCode`, `nafLabel`, `siret`, `url`) ; cache 10 min | Coordonnées de la commune et rayon (API La bonne alternance, variable `BONNE_ALTERNANCE_KEY`) |
 | `/api/offres` | `q`, `commune`, `distance`, `contrat`, `experience`, `depuis`, `page` | 20 offres normalisées | Critères de recherche (API France Travail ; variables `FT_CLIENT_ID`, `FT_CLIENT_SECRET`, `FT_SCOPE` facultatif) |
 | `/api/ft-diagnostic` | `probe`, `scope`, `path` | Diagnostic des accès France Travail ; **inactif** tant que la variable `FT_DIAG` n'existe pas (à supprimer du dépôt si inutile) | — |
-| `/api/sources-diag` | `source` (`lba`, `adzuna`, `theirstack`), `confirm=1` | Résumé d'**un seul** appel de test (statut, comptages, quelques champs) ; sans `confirm=1`, décrit l'appel sans le faire ; **inactif** tant que `SOURCES_DIAG` n'est pas `1` ; ne renvoie jamais de clé (à supprimer après les tests) | Variables `BONNE_ALTERNANCE_KEY`, `APP_ID`, `APP_KEY`, `AUTORISATION_KEY` ; voir `docs/FRANCE-TRAVAIL.md` |
 
 ---
 

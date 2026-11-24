@@ -159,7 +159,7 @@ Pages lues : fiche data.gouv, explorateur de l'API (api.apprentissage.beta.gouv.
 
 ### Tester Adzuna soi-même (France)
 
-Voir aussi `functions/api/sources-diag.js` (même appel, sans exposer la clé). Pour un test manuel :
+Pour un test manuel :
 
 1. Créer un compte sur developer.adzuna.com pour obtenir un `app_id` et un `app_key`.
 2. Dans un terminal, remplacer les deux valeurs et lancer :
@@ -194,13 +194,7 @@ Variables définies dans le projet Cloudflare Pages (invisibles depuis une sessi
 | `APP_ID`, `APP_KEY` | Adzuna (paramètres d'adresse `app_id` et `app_key`) | **25 appels au total** |
 | `AUTORISATION_KEY` | TheirStack (`Authorization: Bearer …`) | **200 crédits** (1 crédit par offre renvoyée) |
 
-**Fonction de test `functions/api/sources-diag.js`** : inactive tant que `SOURCES_DIAG` n'est pas à `1`. Une seule requête amont par appel, et seulement avec `confirm=1` (sans lui, la fonction décrit l'appel sans le faire) ; elle ne renvoie jamais de clé, seulement un statut, des comptages et quelques champs (titre, entreprise, lieu, date).
-
-- `/api/sources-diag?source=lba` puis `…&confirm=1` : 1 appel La bonne alternance (route `GET /api/job/v1/search`, centrée sur Lyon, rayon 30 km, `caller=atelier-candidature`) ; renvoie la forme de la réponse pour fixer les champs à utiliser.
-- `/api/sources-diag?source=adzuna&confirm=1` : 1 appel sur les 25 (`/v1/api/jobs/fr/search/1`, 3 résultats) ; confirme si la France est couverte.
-- `/api/sources-diag?source=theirstack&confirm=1` : au plus 2 crédits (offres en France des 7 derniers jours, `limit` 2).
-
-Marche à suivre : définir `SOURCES_DIAG=1` dans le projet, redéployer, ouvrir ces adresses **une fois chacune**, copier les réponses (sans clé) dans la conversation, puis **retirer `SOURCES_DIAG`**.
+**Fonction de test `sources-diag`** : utilisée une fois pour les tests ci-dessous, puis **supprimée du dépôt** (un point d'accès public qui pouvait consommer les quotas d'Adzuna et de TheirStack ne devait pas rester en ligne). Elle reste consultable dans l'historique git (commit `d691147`). Chaque appel de test était limité à une requête amont et ne renvoyait jamais de clé.
 
 **Ce qui est déjà établi sans clé** : sur `api.apprentissage.beta.gouv.fr`, `GET /api/job/v1/search` et `/api/job/v1/export` existent (réponse 401 « clé d'API valide » sans clé) ; Adzuna répond 401 pour une clé invalide quel que soit le pays (la couverture de `fr` reste à vérifier avec la vraie clé) ; TheirStack : corps attendu `{"job_country_code_or":["FR"],"posted_at_max_age_days":7,"limit":2,"page":0}` (un filtre `posted_at_*` ou un identifiant est obligatoire ; champs de réponse `job_title`, `company`, `location`, `country_code`, `date_posted`, `url`, `description`).
 
@@ -208,7 +202,7 @@ Marche à suivre : définir `SOURCES_DIAG=1` dans le projet, redéployer, ouvrir
 
 ### Résultats des tests (24 novembre 2026)
 
-Un appel par source via `/api/sources-diag` en production (quotas respectés) :
+Un appel par source via la fonction de test `sources-diag` (retirée depuis), en production, quotas respectés :
 
 | Source | Résultat | Consommation |
 |---|---|---|
@@ -221,14 +215,13 @@ Un appel par source via `/api/sources-diag` en production (quotas respectés) :
 - **La bonne alternance est branchée** : `functions/api/alternance.js` et l'onglet **Offres** (offres d'alternance, entreprises qui recrutent souvent pour la candidature spontanée, mention de la source, lien vers l'offre d'origine). Gratuit et non lucratif ; la question écrite au contact de l'API reste recommandée (brouillon plus haut). Le contenu de ces offres n'est jamais envoyé à l'IA, par précaution.
 - **Adzuna n'est pas branchable en l'état** : le plan gratuit (25 appels) sert à évaluer ; un usage réel demande un accord écrit d'Adzuna.
 - **TheirStack n'est pas branchable en l'état** : 200 crédits gratuits, généraliste et orienté données d'entreprises ; réservé à une éventuelle fonction freelance, avec un forfait payant, ce qui s'écarte du cadre non lucratif.
-- **Retirer `SOURCES_DIAG`** du projet Cloudflare une fois les tests terminés (la fonction devient inerte).
+- Les variables `SOURCES_DIAG`, `APP_ID`, `APP_KEY` et `AUTORISATION_KEY` peuvent être retirées du projet Cloudflare : plus aucune fonction ne les lit (en garder une copie si on veut retester).
 
 ### Marche à suivre proposée
 
-1. **Tester les trois sources avec `sources-diag`** (voir « Clés, variables et tests »), sans dépasser les quotas.
-2. **La bonne alternance** (étudiants et alternants) : conditions lues, **usage non lucratif exigé** (cohérent avec l'abandon des formules payantes) ; envoyer la question écrite (brouillon ci-dessus) avant tout développement.
-3. **Adzuna** : si la France est couverte, écrire à Adzuna (brouillon ci-dessus) : un produit sans revenu ni lead est moins exposé à l'exigence de licence.
-4. **TheirStack** : réservé à une fonction freelance (entreprises qui recrutent sur une technologie), sous réserve de ses conditions.
+1. **La bonne alternance** (étudiants et alternants) : branchée ; conditions lues, **usage non lucratif exigé** (cohérent avec l'abandon des formules payantes) ; envoyer la question écrite (brouillon ci-dessus) avant tout développement.
+2. **Adzuna** (offres généralistes, France couverte) : facultatif ; écrire à Adzuna (brouillon ci-dessus) seulement pour ajouter une source d'offres autres que l'alternance.
+3. **TheirStack** : réservé à une fonction freelance (entreprises qui recrutent sur une technologie), sous réserve de ses conditions.
 3. N'envisager les agrégateurs qui collectent sans accord des sources (LoopCV) qu'après lecture de leurs conditions complètes ; privilégier les sources dont la licence autorise explicitement l'affichage et le renvoi vers l'annonce.
 
 Pistes non confirmées : offres de l'emploi public et de l'insertion (existence d'une API non établie), ainsi que les grands sites d'emploi (aucune API publique repérée ; ne pas récupérer leurs pages automatiquement). Pour chaque source, vérifier en particulier : l'interdiction éventuelle d'utiliser les contenus avec une IA, l'obligation de renvoyer vers la source, l'interdiction de conserver les offres, et la compatibilité avec une application sans compte ni serveur de stockage.

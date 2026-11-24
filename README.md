@@ -61,7 +61,7 @@ robots (LinkedIn, Indeed…) ne peuvent pas être lus : on colle alors le texte 
 
 ## Sources d'offres d'emploi
 
-Variables du projet Cloudflare Pages : `BONNE_ALTERNANCE_KEY` (**utilisée** par `functions/api/alternance.js` : offres d'alternance de l'onglet Offres), `APP_ID` et `APP_KEY` (Adzuna, 25 appels, test seulement), `AUTORISATION_KEY` (TheirStack, 200 crédits, test seulement). La fonction `functions/api/sources-diag.js` (inactive sans `SOURCES_DIAG=1`) fait **un seul appel de test** par source, avec `confirm=1`, sans jamais renvoyer de clé. Détail et conditions de chaque source : `docs/FRANCE-TRAVAIL.md`.
+Variable du projet Cloudflare Pages : `BONNE_ALTERNANCE_KEY` (**utilisée** par `functions/api/alternance.js` : offres d'alternance de l'onglet Offres). Les clés `APP_ID` et `APP_KEY` (Adzuna) et `AUTORISATION_KEY` (TheirStack) ont servi à des tests ponctuels ; aucune fonction ne les utilise plus. Conditions de chaque source et résultats des tests : `docs/FRANCE-TRAVAIL.md`.
 
 ## Offres France Travail (API « Offres d'emploi »)
 
