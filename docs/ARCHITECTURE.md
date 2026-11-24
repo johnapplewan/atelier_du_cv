@@ -54,8 +54,9 @@ Navigateur (localStorage)  ←→  app/index.html (état + moteurs de compositio
         │                              ├─ /api/annonce     → page d'une offre (lecture par lien)
         │                              ├─ /api/lieu        → API Adresse (communes)
         │                              ├─ /api/entreprises → API Recherche d'entreprises (data.gouv.fr)
+        │                              ├─ /api/alternance  → API La bonne alternance (offres d'alternance, clé côté serveur)
         │                              └─ /api/offres      → API Offres d'emploi de France Travail (accès refusé à ce stade, voir `docs/FRANCE-TRAVAIL.md`)
-        └─ Assistant IA (facultatif) : copier-coller vers claude.ai, ou envoi direct dans la version claude.ai
+        └─ Assistant IA (facultatif) : copier-coller vers claude.ai, envoi direct dans la version claude.ai, ou clé d'API personnelle vers api.anthropic.com
 ```
 
 Les fonctions serveur ne reçoivent que des critères de recherche ou une URL. Elles ne stockent rien.
@@ -71,7 +72,7 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 | 01 | **Ma base** (`base`) | Constituer et fusionner la base de la personne | Import de CV (nom du CV + texte, case « remplacer »), listes modifiables expériences / formations / rubriques / compétences / certifications, liste des CV importés, **carte de la base** (SVG radial + détail par branche, mise en évidence par profil) |
 | 02 | **Mes profils** (`profils`) | Créer des profils de recherche et leur CV type | Profils proposés d'après la base (niveau : déjà exercé / base suffisante / accessible sans expérience / pas assez d'éléments), « Viser un autre métier », éditeur par profil (titre visé, lieu, rayon, contrats, mots-clés, accroche, ton, à compléter, import de texte, **CV type** avec aperçu, ajustements, PDF) |
 | 03 | **Recherche** (`recherche`) | Entreprises à démarcher (candidatures spontanées) | Profil, lieu (recherche de commune), rayon, taille, résultats avec « Candidature spontanée », lien page recrutement, fiche, écarter |
-| 04 | **Offres** (`offres`) | Offres d'emploi France Travail | Profil, mots-clés, lieu, rayon, contrat, période, correspondance avec la base, « Candidater avec cette offre ». **Accès API refusé par France Travail à ce stade** (voir `docs/FRANCE-TRAVAIL.md`) : `OFFRES_API_ACTIVE = false`, le formulaire est masqué et un avis propose « Coller une annonce » et la recherche d'entreprises ; le contenu d'une offre issue de l'API n'est jamais envoyé à l'IA (`offreVientDeLAPI`) |
+| 04 | **Offres** (`offres`) | Offres d'alternance (La bonne alternance) | Profil, lieu (recherche de commune), rayon, mots-clés (gardent les résultats qui en contiennent au moins un, filtre local), liste d'**offres d'alternance** (correspondance avec la base, « Candidater avec cette offre », « Voir sur La bonne alternance », écarter) et d'**entreprises qui recrutent souvent** (« Candidature spontanée »), mention de la source. `OFFRES_API_ACTIVE` masque le formulaire si la source est coupée. Une annonce issue de l'API n'est jamais envoyée à l'IA (`offreVientDeLAPI`). L'API France Travail reste refusée (voir `docs/FRANCE-TRAVAIL.md`) |
 | 05 | **Annonce** (`annonce`) | Saisir ou récupérer l'annonce | Champ lien + « Récupérer l'annonce », poste, entreprise, texte, mots-clés détectés, encadré d'analyse (qui publie : direct / cabinet / intérim / ESN, entreprise finale, lieu, contrat, rémunération, profil utilisé) |
 | 06 | **CV** (`cv`) | CV de la candidature en cours | Identité (nom, contacts, photo, langue FR/EN, accroche), **composition** (cases par élément, manques `*`), score ATS + suggestions + optimisation + plan d'action, **aperçu éditable**, PDF et PDF anonymisé |
 | 07 | **Lettre** (`lettre`) | Lettre de motivation / spontanée / offre de service | Destinataire, langue, ton, affinage (boutons rapides + remarques + « Réécrire avec Claude »), voix de la personne, texte modifiable, aperçu éditable, PDF |
@@ -92,7 +93,7 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 
 1. **Première utilisation** : Ma base → importer un ou plusieurs CV → Mes profils → créer un profil → Annonce (coller un lien ou un texte) → CV → Lettre → PDF.
 2. **Candidature spontanée** : Recherche → choisir un profil et un lieu → résultats → « Candidature spontanée » → CV + lettre générés → suivi créé avec relance à 10 jours.
-3. **Offre France Travail** (parcours inactif : accès à l'API refusé à ce stade, voir `docs/FRANCE-TRAVAIL.md`) : Offres → résultats → « Candidater avec cette offre » → CV et lettre sur mesure.
+3. **Offre d'alternance** : Offres → choisir un lieu → résultats (offres et entreprises qui recrutent souvent) → « Candidater avec cette offre » ou « Candidature spontanée » → CV et lettre sur mesure. (L'API France Travail est refusée à ce stade : voir `docs/FRANCE-TRAVAIL.md`.)
 4. **Freelance** : Freelance → décrire l'offre → choisir les types de structures → résultats → « Lettre d'offre de service ».
 5. **Offre de service complète (freelance)** : Freelance (cocher des offres suggérées ou saisir les siennes) → Plaquette (choisir les offres, appliquer une accroche et une baseline, modèle, bandeau, images) → PDF → E-mail (type « Offre de service », CV + plaquette) → noter l'envoi dans Plaquette, puis lire ce qui fonctionne et dupliquer la meilleure plaquette pour tester une variante.
 6. **Entretien obtenu** : Entretien → fiche de préparation (présentation, questions à poser, vigilance) → après l'entretien, E-mail type « Remerciement ».
@@ -200,6 +201,7 @@ Dossier (une candidature en cours) = { id, titre, titreAuto, candidatureId,
 | `/api/annonce` | `url` | Titre, entreprise, lieu, contrat, salaire, description (JSON-LD `JobPosting`, sinon texte de la page) ; refuse les adresses internes ; échec clair si le site bloque | L'URL |
 | `/api/lieu` | `q` | Communes (libellé, code postal, code INSEE, département, latitude, longitude) | Le nom saisi (API Adresse) |
 | `/api/entreprises` | `naf`, `lat`/`lon`/`radius` ou `dep`, `taille`, `page` | 20 entreprises actives (nom, activité, effectif, ville, fiche) | Secteur, zone, taille (API Recherche d'entreprises) |
+| `/api/alternance` | `lat`, `lon`, `radius` (5 à 100 km, défaut 30) | Offres d'alternance et entreprises à fort potentiel d'embauche normalisées (`results[]` : `id`, `intitule`, `entreprise`, `lieu`, `contrat`, `duree`, `debut`, `date`, `description`, `url`, `source`, `rome` ; `recruiters[]` : `nom`, `ville`, `cp`, `nafCode`, `nafLabel`, `siret`, `url`) ; cache 10 min | Coordonnées de la commune et rayon (API La bonne alternance, variable `BONNE_ALTERNANCE_KEY`) |
 | `/api/offres` | `q`, `commune`, `distance`, `contrat`, `experience`, `depuis`, `page` | 20 offres normalisées | Critères de recherche (API France Travail ; variables `FT_CLIENT_ID`, `FT_CLIENT_SECRET`, `FT_SCOPE` facultatif) |
 | `/api/ft-diagnostic` | `probe`, `scope`, `path` | Diagnostic des accès France Travail ; **inactif** tant que la variable `FT_DIAG` n'existe pas (à supprimer du dépôt si inutile) | — |
 | `/api/sources-diag` | `source` (`lba`, `adzuna`, `theirstack`), `confirm=1` | Résumé d'**un seul** appel de test (statut, comptages, quelques champs) ; sans `confirm=1`, décrit l'appel sans le faire ; **inactif** tant que `SOURCES_DIAG` n'est pas `1` ; ne renvoie jamais de clé (à supprimer après les tests) | Variables `BONNE_ALTERNANCE_KEY`, `APP_ID`, `APP_KEY`, `AUTORISATION_KEY` ; voir `docs/FRANCE-TRAVAIL.md` |
@@ -265,7 +267,7 @@ Les `id` ci-dessous sont lus par le script. **Ne pas les renommer sans adapter l
 
 **panel-offres**
 
-`#panel-offres`, `#off-unavailable`, `#btn-off-to-annonce`, `#btn-off-to-recherche`, `#off-form-card`, `#off-profil`, `#off-q`, `#off-exp-note`, `#off-lieu`, `#btn-off-lieu`, `#off-lieu-list`, `#off-dist`, `#off-contrat`, `#off-depuis`, `#btn-off-go`, `#off-status`, `#off-results`, `#off-more`, `#off-attrib`
+`#panel-offres`, `#off-unavailable`, `#btn-off-to-annonce`, `#btn-off-to-recherche`, `#off-form-card`, `#off-profil`, `#off-q`, `#off-exp-note`, `#off-lieu`, `#btn-off-lieu`, `#off-lieu-list`, `#off-dist`, `#btn-off-go`, `#off-status`, `#off-results`, `#off-recruiters`, `#off-more`, `#off-attrib`
 
 **panel-annonce**
 
@@ -391,7 +393,7 @@ Numéros de ligne omis (ils changent) : chercher le nom dans `app/index.html`. R
 
 **OFFRES D'EMPLOI (France Travail)**
 
-`offreVientDeLAPI`, `renderOffAvailability`, `offProfilOptions`, `offCurrentProfil`, `offLoadProfil`, `offLieuSearch`, `offRun`, `offMatch`, `renderOffResults`, `startFromOffre`
+`offreVientDeLAPI`, `renderOffAvailability`, `renderOffRecruiters`, `offProfilOptions`, `offCurrentProfil`, `offLoadProfil`, `offLieuSearch`, `offRun`, `offMatch`, `renderOffResults`, `startFromOffre`
 
 **MA BASE : fusion de CV, catégories, certifications, carte**
 

@@ -59,9 +59,9 @@ robots (LinkedIn, Indeed…) ne peuvent pas être lus : on colle alors le texte 
 - `_headers` : politique de sécurité du contenu (CSP), HSTS, X-Frame-Options, etc. (Cloudflare Pages).
 - `robots.txt` et `sitemap.xml` : à garder à jour si le domaine change.
 
-## Sources d'offres d'emploi (en cours d'évaluation)
+## Sources d'offres d'emploi
 
-Variables du projet Cloudflare Pages : `BONNE_ALTERNANCE_KEY` (La bonne alternance), `APP_ID` et `APP_KEY` (Adzuna, 25 appels), `AUTORISATION_KEY` (TheirStack, 200 crédits). La fonction `functions/api/sources-diag.js` (inactive sans `SOURCES_DIAG=1`) fait **un seul appel de test** par source, avec `confirm=1`, sans jamais renvoyer de clé. Détail et conditions de chaque source : `docs/FRANCE-TRAVAIL.md`.
+Variables du projet Cloudflare Pages : `BONNE_ALTERNANCE_KEY` (**utilisée** par `functions/api/alternance.js` : offres d'alternance de l'onglet Offres), `APP_ID` et `APP_KEY` (Adzuna, 25 appels, test seulement), `AUTORISATION_KEY` (TheirStack, 200 crédits, test seulement). La fonction `functions/api/sources-diag.js` (inactive sans `SOURCES_DIAG=1`) fait **un seul appel de test** par source, avec `confirm=1`, sans jamais renvoyer de clé. Détail et conditions de chaque source : `docs/FRANCE-TRAVAIL.md`.
 
 ## Offres France Travail (API « Offres d'emploi »)
 
