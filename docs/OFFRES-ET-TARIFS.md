@@ -4,6 +4,8 @@ Source de vérité du modèle économique. La page `tarifs/index.html`, la secti
 
 ## Décision actuelle : gratuit pour le moment
 
+- **Condition de La bonne alternance** (réponse écrite du 25 novembre 2026) : l'utilisation de ses API est autorisée **tant que le service est 100 % gratuit pour les candidats** (accord tacite, contrôles réguliers). Toute formule payante ou tout accès conditionné à un paiement annulerait cet accord ; voir `docs/FRANCE-TRAVAIL.md`.
+
 - **Aucun prix, aucune formule, aucun paiement** n'est affiché ni prévu à cette date. Toutes les fonctions sont ouvertes à tout le monde, sans compte et sans carte bancaire. Les pages publiques disent « Gratuit pour le moment » et rien d'autre sur ce sujet.
 - **Pourquoi** : rester dans un cadre **non commercial** pour pouvoir utiliser des sources d'offres dont la licence exclut les usages lucratifs ou la facturation de l'accès (La bonne alternance, France Travail ; voir `docs/FRANCE-TRAVAIL.md`), et ne pas avoir à payer l'IA de tout le monde.
 - Les anciennes formules payantes et leurs maquettes (abonnement, paiement, factures, justificatif étudiant, vérification du SIRET, conditions de vente) ont été **retirées** ; elles restent consultables dans l'historique git (commit `7e6c84f` et précédents) et résumées en fin de document.

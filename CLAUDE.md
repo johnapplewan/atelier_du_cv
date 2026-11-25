@@ -22,7 +22,7 @@
 - Rien d'inventé dans les documents produits ; les manques sont signalés par un astérisque.
 - Pas de statistique, de témoignage ni d'avis sans source dans les textes publics ; les captures d'écran utilisent des données fictives.
 - Interface en français, tutoiement.
-- Gratuit pour le moment : aucun prix ni formule affiché ; ne rien annoncer de payant. L'atelier n'appelle aucune IA à ses frais (assistant par le compte Claude de la personne, par sa propre clé d'API facultative, ou copier-coller). Ne jamais lier l'accès aux offres d'emploi à un compte ou à un paiement.
+- Gratuit pour le moment : aucun prix ni formule affiché ; ne rien annoncer de payant. L'atelier n'appelle aucune IA à ses frais (assistant par le compte Claude de la personne, par sa propre clé d'API facultative, ou copier-coller). Ne jamais lier l'accès aux offres d'emploi à un compte ou à un paiement : l'accord tacite de La bonne alternance exige un service 100 % gratuit pour les candidats.
 
 ## Vérifications avant livraison
 

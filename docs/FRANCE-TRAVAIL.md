@@ -133,9 +133,24 @@ Pages lues : fiche data.gouv, explorateur de l'API (api.apprentissage.beta.gouv.
 
 **Lecture pour le produit** : avec un outil entièrement gratuit et sans revenu (formules payantes retirées), un usage non lucratif est défendable. Le risque reviendrait avec toute facturation, même hors accès aux offres : le texte interdit la « facturation de l'accès pour des tiers comme des candidats » et réserve l'API aux usages non lucratifs. **Ne pas construire de dépendance sans réponse écrite du contact de l'API.**
 
+### Réponse de La bonne alternance (25 novembre 2026)
+
+Réponse reçue à la question écrite (résumé fidèle) :
+
+- **Autorisation** : « Tant que votre service de partage d'offres est **100 % gratuit pour les candidats**, vous pouvez utiliser les API de récupération des offres et d'envoi de candidature. » L'accord est **tacite**, et des **contrôles réguliers** sont réalisés pour vérifier son application.
+- **Deux API pour récupérer les offres** : l'API de **recherche** (quelques centaines d'offres pour une recherche précise : celle que l'atelier utilise, `GET /api/job/v1/search`) et l'API d'**export** (toutes les offres en un appel : utile seulement pour couvrir l'intégralité de l'alternance).
+- **Fraîcheur** : rafraîchir les offres **au moins une fois par jour** pour éviter les offres expirées et les liens morts (l'atelier n'enregistre rien et recharge à chaque recherche, avec un cache de 10 minutes).
+- **Alternative proposée** : inviter les personnes à utiliser le moteur de La bonne alternance (lien ajouté dans l'onglet Offres).
+- **Non traité dans la réponse** : règles de conservation, mention obligatoire de la source, usage avec une IA. Le blocage du texte des offres vers l'assistant IA est donc **conservé par précaution** tant que ces points ne sont pas précisés.
+
+**Conséquences** :
+- **Condition à garder** : le service reste **100 % gratuit pour les candidats**. Toute formule payante, tout accès conditionné à un paiement ou toute facturation aux candidats rompt l'accord tacite (voir `docs/OFFRES-ET-TARIFS.md`).
+- **API d'envoi de candidature** : autorisée dans les mêmes conditions, mais elle ferait transiter des données de la personne (CV, coordonnées) par un serveur ; elle n'est **pas utilisée** (principe « données dans le navigateur »). À étudier seulement si la personne la demande explicitement.
+- **Contrôles** : garder les offres non conservées, citer la source, renvoyer vers l'offre d'origine.
+
 ### Questions à poser par écrit (brouillons)
 
-**À La bonne alternance** (`contact-api@labonnealternance.apprentissage.beta.gouv.fr`) :
+**À La bonne alternance** (réponse reçue, voir ci-dessus) (`contact-api@labonnealternance.apprentissage.beta.gouv.fr`) :
 
 > Bonjour,
 >
@@ -170,6 +185,20 @@ curl -s "https://api.adzuna.com/v1/api/jobs/fr/search/1?app_id=VOTRE_ID&app_key=
 
 3. Une réponse avec un champ `count` non nul et des `results` en français confirme la couverture ; une erreur « pays inconnu » l'infirme. Ne partagez pas la clé dans une conversation.
 
+
+### Adzuna : tarifs et décision
+
+Tarifs indiqués par Adzuna : **12 £ pour 5 000 appels**, ou **API Pro à 30 £ par mois** avec les limites 100 appels par minute, 1 500 par jour, 7 500 par semaine et 20 000 par mois (un appel renvoie jusqu'à plusieurs dizaines d'annonces). **Décision : rester sur le plan gratuit (aucune intégration) et passer à un accès payant au moment de la diffusion, si le besoin d'offres généralistes se confirme**, après accord écrit d'Adzuna sur l'usage.
+
+### JobsPipe : documentation lue (clé `PIPE_KEY`)
+
+Lecture de https://jobspipe.dev/agent et de l'OpenAPI (environ 55 % lu ; conditions et licence non lues) :
+
+- **Route** : `POST https://api.jobspipe.dev/v1/jobs/search` ; **authentification** `Authorization: Bearer jp_live_…` (lecture seule) ; bac à sable sans clé `POST /v1/sandbox/jobs/search` (données d'exemple).
+- **Filtres** (tous optionnels, combinés en ET ; un champ inconnu renvoie 400) : `job_title_or`, `description_or`, `skills_or`, `job_country_code_or` (`["FR"]`), `language_or` (`["fr"]`), `job_location_or`, `city_or`, `employment_type_or` (dont `internship`), `posted_at_max_age_days`, `limit` (25 au plus en gratuit), `cursor`, `status`.
+- **Coût** : **1 crédit par offre retournée** et pas déjà payée dans le mois ; une recherche sans résultat est gratuite ; 1 000 crédits offerts une seule fois ; ensuite 1,96 $ pour 1 000 offres. Limite : 2 requêtes par seconde en gratuit.
+- **Réponse** : `data[]` avec `job_title`, `company`, `location`, `country_code`, `date_posted`, `url`, `description`, `employment_statuses`, `salary_*` ; `metadata` avec `credits_charged` et `credits_remaining`. Données actualisées sous 24 h (gratuit).
+- **Sources** : ATS (Workday, Lever, Greenhouse, SmartRecruiters…), LinkedIn et Indeed ; **sources françaises non précisées**. Conditions d'usage (commercial, stockage, IA) : non indiquées.
 
 ### Dépôts et services signalés (à vérifier)
 
@@ -214,7 +243,7 @@ Un appel par source via la fonction de test `sources-diag` (retirée depuis), en
 
 - **La bonne alternance est branchée** : `functions/api/alternance.js` et l'onglet **Offres** (offres d'alternance, entreprises qui recrutent souvent pour la candidature spontanée, mention de la source, lien vers l'offre d'origine). Gratuit et non lucratif ; la question écrite au contact de l'API reste recommandée (brouillon plus haut). Le contenu de ces offres n'est jamais envoyé à l'IA, par précaution.
 - **Adzuna n'est pas branchable en l'état** : le plan gratuit (25 appels) sert à évaluer ; un usage réel demande un accord écrit d'Adzuna.
-- **TheirStack n'est pas branchable en l'état** : 200 crédits gratuits, généraliste et orienté données d'entreprises ; réservé à une éventuelle fonction freelance, avec un forfait payant, ce qui s'écarte du cadre non lucratif.
+- **TheirStack : non branché, mais pas écarté.** Correction : des offres « de toute nature » étaient normales, le test n'avait aucun filtre de titre ; l'API sait filtrer (titre, description, pays) et **fonctionne pour la France**. Ce qui la limite est le budget : **1 crédit par offre affichée** (200 crédits gratuits, puis dès 19 $ par mois pour 1 500 crédits), très peu pour une recherche publique, et des conditions d'usage non lues. Payer une source de données ne rend pas l'atelier commercial (c'est un coût, pas un revenu), contrairement à ce que laissait entendre ma première formulation. Elle reste une piste pour une fonction freelance (entreprises qui recrutent sur une technologie).
 - Les variables `SOURCES_DIAG`, `APP_ID`, `APP_KEY` et `AUTORISATION_KEY` peuvent être retirées du projet Cloudflare : plus aucune fonction ne les lit (en garder une copie si on veut retester).
 
 ### Marche à suivre proposée
