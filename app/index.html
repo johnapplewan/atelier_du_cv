@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Atelier Candidature</title>
 <meta name="description" content="Atelier Candidature : base d'expériences, CV et lettres sur mesure, recherche d'entreprises et suivi de candidatures. Vos données restent dans votre navigateur.">
+<link rel="canonical" href="https://atelier-du-cv.pages.dev/app/">
+<meta property="og:type" content="website"><meta property="og:locale" content="fr_FR"><meta property="og:site_name" content="Atelier Candidature"><meta property="og:title" content="Atelier Candidature : colle une annonce, ton CV et ta lettre sont prêts"><meta property="og:description" content="Dépose ton parcours une fois : l'atelier compose ton CV et ta lettre pour chaque annonce. Gratuit pour le moment, sans compte."><meta property="og:url" content="https://atelier-du-cv.pages.dev/app/"><meta property="og:image" content="https://atelier-du-cv.pages.dev/assets/og/atelier-candidature.jpg"><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="Atelier Candidature : colle une annonce, ton CV et ta lettre sont prêts à relire. Gratuit pour le moment."><meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="https://atelier-du-cv.pages.dev/assets/og/atelier-candidature.jpg"><meta name="twitter:image:alt" content="Atelier Candidature : colle une annonce, ton CV et ta lettre sont prêts à relire. Gratuit pour le moment.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231F3A66'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='white' font-family='Georgia,serif' font-style='italic'%3E%C2%A7%3C/text%3E%3C/svg%3E">
 <!-- Polices et bibliothèques PDF hébergées sur ce même site : aucune ressource n'est chargée depuis un service tiers. -->
 <link rel="stylesheet" href="../vendor/fonts.css">
@@ -478,6 +480,15 @@
 <body>
 
 <noscript><p style="padding:16px;">Atelier Candidature a besoin de JavaScript pour fonctionner. Vos données restent dans votre navigateur.</p></noscript>
+<dialog id="onb-dialog" aria-labelledby="onb-title" style="max-width:640px;width:94vw;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);color:var(--ink-900);padding:22px;">
+  <div id="onb-progress" class="hint" style="margin:0 0 6px;"></div>
+  <h3 id="onb-title" style="margin:0 0 10px;font-size:19px;"></h3>
+  <div id="onb-body" style="line-height:1.55;font-size:14.5px;"></div>
+  <div class="toolbar-row" style="margin-top:16px;justify-content:space-between;">
+    <span><button class="btn btn-ghost btn-sm" id="onb-prev" type="button">Précédent</button><button class="btn btn-ghost btn-sm" id="onb-close" type="button">Fermer</button></span>
+    <button class="btn btn-primary btn-sm" id="onb-next" type="button">Suivant</button>
+  </div>
+</dialog>
 <dialog id="ia-dialog" style="max-width:560px;width:92vw;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);color:var(--ink-900);padding:22px;">
   <h3 style="margin:0 0 8px;font-size:17px;">Assistant IA : ton compte Claude, sans clé obligatoire</h3>
   <p class="hint" style="margin:0 0 10px;">L'atelier fonctionne sans IA. Quand tu demandes une reformulation ou une lettre sur mesure, le travail est fait par <strong>ton compte Claude</strong> :</p>
@@ -542,6 +553,7 @@
     <div class="topbar-actions" id="app-menu">
       <button class="icon-btn" id="btn-theme" type="button"><span id="theme-icon" aria-hidden="true"></span><span class="theme-label mobile-only" id="theme-label"></span></button>
       <button class="btn btn-ghost btn-sm" id="btn-ia-settings" title="Assistant IA facultatif : reformulation et lettre sur mesure">Assistant IA : <span id="ia-state">copier-coller</span></button>
+      <button class="btn btn-ghost btn-sm" id="btn-onb" title="Guide pas à pas pour réussir ta première candidature">Guide</button>
       <button class="btn btn-ghost btn-sm" id="btn-reset" title="Effacer la bibliothèque et repartir de zéro">Tout effacer</button>
       <button class="btn btn-ghost btn-sm" id="btn-export-cv-lettre">CV + Lettre (PDF)</button>
       <button class="btn btn-primary btn-sm" id="btn-export-all">Télécharger le dossier complet (PDF)</button>
@@ -2057,7 +2069,7 @@ wireExportButton("btn-export-all", "export-all-status",
 
 document.getElementById("btn-reset").addEventListener("click", function(){
   if(!confirm("Effacer toutes les informations saisies (bibliothèque comprise) et repartir d'un dossier vide ?")) return;
-  try{ localStorage.removeItem("atelier-candidature-v2"); localStorage.removeItem("atelier-candidature-ia-pref"); }catch(e){}
+  try{ localStorage.removeItem("atelier-candidature-v2"); localStorage.removeItem("atelier-candidature-ia-pref"); localStorage.removeItem("atelier-candidature-onb"); }catch(e){}
   location.reload();
 });
 
@@ -7631,6 +7643,72 @@ function renderVoixCard(){
 
 
 
+/* ===================== GUIDE PAS À PAS (débutants) ===================== */
+
+var ONB_KEY = "atelier-candidature-onb";   // préférence d'interface : guide déjà ouvert (hors sauvegarde, effacée par « Tout effacer »)
+var onbStep = 0;
+var ONB_STEPS = [
+  { t: "Bienvenue : ce que fait l'atelier", body: function(){ return '<p>Tu déposes ton parcours <strong>une seule fois</strong>. Pour chaque annonce, l\'atelier compose un CV et une lettre à partir de ce que tu as déjà fait, puis note ce que tu dois relancer.</p>' +
+      '<ul style="padding-left:18px;"><li><strong>Ta base</strong> : tout ce que tu as fait (études, expériences, projets, compétences). Tu la remplis une fois.</li><li><strong>Un profil</strong> : un métier que tu vises (ex. communication, vente). Il règle le titre et ce qui est mis en avant.</li><li><strong>Une candidature</strong> : un CV et une lettre pour une annonce ou une entreprise précise.</li><li><strong>Le score</strong> : la part des mots de l\'annonce que ton CV contient. Les logiciels de tri des recruteurs s\'en servent.</li></ul>' +
+      '<p class="hint">Tes données restent dans ton navigateur. Rien n\'est inventé : si une information manque, l\'atelier te le dit à côté du CV.</p>'; } },
+  { t: "Ton point de départ", body: function(){ return '<p>Choisis ce qui te ressemble :</p><div class="toolbar-row" style="flex-direction:column;align-items:stretch;gap:8px;">' +
+      '<button class="btn btn-sm" type="button" data-onb-go="base">J\'ai déjà un CV : je le colle dans « Ma base »</button>' +
+      '<button class="btn btn-sm" type="button" data-onb-step="2">Je n\'ai pas de CV : je réponds à quelques questions simples</button>' +
+      '<button class="btn btn-ghost btn-sm" type="button" data-onb-go="annonce">Je veux seulement répondre à une annonce</button></div>' +
+      '<p class="hint" style="margin-top:10px;">Pas d\'expérience ? Ce n\'est pas bloquant : un stage, un job d\'été, un projet de cours, du bénévolat, une association ou un sport d\'équipe comptent.</p>'; } },
+  { t: "Je n'ai pas de CV : ce que j'ai déjà fait", body: function(){ return '<p class="hint" style="margin:0 0 10px;">Remplis ce que tu peux, laisse le reste vide. Tu pourras tout modifier ensuite dans « Ma base ».</p>' +
+      '<div class="row2"><div class="field"><label for="onb-form-dip">Ta formation (diplôme ou cursus)</label><input type="text" id="onb-form-dip" placeholder="ex. BTS Communication"></div><div class="field"><label for="onb-form-etab">Établissement et année</label><input type="text" id="onb-form-etab" placeholder="ex. Lycée Jean Moulin, 2024-2026"></div></div>' +
+      '<div class="row2"><div class="field"><label for="onb-exp-poste">Une expérience : stage, job, bénévolat, projet, association</label><input type="text" id="onb-exp-poste" placeholder="ex. Stage en communication"></div><div class="field"><label for="onb-exp-lieu">Où et quand</label><input type="text" id="onb-exp-lieu" placeholder="ex. Mairie de Reims, juin 2025"></div></div>' +
+      '<div class="field"><label for="onb-exp-det">Ce que tu y as fait (une action par ligne, avec un chiffre si tu peux)</label><textarea id="onb-exp-det" style="min-height:70px;" placeholder="ex. Publication de 3 posts par semaine sur Instagram\nCréation d\'affiches avec Canva pour 2 événements"></textarea></div>' +
+      '<div class="field"><label for="onb-comp">Ce que tu sais faire (séparé par des virgules)</label><input type="text" id="onb-comp" placeholder="ex. Canva, Word, Excel, relation client, travail en équipe"></div>' +
+      '<div class="field"><label for="onb-lang">Langues</label><input type="text" id="onb-lang" placeholder="ex. Français (natif), Anglais (courant)"></div>' +
+      '<div class="toolbar-row"><button class="btn btn-primary btn-sm" id="onb-add" type="button">Ajouter à ma base</button><span class="hint" id="onb-add-status"></span></div>'; } },
+  { t: "Crée un profil : le métier que tu vises", body: function(){ return '<p>Dans <strong>Mes profils</strong>, l\'atelier lit ta base et te propose les métiers que tu peux défendre, avec un niveau honnête (déjà exercé, base suffisante, accessible sans expérience). Tu peux aussi créer un <strong>profil sur mesure</strong>.</p><p class="hint">Un profil règle le titre du CV, l\'accroche et les mots-clés. Tu peux en avoir plusieurs : un par type de poste.</p>' +
+      '<button class="btn btn-sm" type="button" data-onb-go="profils">Voir mes profils</button>'; } },
+  { t: "Colle une annonce", body: function(){ return '<p>Dans <strong>Annonce</strong>, colle le lien ou le texte d\'une offre. L\'atelier repère les mots importants, qui publie l\'offre (l\'entreprise ou un cabinet) et choisit le profil le plus proche.</p><p>Pas d\'annonce ? Dans <strong>Offres</strong> et <strong>Recherche</strong>, tu trouves des offres et des entreprises près de chez toi, et tu choisis quel CV envoyer à chacune.</p>' +
+      '<div class="toolbar-row"><button class="btn btn-sm" type="button" data-onb-go="annonce">Aller à Annonce</button><button class="btn btn-ghost btn-sm" type="button" data-onb-go="offres">Chercher des offres</button></div>'; } },
+  { t: "Vérifie ton CV", body: function(){ return '<p>Dans <strong>CV</strong>, tu vois le CV composé pour cette candidature. Trois repères :</p><ul style="padding-left:18px;"><li><strong>Le score</strong> et l\'écart avec l\'annonce. Les mots « dans ta base, pas sur ce CV » se rajoutent d\'un clic ; ceux « absents de ta base » ne se mettent que si tu les maîtrises vraiment.</li><li><strong>La longueur</strong> : vert jusqu\'à 2 pages, jaune 3, orange 4, rouge au-delà. Les traits rouges montrent où le PDF coupe.</li><li><strong>« À qui s\'adresse ce CV ? »</strong> : change de profil ou de poste visé et le CV se recompose.</li></ul><p class="hint">Tu peux cliquer dans le CV pour corriger un mot.</p>' +
+      '<button class="btn btn-sm" type="button" data-onb-go="cv">Aller au CV</button>'; } },
+  { t: "Lettre, envoi et suivi", body: function(){ return '<p><strong>Lettre</strong> : un texte sur mesure à relire et adapter à ta voix. <strong>E-mail</strong> : le message d\'envoi avec les bonnes pièces jointes. <strong>Candidatures</strong> : chaque envoi y est suivi, avec une relance à 10 jours. <strong>Entretien</strong> : une fiche pour te préparer.</p>' +
+      '<p class="hint">Télécharge le CV et la lettre en PDF avec « CV + Lettre (PDF) » en haut de la page. Le bouton « Guide » te ramène ici à tout moment.</p><button class="btn btn-primary btn-sm" type="button" data-onb-go="base">Commencer avec ma base</button>'; } }
+];
+function onbRender(){
+  var st = ONB_STEPS[onbStep]; if(!st) return;
+  document.getElementById("onb-progress").textContent = "Étape " + (onbStep + 1) + " sur " + ONB_STEPS.length;
+  document.getElementById("onb-title").textContent = st.t;
+  var body = document.getElementById("onb-body"); body.innerHTML = st.body();
+  document.getElementById("onb-prev").style.visibility = onbStep ? "visible" : "hidden";
+  var nx = document.getElementById("onb-next"); nx.textContent = onbStep === ONB_STEPS.length - 1 ? "Terminer" : (onbStep === 1 ? "Passer" : "Suivant");
+  body.querySelectorAll("[data-onb-go]").forEach(function(b){ b.addEventListener("click", function(){ document.getElementById("onb-dialog").close(); switchTab(b.getAttribute("data-onb-go")); }); });
+  body.querySelectorAll("[data-onb-step]").forEach(function(b){ b.addEventListener("click", function(){ onbStep = +b.getAttribute("data-onb-step"); onbRender(); }); });
+  var add = document.getElementById("onb-add"); if(add) add.addEventListener("click", onbAddFromForm);
+}
+// Réponses du guide ajoutées à la base : formation, une expérience, compétences, langues. Rien n'est inventé : seulement ce que la personne a écrit.
+function onbAddFromForm(){
+  var v = function(id){ return document.getElementById(id).value.trim(); }, L = state.library, n = 0, st = document.getElementById("onb-add-status");
+  if(v("onb-form-dip")){ L.formations.push({ id: uid(), diplome: v("onb-form-dip"), etablissement: v("onb-form-etab").replace(/,?\s*((?:19|20)\d{2}(?:\s*[-–]\s*(?:19|20)\d{2})?)\s*$/, ""), dates: (v("onb-form-etab").match(/((?:19|20)\d{2}(?:\s*[-–]\s*(?:19|20)\d{2})?)\s*$/) || ["", ""])[1], details: "", src: [] }); n++; }
+  if(v("onb-exp-poste")){ var lieu = v("onb-exp-lieu"), dt = (lieu.match(/((?:(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+)?(?:19|20)\d{2}(?:\s*[-–]\s*(?:(?:janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre)\s+)?(?:19|20)\d{2})?)\s*$/i) || ["", ""])[1];
+    L.experiences.push({ id: uid(), poste: v("onb-exp-poste"), entreprise: lieu.replace(dt, "").replace(/[,\s]+$/, ""), dates: dt, details: v("onb-exp-det").split("\n").map(function(x){ return x.trim(); }).filter(Boolean).join("\n"), src: [] }); n++; }
+  v("onb-comp").split(/[,;]/).map(function(x){ return x.trim(); }).filter(Boolean).forEach(function(c){ if(addSkillRaw(c)) n++; });
+  if(v("onb-lang")){ state.profil.langues = v("onb-lang"); n++; }
+  if(!n){ st.textContent = "Écris au moins une réponse."; return; }
+  onBaseChanged(true); persist(); syncPersonUI(); refreshStatusDots();
+  st.textContent = n + " élément(s) ajouté(s) à ta base. Tu peux continuer : l'étape suivante crée ton profil.";
+  ["onb-form-dip", "onb-form-etab", "onb-exp-poste", "onb-exp-lieu", "onb-exp-det", "onb-comp", "onb-lang"].forEach(function(i){ document.getElementById(i).value = ""; });
+}
+function onbOpen(step){
+  onbStep = step || 0; onbRender();
+  var d = document.getElementById("onb-dialog"); if(!d.open) d.showModal();
+  try{ localStorage.setItem(ONB_KEY, "1"); }catch(e){}
+}
+document.getElementById("btn-onb").addEventListener("click", function(){ onbOpen(0); });
+document.getElementById("onb-close").addEventListener("click", function(){ document.getElementById("onb-dialog").close(); });
+document.getElementById("onb-prev").addEventListener("click", function(){ onbStep = Math.max(0, onbStep - (onbStep === 3 ? 1 : 1)); onbRender(); });
+document.getElementById("onb-next").addEventListener("click", function(){
+  if(onbStep >= ONB_STEPS.length - 1){ document.getElementById("onb-dialog").close(); return; }
+  onbStep += (onbStep === 1 ? 2 : 1); onbRender();   // « Passer » saute le questionnaire sans CV
+});
+
 /* ===================== ACCUEIL : relances à faire et premiers pas ===================== */
 var homeDismissed = {};
 function renderHomeStrip(){
@@ -7648,6 +7726,9 @@ function renderHomeStrip(){
     { tab: "annonce", label: "Préparer une candidature", done: state.candidatures.length > 0 || !!(state.annonce.poste || "").trim() }
   ];
   var nDone = steps.filter(function(x){ return x.done; }).length;
+  if(nDone === 0 && !state.profil.premiersPasMasques){
+    html += '<div class="strip" role="region" aria-label="Nouveau ici"><span class="strip-text"><strong>Nouveau ici ?</strong> Le guide en 7 étapes t\'explique l\'atelier, même sans CV ni expérience.</span><button class="btn btn-primary btn-sm" type="button" data-home-guide="1">Ouvrir le guide</button></div>';
+  }
   if(nDone < steps.length && !state.profil.premiersPasMasques){
     html += '<div class="strip" role="region" aria-label="Premiers pas"><span class="strip-text"><strong>Premiers pas</strong> (' + nDone + '/3). Tout reste dans ton navigateur.</span><span class="steps">' +
       steps.map(function(x, i){ return '<span class="step' + (x.done ? " done" : "") + '"><span class="n" aria-hidden="true">' + (x.done ? "✓" : (i + 1)) + '</span><button class="btn btn-ghost btn-sm" type="button" data-home="' + x.tab + '">' + esc(x.label) + '</button></span>'; }).join("") +
@@ -7656,6 +7737,7 @@ function renderHomeStrip(){
   box.innerHTML = html;
   box.querySelectorAll("[data-home]").forEach(function(b){ b.addEventListener("click", function(){ switchTab(b.getAttribute("data-home")); }); });
   box.querySelectorAll("[data-home-dismiss]").forEach(function(b){ b.addEventListener("click", function(){ homeDismissed[b.getAttribute("data-home-dismiss")] = true; renderHomeStrip(); }); });
+  box.querySelectorAll("[data-home-guide]").forEach(function(b){ b.addEventListener("click", function(){ onbOpen(0); }); });
   box.querySelectorAll("[data-home-hide]").forEach(function(b){ b.addEventListener("click", function(){ state.profil.premiersPasMasques = true; persist(); renderHomeStrip(); }); });
 }
 

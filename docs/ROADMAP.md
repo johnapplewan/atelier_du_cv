@@ -13,6 +13,7 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 - Recherche d'offres d'alternance (La bonne alternance) et candidature spontanée aux entreprises qui recrutent souvent.
 - Assistant IA : clé d'API personnelle facultative (appel direct du navigateur, hors sauvegarde).
 - E-mail d'envoi (cinq types, signature freelance, bonnes pratiques), fiche de préparation à l'entretien, banque d'images de la plaquette.
+- Miniature de partage 1200 × 630 avec l'accroche de la landing ; guide pas à pas pour les débutants (dont le questionnaire « je n'ai pas de CV »).
 - Mobile (navigation par groupes), thème par bouton icône, accueil (premiers pas, alerte des relances).
 - Pages légales, polices et bibliothèques auto-hébergées, en-têtes de sécurité, documentation (`ARCHITECTURE.md`, `METHODE-LETTRE-RAPOS.md`).
 

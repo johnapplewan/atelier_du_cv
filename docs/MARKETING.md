@@ -28,6 +28,7 @@ Pour les personnes qui candidatent souvent (étudiants, personnes en recherche d
 
 ## Règles éditoriales
 
+- **Miniature de partage** : elle reprend l'accroche du `h1` de la landing (« Colle une annonce. Ton CV et ta lettre sont prêts à relire. ») pour être comprise au premier regard ; à garder alignée si l'accroche change (`assets/og/`).
 - Tutoiement partout (comme dans l'application). Phrases courtes, concrètes, sans exclamation.
 - Pas de statistique, pas de témoignage, pas d'avis chiffré tant qu'on n'a pas de source. Les captures d'écran utilisent des données fictives et le disent.
 - Pas de promesse de résultat (« décroche un emploi »). Dire ce que l'outil fait : compose, signale, suit.

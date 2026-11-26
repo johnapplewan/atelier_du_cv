@@ -31,6 +31,7 @@ Principes de conception à conserver :
 | `saas/*.html` | **Maquettes SaaS non routées** (13 pages : connexion, inscription, vérification de l'e-mail, mot de passe, bienvenue, reprise des données, compte, données, aide…). `noindex`. Voir `docs/PAGES-SAAS.md`. |
 | `site/site.css`, `site/site.js` | Feuille de style et script **communs** à la landing, aux tarifs et aux maquettes SaaS (menu, onglets « Pour qui »). |
 | `assets/landing/` | Captures d'écran de l'application (données fictives) utilisées par la landing, en WebP. |
+| `assets/og/` | Miniature de partage (réseaux sociaux, WhatsApp, messageries) : `atelier-candidature.jpg` (1200 × 630, environ 100 Ko, accroche de la landing en grand), référencée par `og:image` et `twitter:image` de `index.html`, `tarifs/index.html` et `app/index.html` ; `modele.html` en est la source (à ouvrir depuis la racine du site et à capturer en 1200 × 630 pour la régénérer ; garder la même accroche que le `h1` de la landing). |
 | `assets/plaquette/` | Banque d'images de la plaquette (JPEG, servis tels quels) ; `README.md` du dossier : nommage, formats, règles. Liste des fichiers proposés dans l'application : `PQ_PHOTOS` (`index.html`). |
 | `functions/api/*.js` | Cloudflare Pages Functions (côté serveur, voir §7). |
 | `prompts.js` | Méthodes d'écriture données à l'assistant IA (lettre RAPOS, règles d'humanisation, reformulation du CV). Chargé avant le script principal. Référence lisible : `docs/METHODE-LETTRE-RAPOS.md`. |
@@ -84,10 +85,11 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 | 12 | **Plaquette** (`plaquette`) | Plaquettes commerciales A4 d'une page, plusieurs par personne, avec suivi des retours | **Mes plaquettes** de la proposition active (créer, dupliquer, renommer, supprimer) ; **« Pour qui est cette plaquette ? »** (destinataires, cible et persona, repris du projet et modifiables pour un test A/B ; ils changent accroches et baselines) ; **offres de la plaquette** à cocher + suggestions ; **accroches et baselines** (3 + 3, registre vouvoiement ou tutoiement, affinage IA) ; dix modèles (Nuit, Terre, Affiche, Cartes, Étapes, Chiffres, Programme, Citation, Avant/après, Studio) et couleur d'accent ; contenu (titre, présentation, étapes, encadrés, chiffres, témoignage, avant/après, tarif, appel à l'action) ; **bandeau du bas** au choix (présentation avec photo, trois retours clients, références et garanties, questions fréquentes, aucun) ; images (téléversement ou banque `assets/plaquette/`) ; aperçu et PDF pleine page ; **envois et retours** par plaquette, **comparatif et lecture automatique** de ce qui fonctionne |
 | 13 | **Entretien** (`entretien`) | Préparer et s'entraîner | **Fiche de préparation** (présentation en 60 secondes modifiable, questions à poser selon le type d'envoi et d'émetteur, points de vigilance tirés des mots de l'annonce confirmés ou absents de la base, liste à cocher, bouton vers le remerciement, copie Markdown) ; questions générées d'après l'annonce, réponses, corrigé heuristique |
 
-**Barre haute** : marque, bouton icône de thème (soleil, lune ou demi-cercle pour automatique ; un clic passe au suivant), « Assistant IA : <mode> », « Tout effacer », « CV + Lettre (PDF) », « Télécharger le dossier complet (PDF) ».
+**Barre haute** : marque, bouton icône de thème (soleil, lune ou demi-cercle pour automatique ; un clic passe au suivant), « Assistant IA : <mode> », **« Guide »** (guide pas à pas, voir ci-dessous), « Tout effacer », « CV + Lettre (PDF) », « Télécharger le dossier complet (PDF) ».
 **Barre Personne** : choisir, ajouter, renommer, supprimer une personne.
 **Barre Candidature** : choisir, nommer, nouvelle, dupliquer, supprimer, Sauvegarder (fichier .json) / Restaurer.
 **Pied de page** : liens vers la présentation, la page « Gratuit » (`/tarifs/`) et les pages légales.
+**Guide pas à pas** (`#onb-dialog`, bouton « Guide » de la barre haute et carte « Nouveau ici ? » du bandeau d'accueil quand la base est vide) : 7 étapes en langage simple (ce que fait l'atelier avec le vocabulaire base, profil, candidature, score ; point de départ en trois choix ; **questionnaire « je n'ai pas de CV »** qui ajoute à la base une formation, une expérience, des compétences et des langues, sans rien inventer ; profil ; annonce ; vérification du CV avec score, écart, longueur et cible ; lettre, envoi et suivi). Chaque étape propose un bouton qui ouvre l'onglet concerné. Il ne s'ouvre jamais tout seul.
 **Bandeau d'accueil** (`#home-strip`, en haut du contenu) : « Premiers pas » (importer un CV, créer un profil, préparer une candidature ; masquable, mémorisé par personne) et alerte « N relances à faire » (« Voir », « Plus tard »). À l'ouverture, une base vide ouvre directement « Ma base ».
 
 ### Parcours principaux
@@ -104,7 +106,7 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 
 ## 4. Modèle de données
 
-Clé de stockage : `localStorage["atelier-candidature-v2"]` (nom historique, contenu en version 4). Autres clés : `atelier-candidature-theme` (`light`/`dark`, absent = auto), `atelier-candidature-ia-pref` (`{skip}`).
+Clé de stockage : `localStorage["atelier-candidature-v2"]` (nom historique, contenu en version 4). Autres clés : `atelier-candidature-theme` (`light`/`dark`, absent = auto), `atelier-candidature-ia-pref` (`{skip}` et, si la personne le choisit, la clé d'API facultative), `atelier-candidature-onb` (`"1"` : le guide a déjà été ouvert ; hors sauvegarde, effacée par « Tout effacer »).
 
 ```
 Stockage = { version: 4, currentPersonId, people: [ Personne ] }
@@ -259,7 +261,7 @@ Les `id` ci-dessous sont lus par le script. **Ne pas les renommer sans adapter l
 
 **Barre haute, sélecteurs personne/candidature, dialogues, rail, pied de page**
 
-`#ia-dialog`, `#ia-mode-line`, `#ia-byok-on`, `#ia-key`, `#ia-model`, `#ia-key-test`, `#ia-key-clear`, `#ia-key-status`, `#ia-skip`, `#ia-save`, `#ia-paste`, `#ia-paste-what`, `#ia-paste-prompt`, `#ia-paste-copy`, `#ia-paste-copied`, `#ia-paste-answer`, `#ia-paste-error`, `#ia-paste-cancel`, `#ia-paste-ok`, `#ia-confirm`, `#ia-confirm-what`, `#ia-confirm-text`, `#ia-confirm-no`, `#ia-confirm-yes`, `#app`, `#mobile-title`, `#btn-menu`, `#app-menu`, `#btn-theme`, `#theme-icon`, `#theme-label`, `#btn-ia-settings`, `#ia-state`, `#btn-reset`, `#btn-export-cv-lettre`, `#btn-export-all`, `#person-bar`, `#person-select`, `#btn-new-person`, `#btn-rename-person`, `#btn-del-person`, `#dossier-bar`, `#dossier-select`, `#dossier-title`, `#btn-new-dossier`, `#btn-dup-dossier`, `#btn-del-dossier`, `#btn-backup`, `#btn-restore`, `#restore-file`, `#export-cv-lettre-status`, `#export-all-status`, `#bottom-nav`, `#bn-dot-suivi`, `#rail`, `#dot-base`, `#dot-profils`, `#dot-recherche`, `#dot-offres`, `#dot-annonce`, `#dot-cv`, `#dot-lettre`, `#dot-annexe`, `#dot-email`, `#dot-candidatures`, `#dot-freelance`, `#dot-plaquette`, `#dot-entretien`, `#home-strip`
+`#btn-onb`, `#onb-dialog`, `#onb-progress`, `#onb-title`, `#onb-body`, `#onb-prev`, `#onb-next`, `#onb-close`, `#onb-add`, `#onb-add-status`, `#onb-form-dip`, `#onb-form-etab`, `#onb-exp-poste`, `#onb-exp-lieu`, `#onb-exp-det`, `#onb-comp`, `#onb-lang`, `[data-onb-go]`, `[data-onb-step]`, `[data-home-guide]`, `#ia-dialog`, `#ia-mode-line`, `#ia-byok-on`, `#ia-key`, `#ia-model`, `#ia-key-test`, `#ia-key-clear`, `#ia-key-status`, `#ia-skip`, `#ia-save`, `#ia-paste`, `#ia-paste-what`, `#ia-paste-prompt`, `#ia-paste-copy`, `#ia-paste-copied`, `#ia-paste-answer`, `#ia-paste-error`, `#ia-paste-cancel`, `#ia-paste-ok`, `#ia-confirm`, `#ia-confirm-what`, `#ia-confirm-text`, `#ia-confirm-no`, `#ia-confirm-yes`, `#app`, `#mobile-title`, `#btn-menu`, `#app-menu`, `#btn-theme`, `#theme-icon`, `#theme-label`, `#btn-ia-settings`, `#ia-state`, `#btn-reset`, `#btn-export-cv-lettre`, `#btn-export-all`, `#person-bar`, `#person-select`, `#btn-new-person`, `#btn-rename-person`, `#btn-del-person`, `#dossier-bar`, `#dossier-select`, `#dossier-title`, `#btn-new-dossier`, `#btn-dup-dossier`, `#btn-del-dossier`, `#btn-backup`, `#btn-restore`, `#restore-file`, `#export-cv-lettre-status`, `#export-all-status`, `#bottom-nav`, `#bn-dot-suivi`, `#rail`, `#dot-base`, `#dot-profils`, `#dot-recherche`, `#dot-offres`, `#dot-annonce`, `#dot-cv`, `#dot-lettre`, `#dot-annexe`, `#dot-email`, `#dot-candidatures`, `#dot-freelance`, `#dot-plaquette`, `#dot-entretien`, `#home-strip`
 
 **panel-base**
 
@@ -438,6 +440,8 @@ Numéros de ligne omis (ils changent) : chercher le nom dans `app/index.html`. R
 **ASSISTANT IA (facultatif) + AFFINAGE DE LA LETTRE + VOIX**
 
 `iaPrefs`, `iaPrefSave`, `iaByokActive`, `iaByok`, `iaOn`, `refreshIaState`, `scrubForAI`, `extractJson`, `iaAsk`, `iaConfirm`, `relevantExperiences`, `annonceForAI`, `iaReformulerCV`, `refreshAffinerUI`, `addRemarque`, `lettreCurrentParagraphs`, `renderVoixCard`
+
+**Accueil et guide** : `renderHomeStrip`, `ONB_STEPS`, `onbRender`, `onbOpen`, `onbAddFromForm`.
 
 ---
 
