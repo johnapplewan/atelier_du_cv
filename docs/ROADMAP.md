@@ -42,35 +42,37 @@ Décisions du 26 novembre 2026. Vocabulaire : **candidature** pour une demande d
 ## À faire ensuite (backlog)
 
 1. Catégories de compétences modifiables à la main.
-2. Entretien : simulation orale chronométrée avec corrigé par l'IA, suivi des entretiens passés.
-3. Plaquette : images libres de droits proposées, modèles supplémentaires, version deux pages, bandeaux supplémentaires (zone d'intervention, appel découverte, QR vers un portfolio, certifications).
-4. Documents PDF balisés (accessibilité), audit RGAA.
-5. Découper `index.html` (CSS, modules JavaScript) avant la refonte du design.
+2. Vérifier l'export PDF réel du CV avec les repères de pages (nombre de pages du PDF = nombre annoncé par l'aperçu).
+3. Refaire la capture de la landing (`assets/landing/atelier-cv.webp` et celles qui montrent encore des astérisques ou l'ancien libellé « Titre / accroche »), avec des données fictives.
+4. Affiner les références freelance selon les retours de test (classement par cible et persona, corrections apprises).
+5. Entretien : simulation orale chronométrée avec corrigé par l'IA, suivi des entretiens passés.
+6. Plaquette : images libres de droits proposées, modèles supplémentaires, version deux pages, bandeaux supplémentaires (zone d'intervention, appel découverte, QR vers un portfolio, certifications).
+7. Documents PDF balisés (accessibilité), audit RGAA.
+8. Découper `app/index.html` (CSS, modules JavaScript) avant la refonte du design.
 
-## Modèle économique : gratuit pour le moment
+## Modèle économique : gratuit pour le moment, orientation décidée pour la suite
 
-Décision : aucun prix ni formule (voir `docs/OFFRES-ET-TARIFS.md`). Il reste à trancher :
+Aujourd'hui : aucun prix ni formule affiché (voir `docs/OFFRES-ET-TARIFS.md`). **Orientation décidée le 26 novembre 2026 par le propriétaire, à ne jamais annoncer publiquement tant qu'elle n'est pas lancée** :
 
-- le financement de l'IA au-delà du copier-coller et de la clé personnelle (déjà en place) : plafond, financement par des tiers ;
-- la structure juridique si un financement apparaît ;
-- les comptes et la synchronisation entre appareils, si on les ouvre : qui finance l'hébergement ;
-- l'abandon ou la reprise des maquettes payantes (retirées, récupérables dans l'historique git).
+- **IA par abonnement** : un abonnement couvrirait seulement les actions d'IA (reformulation, entraînement à l'entretien…), sans envoyer d'annonce : l'IA ne reçoit que les mots-clés, le titre du poste visé et la spécialité du CV. Idée associée : y inclure un test ATS. Réserve : aucun ATS du marché n'offre d'accès public pour tester un CV ; ce que l'on pourrait proposer, ce sont des contrôles de lisibilité automatique, pas « le test par un ATS réel ». Ne rien promettre de plus.
+- **Comptes et synchronisation entre appareils** : par abonnement aussi (l'abonnement finance l'hébergement).
+- **Structure juridique** : « financement » désigne ici toute entrée d'argent (abonnements, dons, partenaires). Dès qu'il y a un abonnement, il faut un cadre pour facturer (micro-entreprise ou société), des conditions de vente, la TVA, un médiateur de la consommation et une politique RGPD adaptée : à faire valider par un comptable ou un juriste avant le lancement.
+- **Point bloquant à lever avant tout lancement** : l'accord tacite de La bonne alternance exige un service **100 % gratuit pour les candidats**. Une option payante dans le même service peut le rompre. Avant de lancer l'abonnement, demander par écrit à La bonne alternance si une option payante, séparée de la recherche d'offres (qui resterait gratuite et sans compte), est compatible ; sinon, isoler le payant dans un autre service. Même vigilance pour un nouveau dépôt France Travail et pour JobsPipe.
+- Reste à trancher : le prix, le plafond d'usage de l'IA, l'hébergeur et le prestataire de paiement, les maquettes payantes (retirées, récupérables dans l'historique git).
 
 ## Notes pour plus tard
 
 ### Onboarding complet avant le passage au SaaS
 
-À concevoir et à livrer **avant** d'ouvrir le service avec des comptes. Aujourd'hui l'accueil se limite à un bandeau « Premiers pas » (importer un CV, créer un profil, préparer une candidature).
+**Déjà livré** : le guide pas à pas (bouton « Guide » et carte « Nouveau ici ? », 7 étapes, questionnaire « je n'ai pas de CV »), le bandeau « Premiers pas » et les repères sur la composition du CV et les manques.
 
-À prévoir :
+**Reste à concevoir et à livrer avant d'ouvrir le service avec des comptes** :
 
-- **Parcours guidé** à la première ouverture : objectif de la personne (chercher un poste, candidater en spontané, se lancer en freelance), import du premier CV, création du premier profil, première candidature, téléchargement du premier PDF.
-- **Visite des écrans** : repères sur la navigation par groupes (Préparer, Chercher, Candidater, Suivi), la composition automatique du CV, la liste des manques.
 - **Mode démonstration** : jeu de données d'exemple, effaçable en un clic, pour essayer sans rien saisir.
-- **Explication claire du stockage** : ce qui reste dans le navigateur, ce que fait la sauvegarde, ce que change un compte (synchronisation entre appareils).
-- **Consentements et confidentialité** : politique mise à jour pour le SaaS (hébergement des données, durées, droits), choix explicite sur l'assistant IA.
-- **Création de compte** et reprise des données locales existantes vers le compte (import du fichier de sauvegarde ou migration directe).
+- **Explication claire du stockage** : ce que fait la sauvegarde, ce que change un compte (synchronisation entre appareils).
+- **Consentements et confidentialité** : politique mise à jour pour le SaaS (hébergement des données, durées, droits), choix explicite sur l'assistant IA et sur l'abonnement.
+- **Création de compte** et reprise des données locales existantes (import du fichier de sauvegarde ou migration directe).
 - **Mesure de l'activation** respectueuse (sans traceur tiers) : première candidature créée, premier PDF téléchargé.
 - **Messages et courriels** d'accueil, de relance et de récupération de compte.
 
-Prérequis SaaS associés : comptes et authentification, base de données côté serveur et chiffrement, clé API côté serveur pour l'assistant IA, facturation, RGPD (registre, DPA, droit d'accès et d'effacement), limites d'usage, supervision.
+Prérequis SaaS associés : comptes et authentification, base de données côté serveur et chiffrement, clé API côté serveur pour l'assistant IA (financée par l'abonnement), facturation, RGPD (registre, DPA, droit d'accès et d'effacement), limites d'usage, supervision.

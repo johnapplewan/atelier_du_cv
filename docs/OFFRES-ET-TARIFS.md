@@ -35,11 +35,15 @@ Les fonctions de base (CV, lettre, e-mail, plaquette, suivi) n'utilisent aucune 
 
 **Décision** : A et B sont en place (la personne choisit) ; ne jamais financer l'IA des utilisateurs sans plafond. **Séparer deux choses** : l'accès aux offres et aux outils de base (gratuit, sans compte, sans condition) et l'assistant d'écriture (à la charge de la personne).
 
-## Points à trancher
+## Orientation décidée pour la suite (26 novembre 2026)
 
-1. Structure juridique si un financement apparaît (association, mécénat, partenariats).
-2. Si les comptes arrivent (synchronisation entre appareils), rester gratuit : qui finance l'hébergement ?
-3. Wording public à garder tant qu'aucune décision n'est prise : « Gratuit pour le moment ».
+Le propriétaire a retenu, pour plus tard et sans rien annoncer aujourd'hui : un **abonnement pour les seules actions d'IA** (reformulation, entraînement à l'entretien…) qui n'envoient jamais d'annonce (mots-clés, titre du poste et spécialité du CV seulement), et un **abonnement pour les comptes et la synchronisation entre appareils** (il finance l'hébergement). Cela correspond à l'option F ci-dessus, jusqu'ici jugée « à éviter ».
+
+- **Condition préalable** : obtenir l'accord écrit de La bonne alternance (service 100 % gratuit pour les candidats). La recherche d'offres et les outils de base restent gratuits et sans compte ; seul le payant est isolé.
+- **Test ATS** : idée de l'inclure dans l'abonnement ; aucun ATS du marché n'est testable à distance, donc ne proposer que des contrôles de lisibilité automatique, sans l'appeler « test par un ATS réel ».
+- **Structure juridique** : nécessaire dès qu'il y a un abonnement (facturation, TVA, conditions de vente, médiateur de la consommation, RGPD) ; à faire valider par un comptable ou un juriste.
+- **Wording public** : tant que rien n'est lancé, « Gratuit pour le moment », sans prix ni mention d'abonnement.
+- Reste à trancher : prix, plafond d'usage de l'IA, hébergeur, prestataire de paiement.
 
 ## Historique : hypothèse de quatre formules (retirée)
 
