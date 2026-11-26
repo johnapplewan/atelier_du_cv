@@ -780,9 +780,30 @@
     <section class="panel" id="panel-freelance">
       <div class="panel-head">
         <h2>Freelance : proposer mes services</h2>
-        <p>Décris ton offre de service, puis trouve les structures qui peuvent te confier des missions (ESN, cabinets, agences d'intérim, portage, organismes de formation, entreprises) et envoie-leur une lettre d'offre de service ciblée, à la place d'une lettre de motivation.</p>
+        <p>Organise ton activité en projets (un par client ou par cible) et en propositions, puis décris chaque offre de service, puis trouve les structures qui peuvent te confier des missions (ESN, cabinets, agences d'intérim, portage, organismes de formation, entreprises) et envoie-leur une lettre d'offre de service ciblée, à la place d'une lettre de motivation.</p>
       </div>
       <div style="max-width:980px;">
+        <div class="card" style="margin-bottom:16px;" id="fl-projets-card">
+          <span class="eyebrow">Projets et propositions</span>
+          <p class="hint" style="margin:6px 0 10px;">Un <strong>projet</strong> correspond à un client ou à une cible (ex. restaurateurs, PME industrielles, particuliers). Chaque projet contient plusieurs <strong>propositions</strong> : chacune a ses prestations, son tarif et ses plaquettes. Une proposition peut partir de l'un de tes profils (donc de ton CV) ou être entièrement libre.</p>
+          <div class="row2">
+            <div class="field"><label for="fl-projet-sel">Projet</label><select id="fl-projet-sel"></select></div>
+            <div class="field"><label for="fl-projet-nom">Nom du projet</label><input type="text" id="fl-projet-nom" maxlength="60" placeholder="ex. Restaurateurs de la Marne"></div>
+          </div>
+          <div class="row2">
+            <div class="field"><label for="fl-projet-cible">Cible (client ou type de client)</label><input type="text" id="fl-projet-cible" maxlength="120" placeholder="ex. restaurateurs, PME industrielles"></div>
+            <div class="field"><label for="fl-projet-dest">Destinataires</label><select id="fl-projet-dest"><option value="pro">Professionnels (entreprises)</option><option value="particulier">Particuliers</option><option value="mixte">Les deux</option></select></div>
+          </div>
+          <div class="field"><label for="fl-projet-persona">Persona : la personne à convaincre (texte libre)</label><textarea id="fl-projet-persona" style="min-height:60px;" placeholder="ex. gérant de restaurant, 45 ans, peu de temps, méfiant envers les agences, veut des clients réguliers"></textarea></div>
+          <div class="toolbar-row" style="margin-bottom:14px;"><button class="btn btn-sm" id="btn-fl-projet-add" type="button">+ Nouveau projet</button><button class="btn btn-ghost btn-sm" id="btn-fl-projet-del" type="button">Supprimer ce projet</button></div>
+          <div class="row2">
+            <div class="field"><label for="fl-prop-sel">Proposition</label><select id="fl-prop-sel"></select></div>
+            <div class="field"><label for="fl-prop-nom">Nom de la proposition</label><input type="text" id="fl-prop-nom" maxlength="60" placeholder="ex. Site vitrine, Formation équipe"></div>
+          </div>
+          <div class="field"><label for="fl-prop-profil">Partir d'un profil (CV)</label><select id="fl-prop-profil"></select>
+            <p class="hint" style="margin:4px 0 0;">Le profil choisi donne le titre professionnel et oriente les prestations suggérées. « Sans CV » : proposition libre, sans lien avec un profil.</p></div>
+          <div class="toolbar-row"><button class="btn btn-sm" id="btn-fl-prop-add" type="button">+ Nouvelle proposition</button><button class="btn btn-ghost btn-sm" id="btn-fl-prop-dup" type="button">Dupliquer</button><button class="btn btn-ghost btn-sm" id="btn-fl-prop-del" type="button">Supprimer</button></div>
+        </div>
         <div class="card" style="margin-bottom:16px;">
           <span class="eyebrow">Mon offre de service</span>
           <div id="fl-suggest" style="margin-top:8px;"></div>
@@ -796,8 +817,10 @@
           </div>
           <div class="row2">
             <div class="field"><label for="fl-zone">Zone d'intervention</label><input type="text" id="fl-zone" placeholder="ex. Reims, Paris, France entière à distance"></div>
-            <div class="field"><label for="fl-tjm">Tarif indicatif (facultatif)</label><input type="text" id="fl-tjm" placeholder="ex. à partir de 450 € par jour">
-              <label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:4px;"><input type="checkbox" id="fl-showtjm"> L'indiquer dans les lettres</label></div>
+            <div class="field"><label for="fl-tarif-type">Tarif (facultatif)</label><select id="fl-tarif-type"></select>
+              <input type="text" id="fl-tjm" style="margin-top:6px;" placeholder="ex. à partir de 450 € par jour">
+              <label class="hint" style="display:flex;gap:6px;align-items:center;margin-top:4px;"><input type="checkbox" id="fl-showtjm"> L'indiquer dans les lettres, e-mails et plaquettes</label>
+              <p class="hint" id="fl-tarif-preview" style="margin:4px 0 0;"></p></div>
           </div>
           <div class="field"><label>Références : missions à citer (tirées de tes expériences)</label><div id="fl-refs"></div>
             <p class="hint" style="margin:4px 0 0;">Sans sélection, les deux expériences les plus proches de tes prestations sont citées.</p></div>
@@ -893,6 +916,15 @@
             </div>
             <div class="toolbar-row"><button class="btn btn-sm" id="btn-pq-new" type="button">Nouvelle plaquette</button><button class="btn btn-ghost btn-sm" id="btn-pq-dup" type="button">Dupliquer</button><button class="btn btn-ghost btn-sm" id="btn-pq-del" type="button">Supprimer</button></div>
             <p class="hint" style="margin:8px 0 0;">Une plaquette par positionnement (cible, offre, accroche) : note les envois plus bas pour voir celles qui fonctionnent.</p>
+          </div>
+          <div class="card" style="margin-bottom:16px;"><span class="eyebrow">Pour qui est cette plaquette ?</span>
+            <p class="hint" style="margin:6px 0 10px;">Reprend le projet de la proposition ; modifie-le ici pour tester une autre cible (test A/B). Le destinataire et le persona changent les accroches et les baselines proposées.</p>
+            <div class="row2">
+              <div class="field"><label for="pq-dest">Destinataires</label><select id="pq-dest"><option value="">Comme le projet</option><option value="pro">Professionnels</option><option value="particulier">Particuliers</option></select></div>
+              <div class="field"><label for="pq-cible">Cible</label><input type="text" id="pq-cible" maxlength="120" placeholder="Comme le projet"></div>
+            </div>
+            <div class="field"><label for="pq-persona">Persona (texte libre)</label><textarea id="pq-persona" style="min-height:56px;" placeholder="Comme le projet"></textarea></div>
+            <p class="hint" id="pq-pour-hint" style="margin:0;"></p>
           </div>
           <div class="card" style="margin-bottom:16px;"><span class="eyebrow">Offres de cette plaquette</span><div id="pq-offres" style="margin-top:8px;"></div></div>
           <div class="card" style="margin-bottom:16px;"><span class="eyebrow">Accroches et baselines</span><div id="pq-accroches" style="margin-top:8px;"></div></div>
@@ -5131,7 +5163,8 @@ function flSuggestions(){
   var made = {}; state.profils.forEach(function(p){ made[p.domaine] = true; });
   var doms = PROFIL_DOMAINES.filter(function(d){ return FL_OFFRES[d.key]; }).map(function(d){
     var ev = profilEvidence(d);
-    return { key: d.key, label: d.label, score: ev.score + (made[d.key] ? 3 : 0) };
+    var mine = state.profils.find(function(x){ return x.id === flState().profilId; });
+    return { key: d.key, label: d.label, score: ev.score + (made[d.key] ? 3 : 0) + (mine && mine.domaine === d.key ? 6 : 0) };
   }).filter(function(x){ return x.score >= 2; }).sort(function(a, b){ return b.score - a.score; }).slice(0, 3);
   var out = [];
   doms.forEach(function(d, i){
@@ -5163,21 +5196,129 @@ function renderFlSuggest(){
   });
 }
 
-function flState(){
+// Projets (un par client ou par cible) → propositions (chacune avec ses prestations, son tarif, ses plaquettes). flState() renvoie la proposition active.
+function flPropDef(nom){ return { id: uid(), nom: nom || "Proposition 1", profilId: "", services: [], offre: "", expIds: [], dispo: "", mode: "Télétravail ou sur site", zone: "", tarifType: "libre", tjm: "", showTjm: false }; }
+function flRoot(){
   var p = state.profil;
-  p.freelance = Object.assign({ services: [], offre: "", expIds: [], dispo: "", mode: "Télétravail ou sur site", zone: "", tjm: "", showTjm: false }, p.freelance);
-  if(!Array.isArray(p.freelance.services)) p.freelance.services = [];
-  if(!Array.isArray(p.freelance.expIds)) p.freelance.expIds = [];
-  return p.freelance;
+  if(!Array.isArray(p.freelanceProjets) || !p.freelanceProjets.length){
+    var prop = Object.assign(flPropDef("Proposition 1"), p.freelance || {});   // reprend l'ancienne offre unique (prestations, plaquettes, tarif)
+    prop.nom = "Proposition 1";
+    p.freelanceProjets = [{ id: uid(), nom: "Mon projet", cible: "", persona: "", dest: "pro", propositions: [prop] }];
+    p.freelanceActive = { projetId: p.freelanceProjets[0].id, propId: prop.id };
+    p.freelance = {};
+  }
+  var pj = p.freelanceProjets.find(function(x){ return x.id === (p.freelanceActive || {}).projetId; }) || p.freelanceProjets[0];
+  if(!Array.isArray(pj.propositions) || !pj.propositions.length) pj.propositions = [flPropDef("Proposition 1")];
+  var pr = pj.propositions.find(function(x){ return x.id === (p.freelanceActive || {}).propId; }) || pj.propositions[0];
+  p.freelanceActive = { projetId: pj.id, propId: pr.id };
+  return pj;
+}
+function flProjet(){ return flRoot(); }
+function flState(){
+  var pj = flRoot(), pr = pj.propositions.find(function(x){ return x.id === state.profil.freelanceActive.propId; }), d = flPropDef();
+  Object.keys(d).forEach(function(k){ if(pr[k] === undefined) pr[k] = d[k]; });
+  if(!Array.isArray(pr.services)) pr.services = [];
+  if(!Array.isArray(pr.expIds)) pr.expIds = [];
+  return pr;
+}
+// Titre professionnel de la proposition : celui de son profil (CV de départ), sinon celui de la candidature en cours.
+function flTitre(){
+  var pr = state.profils.find(function(x){ return x.id === flState().profilId; });
+  return ((pr && pr.titreVise) || state.cv.titre || state.profil.titre || "").trim();
+}
+// Tarif : types variés, avec ou sans montant.
+var FL_TARIFS = [
+  { k: "none",   label: "Ne pas indiquer de tarif",                 amount: false },
+  { k: "libre",  label: "Texte libre",                              amount: true,  fr: "{m}", ph: "ex. à partir de 450 € par jour" },
+  { k: "tjm",    label: "Taux journalier (TJM)",                    amount: true,  fr: "Tarif journalier : {m}", ph: "ex. 450 €" },
+  { k: "horaire",label: "Taux horaire",                             amount: true,  fr: "Taux horaire : {m}", ph: "ex. 60 €" },
+  { k: "apartir",label: "À partir de",                              amount: true,  fr: "À partir de {m}", ph: "ex. 450 € par jour, 900 € la mission" },
+  { k: "fourch", label: "Fourchette",                               amount: true,  fr: "Entre {m}", ph: "ex. 400 et 600 € par jour" },
+  { k: "forfait",label: "Forfait",                                  amount: true,  fr: "Forfait : {m}", ph: "ex. 1 500 € le site vitrine" },
+  { k: "abo",    label: "Abonnement mensuel",                       amount: true,  fr: "Abonnement : {m}", ph: "ex. 300 € par mois" },
+  { k: "essai",  label: "Mission d'essai",                          amount: true,  fr: "Mission d'essai : {m}", ph: "ex. 2 jours à tarif réduit" },
+  { k: "devis",  label: "Sur devis",                                amount: false, fr: "Tarif sur devis" },
+  { k: "devisg", label: "Devis gratuit et sans engagement",         amount: false, fr: "Devis gratuit et sans engagement" },
+  { k: "echange",label: "Premier échange offert, sans engagement",  amount: false, fr: "Premier échange offert, sans engagement" },
+  { k: "diag",   label: "Diagnostic offert",                        amount: false, fr: "Diagnostic de départ offert" },
+  { k: "gratuit",label: "« X » gratuit (à compléter)",              amount: true,  fr: "{m} : gratuit", ph: "ex. La première heure de conseil" },
+  { k: "sanseng",label: "Sans engagement",                          amount: false, fr: "Sans engagement" },
+  { k: "demande",label: "Tarif communiqué sur demande",             amount: false, fr: "Tarif communiqué sur demande" },
+  { k: "resultat",label: "Au résultat",                             amount: true,  fr: "Rémunération au résultat : {m}", ph: "ex. 10 % du chiffre d'affaires généré" }
+];
+function flTarifTexte(fl, en){
+  fl = fl || flState();
+  if(!fl.showTjm) return "";
+  var t = FL_TARIFS.find(function(x){ return x.k === fl.tarifType; });
+  if(!t || t.k === "none") return "";
+  var m = (fl.tjm || "").trim();
+  if(t.amount && !m) return "";
+  if(en && t.k !== "libre"){ var E = { tjm: "Daily rate: ", horaire: "Hourly rate: ", apartir: "From ", forfait: "Fixed price: ", devis: "Quote on request", devisg: "Free quote, no commitment", echange: "Free first call, no commitment", sanseng: "No commitment", demande: "Rates on request" }; if(E[t.k] !== undefined) return E[t.k] + (t.amount ? m : ""); }
+  return (t.fr || "{m}").replace("{m}", m);
 }
 
 var flCibles = {};      // cibles cochées {cle:true}
 var flPlace = null, flLast = null;
 state.flResultats = [];
 
+function renderFlProjets(){
+  var root = state.profil, pj = flProjet(), fl = flState();
+  var sel = document.getElementById("fl-projet-sel"); if(!sel) return;
+  sel.innerHTML = root.freelanceProjets.map(function(x){ return '<option value="' + x.id + '"' + (x.id === pj.id ? " selected" : "") + '>' + esc(x.nom) + '</option>'; }).join("");
+  [["fl-projet-nom", pj.nom], ["fl-projet-cible", pj.cible], ["fl-projet-persona", pj.persona], ["fl-prop-nom", fl.nom]].forEach(function(x){ var el = document.getElementById(x[0]); if(document.activeElement !== el) el.value = x[1] || ""; });
+  document.getElementById("fl-projet-dest").value = pj.dest || "pro";
+  document.getElementById("btn-fl-projet-del").disabled = root.freelanceProjets.length <= 1;
+  document.getElementById("fl-prop-sel").innerHTML = pj.propositions.map(function(x){ return '<option value="' + x.id + '"' + (x.id === fl.id ? " selected" : "") + '>' + esc(x.nom) + '</option>'; }).join("");
+  document.getElementById("btn-fl-prop-del").disabled = pj.propositions.length <= 1;
+  document.getElementById("fl-prop-profil").innerHTML = '<option value="">Sans CV (proposition libre)</option>' + state.profils.map(function(x){ return '<option value="' + x.id + '"' + (x.id === fl.profilId ? " selected" : "") + '>' + esc(x.nom) + ' : ' + esc(x.titreVise) + '</option>'; }).join("");
+  var ts = document.getElementById("fl-tarif-type");
+  ts.innerHTML = FL_TARIFS.map(function(t){ return '<option value="' + t.k + '"' + (t.k === fl.tarifType ? " selected" : "") + '>' + esc(t.label) + '</option>'; }).join("");
+  var tt = FL_TARIFS.find(function(t){ return t.k === fl.tarifType; }) || FL_TARIFS[1], tj = document.getElementById("fl-tjm");
+  tj.style.display = tt.amount ? "" : "none"; tj.placeholder = tt.ph || "";
+  document.getElementById("fl-tarif-preview").textContent = flTarifTexte(Object.assign({}, fl, { showTjm: true })) ? "Rendu : « " + flTarifTexte(Object.assign({}, fl, { showTjm: true })) + " »" : "";
+}
+function flSwitchProjet(id, propId){
+  var root = state.profil, pj = root.freelanceProjets.find(function(x){ return x.id === id; }) || root.freelanceProjets[0];
+  root.freelanceActive = { projetId: pj.id, propId: propId || (pj.propositions[0] || {}).id };
+  pqProp = null; persist(); renderFreelance();
+}
+function flNewPropositionIn(pj, nom, profilId){
+  var n = flPropDef(nom || "Proposition " + (pj.propositions.length + 1)); n.profilId = profilId || ""; pj.propositions.push(n); return n;
+}
+document.getElementById("fl-projet-sel").addEventListener("change", function(){ flSwitchProjet(this.value); });
+document.getElementById("fl-prop-sel").addEventListener("change", function(){ flSwitchProjet(flProjet().id, this.value); });
+[["fl-projet-nom", "nom"], ["fl-projet-cible", "cible"], ["fl-projet-persona", "persona"]].forEach(function(x){ document.getElementById(x[0]).addEventListener("input", function(){ flProjet()[x[1]] = this.value; persist(); if(x[1] === "nom"){ var o = document.querySelector('#fl-projet-sel option:checked'); if(o) o.textContent = this.value; } }); });
+document.getElementById("fl-projet-dest").addEventListener("change", function(){ flProjet().dest = this.value; pqProp = null; persist(); });
+document.getElementById("fl-prop-nom").addEventListener("input", function(){ flState().nom = this.value; persist(); var o = document.querySelector('#fl-prop-sel option:checked'); if(o) o.textContent = this.value; });
+document.getElementById("fl-prop-profil").addEventListener("change", function(){ flState().profilId = this.value; pqProp = null; persist(); renderFreelance(); });
+document.getElementById("btn-fl-projet-add").addEventListener("click", function(){
+  var root = state.profil, n = { id: uid(), nom: "Projet " + (root.freelanceProjets.length + 1), cible: "", persona: "", dest: "pro", propositions: [] };
+  root.freelanceProjets.push(n); var pr = flNewPropositionIn(n, "Proposition 1", ""); flSwitchProjet(n.id, pr.id);
+});
+document.getElementById("btn-fl-projet-del").addEventListener("click", function(){
+  var root = state.profil, pj = flProjet();
+  if(root.freelanceProjets.length <= 1) return;
+  if(!confirm("Supprimer le projet « " + pj.nom + " » avec ses propositions et ses plaquettes ?")) return;
+  root.freelanceProjets = root.freelanceProjets.filter(function(x){ return x.id !== pj.id; }); flSwitchProjet(root.freelanceProjets[0].id);
+});
+document.getElementById("btn-fl-prop-add").addEventListener("click", function(){ var pj = flProjet(), n = flNewPropositionIn(pj, null, document.getElementById("fl-prop-profil").value); flSwitchProjet(pj.id, n.id); });
+document.getElementById("btn-fl-prop-dup").addEventListener("click", function(){
+  var pj = flProjet(), c = JSON.parse(JSON.stringify(flState()));
+  c.id = uid(); c.nom = c.nom + " (copie)"; (c.plaquettes || []).forEach(function(pl){ pl.id = uid(); pl.envois = []; }); c.plaquetteId = (c.plaquettes && c.plaquettes[0]) ? c.plaquettes[0].id : "";
+  pj.propositions.push(c); flSwitchProjet(pj.id, c.id);
+});
+document.getElementById("btn-fl-prop-del").addEventListener("click", function(){
+  var pj = flProjet(), fl = flState();
+  if(pj.propositions.length <= 1) return;
+  if(!confirm("Supprimer la proposition « " + fl.nom + " » et ses plaquettes ?")) return;
+  pj.propositions = pj.propositions.filter(function(x){ return x.id !== fl.id; }); flSwitchProjet(pj.id, pj.propositions[0].id);
+});
+document.getElementById("fl-tarif-type").addEventListener("change", function(){ var fl = flState(); fl.tarifType = this.value; if(this.value !== "none") fl.showTjm = true; persist(); renderFreelance(); });
+
 function renderFreelance(){
   var fl = flState();
   if(!document.getElementById("fl-services")) return;
+  renderFlProjets();
   // services
   var sw = document.getElementById("fl-services"); sw.innerHTML = "";
   if(!fl.services.length) sw.innerHTML = '<p class="empty-note">Ajoute les prestations que tu proposes (ex. « Conception d\'applications web », « Formation à l\'audiovisuel »), ou colle un texte plus bas.</p>';
@@ -5241,13 +5382,13 @@ document.getElementById("fl-profil").addEventListener("change", function(){ flCi
 
 // saisies simples
 [["fl-dispo","dispo"],["fl-zone","zone"],["fl-tjm","tjm"],["fl-offre","offre"]].forEach(function(pair){
-  document.getElementById(pair[0]).addEventListener("input", function(){ flState()[pair[1]] = this.value; persist(); });
+  document.getElementById(pair[0]).addEventListener("input", function(){ flState()[pair[1]] = this.value; persist(); if(pair[1] === "tjm"){ var pv = document.getElementById("fl-tarif-preview"), f = Object.assign({}, flState(), { showTjm: true }); pv.textContent = flTarifTexte(f) ? "Rendu : « " + flTarifTexte(f) + " »" : ""; } });
 });
 document.getElementById("fl-mode").addEventListener("change", function(){ flState().mode = this.value; persist(); });
-document.getElementById("fl-showtjm").addEventListener("change", function(){ flState().showTjm = this.checked; persist(); });
+document.getElementById("fl-showtjm").addEventListener("change", function(){ flState().showTjm = this.checked; persist(); renderFlProjets(); });
 document.getElementById("btn-fl-add").addEventListener("click", function(){ flState().services.push({ id: uid(), titre: "", description: "" }); persist(); renderFreelance(); });
 document.getElementById("btn-fl-offre-gen").addEventListener("click", function(){
-  var fl = flState(), t = (state.cv.titre || state.profil.titre || "").trim();
+  var fl = flState(), t = flTitre();
   if(t && t === t.toUpperCase()) t = t.toLowerCase();
   var names = fl.services.map(function(s){ return s.titre; }).filter(Boolean);
   fl.offre = (t ? "Je suis " + lowerFirst(t) + ", en freelance. " : "Je travaille en freelance. ") + (names.length ? "Je propose : " + names.join(" ; ") + "." : "");
@@ -5383,7 +5524,7 @@ function generateOffreServiceParagraphs(){
   var l = state.lettre, an = state.annonce, fl = flState(), en = l.lang === "en";
   var cible = FL_CIBLES[an.cible] || FL_CIBLES.conseil;
   var nom = (an.entreprise || "").trim();
-  var titre = (state.cv.titre || state.profil.titre || "").trim();
+  var titre = flTitre();
   if(titre && titre === titre.toUpperCase()) titre = titre.toLowerCase();
   var svcs = fl.services.filter(function(s){ return (s.titre || "").trim(); });
   var paras = [en ? "Dear Sir or Madam," : "Madame, Monsieur,"];
@@ -5415,7 +5556,7 @@ function generateOffreServiceParagraphs(){
   var mod = [];
   if((fl.dispo || "").trim()) mod.push((en ? "Availability: " : "Disponibilité : ") + fl.dispo.trim());
   if((fl.mode || "").trim()) mod.push((en ? "Working mode: " : "Modalités : ") + fl.mode.trim().toLowerCase() + ((fl.zone || "").trim() ? (en ? ", " : ", ") + fl.zone.trim() : ""));
-  if(fl.showTjm && (fl.tjm || "").trim()) mod.push((en ? "Daily rate: " : "Tarif indicatif : ") + fl.tjm.trim());
+  if(flTarifTexte(fl, en)) mod.push(flTarifTexte(fl, en));
   if(mod.length) paras.push(mod.join(". ") + ".");
   paras.push(en
     ? "I can send my CV and detailed references, and I am available for a short call whenever suits you."
@@ -5523,7 +5664,7 @@ function offRunJobspipe(){
       return;
     }
     state.offresResultats = d.results; state.offresRecruteurs = []; offLast = null;
-    st.textContent = d.results.length + " offre(s) sur 30 jours pour « " + q + " »" + (ville ? " à " + ville : " en France") + " (JobsPipe, 25 au plus par recherche)" + (d.creditsRestants !== null ? ", crédits restants du site : " + d.creditsRestants : "") + ".";
+    st.textContent = d.results.length + " offre(s) sur 30 jours pour « " + q + " »" + (ville ? " à " + ville : " en France") + " (JobsPipe, 7 offres par recherche)" + (d.creditsRestants !== null ? ", crédits restants du site : " + d.creditsRestants : "") + ".";
     renderOffResults(); refreshStatusDots();
   }, function(){ btn.disabled = false; st.textContent = rechOffline(); });
 }
@@ -6089,7 +6230,7 @@ function pqPlaquettes(){
 function pqCurrent(){ var l = pqPlaquettes(), id = flState().plaquetteId; return l.find(function(x){ return x.id === id; }); }
 function pqNormData(q){
   var d = { modele: "t1", accent: "", kicker: "", titre: "", accroche: "", etapes: [], encadres: [], chiffres: [], temoignage: { texte: "", auteur: "" },
-    avantApres: { avantTitre: "", avantTexte: "", avantNote: "", apresTitre: "", apresTexte: "", apresNote: "" }, delai: "", tarif: "", cta: "Parlons de votre projet", images: [],
+    avantApres: { avantTitre: "", avantTexte: "", avantNote: "", apresTitre: "", apresTexte: "", apresNote: "" }, delai: "", tarif: "", dest: "", cible: "", persona: "", cta: "Parlons de votre projet", images: [],
     band: "presentation", portrait: "", presentation: { role: "", texte: "", mode: "both", photo: true }, presChiffres: [], avis: [], refs: { clients: "", garanties: "" }, faq: [], offreIds: [], angle: "", tu: false };
   Object.keys(d).forEach(function(k){ if(q[k] === undefined) q[k] = d[k]; });
   var fixUrl = function(u){ return typeof u === "string" ? u.replace(/^assets\//, "../assets/") : u; };   // l'application est servie sous /app/
@@ -6410,13 +6551,14 @@ function refreshPqThumbs(){ /* les vignettes gardent le contenu de démonstratio
 document.getElementById("pq-accent").addEventListener("input", function(){ pqState().accent = this.value; persist(); renderPlaquettePreview(); });
 document.getElementById("pq-accent-reset").addEventListener("click", function(){ pqState().accent = ""; persist(); renderPlaquette(); });
 document.getElementById("btn-pq-fill").addEventListener("click", function(){
-  var q = pqState(), fl = flState(), t = (state.cv.titre || state.profil.titre || "").trim();
-  if(!q.kicker && t) q.kicker = t.toUpperCase();
+  var q = pqState(), fl = flState(), t = flTitre();
+  if(!q.kicker && t) q.kicker = (pqCible() || t).toUpperCase();
   if(!q.presentation.role && t) q.presentation.role = t;
   if(!q.titre && fl.services.length && fl.services[0].titre) q.titre = fl.services[0].titre;
   if(!q.accroche && fl.offre) q.accroche = fl.offre;
   if(!q.delai && fl.dispo) q.delai = "Disponible : " + fl.dispo;
-  if(!q.tarif && fl.tjm) q.tarif = fl.tjm;
+  if(!q.tarif && fl.showTjm && flTarifTexte(fl)) q.tarif = flTarifTexte(fl);
+  if(!q.cible && pqCible()) q.cible = pqCible();
   persist(); renderPlaquette();
 });
 document.getElementById("btn-pq-pdf").addEventListener("click", function(){
@@ -6445,6 +6587,7 @@ var PQ_ANGLES = ["Bénéfice", "Problème puis solution", "Interlocuteur unique"
 
 function renderPqList(){
   var sel = document.getElementById("pq-select"), nom = document.getElementById("pq-nom"); if(!sel) return;
+  renderPqCible();
   var l = pqPlaquettes(), cur = pqCurrent();
   sel.innerHTML = l.map(function(x){ return '<option value="' + x.id + '"' + (x.id === cur.id ? " selected" : "") + ">" + esc(x.nom) + " (" + x.envois.length + " envoi" + (x.envois.length > 1 ? "s" : "") + ")</option>"; }).join("");
   if(document.activeElement !== nom) nom.value = cur.nom;
@@ -6478,8 +6621,22 @@ function pqTu(t){
   return t.replace(/\bVos\b/g, "Tes").replace(/\bvos\b/g, "tes");
 }
 function pqSplitTitle(t){ return t.replace(/^(.{12,}?[,?:]) (?=.{10})/, "$1\n"); }
+// Destinataire, cible et persona effectifs : ceux de la plaquette, sinon ceux du projet.
+function pqDest(){ var d = pqState().dest || flProjet().dest || "pro"; return d === "particulier" ? "particulier" : "pro"; }
+function pqCible(){ return (pqState().cible || flProjet().cible || "").trim(); }
+function pqPersona(){ return (pqState().persona || flProjet().persona || "").trim(); }
+function renderPqCible(){
+  var q = pqState(); if(!document.getElementById("pq-dest")) return;
+  document.getElementById("pq-dest").value = q.dest || "";
+  [["pq-cible", q.cible], ["pq-persona", q.persona]].forEach(function(x){ var el = document.getElementById(x[0]); if(document.activeElement !== el) el.value = x[1] || ""; });
+  document.getElementById("pq-cible").placeholder = flProjet().cible || "Comme le projet"; document.getElementById("pq-persona").placeholder = flProjet().persona || "Comme le projet";
+  document.getElementById("pq-pour-hint").textContent = "Effectif : " + (pqDest() === "particulier" ? "particuliers" : "professionnels") + (pqCible() ? ", cible « " + pqCible() + " »" : "") + " (projet « " + flProjet().nom + " », proposition « " + flState().nom + " »).";
+}
+["pq-dest", "pq-cible", "pq-persona"].forEach(function(id){
+  document.getElementById(id).addEventListener(id === "pq-dest" ? "change" : "input", function(){ pqState()[id.slice(3)] = this.value; pqProp = null; persist(); renderPqCible(); });
+});
 function pqComputePropos(){
-  var sv = pqSelectedServices(), q = pqState(), fl = flState();
+  var sv = pqSelectedServices(), q = pqState(), fl = flState(), part = pqDest() === "particulier";
   var cat = sv.map(function(x){ return { s: x, o: x.sid ? flOfferBySid(x.sid) : null }; });
   var low = function(t){ return t ? t.charAt(0).toLowerCase() + t.slice(1) : t; }, acc = [];
   if(cat.length){
@@ -6487,12 +6644,13 @@ function pqComputePropos(){
     acc.push({ angle: PQ_ANGLES[0], txt: f.o ? f.o.a : f.s.titre + ", sans les mauvaises surprises." });
     acc.push({ angle: PQ_ANGLES[1], txt: sd.o ? sd.o.p : "Un projet bloqué ? " + sd.s.titre + ", avec un seul interlocuteur." });
     var tt = sv.slice(0, 2).map(function(x){ return low(x.titre); });
-    acc.push({ angle: PQ_ANGLES[2], txt: tt.length > 1 ? "Un seul interlocuteur pour " + tt.slice(0, -1).join(", ") + " et " + tt[tt.length - 1] + "." : sv[0].titre + " : du besoin à la livraison, avec un seul interlocuteur." });
+    acc.push({ angle: PQ_ANGLES[2], txt: part ? (tt.length > 1 ? "Une seule personne, près de chez vous, pour " + tt.slice(0, -1).join(", ") + " et " + tt[tt.length - 1] + "." : sv[0].titre + " : une seule personne, de la première visite à la fin du travail.") : tt.length > 1 ? "Un seul interlocuteur pour " + tt.slice(0, -1).join(", ") + " et " + tt[tt.length - 1] + "." : sv[0].titre + " : du besoin à la livraison, avec un seul interlocuteur." });
   }
   var bl = [];
   cat.forEach(function(c){ if(c.o && bl.indexOf(c.o.b) === -1) bl.push(c.o.b); });
   bl = bl.slice(0, 2);
-  if(cat.length) bl.push("Devis écrit, livrables clairs, un point à chaque étape.");
+  if(cat.length) bl.push(part ? "Un devis clair avant de commencer, sans mauvaise surprise." : "Devis écrit, livrables clairs, un point à chaque étape.");
+  if(flTarifTexte(fl) && fl.tarifType !== "libre") bl.push(flTarifTexte(fl) + ".");
   if(q.delai) bl.push(/[.!?]$/.test(q.delai) ? q.delai : q.delai + "."); else if(fl.dispo) bl.push("Disponible : " + fl.dispo + ".");
   if(fl.zone) bl.push("Intervention : " + fl.zone + ".");
   if(q.tu){ acc.forEach(function(x){ x.txt = pqTu(x.txt); }); bl = bl.map(pqTu); }
@@ -6513,7 +6671,7 @@ function pqPropAI(){
   var sv = pqSelectedServices(), st = document.getElementById("pq-prop-status"); if(!sv.length) return;
   var system = "Tu écris pour un freelance français qui démarche des entreprises. À partir de ses offres, propose 3 accroches (titres de 8 à 14 mots, trois angles différents dans cet ordre : bénéfice, problème puis solution, interlocuteur unique) et 4 baselines (une phrase de 8 à 16 mots qui rassure un prospect). " + (pqState().tu ? "Tutoie le prospect." : "Vouvoie le prospect.") + " Phrases concrètes, sans superlatif, sans chiffre inventé, sans formule creuse (« solutions innovantes », « accompagnement sur mesure »), sans contraste « non pas X mais Y », sans tiret long. Réponds par un objet JSON : {\"accroches\":[\"…\"],\"baselines\":[\"…\"]}.";
   st.textContent = "En cours…";
-  iaAsk(system, { offres: sv.map(function(x){ return { titre: scrubForAI(x.titre), description: scrubForAI(x.description) }; }), metier: scrubForAI(state.cv.titre || state.profil.titre || ""), disponibilite: scrubForAI(flState().dispo || "") },
+  iaAsk(system + " Destinataires : " + (pqDest() === "particulier" ? "des particuliers (ton simple, rassurant, concret, pas de jargon professionnel)." : "des professionnels (bénéfice mesurable, fiabilité, gain de temps).") + (pqCible() ? " Cible : " + scrubForAI(pqCible()) + "." : "") + (pqPersona() ? " Persona : " + scrubForAI(pqPersona()) + "." : ""), { offres: sv.map(function(x){ return { titre: scrubForAI(x.titre), description: scrubForAI(x.description) }; }), metier: scrubForAI(flTitre()), disponibilite: scrubForAI(flState().dispo || "") },
     "Les intitulés de tes offres (sans ton nom ni tes coordonnées) servent à écrire des accroches.").then(function(r){
       var ac = (r.accroches || []).slice(0, 3).map(function(t, i){ return { angle: (PQ_ANGLES[i] || "Autre") + " (IA)", txt: String(t) }; });
       var bl = (r.baselines || []).slice(0, 5).map(String);
@@ -6702,7 +6860,7 @@ function emBuild(){
     objets = ["Candidature spontanée : " + (titre || poste || "profil") + n_, (titre || poste || "Mon profil") + " : un échange de 15 minutes ?", "Candidature spontanée" + (E_ ? " · " + E_ : "") + n_];
   } else if(type === "freelance"){
     var dispo = (fl.dispo ? "Je suis disponible " + fl.dispo + "." : "") + (fl.zone ? " J'interviens : " + fl.zone + "." : "");
-    if(fl.showTjm && fl.tjm) dispo += " Mon tarif indicatif : " + fl.tjm + ".";
+    if(flTarifTexte(fl)) dispo += " " + flTarifTexte(fl) + ".";
     para = [hello, hook || (cible ? "Je vous contacte pour " + cible + "." : "Je vous écris pour vous proposer un renfort ponctuel."),
       "Je suis " + (titre || "indépendant") + " en freelance" + (svc.length ? " et j'interviens sur : " + emList(svc) + "." : "."), dispo.trim(), pjLine,
       "Un échange de 15 minutes cette semaine, pour voir si je peux vous être utile ?"];

@@ -1,6 +1,6 @@
 // Cloudflare Pages Function : /api/jobspipe?q=monteur%20vidéo&ville=Reims&jours=30
 // Source d'offres généralistes (CDI, CDD, stage, freelance…) : JobsPipe (api.jobspipe.dev), clé PIPE_KEY (variable du projet, jamais dans le code).
-// PHASE DE TEST : une seule clé sert les testeurs, au plan gratuit (1 000 crédits uniques, 1 crédit par offre retournée, 25 offres au plus par appel).
+// PHASE DE TEST : une seule clé sert les testeurs, au plan gratuit (1 000 crédits uniques, 1 crédit par offre retournée, 7 offres par recherche).
 // Les conditions de JobsPipe interdisent de partager une clé d'API : ne pas diffuser largement sans accord écrit (voir docs/FRANCE-TRAVAIL.md).
 // Seuls les mots-clés et la commune transitent ; aucune donnée personnelle, rien n'est stocké ni journalisé. Le lien vers l'annonce d'origine est toujours conservé.
 // Variable facultative JOBSPIPE_OFF = "1" : coupe la source (économise les crédits).
@@ -30,7 +30,7 @@ export async function onRequestGet(context) {
   const q = String(p.get("q") || "").split(/[,;\n]/).map((s) => s.trim()).filter((s) => s.length >= 2).slice(0, 5);
   if (!q.length) return json({ ok: false, reason: "query_required" }, 400);
   const ville = String(p.get("ville") || "").trim().slice(0, 80), jours = Math.min(90, Math.max(1, parseInt(p.get("jours"), 10) || 30));
-  const body = { job_country_code_or: ["FR"], language_or: ["fr"], job_title_or: q, posted_at_max_age_days: jours, limit: 25 };
+  const body = { job_country_code_or: ["FR"], language_or: ["fr"], job_title_or: q, posted_at_max_age_days: jours, limit: 7 };
   if (ville) body.city_or = [ville];
   const ctrl = new AbortController(), timer = setTimeout(() => ctrl.abort(), 20000);
   try {
