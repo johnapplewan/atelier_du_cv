@@ -605,6 +605,7 @@
       <button class="rail-item" data-tab="freelance" data-group="chercher"><span class="num">11</span>Freelance<span class="status-dot" id="dot-freelance"></span></button>
       <button class="rail-item" data-tab="plaquette" data-group="chercher"><span class="num">12</span>Plaquette<span class="status-dot" id="dot-plaquette"></span></button>
       <button class="rail-item" data-tab="entretien" data-group="suivi"><span class="num">13</span>Entretien<span class="status-dot" id="dot-entretien"></span></button>
+      <button class="rail-item" data-tab="regles" data-group="prep"><span class="num">14</span>Règles<span class="status-dot" id="dot-regles"></span></button>
     </div>
     <div class="rail-foot">Ta bibliothèque (expériences, compétences, lettres, candidatures) reste dans ce navigateur. Seuls le lien d'une annonce ou les critères d'une recherche d'entreprises transitent, jamais ton CV ni tes coordonnées.</div>
   </nav>
@@ -718,6 +719,41 @@
         </div>
         <span class="eyebrow">Mes profils</span>
         <div id="profils-list" style="margin-top:8px;"></div>
+      </div>
+    </section>
+
+    <!-- PANEL RÈGLES -->
+    <section class="panel" id="panel-regles">
+      <div class="panel-head">
+        <h2>Règles : ce que l'atelier met en avant</h2>
+        <p>La personne qui lit ton CV doit pouvoir se projeter. Ces règles décident quelles références, expériences, compétences et formations passent devant selon la cible, et quels principes de communication l'atelier vérifie. Tout est modifiable ; l'atelier apprend aussi de tes corrections.</p>
+      </div>
+      <div style="max-width:980px;">
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">1. Ce qui passe devant</span>
+          <p class="hint" style="margin:6px 0 10px;">Chaque curseur dit l'importance d'un critère (0 = ignoré, 5 = très important). Un élément qui ne concerne pas la cible n'apparaît pas, sauf pour éviter un CV vide.</p>
+          <div id="rg-poids"></div>
+          <label class="hint" style="display:flex;gap:6px;align-items:center;margin:8px 0;"><input type="checkbox" id="rg-strict"> Mode strict : ne pas afficher ce qui ne concerne pas la cible</label>
+          <span class="eyebrow" style="display:block;margin-top:10px;">Combien d'éléments</span>
+          <div id="rg-limites" class="row2" style="margin-top:6px;"></div>
+          <div class="toolbar-row" style="margin-top:8px;"><button class="btn btn-ghost btn-sm" id="rg-reset-poids" type="button">Rétablir les valeurs de base</button></div>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">2. Principes de communication</span>
+          <p class="hint" style="margin:6px 0 10px;">Sens, ambiguïté, preuve, clarté… Ajoute ici chaque principe que tu découvres : l'atelier le vérifie dans le CV, la lettre et la plaquette, et le rappelle à l'IA quand tu l'utilises. Un principe peut surveiller des <strong>mots</strong> à éviter, des <strong>débuts de phrase</strong>, une <strong>longueur</strong> de phrase, une <strong>part de chiffres</strong>, ou rester un rappel <strong>libre</strong>.</p>
+          <div id="rg-principes"></div>
+          <div class="toolbar-row"><button class="btn btn-sm" id="rg-add" type="button">+ Ajouter un principe</button><button class="btn btn-ghost btn-sm" id="rg-reset-principes" type="button">Rétablir les principes de base</button></div>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">3. Ce que l'atelier a appris de tes corrections</span>
+          <p class="hint" style="margin:6px 0 10px;">Quand tu coches ou décoches un élément dans la composition du CV, l'atelier s'en souvient pour les cibles qui ressemblent à celle-là (même profil, ou au moins deux mots de la cible en commun). Après 2 corrections dans le même sens, il applique ton choix tout seul.</p>
+          <div id="rg-appris"></div>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">4. Contrôler mes documents</span>
+          <div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-primary btn-sm" id="rg-check" type="button">Contrôler le CV, la lettre et la plaquette en cours</button></div>
+          <div id="rg-check-out" style="margin-top:10px;"></div>
+        </div>
       </div>
     </section>
 
@@ -835,7 +871,8 @@
               <p class="hint" id="fl-tarif-preview" style="margin:4px 0 0;"></p></div>
           </div>
           <div class="field"><label>Références : missions à citer (tirées de tes expériences)</label><div id="fl-refs"></div>
-            <p class="hint" style="margin:4px 0 0;">Sans sélection, les deux expériences les plus proches de tes prestations sont citées.</p></div>
+            <p class="hint" style="margin:4px 0 0;">Sans sélection, les deux références les mieux classées sont citées : l'atelier classe selon la cible et le persona du projet, tes prestations, les résultats chiffrés, la récence et tes corrections (onglet Règles).</p>
+            <div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-ghost btn-sm" id="btn-fl-refs-auto" type="button">Appliquer la sélection suggérée</button></div></div>
           <div class="field"><label for="fl-import">Compléter avec un texte (plaquette, missions, références, services…)</label>
             <textarea id="fl-import" style="min-height:90px;" placeholder="Colle un texte : l'atelier trie et organise les prestations, missions et références, et les ajoute à ta base."></textarea>
             <div class="toolbar-row" style="margin-top:6px;"><button class="btn btn-ghost btn-sm" id="btn-fl-import" type="button">Analyser et ajouter</button><span class="hint" id="fl-import-status"></span></div></div>
@@ -1094,6 +1131,8 @@
             <div id="compo-gaps"></div>
             <div id="compo-lists"></div>
           </div>
+
+          <div class="card" style="margin-bottom:16px;" id="card-principes"><span class="eyebrow">Principes de communication</span><div id="cv-principes" style="margin-top:6px;"></div></div>
 
           <div class="card">
             <div class="gauge-wrap">
@@ -1755,10 +1794,11 @@ function persist(){
 
 /* ---------------- onglets & statut ---------------- */
 
-var TABS = ["base","profils","recherche","offres","annonce","cv","lettre","annexe","email","candidatures","freelance","plaquette","entretien"];
+var TABS = ["base","profils","recherche","offres","annonce","cv","lettre","annexe","email","candidatures","freelance","plaquette","entretien","regles"];
 var activeTab = "annonce";
 
 function statusFor(tab){
+  if(tab === "regles"){ return (reglesState().corrections || []).length ? "ready" : "empty"; }
   if(tab === "base"){ var L = state.library; return (L.experiences.length || L.formations.length || L.competences.length) ? "ready" : "empty"; }
   if(tab === "profils"){ return state.profils.length ? "ready" : "empty"; }
   if(tab === "offres"){ return (state.offresResultats || []).length ? "ready" : "empty"; }
@@ -1821,6 +1861,7 @@ function switchTab(tab){
   if(tab === "plaquette" && typeof renderPlaquette === "function"){ renderPlaquette(); }
   if(tab === "email" && typeof renderEmail === "function"){ renderEmail(); }
   if(tab === "entretien" && typeof renderEntretienFiche === "function"){ renderEntretienFiche(); }
+  if(tab === "regles" && typeof renderRegles === "function"){ renderRegles(); }
   if(tab === "cv" && typeof scheduleCvLength === "function"){ setTimeout(renderCvLength, 60); }
   if(tab === "offres" && typeof offProfilOptions === "function"){ renderOffAvailability(); offProfilOptions(); renderOffResults(); }
   TABS.forEach(function(t){
@@ -2330,7 +2371,7 @@ function renderATS(){
   sugEl.innerHTML = html || '<p class="hint">Rien à améliorer côté mots-clés.</p>';
   sugEl.querySelectorAll("[data-ats-own]").forEach(function(b){ b.addEventListener("click", function(){
     var t = b.getAttribute("data-ats-own"), sk = addSkillRaw(t) || state.library.competences.find(function(c){ return norm(c.label) === norm(t); });
-    if(sk){ state.cv.pins = state.cv.pins || {}; state.cv.pins["skill:" + sk.id] = true; if(state.cv.hides) delete state.cv.hides["skill:" + sk.id]; }
+    if(sk){ state.cv.pins = state.cv.pins || {}; state.cv.pins["skill:" + sk.id] = true; if(state.cv.hides) delete state.cv.hides["skill:" + sk.id]; logCorrection("skill:" + sk.id, "pin"); }
     onBaseChanged(true); renderSkillChips(); renderSkillSuggestions(); renderCVPreview(); persist();
   }); });
 
@@ -3161,6 +3202,7 @@ function renderCVPreview(){
   wrap.innerHTML = html || '<p class="empty-note">Importe un CV dans « Ma base » et remplis ton profil : le CV se construit ici.</p>';
   renderComposition();
   renderATS();
+  renderPrincipesCv();
   scheduleCvLength();
 }
 
@@ -5359,13 +5401,17 @@ function renderFreelance(){
     lab.innerHTML = '<input type="checkbox" data-fl-ref="' + e.id + '"' + (on ? " checked" : "") + '> <span><strong>' + esc(e.poste || e.entreprise) + '</strong>' + (e.entreprise && e.poste ? ", " + esc(e.entreprise) : "") + (e.dates ? " (" + esc(e.dates) + ")" : "") + '</span>';
     rw.appendChild(lab);
   });
+  var rank = flRefsRanking(), top = rank.filter(function(x){ return x.le.net > -LEARN_MIN; }).slice(0, reglesState().limites.refs).map(function(x){ return x.e.id; });
   rw.querySelectorAll("[data-fl-ref]").forEach(function(cb){
+    var id = cb.getAttribute("data-fl-ref");
+    if(top.indexOf(id) !== -1){ var sp = document.createElement("span"); sp.className = "hint"; sp.textContent = " · suggérée pour cette cible"; cb.parentNode.appendChild(sp); }
     cb.addEventListener("change", function(){
-      var id = cb.getAttribute("data-fl-ref");
       fl.expIds = fl.expIds.filter(function(x){ return x !== id; }); if(cb.checked) fl.expIds.push(id);
+      logCorrectionCtx("ref:" + id, cb.checked ? "pin" : "hide", fl.id, flTargetTerms());
       persist();
     });
   });
+  var ra = document.getElementById("btn-fl-refs-auto"); if(ra) ra.disabled = !top.length;
   // profil + cibles conseillées
   var ps = document.getElementById("fl-profil"), cur = ps.value;
   ps.innerHTML = '<option value="">Aucun profil précis</option>' + state.profils.map(function(p){ return '<option value="' + p.id + '">' + esc(p.nom) + '</option>'; }).join("");
@@ -5398,6 +5444,10 @@ document.getElementById("fl-profil").addEventListener("change", function(){ flCi
 });
 document.getElementById("fl-mode").addEventListener("change", function(){ flState().mode = this.value; persist(); });
 document.getElementById("fl-showtjm").addEventListener("change", function(){ flState().showTjm = this.checked; persist(); renderFlProjets(); });
+document.getElementById("btn-fl-refs-auto").addEventListener("click", function(){
+  var fl = flState(), top = flRefsRanking().filter(function(x){ return x.le.net > -LEARN_MIN; }).slice(0, reglesState().limites.refs).map(function(x){ return x.e.id; });
+  fl.expIds = top; persist(); renderFreelance();
+});
 document.getElementById("btn-fl-add").addEventListener("click", function(){ flState().services.push({ id: uid(), titre: "", description: "" }); persist(); renderFreelance(); });
 document.getElementById("btn-fl-offre-gen").addEventListener("click", function(){
   var fl = flState(), t = flTitre();
@@ -5552,11 +5602,7 @@ function generateOffreServiceParagraphs(){
   }
   // références : expériences cochées, sinon les deux plus proches des prestations
   var refs = state.library.experiences.filter(function(e){ return fl.expIds.indexOf(e.id) !== -1; });
-  if(!refs.length){
-    var kw = svcs.map(function(s){ return { term: s.titre, count: 1, kind: "skill" }; });
-    refs = state.library.experiences.filter(function(e){ return e.poste || e.entreprise; }).map(function(e, i){ return { e: e, i: i, sc: scoreAgainstKeywords([e.poste, e.entreprise, expDetails(e)].join(" "), kw) }; })
-      .sort(function(a, b){ return (b.sc - a.sc) || (a.i - b.i); }).slice(0, 2).map(function(x){ return x.e; });
-  }
+  if(!refs.length){ refs = flRefsRanking().slice(0, 2).map(function(x){ return x.e; }); }   // selon la cible, le persona, les prestations et les règles
   refs.slice(0, 3).forEach(function(e, i){
     var facts = expDetails(e).split("\n").map(trimEnd).filter(Boolean).slice(0, 2).map(lowerFirst);
     var s = en
@@ -5972,17 +6018,29 @@ function compoDecision(key, auto){
 function composeCv(){
   var cv = state.cv, lib = state.library, K = compoKeywords(), kws = K.all;
   cv.pins = cv.pins || {}; cv.hides = cv.hides || {};
-  var score = function(text){ return scoreAgainstKeywords(text, kws); };
-  var out = { exp: [], bullets: {}, skills: [], forms: [], certs: [], secs: [], auto: {}, gaps: [], K: K.has };
+  var R = reglesState(), W = R.poids, LIM = R.limites, ctx = ruleCtx(), ctxId = cv.profilId || "", ctxTerms = ruleTargetTerms();
+  var learned = {};
+  var score = function(text){ return scoreAgainstKeywords(text, kws) + ruleCtxScore(text, ctx); };   // pertinence : mots de la cible + contexte de la cible
+  // score d'ordre : pondérations modifiables (pertinence, contexte, chiffres, récence) + apprentissage des corrections
+  var order = function(text, key, dr){
+    var k = scoreAgainstKeywords(text, kws), c = ruleCtxScore(text, ctx), le = learnEffect(key, ctxId, ctxTerms);
+    if(le.pin || le.hide) learned[key] = le;
+    return { s: k + c + (le.net >= LEARN_MIN ? 1 : 0), o: W.pertinence * k + W.contexte * c + (/\d/.test(text) ? W.chiffres : 0) + (dr ? W.recence * recBucket(dr) : 0) + W.appris * le.score, le: le };
+  };
+  var out = { exp: [], bullets: {}, skills: [], forms: [], certs: [], secs: [], auto: {}, gaps: [], K: K.has, learned: learned };
 
   // expériences : pertinence, puis récence ; les 5 premières sont retenues d'office
   var exps = lib.experiences.filter(function(e){ return e.poste || e.entreprise; }).map(function(e, i){
-    return { e: e, i: i, s: score([e.poste, e.entreprise, expDetails(e)].join(" ")), r: dateRank(e.dates) };
+    var o = order([e.poste, e.entreprise, expDetails(e)].join(" "), "exp:" + e.id, e.dates);
+    return { e: e, i: i, s: o.s, o: o.o, le: o.le, r: dateRank(e.dates) };
   });
-  exps.sort(function(a, b){ return K.has ? ((b.s - a.s) || (b.r - a.r) || (a.i - b.i)) : ((b.r - a.r) || (a.i - b.i)); });
+  exps.sort(function(a, b){ return K.has ? ((b.o - a.o) || (b.r - a.r) || (a.i - b.i)) : ((b.r - a.r) || (a.i - b.i)); });
   var nRelE = exps.filter(function(x){ return x.s > 0; }).length, nE = 0;
   exps.forEach(function(x, rank){
-    var key = "exp:" + x.e.id, auto = K.has ? (x.s > 0 ? nE < 5 : (nRelE < 2 && rank < 2)) : rank < 5;   // avec une cible : les expériences concernées d'abord, les autres seulement pour ne pas laisser le CV vide
+    var key = "exp:" + x.e.id, auto;
+    if(K.has && x.le.net >= LEARN_MIN) auto = true;   // gardé à chaque fois pour ce type de cible : l'atelier a appris
+    else if(K.has && x.le.net <= -LEARN_MIN) auto = false;   // retiré à chaque fois pour ce type de cible
+    else auto = K.has ? (x.s > 0 ? nE < LIM.exp : ((!R.strict && rank < LIM.exp) || (nRelE < 2 && rank < 2))) : rank < LIM.exp;   // avec une cible : les expériences concernées d'abord, les autres seulement pour ne pas laisser le CV vide
     if(auto) nE++;
     out.auto[key] = auto;
     if(compoDecision(key, auto)) out.exp.push(x.e.id);
@@ -5992,9 +6050,9 @@ function composeCv(){
     var e = lib.experiences.find(function(z){ return z.id === id; });
     var ov = cv.expOverrides && cv.expOverrides[id];
     var lines = (typeof ov === "string" ? ov : (e.details || "")).split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
-    var max = pos < 2 ? 5 : 3;
+    var max = pos < 2 ? LIM.bulletsTop : LIM.bulletsAutres;
     if(typeof ov !== "string" && lines.length > max){
-      var scored = lines.map(function(l, i){ return { l: l, i: i, s: K.has ? score(l) : 0 }; });
+      var scored = lines.map(function(l, i){ return { l: l, i: i, s: K.has ? W.pertinence * scoreAgainstKeywords(l, kws) + W.contexte * ruleCtxScore(l, ctx) + (/\d/.test(l) ? W.chiffres : 0) : 0 }; });
       var keep = scored.slice().sort(function(a, b){ return (b.s - a.s) || (a.i - b.i); }).slice(0, max).map(function(x){ return x.i; }).sort(function(a, b){ return a - b; });
       lines = keep.map(function(i){ return lines[i]; });
     }
@@ -6002,20 +6060,20 @@ function composeCv(){
   });
 
   // compétences : celles qui comptent d'abord, 16 au plus
-  var sk = lib.competences.map(function(c, i){ return { c: c, i: i, s: score(c.label) }; });
-  sk.sort(function(a, b){ return (b.s - a.s) || (a.i - b.i); });
+  var sk = lib.competences.map(function(c, i){ var o = order(c.label, "skill:" + c.id); return { c: c, i: i, s: o.s, o: o.o, le: o.le }; });
+  sk.sort(function(a, b){ return (b.o - a.o) || (a.i - b.i); });
   var nAuto = 0, nRelS = sk.filter(function(x){ return x.s > 0; }).length;
   sk.forEach(function(x){
-    var key = "skill:" + x.c.id, auto = K.has ? (x.s > 0 ? nAuto < 16 : (nRelS < 4 && nAuto < 4)) : nAuto < 14;
+    var key = "skill:" + x.c.id, auto = (K.has && x.le.net >= LEARN_MIN) ? true : (K.has && x.le.net <= -LEARN_MIN) ? false : K.has ? (x.s > 0 ? nAuto < LIM.skills : ((!R.strict && nAuto < 8) || (nRelS < 4 && nAuto < 4))) : nAuto < Math.min(14, LIM.skills);
     if(auto) nAuto++;
     out.auto[key] = auto;
     if(compoDecision(key, auto)) out.skills.push(x.c.id);
   });
 
   // formations : les 4 plus pertinentes / récentes
-  var fs = lib.formations.filter(function(f){ return f.diplome || f.etablissement; }).map(function(f, i){ return { f: f, i: i, s: score([f.diplome, f.etablissement, f.details].join(" ")), r: dateRank(f.dates) }; });
-  fs.sort(function(a, b){ return (b.s - a.s) || (b.r - a.r) || (a.i - b.i); });
-  fs.forEach(function(x, rank){ var key = "form:" + x.f.id, auto = K.has ? rank < 4 && (x.s > 0 || rank < 2) : rank < 4; out.auto[key] = auto; if(compoDecision(key, auto)) out.forms.push(x.f.id); });
+  var fs = lib.formations.filter(function(f){ return f.diplome || f.etablissement; }).map(function(f, i){ var o = order([f.diplome, f.etablissement, f.details].join(" "), "form:" + f.id, f.dates); return { f: f, i: i, s: o.s, o: o.o, le: o.le, r: dateRank(f.dates) }; });
+  fs.sort(function(a, b){ return (b.o - a.o) || (b.r - a.r) || (a.i - b.i); });
+  fs.forEach(function(x, rank){ var key = "form:" + x.f.id, auto = (K.has && x.le.net >= LEARN_MIN) ? true : (K.has && x.le.net <= -LEARN_MIN) ? false : K.has ? rank < LIM.forms && (x.s > 0 || !R.strict || rank < 2) : rank < LIM.forms; out.auto[key] = auto; if(compoDecision(key, auto)) out.forms.push(x.f.id); });
 
   // certifications : celles qui servent le profil, sinon jusqu'à 3
   var cs = lib.certifications.filter(function(c){ return c.label; }).map(function(c, i){ return { c: c, i: i, s: score(c.label + " " + (c.organisme || "")) }; });
@@ -6110,11 +6168,11 @@ function renderComposition(){
   if(exps.length){
     html += '<p class="eyebrow" style="margin:10px 0 4px;">Expériences</p>' + exps.map(function(e){
       var on = c.exp.indexOf(e.id) !== -1, total = (e.details || "").split("\n").filter(function(x){ return x.trim(); }).length;
-      return row("exp:" + e.id, esc(e.poste || e.entreprise) + (e.entreprise && e.poste ? ", " + esc(e.entreprise) : ""), on, on ? (c.bullets[e.id] || []).length + "/" + total + " réalisations" : "");
+      return row("exp:" + e.id, esc(e.poste || e.entreprise) + (e.entreprise && e.poste ? ", " + esc(e.entreprise) : ""), on, (on ? (c.bullets[e.id] || []).length + "/" + total + " réalisations" : "") + learnedTag(c, "exp:" + e.id));
     }).join("");
   }
   var fl = lib.formations.filter(function(f){ return f.diplome || f.etablissement; });
-  if(fl.length) html += '<p class="eyebrow" style="margin:10px 0 4px;">Formations</p>' + fl.map(function(f){ return row("form:" + f.id, esc(f.diplome || f.etablissement), c.forms.indexOf(f.id) !== -1); }).join("");
+  if(fl.length) html += '<p class="eyebrow" style="margin:10px 0 4px;">Formations</p>' + fl.map(function(f){ return row("form:" + f.id, esc(f.diplome || f.etablissement), c.forms.indexOf(f.id) !== -1, learnedTag(c, "form:" + f.id).trim()); }).join("");
   var cl = lib.certifications.filter(function(x){ return x.label; });
   if(cl.length) html += '<p class="eyebrow" style="margin:10px 0 4px;">Certifications</p>' + cl.map(function(x){ return row("cert:" + x.id, esc(x.label), c.certs.indexOf(x.id) !== -1); }).join("");
   var sl = (lib.sections || []).filter(function(x){ return x.titre || x.texte; });
@@ -6130,6 +6188,7 @@ function renderComposition(){
       cv.pins = cv.pins || {}; cv.hides = cv.hides || {};
       delete cv.pins[key]; delete cv.hides[key];
       if(now) cv.pins[key] = true; else cv.hides[key] = true;
+      logCorrection(key, now ? "pin" : "hide");   // micro-correction : l'atelier s'en souvient pour ce type de cible
       renderCVPreview(); persist();
     });
   });
@@ -7402,7 +7461,7 @@ function extractJson(txt){
 // Demande à Claude : envoi direct avec le compte de la personne si la page tourne sur claude.ai, sinon avec sa clé d'API personnelle si elle en a saisi une, sinon copier-coller.
 // `what` décrit ce qui part, pour l'aperçu.
 function iaAsk(system, userObj, what){
-  var prompt = system + "\n\n=== DONNÉES (JSON) ===\n" + JSON.stringify(userObj, null, 1) + "\n\nRéponds uniquement par l'objet JSON demandé, sans texte avant ni après.";
+  var prompt = system + principesIA() + "\n\n=== DONNÉES (JSON) ===\n" + JSON.stringify(userObj, null, 1) + "\n\nRéponds uniquement par l'objet JSON demandé, sans texte avant ni après.";
   if(iaSample){
     var go = iaPrefs().skip ? Promise.resolve(true) : iaConfirm(what, prompt);
     return go.then(function(ok){
@@ -7642,6 +7701,211 @@ function renderVoixCard(){
 });
 
 
+
+/* ===================== RÈGLES : mise en avant selon la cible, apprentissage, principes de communication ===================== */
+
+var LEARN_MIN = 2;   // corrections dans le même sens avant que l'atelier applique le choix tout seul
+function principesDef(){
+  return [
+    { id: "sens", titre: "Une idée par phrase", texte: "Une phrase trop longue se lit mal et prête à confusion : le lecteur doit comprendre sans relire. Coupe en deux.", type: "longueur", param: 28, actif: true },
+    { id: "flou", titre: "Pas de mots flous", texte: "Un mot vague laisse le lecteur deviner (ambiguïté). Remplace-le par un fait précis : quoi, combien, pour qui.", type: "mots", param: ["divers", "diverses", "etc", "plusieurs", "différents", "quelques", "certains", "notamment", "variés", "un peu", "beaucoup de"], actif: true },
+    { id: "preuve", titre: "Un fait plutôt qu'une qualité", texte: "Dire « rigoureux » ne prouve rien ; une réalisation prouve. Cite ce que tu as fait.", type: "mots", param: ["dynamique", "motivé", "motivée", "rigoureux", "rigoureuse", "passionné", "passionnée", "polyvalent", "polyvalente", "sérieux", "sérieuse"], actif: true },
+    { id: "verbe", titre: "Commencer par ce que tu as fait", texte: "Une réalisation commence par un verbe d'action, pas par « responsable de » ou « en charge de ».", type: "debuts", param: ["responsable de", "en charge de", "participation à", "participé à", "chargé de", "chargée de", "tâches"], actif: true },
+    { id: "chiffres", titre: "Des chiffres pour se projeter", texte: "La cible se projette mieux avec un volume, un délai ou un résultat. Vise au moins une réalisation sur trois chiffrée.", type: "chiffre", param: 33, actif: true },
+    { id: "cible", titre: "Parler à la cible", texte: "Chaque élément retenu doit aider la cible à se projeter : même contexte, mêmes enjeux, un résultat qui compte pour elle.", type: "libre", param: null, actif: true }
+  ];
+}
+function reglesDef(){ return { poids: { pertinence: 3, contexte: 2, chiffres: 1, recence: 1, appris: 2 }, limites: { exp: 5, bulletsTop: 5, bulletsAutres: 3, skills: 16, forms: 4, refs: 3 }, strict: true, principes: principesDef(), corrections: [] }; }
+function reglesState(){
+  var p = state.profil, d = reglesDef(), r = p.regles || {};
+  r.poids = Object.assign(d.poids, r.poids); r.limites = Object.assign(d.limites, r.limites);
+  if(r.strict === undefined) r.strict = d.strict;
+  if(!Array.isArray(r.principes)) r.principes = d.principes;
+  if(!Array.isArray(r.corrections)) r.corrections = [];
+  p.regles = r; return r;
+}
+var RG_STOP = { pour:1, dans:1, avec:1, entre:1, autres:1, autre:1, activites:1, activite:1, services:1, service:1, societe:1, societes:1, entreprise:1, entreprises:1, toute:1, tous:1, leurs:1, leur:1, sont:1, plus:1, mais:1, cette:1, votre:1, notre:1 };
+function ctxWords(text){
+  var seen = {}, out = [];
+  norm(text || "").split(/[^a-z0-9]+/).forEach(function(w){ if(w.length >= 5 && !RG_STOP[w]){ var k = w.replace(/s$/, ""); if(!seen[k]){ seen[k] = 1; out.push(k); } } });
+  return out;
+}
+// Contexte de la cible : secteur de l'annonce ou de l'entreprise (candidature spontanée), secteur du profil.
+function ruleCtx(){
+  var a = state.annonce || {}, pr = typeof currentProfil === "function" ? currentProfil() : null;
+  return ctxWords([(a.meta || {}).secteur, pr && pr.secteur, a.clientFinal].join(" "));
+}
+function ruleCtxScore(text, ctx){
+  if(!ctx || !ctx.length) return 0;
+  var t = norm(text || ""), n = 0; ctx.forEach(function(w){ if(t.indexOf(w) !== -1) n++; });
+  return Math.min(3, n);
+}
+function recBucket(dates){ var y = dateRank(dates), now = new Date().getFullYear(); return y >= now ? 2 : (y >= now - 3 ? 1 : 0); }
+function ruleTargetTerms(){
+  var out = [], pr = typeof currentProfil === "function" ? currentProfil() : null;
+  ((state.annonce && state.annonce.keywords) || []).slice(0, 12).forEach(function(k){ out.push(norm(k.term)); });
+  if(pr) (pr.motsCles || []).slice(0, 8).forEach(function(k){ out.push(norm(k)); });
+  return out.filter(function(t, i){ return t && out.indexOf(t) === i; });
+}
+// Ce que les corrections passées disent d'un élément pour une cible proche (même profil ou au moins deux mots en commun).
+function learnEffect(key, ctxId, terms){
+  var pin = 0, hide = 0;
+  reglesState().corrections.forEach(function(c){
+    if(c.cle !== key) return;
+    var same = !!ctxId && c.profilId === ctxId, ov = (c.termes || []).filter(function(t){ return terms.indexOf(t) !== -1; }).length;
+    if(!(same || ov >= 2)) return;
+    if(c.action === "pin") pin++; else hide++;
+  });
+  return { pin: pin, hide: hide, net: pin - hide, score: Math.max(-3, Math.min(3, pin - hide)) };
+}
+function learnedTag(c, key){
+  var le = c.learned && c.learned[key]; if(!le || !le.net) return "";
+  return ' · <span title="Appris de tes corrections : ' + le.pin + ' ajout(s), ' + le.hide + ' retrait(s) pour une cible proche">' + (le.net >= LEARN_MIN ? "appris : toujours gardé" : le.net <= -LEARN_MIN ? "appris : toujours retiré" : "correction notée") + '</span>';
+}
+function ruleItemLabel(key){
+  var L = state.library, id = key.split(":")[1], t = key.split(":")[0], f = function(a){ return a.find(function(x){ return x.id === id; }); }, x;
+  if(t === "exp"){ x = f(L.experiences); return x ? (x.poste || x.entreprise) : key; }
+  if(t === "form"){ x = f(L.formations); return x ? (x.diplome || x.etablissement) : key; }
+  if(t === "skill"){ x = f(L.competences); return x ? x.label : key; }
+  if(t === "cert"){ x = f(L.certifications); return x ? x.label : key; }
+  if(t === "sec"){ x = f(L.sections || []); return x ? x.titre : key; }
+  if(t === "ref"){ x = f(L.experiences); return x ? "Référence : " + (x.poste || x.entreprise) : key; }
+  return key;
+}
+function logCorrectionCtx(key, action, ctxId, terms){
+  var R = reglesState(), now = Date.now();
+  if(!terms.length && !ctxId) return;                      // sans cible, rien à apprendre
+  for(var i = R.corrections.length - 1; i >= 0; i--){
+    var c = R.corrections[i];
+    if(c.cle === key && c.profilId === ctxId && now - c.ts < 600000){ if(c.action !== action) R.corrections.splice(i, 1); return; }   // même geste : déjà noté ; geste inverse très récent : annulé
+  }
+  R.corrections.push({ id: uid(), ts: now, cle: key, label: ruleItemLabel(key), action: action, profilId: ctxId || "", termes: terms.slice(0, 12) });
+  if(R.corrections.length > 300) R.corrections.shift();
+  refreshStatusDots();
+}
+function logCorrection(key, action){ logCorrectionCtx(key, action, state.cv.profilId || "", ruleTargetTerms()); }
+
+// Références freelance : classées selon la cible et le persona du projet, les prestations, les chiffres, la récence et les corrections passées.
+function flTargetTerms(){
+  var pj = flProjet(), fl = flState();
+  return ctxWords([pj.cible, pj.persona].concat(fl.services.map(function(x){ return x.titre; })).join(" "));
+}
+function flRefsRanking(){
+  var fl = flState(), pj = flProjet(), W = reglesState().poids, ctx = ctxWords([pj.cible, pj.persona].join(" ")), terms = flTargetTerms();
+  var kw = fl.services.filter(function(x){ return (x.titre || "").trim(); }).map(function(x){ return { term: x.titre, count: 1, kind: "skill" }; });
+  var rows = state.library.experiences.filter(function(e){ return e.poste || e.entreprise; }).map(function(e, i){
+    var text = [e.poste, e.entreprise, expDetails(e)].join(" "), k = scoreAgainstKeywords(text, kw), c = ruleCtxScore(text, ctx), le = learnEffect("ref:" + e.id, fl.id, terms);
+    return { e: e, i: i, k: k, c: c, le: le, o: W.pertinence * k + W.contexte * c + (/\d/.test(text) ? W.chiffres : 0) + W.recence * recBucket(e.dates) + W.appris * le.score };
+  });
+  rows.sort(function(a, b){ return ((a.le.net <= -LEARN_MIN) - (b.le.net <= -LEARN_MIN)) || (b.o - a.o) || (a.i - b.i); });
+  return rows;
+}
+
+// ---- principes de communication
+function pEsc(t){ return norm(t).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function principesUnits(){
+  var units = [], c = composeCv(), lib = state.library, cv = state.cv;
+  if((cv.resume || "").trim()) units.push({ zone: "CV : accroche", texte: cv.resume });
+  c.exp.forEach(function(id){ var e = lib.experiences.find(function(z){ return z.id === id; }); (c.bullets[id] || []).forEach(function(l){ units.push({ zone: "CV : " + (e ? (e.poste || e.entreprise) : "expérience"), texte: l, puce: true }); }); });
+  try{ var l = state.lettre, paras = (Array.isArray(l.corps) && l.corps.length ? l.corps : generateLettre()).filter(function(x){ return x && !/^(Madame, Monsieur|Dear )/.test(x); });
+    paras.forEach(function(x){ units.push({ zone: "Lettre", texte: x }); }); }catch(e){}
+  try{ var q = pqState(); [q.titre, q.accroche, q.delai].forEach(function(x){ if((x || "").trim()) units.push({ zone: "Plaquette", texte: x }); }); }catch(e){}
+  return units;
+}
+function principesCheck(units){
+  var out = [], bullets = units.filter(function(u){ return u.puce; });
+  reglesState().principes.filter(function(pc){ return pc.actif; }).forEach(function(pc){
+    var add = function(u, extrait, conseil){ out.push({ pid: pc.id, titre: pc.titre, zone: u.zone, extrait: extrait, conseil: conseil || pc.texte }); };
+    if(pc.type === "longueur"){
+      units.forEach(function(u){ String(u.texte).split(/(?<=[.!?;])\s+|\n/).forEach(function(ph){ var n = ph.trim().split(/\s+/).filter(Boolean).length; if(n > (+pc.param || 28)) add(u, ph.trim().split(/\s+/).slice(0, 9).join(" ") + "… (" + n + " mots)"); }); });
+    } else if(pc.type === "mots"){
+      (pc.param || []).forEach(function(w){ var re = new RegExp("(^|[^a-z0-9])" + pEsc(w) + "([^a-z0-9]|$)"); units.forEach(function(u){ if(re.test(norm(u.texte))) add(u, "« " + w + " »"); }); });
+    } else if(pc.type === "debuts"){
+      bullets.forEach(function(u){ var t = norm(u.texte).replace(/^[^a-z0-9]+/, ""); (pc.param || []).forEach(function(w){ if(t.indexOf(norm(w)) === 0) add(u, u.texte.split(/\s+/).slice(0, 6).join(" ") + "…"); }); });
+    } else if(pc.type === "chiffre" && bullets.length){
+      var n = bullets.filter(function(u){ return /\d/.test(u.texte); }).length, pct = Math.round(n / bullets.length * 100);
+      if(pct < (+pc.param || 33)) out.push({ pid: pc.id, titre: pc.titre, zone: "CV", extrait: n + " réalisation(s) chiffrée(s) sur " + bullets.length + " (" + pct + " %, objectif " + (+pc.param || 33) + " %)", conseil: pc.texte });
+    }
+  });
+  return out;
+}
+function principesIA(){
+  var l = reglesState().principes.filter(function(pc){ return pc.actif && (pc.titre || "").trim(); });
+  if(!l.length) return "";
+  return "\n\nPrincipes de communication de la personne, à respecter dans ta réponse :\n" + l.map(function(pc){ return "- " + pc.titre + (pc.texte ? " : " + pc.texte : "") + (pc.type === "mots" && (pc.param || []).length ? " (mots à éviter : " + pc.param.join(", ") + ")" : ""); }).join("\n");
+}
+function findingsHtml(f, max){
+  if(!f.length) return '<p class="hint">Aucun écart avec tes principes.</p>';
+  return '<ul class="ats-list">' + f.slice(0, max || 99).map(function(x){ return "<li><strong>" + esc(x.titre) + "</strong> · " + esc(x.zone) + " : " + esc(x.extrait) + (x.conseil ? '<br><span class="hint">' + esc(x.conseil) + "</span>" : "") + "</li>"; }).join("") + "</ul>" + (max && f.length > max ? '<p class="hint">+ ' + (f.length - max) + " autre(s) dans l'onglet Règles.</p>" : "");
+}
+function renderPrincipesCv(){
+  var box = document.getElementById("cv-principes"); if(!box) return;
+  var f = principesCheck(principesUnits().filter(function(u){ return /^CV/.test(u.zone); }));
+  box.innerHTML = '<p class="hint" style="margin:0 0 6px;">' + (f.length ? f.length + " point(s) à revoir d'après tes principes." : "Le CV respecte tes principes.") + ' <button class="btn btn-ghost btn-sm" type="button" data-goto="regles">Gérer les principes</button></p>' + (f.length ? findingsHtml(f, 4) : "");
+  box.querySelectorAll("[data-goto]").forEach(function(b){ b.addEventListener("click", function(){ switchTab(b.getAttribute("data-goto")); }); });
+}
+
+// ---- onglet Règles
+var RG_POIDS = [["pertinence", "Les mots de la cible", "Un élément qui contient les mots de l'annonce, du poste visé ou du profil passe devant."],
+  ["contexte", "Le même contexte que la cible", "Secteur, type de structure, public : la personne se projette mieux avec ce qui lui ressemble."],
+  ["chiffres", "Les preuves chiffrées", "Une réalisation avec un volume, un délai ou un résultat prouve plus qu'une description."],
+  ["recence", "La récence", "Ce qui est récent passe devant ce qui est ancien."],
+  ["appris", "Mes corrections passées", "Ce que tu as déjà gardé ou retiré pour une cible proche."]];
+var RG_LIM = [["exp", "Expériences", 1, 10], ["bulletsTop", "Réalisations des 2 premières", 1, 10], ["bulletsAutres", "Réalisations des suivantes", 1, 8], ["skills", "Compétences", 4, 30], ["forms", "Formations", 1, 8], ["refs", "Références freelance", 1, 6]];
+function renderRegles(){
+  var R = reglesState(), pw = document.getElementById("rg-poids"); if(!pw) return;
+  pw.innerHTML = RG_POIDS.map(function(x){ return '<div class="field" style="margin-bottom:8px;"><label for="rg-p-' + x[0] + '">' + x[1] + ' : <strong id="rg-pv-' + x[0] + '">' + R.poids[x[0]] + '</strong></label><input type="range" min="0" max="5" step="1" id="rg-p-' + x[0] + '" value="' + R.poids[x[0]] + '" data-rg-poids="' + x[0] + '"><span class="hint">' + x[2] + '</span></div>'; }).join("");
+  document.getElementById("rg-strict").checked = !!R.strict;
+  document.getElementById("rg-limites").innerHTML = RG_LIM.map(function(x){ return '<div class="field"><label for="rg-l-' + x[0] + '">' + x[1] + '</label><input type="number" min="' + x[2] + '" max="' + x[3] + '" id="rg-l-' + x[0] + '" value="' + R.limites[x[0]] + '" data-rg-lim="' + x[0] + '"></div>'; }).join("");
+  var pr = document.getElementById("rg-principes"); pr.innerHTML = "";
+  R.principes.forEach(function(pc, i){
+    var d = document.createElement("details"); d.className = "exp-block"; d.open = !!pc._open;
+    var isList = pc.type === "mots" || pc.type === "debuts", isNum = pc.type === "longueur" || pc.type === "chiffre";
+    d.innerHTML = '<summary style="cursor:pointer;display:flex;gap:8px;align-items:center;"><input type="checkbox" data-rg-pa="' + i + '"' + (pc.actif ? " checked" : "") + ' aria-label="Principe actif"><strong>' + esc(pc.titre || "Principe sans titre") + '</strong><span class="hint">' + ({ mots: "mots à éviter", debuts: "débuts de phrase", longueur: "longueur", chiffre: "chiffres", libre: "rappel libre" }[pc.type] || "") + '</span></summary>' +
+      '<div style="margin-top:10px;"><div class="field"><label>Titre</label><input type="text" data-rg-pf="titre" data-i="' + i + '" value="' + esc(pc.titre) + '"></div>' +
+      '<div class="field"><label>Pourquoi (le conseil affiché, repris par l\'IA)</label><textarea data-rg-pf="texte" data-i="' + i + '" style="min-height:56px;">' + esc(pc.texte) + '</textarea></div>' +
+      '<div class="row2"><div class="field"><label>Ce que l\'atelier vérifie</label><select data-rg-pf="type" data-i="' + i + '">' + [["libre", "Rien (rappel libre)"], ["mots", "Mots à éviter"], ["debuts", "Débuts de phrase à éviter"], ["longueur", "Longueur de phrase (mots)"], ["chiffre", "Part de réalisations chiffrées (%)"]].map(function(t){ return '<option value="' + t[0] + '"' + (pc.type === t[0] ? " selected" : "") + ">" + t[1] + "</option>"; }).join("") + '</select></div>' +
+      (isList ? '<div class="field"><label>Liste (séparée par des virgules)</label><textarea data-rg-pf="param" data-i="' + i + '" style="min-height:56px;">' + esc((pc.param || []).join(", ")) + '</textarea></div>' : isNum ? '<div class="field"><label>Valeur</label><input type="number" min="1" max="200" data-rg-pf="param" data-i="' + i + '" value="' + esc(String(pc.param || "")) + '"></div>' : '') + '</div>' +
+      '<div class="toolbar-row"><button class="btn btn-ghost btn-sm" type="button" data-rg-del="' + i + '">Supprimer ce principe</button></div></div>';
+    pr.appendChild(d);
+    d.addEventListener("toggle", function(){ pc._open = d.open; });
+  });
+  var ap = document.getElementById("rg-appris"), cs = R.corrections, byKey = {};
+  cs.forEach(function(c){ var k = c.cle + "|" + (c.profilId || ""); (byKey[k] = byKey[k] || { c: c, pin: 0, hide: 0 })[c.action]++; });
+  var keys = Object.keys(byKey);
+  ap.innerHTML = keys.length ? '<ul class="ats-list">' + keys.map(function(k){ var x = byKey[k], pf = state.profils.find(function(q){ return q.id === x.c.profilId; });
+    return '<li><strong>' + esc(ruleItemLabel(x.c.cle) || x.c.label) + '</strong> : ' + (x.pin ? x.pin + " ajout(s)" : "") + (x.pin && x.hide ? ", " : "") + (x.hide ? x.hide + " retrait(s)" : "") + (pf ? " pour le profil « " + esc(pf.nom) + " »" : " pour une cible proche") + ((x.pin - x.hide) >= LEARN_MIN ? ' <em>(appliqué tout seul : gardé)</em>' : (x.hide - x.pin) >= LEARN_MIN ? ' <em>(appliqué tout seul : retiré)</em>' : "") + ' <button class="btn btn-ghost btn-sm" type="button" data-rg-forget="' + esc(k) + '">Oublier</button></li>'; }).join("") + '</ul><div class="toolbar-row"><button class="btn btn-ghost btn-sm" id="rg-forget-all" type="button">Tout oublier</button></div>'
+    : '<p class="empty-note">Rien pour l\'instant. Coche ou décoche des éléments dans la carte « Composition » de l\'onglet CV, avec un profil ou une annonce : l\'atelier apprendra.</p>';
+  bindRegles();
+}
+function reglesChanged(){ state.cv.autoMode = true; recomposerCV(); renderCVPreview(); persist(); refreshStatusDots(); }   // le CV se recompose avec les nouvelles règles
+function bindRegles(){
+  var R = reglesState();
+  document.querySelectorAll("[data-rg-poids]").forEach(function(el){ el.addEventListener("input", function(){ var k = el.getAttribute("data-rg-poids"); R.poids[k] = +el.value; document.getElementById("rg-pv-" + k).textContent = el.value; reglesChanged(); }); });
+  document.querySelectorAll("[data-rg-lim]").forEach(function(el){ el.addEventListener("change", function(){ var k = el.getAttribute("data-rg-lim"), x = RG_LIM.find(function(q){ return q[0] === k; }); R.limites[k] = Math.max(x[2], Math.min(x[3], parseInt(el.value, 10) || x[2])); el.value = R.limites[k]; reglesChanged(); }); });
+  document.querySelectorAll("[data-rg-pa]").forEach(function(el){ el.addEventListener("click", function(e){ e.stopPropagation(); }); el.addEventListener("change", function(){ R.principes[+el.getAttribute("data-rg-pa")].actif = el.checked; persist(); }); });
+  document.querySelectorAll("[data-rg-pf]").forEach(function(el){
+    el.addEventListener(el.tagName === "SELECT" ? "change" : "input", function(){
+      var pc = R.principes[+el.getAttribute("data-i")], f = el.getAttribute("data-rg-pf");
+      if(f === "param"){ pc.param = (pc.type === "mots" || pc.type === "debuts") ? el.value.split(/[,;\n]/).map(function(x){ return x.trim(); }).filter(Boolean) : (parseInt(el.value, 10) || null); }
+      else if(f === "type"){ pc.type = el.value; pc.param = (el.value === "mots" || el.value === "debuts") ? [] : (el.value === "longueur" ? 28 : el.value === "chiffre" ? 33 : null); pc._open = true; persist(); renderRegles(); return; }
+      else pc[f] = el.value;
+      if(f === "titre"){ var sm = el.closest("details").querySelector("summary strong"); if(sm) sm.textContent = el.value || "Principe sans titre"; }
+      persist();
+    });
+  });
+  document.querySelectorAll("[data-rg-del]").forEach(function(b){ b.addEventListener("click", function(){ R.principes.splice(+b.getAttribute("data-rg-del"), 1); persist(); renderRegles(); }); });
+  document.querySelectorAll("[data-rg-forget]").forEach(function(b){ b.addEventListener("click", function(){ var k = b.getAttribute("data-rg-forget").split("|"); R.corrections = R.corrections.filter(function(c){ return !(c.cle === k[0] && (c.profilId || "") === k[1]); }); persist(); renderRegles(); refreshStatusDots(); }); });
+  var fa = document.getElementById("rg-forget-all"); if(fa) fa.addEventListener("click", function(){ R.corrections = []; persist(); renderRegles(); refreshStatusDots(); });
+}
+document.getElementById("rg-strict").addEventListener("change", function(){ reglesState().strict = this.checked; reglesChanged(); });
+document.getElementById("rg-reset-poids").addEventListener("click", function(){ var d = reglesDef(), R = reglesState(); R.poids = d.poids; R.limites = d.limites; R.strict = d.strict; reglesChanged(); renderRegles(); });
+document.getElementById("rg-reset-principes").addEventListener("click", function(){ if(!confirm("Rétablir les principes de base ? Tes principes ajoutés ou modifiés seront remplacés.")) return; reglesState().principes = principesDef(); persist(); renderRegles(); });
+document.getElementById("rg-add").addEventListener("click", function(){ reglesState().principes.push({ id: uid(), titre: "Nouveau principe", texte: "", type: "libre", param: null, actif: true, _open: true }); persist(); renderRegles(); });
+document.getElementById("rg-check").addEventListener("click", function(){
+  var f = principesCheck(principesUnits()), out = document.getElementById("rg-check-out");
+  out.innerHTML = '<p class="hint">' + f.length + " point(s) trouvé(s) dans le CV, la lettre et la plaquette en cours.</p>" + findingsHtml(f);
+});
 
 /* ===================== GUIDE PAS À PAS (débutants) ===================== */
 

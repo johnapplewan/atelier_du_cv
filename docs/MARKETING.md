@@ -14,8 +14,8 @@ Pour les personnes qui candidatent souvent (étudiants, personnes en recherche d
 
 | Audience | Situation | Promesse | Preuves vérifiables |
 |---|---|---|---|
-| Étudiants et alternants | Peu d'expérience, besoin d'un premier CV, de stages, d'alternance | Un premier CV avec ce qu'on a déjà ; niveau honnête par métier ; manques signalés | Profils « accessible sans expérience », liste des manques, offres d'alternance et candidatures spontanées, fiche d'entretien |
-| Recherche d'emploi | Plusieurs candidatures par semaine, CV à adapter à chaque annonce | Dix candidatures sans dix CV à refaire | Score de correspondance, CV au format ATS, lettre avec contrôle de style, suivi et relances à 10 jours, e-mail d'envoi |
+| Étudiants et alternants | Peu d'expérience, besoin d'un premier CV, de stages, d'alternance | Un premier CV avec ce qu'on a déjà ; niveau honnête par métier ; manques signalés | Guide pas à pas et questionnaire « je n'ai pas de CV », profils « accessible sans expérience », liste des manques, offres d'alternance et candidatures spontanées, fiche d'entretien |
+| Recherche d'emploi | Plusieurs candidatures par semaine, CV à adapter à chaque annonce | Dix candidatures sans dix CV à refaire | Score de correspondance, règles de mise en avant et principes de communication personnalisables, CV au format ATS, lettre avec contrôle de style, suivi et relances à 10 jours, e-mail d'envoi |
 | Salariés en transition | Salariés qui préparent un autre métier, avec des années d'expérience mais pas dans le métier visé | Changer de métier sans repartir de zéro | Un profil par métier visé avec niveau honnête (« déjà exercé », « accessible sans expérience », « à renforcer »), CV qui remet l'utile devant, CV anonymisé, candidatures spontanées |
 | Freelances | Démarcher des clients et des intermédiaires | Une offre claire, une plaquette A4, un e-mail qui se lit | Projets par client ou par cible, plusieurs propositions et plaquettes à tester (professionnels ou particuliers), tarif au choix (à partir de, devis, gratuit et sans engagement…), offres suggérées, accroches, 10 modèles de plaquette, suivi des envois et statistiques, signature avec SIRET |
 
