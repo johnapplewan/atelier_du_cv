@@ -4733,11 +4733,13 @@ function applyProfilToDossier(id, force){
 }
 
 // Profil le plus proche d'une annonce (recouvrement mots-clés + intitulé).
-function bestProfilForAnnonce(){
-  if(!state.profils.length) return null;
-  var text = norm([state.annonce.poste, state.annonce.texte].join(" "));
+function bestProfilForAnnonce(){ return bestProfilForText([state.annonce.poste, state.annonce.texte].join(" ")); }
+function bestProfilForText(raw, onlyIds){
+  var list = onlyIds ? state.profils.filter(function(p){ return onlyIds(p); }) : state.profils;
+  if(!list.length) return null;
+  var text = norm(raw);
   var best = null, bs = 0;
-  state.profils.forEach(function(pr){
+  list.forEach(function(pr){
     var sc = 0;
     (pr.motsCles || []).forEach(function(k){ if(countTerm(text, norm(k)) > 0) sc += 1; });
     if(pr.titreVise && text.indexOf(norm(pr.titreVise)) !== -1) sc += 3;
@@ -4747,6 +4749,14 @@ function bestProfilForAnnonce(){
   return bs >= 2 ? best : null;
 }
 
+// Menu « CV à utiliser » d'une carte (entreprise ou offre) : le profil le plus proche est proposé, sinon celui choisi en haut de page.
+function cvProfilSelectHtml(id, text, fallbackId, spontaneeOnly){
+  if(!state.profils.length) return "";
+  var ok = function(p){ return !spontaneeOnly || (p.modes && p.modes.spontanee); };
+  var best = text ? bestProfilForText(text, ok) : null, cur = best ? best.id : fallbackId;
+  return '<label class="hint" style="display:flex;gap:6px;align-items:center;margin:0 0 8px;flex-wrap:wrap;">CV à envoyer : <select data-cvprof="' + esc(id) + '" style="max-width:100%;">' + state.profils.filter(ok).map(function(p){
+    return '<option value="' + p.id + '"' + (p.id === cur ? " selected" : "") + '>' + esc(p.nom) + (best && p.id === best.id ? " (proposé)" : "") + '</option>'; }).join("") + '</select></label>';
+}
 function renderProfilSelect(){
   var sel = document.getElementById("an-profil");
   if(!sel) return;
@@ -4984,6 +4994,7 @@ function renderRechResults(){
     var b = document.createElement("div"); b.className = "exp-block";
     b.innerHTML = '<div class="exp-block-head"><strong>' + esc(nom) + '</strong><span class="hint">' + esc(r.ville) + (r.cp ? " (" + esc(r.cp) + ")" : "") + '</span></div>' +
       '<p class="hint" style="margin:0 0 8px;">' + esc(naf) + ' · effectif : ' + esc(r.effectif) + (r.employeur ? " · employeur" : "") + (r.creation ? " · créée en " + esc(r.creation) : "") + '</p>' +
+      cvProfilSelectHtml("s" + r.siren, "", r._profilId, true) +
       '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-spont="' + r.siren + '">Candidature spontanée</button>' +
       '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="https://duckduckgo.com/?q=' + encodeURIComponent(nom + " recrutement " + r.ville) + '">Chercher leur page recrutement</a>' +
       '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(r.fiche) + '">Fiche entreprise</a>' +
@@ -4991,7 +5002,11 @@ function renderRechResults(){
     wrap.appendChild(b);
   });
   wrap.querySelectorAll("[data-spont]").forEach(function(btn){
-    btn.addEventListener("click", function(){ startSpontanee(state.rechercheResultats.find(function(r){ return r.siren === btn.getAttribute("data-spont"); })); });
+    btn.addEventListener("click", function(){
+      var res = state.rechercheResultats.find(function(r){ return r.siren === btn.getAttribute("data-spont"); }), sel = btn.closest(".exp-block").querySelector("[data-cvprof]");
+      if(sel && sel.value) res = Object.assign({}, res, { _profilId: sel.value });
+      startSpontanee(res);
+    });
   });
   wrap.querySelectorAll("[data-ecarter]").forEach(function(btn){
     btn.addEventListener("click", function(){ state.profil.ecartes = state.profil.ecartes || {}; state.profil.ecartes[btn.getAttribute("data-ecarter")] = true; persist(); renderRechResults(); });
@@ -5524,11 +5539,13 @@ function renderOffRecruiters(){
   l.slice(0, 30).forEach(function(r, i){
     var d = document.createElement("div"); d.className = "exp-block";
     d.innerHTML = '<div class="exp-block-head"><strong>' + esc(r.nom) + '</strong></div><p class="hint" style="margin:0 0 8px;">' + esc([r.ville, r.nafLabel, r.taille && r.taille !== "Non diffusé" ? r.taille : ""].filter(Boolean).join(" · ")) + '</p>' +
+      cvProfilSelectHtml("r" + i, "", document.getElementById("off-profil").value, true) +
       '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-off-rec="' + i + '">Candidature spontanée</button>' + (r.url ? '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(r.url) + '">Voir sur La bonne alternance</a>' : "") + '</div>';
     w.appendChild(d);
   });
   w.querySelectorAll("[data-off-rec]").forEach(function(b){ b.addEventListener("click", function(){
-    var r = state.offresRecruteurs[+b.getAttribute("data-off-rec")], pr = offCurrentProfil(), st = document.getElementById("off-status");
+    var r = state.offresRecruteurs[+b.getAttribute("data-off-rec")], sel = b.closest(".exp-block").querySelector("[data-cvprof]"), st = document.getElementById("off-status");
+    var pr = state.profils.find(function(x){ return x.id === (sel && sel.value); }) || offCurrentProfil();
     if(!pr){ st.textContent = "Crée d'abord un profil de recherche (onglet Mes profils) pour préparer une candidature spontanée."; return; }
     startSpontanee({ _profilId: pr.id, nom: r.nom, naf: r.nafCode, nafLabel: r.nafLabel, fiche: r.url || "", ville: r.ville, cp: r.cp });
   }); });
@@ -5559,17 +5576,18 @@ function renderOffResults(){
       '<p class="hint" style="margin:0 0 6px;">' + esc(o.entreprise || "Entreprise non communiquée") + ' · ' + esc(o.lieu) + ' · ' + esc(o.contrat) + (o.salaire ? ' · ' + esc(o.salaire) : '') + (o.experience ? ' · ' + esc(o.experience) : '') + (o.date ? ' · publiée le ' + esc(o.date) : '') + '</p>' +
       '<p style="font-size:13px;color:var(--ink-600);line-height:1.5;margin:0 0 8px;">' + esc(o.description.replace(/\s+/g, " ").slice(0, 260)) + (o.description.length > 260 ? "…" : "") + '</p>' +
       (m.missing.length ? '<p class="hint" style="margin:0 0 8px;">Mots-clés de l\'offre absents de ta base : ' + esc(m.missing.slice(0, 6).join(", ")) + '.</p>' : '') +
+      cvProfilSelectHtml("o" + o.id, o.intitule + " " + o.description, document.getElementById("off-profil").value, false) +
       '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-off-use="' + esc(o.id) + '">Candidater avec cette offre</button>' +
       '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(o.url) + '">Voir ' + (o.source === "jobspipe" ? "l\'annonce d\'origine" : "sur La bonne alternance") + '</a>' +
       '<button class="btn btn-ghost btn-sm" type="button" data-off-skip="' + esc(o.id) + '">Écarter</button></div>';
     wrap.appendChild(d);
   });
-  wrap.querySelectorAll("[data-off-use]").forEach(function(b){ b.addEventListener("click", function(){ startFromOffre(state.offresResultats.find(function(o){ return o.id === b.getAttribute("data-off-use"); })); }); });
+  wrap.querySelectorAll("[data-off-use]").forEach(function(b){ b.addEventListener("click", function(){ var sel = b.closest(".exp-block").querySelector("[data-cvprof]"); startFromOffre(state.offresResultats.find(function(o){ return o.id === b.getAttribute("data-off-use"); }), sel && sel.value); }); });
   wrap.querySelectorAll("[data-off-skip]").forEach(function(b){ b.addEventListener("click", function(){ state.profil.offresEcartees = state.profil.offresEcartees || {}; state.profil.offresEcartees[b.getAttribute("data-off-skip")] = true; persist(); renderOffResults(); }); });
 }
 
 // Nouvelle candidature pré-remplie avec l'offre (poste, entreprise, texte, lieu, contrat, salaire, lien).
-function startFromOffre(o){
+function startFromOffre(o, profilId){
   if(!o) return;
   persist();
   document.getElementById("btn-new-dossier").click();
@@ -5577,8 +5595,10 @@ function startFromOffre(o){
   state.annonce.meta = { lieu: o.lieu, contrat: o.contrat, salaire: o.salaire, date: o.date, secteur: "" };
   state.annonce.source = o.source || "france-travail";   // les offres d'API ne partent jamais vers l'IA
   reanalyzeAnnonce();
-  var pr = offCurrentProfil();
-  if(pr){ state.cv.profilId = pr.id; state.cv.profilManuel = true; applyProfilToDossier(pr.id, false); }
+  var pr = state.profils.find(function(x){ return x.id === profilId; }) || offCurrentProfil();
+  if(pr){ state.cv.profilId = pr.id; state.cv.profilManuel = true; applyProfilToDossier(pr.id, true); }
+  var cvPoste = cleanPosteTitle(o.intitule); if(cvPoste) state.cv.titre = cvPoste;   // le titre du CV reprend le poste de l'offre
+  recomposerCV();
   syncDossierUI(); persist();
   switchTab("cv");
 }
