@@ -14,7 +14,7 @@ Pour les personnes qui candidatent souvent (étudiants, personnes en recherche d
 
 | Audience | Situation | Promesse | Preuves vérifiables |
 |---|---|---|---|
-| Étudiants et alternants | Peu d'expérience, besoin d'un premier CV, de stages, d'alternance | Un premier CV avec ce qu'on a déjà ; niveau honnête par métier ; manques signalés | Profils « accessible sans expérience », astérisques de manque, offres d'alternance et candidatures spontanées, fiche d'entretien |
+| Étudiants et alternants | Peu d'expérience, besoin d'un premier CV, de stages, d'alternance | Un premier CV avec ce qu'on a déjà ; niveau honnête par métier ; manques signalés | Profils « accessible sans expérience », liste des manques, offres d'alternance et candidatures spontanées, fiche d'entretien |
 | Recherche d'emploi | Plusieurs candidatures par semaine, CV à adapter à chaque annonce | Dix candidatures sans dix CV à refaire | Score de correspondance, CV au format ATS, lettre avec contrôle de style, suivi et relances à 10 jours, e-mail d'envoi |
 | Salariés en transition | Salariés qui préparent un autre métier, avec des années d'expérience mais pas dans le métier visé | Changer de métier sans repartir de zéro | Un profil par métier visé avec niveau honnête (« déjà exercé », « accessible sans expérience », « à renforcer »), CV qui remet l'utile devant, CV anonymisé, candidatures spontanées |
 | Freelances | Démarcher des clients et des intermédiaires | Une offre claire, une plaquette A4, un e-mail qui se lit | Offres suggérées, accroches, 10 modèles de plaquette, suivi des envois et statistiques, signature avec SIRET |
@@ -22,7 +22,7 @@ Pour les personnes qui candidatent souvent (étudiants, personnes en recherche d
 ## Messages clés
 
 1. **Une base, tous les documents** : on importe son parcours une fois.
-2. **Rien d'inventé** : ce qui manque est signalé par un astérisque.
+2. **Rien d'inventé** : ce qui manque est listé à côté du CV, jamais écrit dedans.
 3. **Sur ton ordinateur** : pas de compte pour le moment, pas de cookie, pas de suivi.
 4. **Gratuit pour le moment** : aucun prix, aucun compte ; l'assistant d'écriture passe par le compte Claude de la personne, sa propre clé d'API facultative ou un copier-coller : personne ne paie la consommation des autres.
 

@@ -413,6 +413,12 @@
   .cv-doc [contenteditable]:focus{ outline:2px solid var(--accent,#888); outline-offset:2px; }
   .ats-list{ margin:0 0 6px; padding-left:18px; font-size:12.5px; line-height:1.55; color:var(--ink-600); }
   .ats-far{ color:var(--danger,#B3261E); font-weight:600; }
+  #cv-preview{ position:relative; }
+  .cv-doc .page-cut{ position:absolute; left:0; right:0; border-top:2px dashed #B3261E; height:0; pointer-events:none; }
+  .cv-doc .page-cut span{ position:absolute; right:6px; top:-9px; background:#fff; color:#B3261E; font-size:10px; font-weight:700; padding:0 6px; border-radius:8px; }
+  .cv-length{ display:flex; gap:8px; align-items:center; flex-wrap:wrap; font-size:12.5px; margin:0 0 8px; }
+  .cv-length .len-pill{ font-weight:700; padding:3px 10px; border-radius:999px; color:#fff; }
+  .cv-length .len-green{ background:#2E7D32; } .cv-length .len-yellow{ background:#B58105; } .cv-length .len-orange{ background:#D26A0A; } .cv-length .len-red{ background:#B3261E; }
   .cv-doc .gap-star{ color:#B3261E; font-weight:700; cursor:help; margin-left:2px; }
   .cv-doc .gap-note{ color:#B3261E; font-size:11px; margin:6px 0; }
   .cv-doc .cv-skillline{ margin:2px 0; }
@@ -687,6 +693,16 @@
           <p class="hint" style="margin:6px 0 10px;">Tu veux changer de voie ? Écris le métier : l'atelier vérifie que ta base contient de quoi l'asseoir.</p>
           <div style="display:flex;gap:8px;"><input type="text" id="viser-metier" placeholder="ex. Négociateur immobilier, UX designer…"><button class="btn btn-sm" id="btn-viser-metier" type="button">Vérifier et créer</button></div>
           <p class="hint" id="viser-result" style="margin:8px 0 0;"></p>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+          <span class="eyebrow">Créer un profil sur mesure</span>
+          <p class="hint" style="margin:6px 0 10px;">Pour une orientation que la liste ne propose pas (ex. « communication audiovisuelle », « vidéo corporate », « formation soft skills et gestion du stress »). Aucune vérification : c'est toi qui décides. Le nom sert de référence ; le titre est celui qui s'affichera sur le CV.</p>
+          <div class="row2">
+            <div class="field"><label for="pf-ref">Nom du profil (référence)</label><input type="text" id="pf-ref" placeholder="ex. Vidéo corporate"></div>
+            <div class="field"><label for="pf-titre">Titre sur le CV</label><input type="text" id="pf-titre" placeholder="ex. Réalisateur de films d'entreprise"></div>
+          </div>
+          <div class="field"><label for="pf-mots">Mots-clés (séparés par des virgules)</label><input type="text" id="pf-mots" placeholder="ex. montage, étalonnage, Premiere Pro, motion design, tournage"></div>
+          <div class="toolbar-row"><button class="btn btn-sm" id="btn-pf-create" type="button">Créer ce profil</button><span class="hint" id="pf-status"></span></div>
         </div>
         <span class="eyebrow">Mes profils</span>
         <div id="profils-list" style="margin-top:8px;"></div>
@@ -963,15 +979,28 @@
     <section class="panel panel-doc" id="panel-cv">
       <div class="panel-head">
         <h2>Le CV, format ATS</h2>
-        <p>Le CV est composé à partir de ta base, selon le profil et l'annonce : les éléments les plus pertinents sont retenus, triés et organisés. Il se met à jour dès que ta base évolue. Un astérisque (*) signale ce qui pourrait manquer.</p>
+        <p>Le CV est composé à partir de ta base, selon le profil et l'annonce : les éléments les plus pertinents sont retenus, triés et organisés. Il se met à jour dès que ta base évolue. Ce qui pourrait manquer est listé sous le score et dans la composition, jamais dans le CV.</p>
       </div>
       <div class="split">
         <div class="controls-col">
 
+          <div class="card" style="margin-bottom:16px;" id="card-cible">
+            <span class="eyebrow">À qui s'adresse ce CV ?</span>
+            <p class="hint" style="margin:6px 0 10px;">Chaque candidature a son CV. Choisis un profil, ou écris le poste ou le secteur visé : le titre, l'accroche et les éléments retenus se recomposent depuis ta base. Une annonce ou une offre déjà chargée sert aussi de cible.</p>
+            <div class="field"><label for="cv-orientation">Profil utilisé</label><select id="cv-orientation"></select></div>
+            <div class="row2">
+              <div class="field"><label for="cv-cible-poste">Poste ou secteur visé</label><input type="text" id="cv-cible-poste" placeholder="ex. Monteur vidéo, communication audiovisuelle"></div>
+              <div class="field"><label for="cv-cible-ent">Entreprise visée (facultatif)</label><input type="text" id="cv-cible-ent" placeholder="ex. Studio Lumière"></div>
+            </div>
+            <label class="hint" style="display:flex;gap:6px;align-items:center;"><input type="checkbox" id="cv-titre-annonce" checked> Reprendre le poste visé comme titre du CV</label>
+            <label class="hint" style="display:flex;gap:6px;align-items:center;margin-bottom:8px;"><input type="checkbox" id="cv-reset-pins" checked> Repartir de la sélection automatique (retire mes cases cochées et décochées)</label>
+            <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-cv-adapter" type="button">Adapter tout le CV à cette cible</button><span class="hint" id="cv-adapt-status"></span></div>
+          </div>
+
           <div class="card" style="margin-bottom:16px;">
             <div class="row2">
               <div class="field"><label for="cv-nom">Nom complet</label><input type="text" id="cv-nom" placeholder="ex. Camille Farrow"></div>
-              <div class="field"><label for="cv-titre">Titre / accroche</label><input type="text" id="cv-titre" placeholder="ex. Chargée de communication junior"></div>
+              <div class="field"><label for="cv-titre">Titre de ce CV</label><input type="text" id="cv-titre" placeholder="ex. Chargée de communication junior"></div>
             </div>
             <div class="row2">
               <div class="field"><label for="cv-email">Email</label><input type="email" id="cv-email" placeholder="prenom.nom@mail.com"></div>
@@ -1054,6 +1083,7 @@
           </div>
           <div style="margin:0 0 8px;"><label class="hint" style="display:flex;gap:6px;align-items:center;"><input type="checkbox" id="anon-mask-employers"> Anonymiser aussi les noms d'employeurs dans le PDF anonymisé</label>
           <label class="hint" style="display:flex;gap:6px;align-items:center;"><input type="checkbox" id="anon-mask-schools"> Anonymiser aussi les noms d'établissements de formation</label></div>
+          <div class="cv-length" id="cv-length" aria-live="polite"></div>
           <div class="paper cv-doc" id="cv-preview"></div>
           <span class="download-status" id="cv-download-status"></span>
         </div>
@@ -1747,6 +1777,7 @@ function switchTab(tab){
   if(tab === "plaquette" && typeof renderPlaquette === "function"){ renderPlaquette(); }
   if(tab === "email" && typeof renderEmail === "function"){ renderEmail(); }
   if(tab === "entretien" && typeof renderEntretienFiche === "function"){ renderEntretienFiche(); }
+  if(tab === "cv" && typeof scheduleCvLength === "function"){ setTimeout(renderCvLength, 60); }
   if(tab === "offres" && typeof offProfilOptions === "function"){ renderOffAvailability(); offProfilOptions(); renderOffResults(); }
   TABS.forEach(function(t){
     document.getElementById("panel-"+t).classList.toggle("active", t === tab);
@@ -1885,7 +1916,7 @@ function makePdfClone(el, width){
   clone.removeAttribute("id");
   clone.querySelectorAll("[id]").forEach(function(n){ n.removeAttribute("id"); });
   clone.querySelectorAll("[contenteditable]").forEach(function(n){ n.removeAttribute("contenteditable"); });
-  clone.querySelectorAll(".gap-star, .gap-note").forEach(function(n){ n.remove(); });
+  clone.querySelectorAll(".gap-star, .gap-note, .page-cut").forEach(function(n){ n.remove(); });
   clone.style.cssText = "position:fixed;left:-10000px;top:0;width:" + width + "px;min-height:0;padding:0;margin:0;border:0;box-shadow:none;border-radius:0;background:#fff;";
   document.body.appendChild(clone);
   return clone;
@@ -2094,7 +2125,8 @@ function reanalyzeAnnonce(fromText){
   state.annonce.entreprise = anEntreprise.value;
   state.annonce.url = anUrl.value;
   state.annonce.texte = anTexte.value;
-  state.annonce.keywords = extractKeywords(anTexte.value);
+  state.annonce.keywords = extractKeywords(anTexte.value.trim() ? anTexte.value : anPoste.value);
+  if(!state.annonce.keywords.length && !anTexte.value.trim() && anPoste.value.trim()) state.annonce.keywords = cibleKeywords(anPoste.value);
   if(typeof runEmetteurAnalysis === "function"){ runEmetteurAnalysis(); renderAnalyseCard(); }
   if(typeof autoProfilForAnnonce === "function"){ autoProfilForAnnonce(); }
   renderKeywordChips();
@@ -2173,10 +2205,11 @@ function atsAnalysis(){
   var found = [], missing = [];
   kws.forEach(function(k){
     if(hasTerm(full, k.term)){ found.push(k.term); return; }
-    var item = { term: k.term, kind: k.kind, count: k.count, action: "manual", detail: "", ids: [] };
+    var item = { term: k.term, kind: k.kind, count: k.count, action: "manual", detail: "", ids: [], inBase: false };
     var ex = excluded.filter(function(x){ return hasTerm(x.text, k.term); });
-    if(ex.length){ item.action = "include-exp"; item.ids = ex.map(function(x){ return x.e.id; }); item.detail = "Présent dans l'expérience « " + (ex[0].e.poste || ex[0].e.entreprise) + " », aujourd'hui hors de ce CV."; }
+    if(ex.length){ item.inBase = true; item.action = "include-exp"; item.ids = ex.map(function(x){ return x.e.id; }); item.detail = "Présent dans l'expérience « " + (ex[0].e.poste || ex[0].e.entreprise) + " », aujourd'hui hors de ce CV."; }
     else if(hasTerm(own, k.term)){
+      item.inBase = true;
       if(k.kind === "skill"){ item.action = "add-skill"; item.detail = "Présent ailleurs dans ta base (lettres, rubriques, annexe) mais pas dans ce CV."; }
       else { item.detail = "Mot fréquent de l'annonce, déjà évoqué dans ta base : reprends-le dans une réalisation si c'est pertinent."; }
     }
@@ -2190,7 +2223,9 @@ function atsAnalysis(){
   var poste = (state.annonce.poste || "").trim();
   if(poste && countTerm(norm([p.titre, state.cv.resume].join(" ")), norm(poste)) === 0 && !hasTerm(norm([p.titre, state.cv.resume].join(" ")), poste)) notes.push({ action: "manual", text: "L'intitulé visé (« " + poste + " ») n'apparaît ni dans ton titre ni dans l'accroche. Si c'est bien ton métier visé, reprends-le tel quel." });
   if(annonceLooksEnglish() && state.cv.lang !== "en") notes.push({ action: "manual", text: "L'annonce est en anglais : passe le CV en English (boutons « Langue du CV »)." });
-  return { pct: Math.round((found.length / kws.length) * 100), found: found, missing: missing, notes: notes, total: kws.length };
+  missing.sort(function(a, b){ return ((b.kind === "skill" ? 100 : 0) + (b.count || 0)) - ((a.kind === "skill" ? 100 : 0) + (a.count || 0)); });   // priorité : compétences, puis fréquence dans l'annonce
+  var inBase = missing.filter(function(m){ return m.inBase; }).length;
+  return { pct: Math.round((found.length / kws.length) * 100), potentiel: Math.round(((found.length + inBase) / kws.length) * 100), found: found, missing: missing, notes: notes, total: kws.length };
 }
 
 function computeATS(){
@@ -2217,10 +2252,13 @@ function renderATS(){
   panel.style.display = "block";
   scoreEl.textContent = a.pct + "%";
   var tier = atsTier(a.pct);
-  var labelMap = { success: "bonne couverture", caution: "couverture partielle", danger: "couverture faible" };
-  tierEl.innerHTML = '<span class="tier-pill ' + tier + '">' + labelMap[tier] + '</span>';
-  missingEl.textContent = a.missing.length
-    ? "Mots-clés absents du CV : " + a.missing.slice(0, 8).map(function(m){ return m.term; }).join(", ") + (a.missing.length > 8 ? "…" : "")
+  var ecart = a.pct >= 85 ? "écart faible" : a.pct >= 70 ? "écart modéré" : a.pct >= 40 ? "écart important" : "écart très important";
+  tierEl.innerHTML = '<span class="tier-pill ' + tier + '">' + ecart + '</span> ' + (a.potentiel > a.pct ? "Jusqu'à " + a.potentiel + " % en ajoutant ce que ta base contient déjà." : "");
+  var inBaseL = a.missing.filter(function(m){ return m.inBase; }), absentL = a.missing.filter(function(m){ return !m.inBase; });
+  var chipList = function(l){ return l.slice(0, 10).map(function(m){ return displayTerm(m.term); }).join(", ") + (l.length > 10 ? "…" : ""); };
+  missingEl.innerHTML = a.missing.length
+    ? (inBaseL.length ? '<strong>Dans ta base, pas sur ce CV</strong> (à ajouter, par ordre de priorité) : ' + esc(chipList(inBaseL)) + '.<br>' : '') +
+      (absentL.length ? '<strong>Absents de ta base</strong> : ' + esc(chipList(absentL)) + '. Si tu les maîtrises, ajoute-les à ta base ; sinon, ne les mets pas dans ton CV.' : '')
     : "Tous les mots-clés détectés apparaissent dans le CV.";
 
   var auto = a.missing.filter(function(m){ return m.action !== "manual"; });
@@ -2239,18 +2277,24 @@ function renderATS(){
     html += "</ul>";
   }
   if(manual.length || manualNotes.length){
-    html += '<p class="eyebrow" style="margin:10px 0 4px;">À toi de jouer</p><ul class="ats-list">';
+    html += '<p class="eyebrow" style="margin:10px 0 4px;">À toi de décider</p><ul class="ats-list">';
     manualNotes.forEach(function(n){ html += "<li>" + esc(n.text) + "</li>"; });
-    manual.forEach(function(m){ html += "<li><strong>" + esc(displayTerm(m.term)) + "</strong> : " + esc(m.detail) + "</li>"; });
+    manual.forEach(function(m){ html += "<li><strong>" + esc(displayTerm(m.term)) + "</strong> : " + esc(m.detail) + (m.kind === "skill" ? ' <button class="btn btn-ghost btn-sm" type="button" data-ats-own="' + esc(m.term) + '">Je le maîtrise : l\'ajouter</button>' : "") + "</li>"; });
     html += "</ul>";
   }
-  document.getElementById("ats-suggestions").innerHTML = html || '<p class="hint">Rien à améliorer côté mots-clés.</p>';
+  var sugEl = document.getElementById("ats-suggestions");
+  sugEl.innerHTML = html || '<p class="hint">Rien à améliorer côté mots-clés.</p>';
+  sugEl.querySelectorAll("[data-ats-own]").forEach(function(b){ b.addEventListener("click", function(){
+    var t = b.getAttribute("data-ats-own"), sk = addSkillRaw(t) || state.library.competences.find(function(c){ return norm(c.label) === norm(t); });
+    if(sk){ state.cv.pins = state.cv.pins || {}; state.cv.pins["skill:" + sk.id] = true; if(state.cv.hides) delete state.cv.hides["skill:" + sk.id]; }
+    onBaseChanged(true); renderSkillChips(); renderSkillSuggestions(); renderCVPreview(); persist();
+  }); });
 
   var res = document.getElementById("ats-result");
   var far = a.pct < ATS_FAR_THRESHOLD && !canAuto;
   var txt = "";
   if(ATS_LAST_LOG){ txt += ATS_LAST_LOG.before + "% → " + a.pct + "% après optimisation. " + (ATS_LAST_LOG.done.length ? "Fait : " + ATS_LAST_LOG.done.join(" ; ") + "." : "Rien de plus à ajouter automatiquement."); }
-  if(far){ txt += (txt ? " " : "") + "Ce poste semble trop éloigné de ton profil actuel (" + a.missing.length + " mots-clés sur " + a.total + " non couverts). Le plan d'action liste ce qu'il faudrait faire évoluer pour l'atteindre."; }
+  if(far){ txt += (txt ? " " : "") + "Écart très important : " + a.missing.length + " mots-clés sur " + a.total + " ne sont pas couverts. Vérifie la liste « Absents de ta base » : si tu maîtrises certains de ces points, ajoute-les à ta base ; sinon, ce poste est éloigné de ton parcours actuel et le plan d'action détaille ce qu'il faudrait acquérir."; }
   res.textContent = txt;
   res.className = far ? "hint ats-far" : "hint";
 }
@@ -3073,6 +3117,7 @@ function renderCVPreview(){
   wrap.innerHTML = html || '<p class="empty-note">Importe un CV dans « Ma base » et remplis ton profil : le CV se construit ici.</p>';
   renderComposition();
   renderATS();
+  scheduleCvLength();
 }
 
 // HTML du CV d'après l'état courant ("" si rien à montrer). Sert à l'aperçu et au CV anonymisé.
@@ -3095,7 +3140,6 @@ function cvHtml(){
   html += '</div>';
 
   if(cv.resume) html += '<h3 class="cv-h">' + L.profil + '</h3><p data-edit="resume::resume" contenteditable="true" spellcheck="false">' + esc(cv.resume) + '</p>';
-  else html += '<p class="gap-note"><sup class="gap-star">*</sup> Accroche à ajouter (voir « Adapter l\'accroche »).</p>';
   if(p.atouts.length) html += '<h3 class="cv-h">' + L.atouts + '</h3><div class="cv-skills">' + p.atouts.map(function(a){ return '<span class="chip cv-skill" style="background:var(--accent-soft);color:var(--accent-ink);">' + esc(a) + '</span>'; }).join("") + '</div>';
 
   var c = composeCv(), lib = state.library;
@@ -3133,7 +3177,7 @@ function cvHtml(){
       var x = byId(lib.certifications, id); if(!x) return "";
       return "<li>" + esc(x.label) + (x.organisme ? ", " + esc(x.organisme) : "") + (x.annee ? " (" + esc(x.annee) + ")" : "") + "</li>";
     }).join("") + '</ul>';
-  } else if(star("sec:cert")){ html += '<p class="gap-note">' + star("sec:cert") + ' Certifications : voir « À compléter ».</p>'; }
+  }
 
   if(c.skills.length){
     // compétences regroupées par catégorie, en texte simple (lisible par les outils de tri)
@@ -3195,7 +3239,10 @@ function anonymizedCvElement(maskEmployers, maskSchools){
 }
 
 function initCVModule(){
-  ["nom", "titre", "email", "tel", "ville", "lien", "langues"].forEach(function(f){
+  var titreEl = document.getElementById("cv-titre");
+  titreEl.value = state.cv.titre || state.profil.titre || "";
+  titreEl.addEventListener("input", function(){ state.cv.titre = titreEl.value; renderCVPreview(); refreshCVStatus(); persist(); });
+  ["nom", "email", "tel", "ville", "lien", "langues"].forEach(function(f){
     var el = document.getElementById("cv-" + f);
     el.value = state.profil[f] || "";
     el.addEventListener("input", function(){ state.profil[f] = el.value; renderCVPreview(); refreshCVStatus(); persist(); if(f === "nom" && typeof renderPersonBar === "function") renderPersonBar(); });
@@ -4705,6 +4752,7 @@ function renderProfilSelect(){
   if(!sel) return;
   sel.innerHTML = '<option value="">Aucun profil</option>' + state.profils.map(function(p){ return '<option value="' + p.id + '"' + (state.cv.profilId === p.id ? " selected" : "") + '>' + esc(p.nom) + ' : ' + esc(p.titreVise) + '</option>'; }).join("");
   document.getElementById("an-profil-field").style.display = state.profils.length ? "block" : "none";
+  renderCvOrientation();
 }
 document.getElementById("an-profil").addEventListener("change", function(){
   state.cv.profilManuel = true;
@@ -4742,6 +4790,97 @@ document.getElementById("btn-viser-metier").addEventListener("click", function()
   var pr = createProfil(dom, ev.level, { titreVise: title, nom: title });
   out.textContent = "Profil créé : « " + title + " » (" + PROFIL_LEVELS[ev.level].label.toLowerCase() + ").";
   inp.value = ""; pr._open = true; renderProfils(); refreshStatusDots();
+});
+
+/* ===================== ORIENTER LE CV : profil, poste visé, annonce ===================== */
+
+// Sans texte d'annonce, la cible (poste ou secteur écrit à la main) fournit ses propres mots-clés : les mots de l'intitulé.
+function cibleKeywords(poste){
+  var stop = { pour:1, dans:1, avec:1, chez:1, sans:1, tout:1, toute:1, plus:1, cdi:1, cdd:1, stage:1, alternance:1, freelance:1 };
+  var seen = {}, out = [];
+  norm(cleanPosteTitle(poste)).split(/[^a-z0-9+#]+/).forEach(function(w){ if(w.length >= 4 && !stop[w] && !seen[w]){ seen[w] = 1; out.push({ term: w, count: 2, kind: "skill" }); } });
+  return out;
+}
+// Retire « (H/F) », « F/H »… de l'intitulé d'une annonce pour en faire un titre de CV.
+function cleanPosteTitle(t){
+  return String(t || "").replace(/\s*\(?\s*(?<![A-Za-zÀ-ÿ])[HF]\s*[\/-]\s*[HF](?:\s*[\/-]\s*[XN])?(?![A-Za-zÀ-ÿ])\s*\)?/gi, " ").replace(/\s+[-–—]\s*(?:cdi|cdd|alternance|stage|freelance)\s*$/i, "").replace(/\s+/g, " ").trim();
+}
+function renderCvOrientation(){
+  var sel = document.getElementById("cv-orientation"); if(!sel) return;
+  sel.innerHTML = '<option value="">Aucun profil (CV général)</option>' + state.profils.map(function(p){ return '<option value="' + p.id + '"' + (state.cv.profilId === p.id ? " selected" : "") + '>' + esc(p.nom) + ' : ' + esc(p.titreVise) + '</option>'; }).join("");
+}
+// Recompose tout le CV pour la cible : profil, intitulé visé (titre), accroche, éléments retenus.
+function cvAdapter(){
+  var st = document.getElementById("cv-adapt-status"), poste = document.getElementById("cv-cible-poste").value.trim(), ent = document.getElementById("cv-cible-ent").value.trim();
+  var sel = document.getElementById("cv-orientation").value;
+  if(!poste && !sel && !(state.annonce.poste || "").trim()){ st.textContent = "Choisis un profil ou écris le poste ou le secteur visé."; return; }
+  if(poste){ anPoste.value = poste; }
+  if(ent){ anEntreprise.value = ent; }
+  if(document.getElementById("cv-reset-pins").checked){ state.cv.pins = {}; state.cv.hides = {}; state.cv.expOverrides = {}; }
+  state.cv.profilManuel = !!sel;
+  reanalyzeAnnonce();                                   // mots-clés de la cible ; choisit le profil le plus proche si aucun n'est imposé
+  var id = sel || state.cv.profilId || "";
+  if(id){ applyProfilToDossier(id, true); } else { state.cv.titre = ""; recomposerCV(); }
+  var cible = (anPoste.value || "").trim();
+  if(document.getElementById("cv-titre-annonce").checked && cible){ state.cv.titre = cleanPosteTitle(cible); }
+  if(!(state.cv.resume || "").trim() && state.cv.titre){ state.cv.resume = state.cv.titre + "."; document.getElementById("cv-resume").value = state.cv.resume; }
+  document.getElementById("btn-resume-auto").click();   // ajoute les mots-clés de la cible que ta base confirme
+  document.getElementById("cv-titre").value = state.cv.titre || state.profil.titre || "";
+  recomposerCV(); renderExpList(); renderFormList(); renderSkillChips(); renderSkillSuggestions(); renderCvOrientation(); renderCVPreview(); renderProfils(); refreshStatusDots(); persist();
+  var c = state.cv.compo, a = atsAnalysis();
+  st.textContent = "CV recomposé : " + c.exp.length + " expérience(s), " + c.skills.length + " compétence(s), " + c.forms.length + " formation(s)" + (a ? ", correspondance " + a.pct + " %" : "") + ".";
+}
+document.getElementById("btn-cv-adapter").addEventListener("click", cvAdapter);
+document.getElementById("cv-orientation").addEventListener("change", function(){ state.cv.profilManuel = true; if(this.value){ applyProfilToDossier(this.value, true); } else { state.cv.profilId = ""; state.cv.titre = ""; recomposerCV(); } syncDossierUI(); persist(); });
+
+// Longueur du CV et découpe en pages telles qu'à l'export : mêmes règles que le PDF (A4, marges de 32 pt, texte resserré jusqu'à 2 pages).
+var CV_LEN = [{ max: 2, cls: "len-green", txt: "longueur idéale" }, { max: 3, cls: "len-yellow", txt: "acceptable pour un parcours long" }, { max: 4, cls: "len-orange", txt: "trop long : retire des éléments" }, { max: 99, cls: "len-red", txt: "beaucoup trop long : à raccourcir" }];
+function cvPageLayout(){
+  var el = document.getElementById("cv-preview"); if(!el || !el.querySelector(".cv-name")) return null;
+  var availW = 595.28 - 64, availH = 841.89 - 64, clone = null, width = 680, pagePx = 0;
+  for(; width <= 800; width += 20){
+    if(clone) clone.remove();
+    clone = makePdfClone(el, width);
+    pagePx = availH * width / availW;
+    if(Math.ceil(clone.getBoundingClientRect().height / (pagePx * 0.97)) <= 2) break;
+  }
+  var top = clone.getBoundingClientRect().top, total = clone.getBoundingClientRect().height, brk = [];
+  clone.querySelectorAll(".cv-item, li, p, .cv-skills, .cv-sub").forEach(function(n){ brk.push(n.getBoundingClientRect().bottom - top); });
+  clone.remove();
+  var cuts = [], sy = 0;
+  while(total - sy > 2){
+    var end = Math.min(total, sy + pagePx);
+    if(end < total){ var cand = 0; brk.forEach(function(b){ if(b > sy + pagePx * 0.55 && b <= end) cand = b; }); if(cand) end = cand; cuts.push(end); }
+    sy = end;
+  }
+  return { pages: cuts.length + 1, cuts: cuts.map(function(c){ return c / total; }), squeezed: width > 680 };
+}
+function renderCvLength(){
+  var el = document.getElementById("cv-preview"), bar = document.getElementById("cv-length"); if(!el || !bar) return;
+  el.querySelectorAll(".page-cut").forEach(function(n){ n.remove(); });
+  if(!document.getElementById("panel-cv").classList.contains("active")){ return; }
+  var lay = cvPageLayout();
+  if(!lay){ bar.innerHTML = ""; return; }
+  var lv = CV_LEN.find(function(x){ return lay.pages <= x.max; });
+  bar.innerHTML = '<span class="len-pill ' + lv.cls + '">' + lay.pages + (lay.pages > 1 ? " pages" : " page") + '</span><span>' + lv.txt + (lay.pages === 1 ? " (1 page convient surtout aux parcours courts)" : "") + '. Les traits rouges montrent les coupures du PDF.</span>';
+  var h = el.scrollHeight;
+  lay.cuts.forEach(function(f, i){ var d = document.createElement("div"); d.className = "page-cut"; d.style.top = Math.round(f * h) + "px"; d.innerHTML = "<span>Page " + (i + 2) + "</span>"; el.appendChild(d); });
+}
+var scheduleCvLength = debounce(renderCvLength, 350);
+
+// Profil sur mesure : aucune condition, la personne décide du nom, du titre et des mots-clés.
+document.getElementById("btn-pf-create").addEventListener("click", function(){
+  var st = document.getElementById("pf-status"), ref = document.getElementById("pf-ref").value.trim(), titre = document.getElementById("pf-titre").value.trim() || ref;
+  var mots = document.getElementById("pf-mots").value.split(/[,;\n]/).map(function(x){ return x.trim(); }).filter(Boolean);
+  if(!ref){ st.textContent = "Donne un nom au profil."; return; }
+  if(state.profils.some(function(x){ return norm(x.nom) === norm(ref); })){ st.textContent = "Un profil porte déjà ce nom."; return; }
+  var dom = { key: "custom", label: ref, titres: [titre], naf: [], mots: mots };
+  var pr = createProfil(dom, "assise", { nom: ref, titreVise: titre, motsCles: mots, niveau: "assise" });
+  pr.modes = PROFIL_LEVELS.exerce.modes;
+  pr.accroche = profilAccroche(pr); pr._open = true; persist();
+  st.textContent = "Profil créé : « " + ref + " ». Règle son accroche et son CV type ci-dessous.";
+  ["pf-ref", "pf-titre", "pf-mots"].forEach(function(i){ document.getElementById(i).value = ""; });
+  renderProfils(); renderProfilSelect(); refreshStatusDots();
 });
 
 /* ===================== RECHERCHE D'ENTREPRISES (candidatures spontanées) ===================== */
@@ -5668,8 +5807,10 @@ function composeCv(){
     return { e: e, i: i, s: score([e.poste, e.entreprise, expDetails(e)].join(" ")), r: dateRank(e.dates) };
   });
   exps.sort(function(a, b){ return K.has ? ((b.s - a.s) || (b.r - a.r) || (a.i - b.i)) : ((b.r - a.r) || (a.i - b.i)); });
+  var nRelE = exps.filter(function(x){ return x.s > 0; }).length, nE = 0;
   exps.forEach(function(x, rank){
-    var key = "exp:" + x.e.id, auto = rank < 5;
+    var key = "exp:" + x.e.id, auto = K.has ? (x.s > 0 ? nE < 5 : (nRelE < 2 && rank < 2)) : rank < 5;   // avec une cible : les expériences concernées d'abord, les autres seulement pour ne pas laisser le CV vide
+    if(auto) nE++;
     out.auto[key] = auto;
     if(compoDecision(key, auto)) out.exp.push(x.e.id);
   });
@@ -5690,9 +5831,9 @@ function composeCv(){
   // compétences : celles qui comptent d'abord, 16 au plus
   var sk = lib.competences.map(function(c, i){ return { c: c, i: i, s: score(c.label) }; });
   sk.sort(function(a, b){ return (b.s - a.s) || (a.i - b.i); });
-  var nAuto = 0;
+  var nAuto = 0, nRelS = sk.filter(function(x){ return x.s > 0; }).length;
   sk.forEach(function(x){
-    var key = "skill:" + x.c.id, auto = K.has ? (x.s > 0 && nAuto < 16) || (nAuto < 8) : nAuto < 14;
+    var key = "skill:" + x.c.id, auto = K.has ? (x.s > 0 ? nAuto < 16 : (nRelS < 4 && nAuto < 4)) : nAuto < 14;
     if(auto) nAuto++;
     out.auto[key] = auto;
     if(compoDecision(key, auto)) out.skills.push(x.c.id);
@@ -5701,7 +5842,7 @@ function composeCv(){
   // formations : les 4 plus pertinentes / récentes
   var fs = lib.formations.filter(function(f){ return f.diplome || f.etablissement; }).map(function(f, i){ return { f: f, i: i, s: score([f.diplome, f.etablissement, f.details].join(" ")), r: dateRank(f.dates) }; });
   fs.sort(function(a, b){ return (b.s - a.s) || (b.r - a.r) || (a.i - b.i); });
-  fs.forEach(function(x, rank){ var key = "form:" + x.f.id, auto = rank < 4; out.auto[key] = auto; if(compoDecision(key, auto)) out.forms.push(x.f.id); });
+  fs.forEach(function(x, rank){ var key = "form:" + x.f.id, auto = K.has ? rank < 4 && (x.s > 0 || rank < 2) : rank < 4; out.auto[key] = auto; if(compoDecision(key, auto)) out.forms.push(x.f.id); });
 
   // certifications : celles qui servent le profil, sinon jusqu'à 3
   var cs = lib.certifications.filter(function(c){ return c.label; }).map(function(c, i){ return { c: c, i: i, s: score(c.label + " " + (c.organisme || "")) }; });
@@ -5776,10 +5917,8 @@ function computeGaps(c){
   }
   return gaps;
 }
-function gapStar(c, key){
-  var g = (c.gaps || []).filter(function(x){ return x.key === key; });
-  return g.length ? '<sup class="gap-star" title="' + esc(g.map(function(x){ return x.text; }).join(" ")) + '">*</sup>' : "";
-}
+// Les manques ne figurent jamais dans le CV : ils sont listés à côté (carte « Composition », sous le score).
+function gapStar(c, key){ return ""; }
 
 /* ---- carte « Composition de ce CV » dans l'onglet CV ---- */
 function renderComposition(){
@@ -6741,6 +6880,8 @@ function syncDossierUI(){
   anTexte.value = state.annonce.texte || "";
   renderAnalyseCard();
   document.getElementById("cv-resume").value = state.cv.resume || "";
+  document.getElementById("cv-titre").value = state.cv.titre || state.profil.titre || "";
+  document.getElementById("cv-cible-poste").value = state.annonce.poste || ""; document.getElementById("cv-cible-ent").value = state.annonce.entreprise || "";
   document.querySelectorAll('#lang-segmented button').forEach(function(b){ var on = b.getAttribute("data-lang") === state.cv.lang; b.classList.toggle("active", on); b.setAttribute("aria-pressed", on ? "true" : "false"); });
   document.getElementById("l-destinataire").value = state.lettre.destinataire || "";
   document.getElementById("l-disponibilite").value = state.lettre.disponibilite || "";
@@ -6820,7 +6961,7 @@ function renderPersonBar(){
 
 // Recharge tout ce qui dépend de la personne (profil, base, suivi) puis de la candidature active.
 function syncPersonUI(){
-  ["nom", "titre", "email", "tel", "ville", "lien", "langues"].forEach(function(f){ document.getElementById("cv-" + f).value = state.profil[f] || ""; });
+  ["nom", "email", "tel", "ville", "lien", "langues"].forEach(function(f){ document.getElementById("cv-" + f).value = state.profil[f] || ""; });
   renderPhotoThumb();
   renderArchiveList(); renderReferencePanel();
   renderCertList(); renderSources(); renderBaseMap();
