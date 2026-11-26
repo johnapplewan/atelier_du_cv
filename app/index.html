@@ -725,8 +725,8 @@
     <!-- PANEL OFFRES -->
     <section class="panel" id="panel-offres">
       <div class="panel-head">
-        <h2>Offres d'alternance</h2>
-        <p>Cherche les offres d'alternance et les entreprises qui recrutent souvent, près de chez toi, avec La bonne alternance. Un clic prépare la candidature : annonce, mots-clés, CV et lettre sur mesure.</p>
+        <h2>Offres d'emploi et d'alternance</h2>
+        <p>Cherche des offres d'alternance (La bonne alternance) ou tous types de contrats (JobsPipe, en test), près de chez toi. Un clic prépare la candidature : annonce, mots-clés, CV et lettre sur mesure.</p>
       </div>
       <div style="max-width:980px;">
         <div class="card" id="off-unavailable" style="margin-bottom:16px;">
@@ -735,6 +735,8 @@
           <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-off-to-annonce" type="button">Coller une annonce</button><button class="btn btn-ghost btn-sm" id="btn-off-to-recherche" type="button">Chercher des entreprises à démarcher</button></div>
         </div>
         <div class="card" id="off-form-card" style="margin-bottom:16px;">
+          <div class="field" style="margin-bottom:10px;"><label for="off-source">Source des offres</label>
+            <select id="off-source"><option value="alternance">Alternance : La bonne alternance (gratuit, officiel)</option><option value="jobspipe">Tous contrats : JobsPipe (phase de test)</option></select></div>
           <div class="row2">
             <div class="field"><label for="off-profil">Profil de recherche</label><select id="off-profil"></select></div>
             <div class="field"><label for="off-q">Mots-clés (gardent les offres qui en contiennent au moins un)</label><input type="text" id="off-q" placeholder="ex. développeur web, communication"></div>
@@ -744,17 +746,17 @@
             <div class="field"><label for="off-lieu">Lieu</label>
               <div style="display:flex;gap:8px;"><input type="text" id="off-lieu" placeholder="ex. Reims"><button class="btn btn-sm" id="btn-off-lieu" type="button">Chercher le lieu</button></div>
               <div class="chips" id="off-lieu-list" style="margin-top:6px;"></div></div>
-            <div class="field"><label for="off-dist">Rayon</label><select id="off-dist"><option value="10">10 km</option><option value="30" selected>30 km</option><option value="50">50 km</option><option value="100">100 km</option></select></div>
+            <div class="field"><label for="off-dist">Rayon (alternance)</label><select id="off-dist"><option value="10">10 km</option><option value="30" selected>30 km</option><option value="50">50 km</option><option value="100">100 km</option></select></div>
           </div>
-          <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-off-go" type="button">Rechercher des offres d'alternance</button></div>
+          <div class="toolbar-row"><button class="btn btn-primary btn-sm" id="btn-off-go" type="button">Rechercher des offres</button></div>
           <p class="hint" id="off-status" style="margin:10px 0 0;"></p>
-          <p class="hint" style="margin:6px 0 0;">Seuls le lieu (coordonnées de la commune) et le rayon sont transmis, par le serveur de l'atelier, à La bonne alternance ; les mots-clés filtrent les résultats sur ton appareil. Ni ton nom, ni tes coordonnées, ni ton CV.</p>
+          <p class="hint" style="margin:6px 0 0;">Alternance : seuls le lieu (coordonnées de la commune) et le rayon sont transmis, par le serveur de l'atelier, à La bonne alternance ; les mots-clés filtrent sur ton appareil. Tous contrats : seuls les mots-clés et la commune sont transmis à JobsPipe (le rayon n'est pas pris en compte). Ni ton nom, ni tes coordonnées, ni ton CV.</p>
           <p class="hint" style="margin:6px 0 0;">Tu peux aussi chercher directement sur le <a href="https://labonnealternance.apprentissage.beta.gouv.fr/" target="_blank" rel="noopener noreferrer">moteur de La bonne alternance</a>, qui regroupe toutes ses offres.</p>
         </div>
         <div id="off-results"></div>
         <div id="off-recruiters" style="margin-top:20px;"></div>
         <button class="btn btn-ghost btn-sm" id="off-more" type="button" style="display:none;margin-top:8px;">Voir plus d'offres</button>
-        <p class="hint" id="off-attrib" style="display:none;margin-top:14px;">Offres issues de La bonne alternance (labonnealternance.apprentissage.beta.gouv.fr, DGEFP), affichées le temps de la recherche et non conservées. La candidature se fait sur la source de l'offre.</p>
+        <p class="hint" id="off-attrib" style="display:none;margin-top:14px;"><span id="off-attrib-txt"></span> Affichées le temps de la recherche et non conservées. La candidature se fait sur la source de l'offre.</p>
       </div>
     </section>
 
@@ -5324,6 +5326,8 @@ document.getElementById("off-lieu").addEventListener("input", function(){ offPla
 
 function offRun(){
   var st = document.getElementById("off-status");
+  var src = document.getElementById("off-source").value;
+  if(src === "jobspipe") return offRunJobspipe();
   if(!offPlace){ st.textContent = document.getElementById("off-lieu").value.trim() ? "Choisis la commune avec « Chercher le lieu »." : "Indique un lieu : les offres d'alternance se cherchent autour d'une commune."; return; }
   var btn = document.getElementById("btn-off-go"); btn.disabled = true; st.textContent = "Recherche en cours…";
   flFetch("/api/alternance?lat=" + encodeURIComponent(offPlace.lat) + "&lon=" + encodeURIComponent(offPlace.lon) + "&radius=" + encodeURIComponent(document.getElementById("off-dist").value)).then(function(d){
@@ -5347,6 +5351,31 @@ function offRun(){
   }, function(){ btn.disabled = false; st.textContent = rechOffline(); });
 }
 document.getElementById("btn-off-go").addEventListener("click", function(){ offRun(); });
+
+// Source « tous contrats » : JobsPipe (/api/jobspipe), phase de test. Le titre du profil sert de mots-clés (séparés par des virgules).
+function offRunJobspipe(){
+  var st = document.getElementById("off-status"), q = document.getElementById("off-q").value.trim();
+  if(q.length < 2){ st.textContent = "Indique au moins un mot-clé (séparés par des virgules) : ils filtrent le titre des offres."; return; }
+  var btn = document.getElementById("btn-off-go"), ville = offPlace ? offPlace.label : document.getElementById("off-lieu").value.trim();
+  btn.disabled = true; st.textContent = "Recherche en cours…";
+  flFetch("/api/jobspipe?q=" + encodeURIComponent(q) + "&ville=" + encodeURIComponent(ville) + "&jours=30").then(function(d){
+    btn.disabled = false;
+    if(!d.ok){
+      st.textContent = {
+        not_configured: "JobsPipe n'est pas activé sur ce site (variable PIPE_KEY absente ou source coupée).",
+        auth: "JobsPipe refuse la clé du site : vérifie PIPE_KEY.", credits: "Les crédits JobsPipe du site sont épuisés.",
+        rate: "Trop de recherches d'un coup : réessaie dans une minute.", query_required: "Indique un mot-clé."
+      }[d.reason] || ("La recherche n'a pas abouti (" + (d.reason || "erreur") + ").");
+      return;
+    }
+    state.offresResultats = d.results; state.offresRecruteurs = []; offLast = null;
+    st.textContent = d.results.length + " offre(s) sur 30 jours pour « " + q + " »" + (ville ? " à " + ville : " en France") + " (JobsPipe, 25 au plus par recherche)" + (d.creditsRestants !== null ? ", crédits restants du site : " + d.creditsRestants : "") + ".";
+    renderOffResults(); refreshStatusDots();
+  }, function(){ btn.disabled = false; st.textContent = rechOffline(); });
+}
+var OFF_SOURCES = { "la-bonne-alternance": { nom: "La bonne alternance", attrib: "Offres issues de La bonne alternance (labonnealternance.apprentissage.beta.gouv.fr, DGEFP)." },
+  "jobspipe": { nom: "l'annonce d'origine", attrib: "Offres issues de JobsPipe (jobspipe.dev), qui les reprend des sites d'emploi et des pages carrières des entreprises ; les annonces appartiennent aux employeurs et peuvent être inexactes ou périmées." } };
+document.getElementById("off-source").addEventListener("change", function(){ state.offresResultats = []; state.offresRecruteurs = []; document.getElementById("off-status").textContent = ""; renderOffResults(); });
 
 // Entreprises à fort potentiel d'embauche (pas d'offre publiée) : candidature spontanée.
 function renderOffRecruiters(){
@@ -5380,6 +5409,7 @@ function renderOffResults(){
   var list = state.offresResultats.filter(function(o){ return !ec[o.id]; });
   document.getElementById("off-more").style.display = "none";
   document.getElementById("off-attrib").style.display = (state.offresResultats.length || (state.offresRecruteurs || []).length) ? "block" : "none";
+  document.getElementById("off-attrib-txt").textContent = (OFF_SOURCES[(state.offresResultats[0] || {}).source] || OFF_SOURCES["la-bonne-alternance"]).attrib;
   renderOffRecruiters();
   if(!list.length){ wrap.innerHTML = ""; return; }
   wrap.innerHTML = "";
@@ -5391,7 +5421,7 @@ function renderOffResults(){
       '<p style="font-size:13px;color:var(--ink-600);line-height:1.5;margin:0 0 8px;">' + esc(o.description.replace(/\s+/g, " ").slice(0, 260)) + (o.description.length > 260 ? "…" : "") + '</p>' +
       (m.missing.length ? '<p class="hint" style="margin:0 0 8px;">Mots-clés de l\'offre absents de ta base : ' + esc(m.missing.slice(0, 6).join(", ")) + '.</p>' : '') +
       '<div class="toolbar-row"><button class="btn btn-primary btn-sm" type="button" data-off-use="' + esc(o.id) + '">Candidater avec cette offre</button>' +
-      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(o.url) + '">Voir sur La bonne alternance</a>' +
+      '<a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer" href="' + esc(o.url) + '">Voir ' + (o.source === "jobspipe" ? "l\'annonce d\'origine" : "sur La bonne alternance") + '</a>' +
       '<button class="btn btn-ghost btn-sm" type="button" data-off-skip="' + esc(o.id) + '">Écarter</button></div>';
     wrap.appendChild(d);
   });
