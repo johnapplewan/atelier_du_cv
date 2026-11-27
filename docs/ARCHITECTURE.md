@@ -71,7 +71,7 @@ Le rail latéral (`#rail`, boutons `.rail-item[data-tab]`) ouvre un panneau `sec
 
 | N° | Onglet (`data-tab`) | Rôle | Éléments principaux |
 |---|---|---|---|
-| 01 | **Ma base** (`base`) | Constituer et fusionner la base de la personne | Import de CV (nom du CV + texte, case « remplacer »), listes modifiables expériences / formations / rubriques / compétences / certifications, liste des CV importés, **carte de la base** (SVG radial + détail par branche, mise en évidence par profil) |
+| 01 | **Ma base** (`base`) | Constituer et fusionner la base de la personne | Import de CV (nom du CV + texte, case « remplacer »), listes modifiables expériences / formations / rubriques / compétences / certifications, **catégories de compétences modifiables** (menu de catégorie sur chaque pastille, renommer les catégories proposées, ajouter et supprimer les siennes), liste des CV importés, **carte de la base** (SVG radial + détail par branche, mise en évidence par profil) |
 | 02 | **Mes profils** (`profils`) | Créer des profils de recherche et leur CV type | **Création d'un profil sur mesure** (nom de référence, titre sur le CV, mots-clés ; aucune condition), profils proposés d'après la base (niveau : déjà exercé / base suffisante / accessible sans expérience / pas assez d'éléments), « Viser un autre métier », éditeur par profil (titre visé, lieu, rayon, contrats, mots-clés, accroche, ton, à compléter, import de texte, **CV type** avec aperçu, ajustements, PDF) |
 | 03 | **Recherche** (`recherche`) | Entreprises à démarcher (candidatures spontanées) | Profil, lieu (recherche de commune), rayon, taille, résultats avec le menu **« CV à envoyer »** (profil de la recherche par défaut, modifiable par entreprise) et « Candidature spontanée », lien page recrutement, fiche, écarter |
 | 04 | **Offres** (`offres`) | Offres d'alternance (La bonne alternance) ou tous contrats (JobsPipe, test) via le sélecteur `#off-source` | Profil, lieu (recherche de commune), rayon, mots-clés (gardent les résultats qui en contiennent au moins un, filtre local), liste d'**offres** (menu **« CV à envoyer »** : le profil le plus proche de l'offre est proposé, modifiable ; correspondance avec la base, « Candidater avec cette offre » qui reprend le poste de l'offre comme titre du CV, « Voir sur La bonne alternance », écarter) et d'**entreprises qui recrutent souvent** (« Candidature spontanée »), mention de la source. `OFFRES_API_ACTIVE` masque le formulaire si la source est coupée. Une annonce issue de l'API n'est jamais envoyée à l'IA (`offreVientDeLAPI`). L'API France Travail reste refusée (voir `docs/FRANCE-TRAVAIL.md`) |
@@ -124,6 +124,7 @@ Personne = { id, nom, data: {
                                                              band, portrait, presentation{role,texte,mode,photo}, presChiffres[], avis[],
                                                              refs{clients,garanties}, faq[], offreIds[], angle, tu } } ],
                                        plaquetteId } ] } ],
+                   skillCats:[{key,label}], skillCatLabels:{clé:nom} (catégories de compétences : celles de la personne et les noms modifiés des catégories proposées),
                    regles:{ poids{pertinence,contexte,chiffres,recence,appris}, limites{exp,bulletsTop,bulletsAutres,skills,forms,refs}, strict,
                             principes[{id,titre,texte,type ('libre'|'mots'|'debuts'|'longueur'|'chiffre'),param,actif}],
                             corrections[{id,ts,cle ('exp:'|'form:'|'skill:'|'cert:'|'sec:'|'ref:' + id),label,action ('pin'|'hide'),profilId,termes[]}] },
@@ -133,7 +134,7 @@ Personne = { id, nom, data: {
                    ecartes{siren:true}, offresEcartees{id:true} },
   library:       { experiences[{id,poste,entreprise,dates,details,src[]}],   // details = une réalisation par ligne
                    formations[{id,diplome,etablissement,dates,details,src[]}],
-                   competences[{id,label,cat?,src[]}],
+                   competences[{id,label,cat? (clé d'une catégorie ; absente = classement automatique),src[]}],
                    certifications[{id,label,organisme,annee,src[]}],
                    sections[{id,titre,texte,src[]}],                         // texte structuré : "## sous-titre", "- puce"
                    sources[{id,label,date}],                                 // CV importés
@@ -272,7 +273,7 @@ Les `id` ci-dessous sont lus par le script. **Ne pas les renommer sans adapter l
 
 **panel-base**
 
-`#panel-base`, `#cv-import-label`, `#cv-import-text`, `#btn-import-cv`, `#cv-import-replace`, `#cv-import-status`, `#btn-add-exp`, `#exp-list`, `#btn-add-formation`, `#formation-list`, `#btn-add-section`, `#section-list`, `#cv-skill-input`, `#btn-add-skill`, `#cv-skill-chips`, `#cv-skill-suggest`, `#btn-add-cert`, `#cert-list`, `#sources-list`, `#base-map-card`, `#map-profil`, `#base-map`, `#base-map-detail`
+`#panel-base`, `#skill-cats-box`, `#skill-cats-editor`, `[data-skcat]`, `[data-skcat-del]`, `#skill-cat-new`, `#btn-skill-cat-add`, `select.skill-cat`, `#cv-import-label`, `#cv-import-text`, `#btn-import-cv`, `#cv-import-replace`, `#cv-import-status`, `#btn-add-exp`, `#exp-list`, `#btn-add-formation`, `#formation-list`, `#btn-add-section`, `#section-list`, `#cv-skill-input`, `#btn-add-skill`, `#cv-skill-chips`, `#cv-skill-suggest`, `#btn-add-cert`, `#cert-list`, `#sources-list`, `#base-map-card`, `#map-profil`, `#base-map`, `#base-map-detail`
 
 **panel-profils**
 
@@ -374,7 +375,7 @@ Numéros de ligne omis (ils changent) : chercher le nom dans `app/index.html`. R
 
 **MODULE CV (bibliothèque + auto-composition)**
 
-`refreshCVStatus`, `atsTier`, `variantsOf`, `hasTerm`, `ownMaterialText`, `annonceLooksEnglish`, `atsAnalysis`, `computeATS`, `renderATS`, `atsOptimize`, `atsPlanMarkdown`, `renderExpList`, `renderFormList`, `addSkillRaw`, `addSkill`, `yearOfToken`, `isPlausibleYear`, `detectDateInLine`, `stripImportBullet`, `splitTitleLine`, `isLikelySkillLine`, `isFormationBlock`, `cleanTitleLine`, `parseImportedCvLegacy`, `importSectionKey`, `stripInlineMarkdown`, `normalizeImportLines`, `isHeadingLine`, `splitListItems`, `toStructuredText`, `parseEntries`, `parseImportedCv`, `doImportCv`, `renderSkillChips`, `renderSkillSuggestions`, `addAtout`, `renderAtoutsChips`, `renderPhotoThumb`, `structuredToHtml`, `htmlToStructured`, `renderSectionsList`, `initPreviewEditing`, `renderCVPreview`, `cvHtml`, `anonymizedCvElement`, `initCVModule`
+`refreshCVStatus`, `skillCats`, `skillCat`, `renderSkillCatsEditor`, `atsTier`, `variantsOf`, `hasTerm`, `ownMaterialText`, `annonceLooksEnglish`, `atsAnalysis`, `computeATS`, `renderATS`, `atsOptimize`, `atsPlanMarkdown`, `renderExpList`, `renderFormList`, `addSkillRaw`, `addSkill`, `yearOfToken`, `isPlausibleYear`, `detectDateInLine`, `stripImportBullet`, `splitTitleLine`, `isLikelySkillLine`, `isFormationBlock`, `cleanTitleLine`, `parseImportedCvLegacy`, `importSectionKey`, `stripInlineMarkdown`, `normalizeImportLines`, `isHeadingLine`, `splitListItems`, `toStructuredText`, `parseEntries`, `parseImportedCv`, `doImportCv`, `renderSkillChips`, `renderSkillSuggestions`, `addAtout`, `renderAtoutsChips`, `renderPhotoThumb`, `structuredToHtml`, `htmlToStructured`, `renderSectionsList`, `initPreviewEditing`, `renderCVPreview`, `cvHtml`, `anonymizedCvElement`, `initCVModule`
 
 **MODULE LETTRE**
 

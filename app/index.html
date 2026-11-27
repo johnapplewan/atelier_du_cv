@@ -663,6 +663,11 @@
               </div>
               <div class="chips" id="cv-skill-chips"></div>
               <div class="chips" id="cv-skill-suggest" style="margin-top:10px;"></div>
+              <details style="margin-top:12px;" id="skill-cats-box"><summary class="hint" style="cursor:pointer;">Catégories de compétences (renommer, ajouter, supprimer)</summary>
+                <p class="hint" style="margin:8px 0;">Dans le CV, les compétences sont regroupées par catégorie. Chaque compétence est classée automatiquement ; choisis une autre catégorie avec le menu de sa pastille. Tes catégories s'ajoutent à celles proposées.</p>
+                <div id="skill-cats-editor"></div>
+                <div style="display:flex;gap:8px;margin-top:8px;"><input type="text" id="skill-cat-new" placeholder="ex. Langages, Réseaux sociaux, Pédagogie" maxlength="40"><button class="btn btn-sm" id="btn-skill-cat-add" type="button">Ajouter une catégorie</button></div>
+              </details>
             </div>
           </div>
 
@@ -2305,7 +2310,7 @@ function atsAnalysis(){
   var p = state.profil;
   if(!(p.email || "").trim() || !(p.tel || "").trim()) notes.push({ action: "manual", text: "Renseigne ton email et ton téléphone : un CV sans coordonnées est écarté par beaucoup de filtres." });
   if(!(state.cv.resume || "").trim()) notes.push({ action: "auto-resume", text: "Ajoute une accroche de 2 phrases qui reprend les mots-clés de l'annonce." });
-  var poste = (state.annonce.poste || "").trim();
+  var poste = cleanPosteTitle(state.annonce.poste || "");
   if(poste && countTerm(norm([p.titre, state.cv.resume].join(" ")), norm(poste)) === 0 && !hasTerm(norm([p.titre, state.cv.resume].join(" ")), poste)) notes.push({ action: "manual", text: "L'intitulé visé (« " + poste + " ») n'apparaît ni dans ton titre ni dans l'accroche. Si c'est bien ton métier visé, reprends-le tel quel." });
   if(annonceLooksEnglish() && state.cv.lang !== "en") notes.push({ action: "manual", text: "L'annonce est en anglais : passe le CV en English (boutons « Langue du CV »)." });
   missing.sort(function(a, b){ return ((b.kind === "skill" ? 100 : 0) + (b.count || 0)) - ((a.kind === "skill" ? 100 : 0) + (a.count || 0)); });   // priorité : compétences, puis fréquence dans l'annonce
@@ -3034,9 +3039,15 @@ function renderSkillChips(){
   state.library.competences.forEach(function(c){
     var chip = document.createElement("span");
     chip.className = "chip";
-    chip.innerHTML = esc(c.label) + ' <button data-id="' + c.id + '" title="Retirer" aria-label="Retirer">' + icon("close") + '</button>';
+    var cur = c.cat && skillCats().some(function(x){ return x.key === c.cat; }) ? c.cat : "";
+    chip.innerHTML = esc(c.label) + ' <select class="skill-cat" data-skid="' + c.id + '" aria-label="Catégorie de ' + esc(c.label) + '" title="Catégorie dans le CV" style="font-size:11px;max-width:110px;"><option value="">Auto : ' + esc(skillCat({ label: c.label }).label) + '</option>' + skillCats().map(function(x){ return '<option value="' + esc(x.key) + '"' + (cur === x.key ? " selected" : "") + '>' + esc(x.label) + '</option>'; }).join("") + '</select> <button data-id="' + c.id + '" title="Retirer" aria-label="Retirer">' + icon("close") + '</button>';
     wrap.appendChild(chip);
   });
+  wrap.querySelectorAll("select.skill-cat").forEach(function(sel){ sel.addEventListener("change", function(){
+    var c = state.library.competences.find(function(x){ return x.id === sel.getAttribute("data-skid"); }); if(!c) return;
+    if(sel.value) c.cat = sel.value; else delete c.cat;
+    renderCVPreview(); persist();
+  }); });
   wrap.querySelectorAll("button").forEach(function(btn){
     btn.addEventListener("click", function(){
       var id = btn.getAttribute("data-id");
@@ -5810,12 +5821,45 @@ var SKILL_CATS = [
   { key:"relationnel",label:"Savoir-être",             re:/(management|leadership|communication|n[ée]gociation|relation|animation|p[ée]dagogie|autonomie|rigueur|organisation|esprit|travail d['’]équipe|polyvalence|adaptabilit[ée]|cr[ée]ativit[ée]|écoute|sens)/i },
   { key:"tech",       label:"Savoir-faire techniques", re:/(javascript|typescript|python|php|java\b|react|node|html|css|sql|api|git|docker|llm|rag|mcp|agents?|\bia\b|intelligence artificielle|n8n|automatisation|prompt|cloud|linux|d[ée]veloppement|architecture|base de donn[ée]es|seo|sea|analytics|data|blockchain|web3|supabase|neon|vercel|cloudflare|github|montage|r[ée]alisation|photographie|audiovisuel)/i }
 ];
-function skillCat(c){
-  if(c.cat){ var f = SKILL_CATS.find(function(x){ return x.key === c.cat; }); if(f) return f; }
-  var l = c.label || "";
-  for(var i = 0; i < SKILL_CATS.length; i++){ if(SKILL_CATS[i].re.test(l)) return SKILL_CATS[i]; }
-  return { key:"autres", label:"Autres compétences" };
+// Catégories : celles proposées (renommables) + celles de la personne (`profil.skillCats`).
+function skillCats(){
+  var P = state.profil; if(!Array.isArray(P.skillCats)) P.skillCats = []; if(!P.skillCatLabels) P.skillCatLabels = {};
+  return SKILL_CATS.map(function(c){ return { key: c.key, label: P.skillCatLabels[c.key] || c.label, re: c.re, builtin: true }; })
+    .concat(P.skillCats.map(function(c){ return { key: c.key, label: c.label }; }))
+    .concat([{ key: "autres", label: P.skillCatLabels.autres || "Autres compétences", builtin: true, other: true }]);
 }
+function skillCat(c){
+  var cats = skillCats();
+  if(c.cat){ var f = cats.find(function(x){ return x.key === c.cat; }); if(f) return f; }
+  var l = c.label || "";
+  for(var i = 0; i < cats.length; i++){ if(cats[i].re && cats[i].re.test(l)) return cats[i]; }
+  return cats[cats.length - 1];
+}
+function renderSkillCatsEditor(){
+  var box = document.getElementById("skill-cats-editor"); if(!box) return;
+  var P = state.profil;
+  box.innerHTML = skillCats().map(function(c){
+    return '<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px;"><input type="text" maxlength="40" data-skcat="' + esc(c.key) + '" value="' + esc(c.label) + '" aria-label="Nom de la catégorie">' +
+      (c.builtin ? '<span class="hint">proposée</span>' : '<button class="btn btn-ghost btn-sm" type="button" data-skcat-del="' + esc(c.key) + '">Supprimer</button>') + '</div>';
+  }).join("");
+  box.querySelectorAll("[data-skcat]").forEach(function(el){ el.addEventListener("input", function(){
+    var k = el.getAttribute("data-skcat"), v = el.value.trim(), cu = P.skillCats.find(function(x){ return x.key === k; });
+    if(cu){ cu.label = v || cu.label; } else { P.skillCatLabels[k] = v; if(!v) delete P.skillCatLabels[k]; }
+    renderCVPreview(); persist();
+  }); el.addEventListener("change", function(){ renderSkillChips(); });
+  });
+  box.querySelectorAll("[data-skcat-del]").forEach(function(b){ b.addEventListener("click", function(){
+    var k = b.getAttribute("data-skcat-del"); P.skillCats = P.skillCats.filter(function(x){ return x.key !== k; });
+    state.library.competences.forEach(function(c){ if(c.cat === k) delete c.cat; });   // retour au classement automatique
+    renderSkillCatsEditor(); renderSkillChips(); renderCVPreview(); persist();
+  }); });
+}
+document.getElementById("btn-skill-cat-add").addEventListener("click", function(){
+  var inp = document.getElementById("skill-cat-new"), v = inp.value.trim(); if(!v) return;
+  if(skillCats().some(function(c){ return norm(c.label) === norm(v); })){ inp.value = ""; return; }
+  state.profil.skillCats.push({ key: "u" + uid(), label: v }); inp.value = "";
+  renderSkillCatsEditor(); renderSkillChips(); persist();
+});
 
 function bulletWords(s){ return norm(s).replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(function(w){ return w.length > 2; }); }
 function similarText(a, b){
@@ -5940,7 +5984,7 @@ function baseTree(){
     { key:"form", label:"Formations", items: lib.formations.filter(function(f){ return f.diplome || f.etablissement; }).map(function(f){ return { label: f.diplome + (f.etablissement ? " · " + f.etablissement : ""), text: [f.diplome, f.etablissement, f.details].join(" "), dates: f.dates }; }) },
     { key:"cert", label:"Certifications", items: lib.certifications.filter(function(c){ return c.label; }).map(function(c){ return { label: c.label + (c.annee ? " (" + c.annee + ")" : ""), text: c.label + " " + (c.organisme || "") }; }) }
   ];
-  SKILL_CATS.concat([{ key:"autres", label:"Autres compétences" }]).forEach(function(cat){
+  skillCats().forEach(function(cat){
     var items = lib.competences.filter(function(c){ return skillCat(c).key === cat.key; }).map(function(c){ return { label: c.label, text: c.label }; });
     if(items.length) branches.push({ key:"skill-" + cat.key, label: cat.label, items: items });
   });
@@ -7211,7 +7255,7 @@ function renderPersonBar(){
 // Recharge tout ce qui dépend de la personne (profil, base, suivi) puis de la candidature active.
 function syncPersonUI(){
   ["nom", "email", "tel", "ville", "lien", "langues"].forEach(function(f){ document.getElementById("cv-" + f).value = state.profil[f] || ""; });
-  renderPhotoThumb();
+  renderPhotoThumb(); renderSkillCatsEditor();
   renderArchiveList(); renderReferencePanel();
   renderCertList(); renderSources(); renderBaseMap();
   renderCandidaturesList();
@@ -8041,6 +8085,7 @@ renderAnalyseCard();
 renderProfilSelect();
 renderProfils();
 renderCertList();
+renderSkillCatsEditor();
 renderSources();
 renderBaseMap();
 refreshIaState();

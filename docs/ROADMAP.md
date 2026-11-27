@@ -14,6 +14,8 @@ Document vivant : ce qui est fait, ce qui attend un tiers, ce qui reste à faire
 - Assistant IA : clé d'API personnelle facultative (appel direct du navigateur, hors sauvegarde).
 - E-mail d'envoi (cinq types, signature freelance, bonnes pratiques), fiche de préparation à l'entretien, banque d'images de la plaquette.
 - Onglet Règles : mise en avant selon la cible (poids et limites modifiables), principes de communication personnalisables vérifiés dans le CV, la lettre et la plaquette et transmis à l'IA, apprentissage des corrections, références freelance classées selon la cible et le persona.
+- Export PDF vérifié sur un vrai fichier (1, 2 et 3 pages : le nombre de pages du PDF est celui annoncé par l'aperçu) ; captures de la landing refaites (CV et score).
+- Catégories de compétences modifiables (renommer, ajouter, supprimer, choisir par compétence).
 - Miniature de partage 1200 × 630 avec l'accroche de la landing ; guide pas à pas pour les débutants (dont le questionnaire « je n'ai pas de CV »).
 - Mobile (navigation par groupes), thème par bouton icône, accueil (premiers pas, alerte des relances).
 - Pages légales, polices et bibliothèques auto-hébergées, en-têtes de sécurité, documentation (`ARCHITECTURE.md`, `METHODE-LETTRE-RAPOS.md`).
@@ -41,14 +43,11 @@ Décisions du 26 novembre 2026. Vocabulaire : **candidature** pour une demande d
 
 ## À faire ensuite (backlog)
 
-1. Catégories de compétences modifiables à la main.
-2. Vérifier l'export PDF réel du CV avec les repères de pages (nombre de pages du PDF = nombre annoncé par l'aperçu).
-3. Refaire la capture de la landing (`assets/landing/atelier-cv.webp` et celles qui montrent encore des astérisques ou l'ancien libellé « Titre / accroche »), avec des données fictives.
-4. Affiner les références freelance selon les retours de test (classement par cible et persona, corrections apprises).
-5. Entretien : simulation orale chronométrée avec corrigé par l'IA, suivi des entretiens passés.
-6. Plaquette : images libres de droits proposées, modèles supplémentaires, version deux pages, bandeaux supplémentaires (zone d'intervention, appel découverte, QR vers un portfolio, certifications).
-7. Documents PDF balisés (accessibilité), audit RGAA.
-8. Découper `app/index.html` (CSS, modules JavaScript) avant la refonte du design.
+1. Affiner les références freelance selon les retours de test (classement par cible et persona, corrections apprises).
+2. Entretien : simulation orale chronométrée avec corrigé par l'IA, suivi des entretiens passés.
+3. Plaquette : images libres de droits proposées, modèles supplémentaires, version deux pages, bandeaux supplémentaires (zone d'intervention, appel découverte, QR vers un portfolio, certifications).
+4. Documents PDF balisés (accessibilité), audit RGAA.
+5. Découper `app/index.html` (CSS, modules JavaScript) avant la refonte du design.
 
 ## Modèle économique : gratuit pour le moment, orientation décidée pour la suite
 
